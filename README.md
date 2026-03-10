@@ -1,36 +1,177 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Next.js Frontend Application with Atomic Design
+
+A modern Next.js 16 frontend application built with Atomic Design principles and Tailwind CSS 4.
+
+## Features
+
+- **Atomic Design Architecture**: Components organized into Atoms, Molecules, Organisms, and Templates
+- **TypeScript**: Full type safety across the application
+- **Tailwind CSS 4**: Modern utility-first CSS framework
+- **Backend API Integration**: Pre-configured connection to backend at http://localhost:8081
+- **Multiple Layouts**: MainLayout, CenteredLayout, and SidebarLayout templates
+- **Sample Pages**: Home, About, and Login pages demonstrating component usage
+
+## Project Structure
+
+```
+src/
+├── app/                          # Next.js app router
+│   ├── page.tsx                  # Home page
+│   ├── about/                    # About page
+│   └── login/                    # Login page
+├── components/
+│   ├── atoms/                    # Basic building blocks
+│   │   ├── Button.tsx
+│   │   ├── Text.tsx
+│   │   ├── Heading.tsx
+│   │   ├── Input.tsx
+│   │   └── index.ts
+│   ├── molecules/                # Simple component combinations
+│   │   ├── SearchBar.tsx
+│   │   ├── Card.tsx
+│   │   ├── Pagination.tsx
+│   │   ├── LoginForm.tsx
+│   │   └── index.ts
+│   ├── organisms/                # Complex components
+│   │   ├── Header.tsx
+│   │   ├── Footer.tsx
+│   │   ├── ItemList.tsx
+│   │   ├── AuthSection.tsx
+│   │   └── index.ts
+│   └── templates/                # Page layouts
+│       ├── MainLayout.tsx
+│       ├── CenteredLayout.tsx
+│       ├── SidebarLayout.tsx
+│       └── index.ts
+├── lib/                          # Utility functions
+│   └── api-client.ts             # API client for backend communication
+├── services/                     # Service layer (for future use)
+├── hooks/                        # Custom React hooks (for future use)
+└── types/                        # TypeScript type definitions
+    └── common.ts
+
+```
+
+## Tech Stack
+
+- **Next.js 16**: React framework for production
+- **React 19**: UI library
+- **TypeScript**: Static type checking
+- **Tailwind CSS 4**: Utility-first CSS
+- **ESLint**: Code quality
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js 18 or higher
+- npm or yarn
+
+### Installation
+
+```bash
+npm install
+```
+
+### Environment Configuration
+
+The application is pre-configured to connect to a backend at `http://localhost:8081`. The environment variable is set in `.env.local`:
+
+```
+NEXT_PUBLIC_API_URL=http://localhost:8081
+```
+
+You can modify this to point to your actual backend URL.
+
+### Development Server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The application will be available at [http://localhost:3000](http://localhost:3000)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Production Build
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run build
+npm run start
+```
 
-## Learn More
+## Atomic Design Components
 
-To learn more about Next.js, take a look at the following resources:
+### Atoms
+Small, reusable building blocks such as buttons, inputs, headings, and text elements.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- `Button`: Customizable button with variants (primary, secondary, danger) and sizes
+- `Text`: Paragraph text with different variants (body, caption, small)
+- `Heading`: Heading component with 6 levels (h1-h6)
+- `Input`: Form input with label and error support
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Molecules
+Simple combinations of atoms without their own functionality.
 
-## Deploy on Vercel
+- `SearchBar`: Search input with button
+- `Card`: Content container with title and optional action
+- `Pagination`: Navigation component with previous/next controls
+- `LoginForm`: Login form with email and password inputs
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Organisms
+Complex components that combine molecules and atoms with business logic.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `Header`: Navigation header with title and nav items
+- `Footer`: Footer with links and copyright
+- `ItemList`: Grid of cards displaying items
+- `AuthSection`: Full authentication section with styling
+
+### Templates
+Page-level layout components that define the overall structure.
+
+- `MainLayout`: Standard layout with header, main content, and footer
+- `CenteredLayout`: Centered layout for login and auth pages
+- `SidebarLayout`: Layout with sidebar navigation
+
+## API Integration
+
+The application uses the `apiClient` from `src/lib/api-client.ts` for all backend communication.
+
+### Usage Example
+
+```typescript
+import { apiClient } from '@/lib/api-client';
+
+// GET request
+const data = await apiClient.get('/api/items');
+
+// POST request
+const result = await apiClient.post('/api/items', { name: 'Item' });
+
+// PUT request
+const updated = await apiClient.put('/api/items/1', { name: 'Updated' });
+
+// DELETE request
+const deleted = await apiClient.delete('/api/items/1');
+```
+
+When any API call is successful, a console.log message appears confirming the connection to the backend endpoint.
+
+## Pages
+
+- **Home** (`/`): Main page showcasing featured items and search functionality
+- **About** (`/about`): Information about the application architecture
+- **Login** (`/login`): Authentication page with login form
+
+## Browser Support
+
+This application supports all modern browsers that support ES2020 and CSS Grid/Flexbox.
+
+## License
+
+MIT
+
+## Notes
+
+- All console.log messages for API connections include the endpoint URL without any icons
+- The application is fully typed with TypeScript
+- Tailwind CSS 4 provides the latest styling features
+- The project follows Next.js 16 best practices with the App Router
