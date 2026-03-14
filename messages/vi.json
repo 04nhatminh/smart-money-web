@@ -1,0 +1,41 @@
+{
+  "common": {
+    "language": "Tiếng Việt",
+    "home": "Trang chủ",
+    "about": "Về chúng tôi",
+    "login": "Đăng nhập",
+    "logout": "Đăng xuất",
+    "submit": "Gửi",
+    "cancel": "Hủy",
+    "save": "Lưu",
+    "delete": "Xóa",
+    "edit": "Chỉnh sửa",
+    "close": "Đóng",
+    "search": "Tìm kiếm",
+    "filter": "Bộ lọc",
+    "loading": "Đang tải...",
+    "error": "Lỗi",
+    "success": "Thành công",
+    "warning": "Cảnh báo",
+    "info": "Thông tin"
+  },
+  "auth": {
+    "email": "Email",
+    "password": "Mật khẩu",
+    "login": "Đăng nhập",
+    "register": "Đăng ký",
+    "forgotPassword": "Quên mật khẩu?",
+    "rememberMe": "Ghi nhớ tôi",
+    "loginSuccess": "Đăng nhập thành công",
+    "loginError": "Đăng nhập thất bại",
+    "registerSuccess": "Đăng ký thành công",
+    "registerError": "Đăng ký thất bại"
+  },
+  "validation": {
+    "required": "Trường này là bắt buộc",
+    "email": "Vui lòng nhập email hợp lệ",
+    "minLength": "Tối thiểu {min} ký tự",
+    "maxLength": "Tối đa {max} ký tự",
+    "passwordMatch": "Mật khẩu không trùng khớp"
+  }
+}

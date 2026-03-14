@@ -1,31 +1,80 @@
+'use client';
+
 import React from 'react';
+import { useTheme } from '@/context';
+import { BORDER_RADIUS, SHADOWS, TRANSITIONS } from '@/constants';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'danger';
+  variant?: 'primary' | 'secondary' | 'danger' | 'success' | 'info';
   size?: 'sm' | 'md' | 'lg';
+  elevation?: 'sm' | 'md' | 'lg';
 }
 
 export const Button: React.FC<ButtonProps> = ({
   variant = 'primary',
   size = 'md',
+  elevation = 'md',
   className = '',
   ...props
 }) => {
-  const baseStyles = 'font-semibold rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2';
-
-  const variantStyles = {
-    primary: 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500',
-    secondary: 'bg-gray-200 text-gray-800 hover:bg-gray-300 focus:ring-gray-500',
-    danger: 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500',
-  };
+  const { colors } = useTheme();
 
   const sizeStyles = {
-    sm: 'px-3 py-1 text-sm',
-    md: 'px-4 py-2 text-base',
-    lg: 'px-6 py-3 text-lg',
+    sm: 'px-3 py-1.5 text-sm font-semibold',
+    md: 'px-4 py-2 text-base font-semibold',
+    lg: 'px-6 py-3 text-lg font-semibold',
   };
 
-  const finalClassName = `${baseStyles} ${variantStyles[variant]} ${sizeStyles[size]} ${className}`;
+  const shadowStyles = {
+    sm: SHADOWS.sm,
+    md: SHADOWS.md,
+    lg: SHADOWS.lg,
+  };
 
-  return <button className={finalClassName} {...props} />;
+  const variantStyles = {
+    primary: {
+      backgroundColor: colors.interactive.primary,
+      color: colors.text.inverse,
+    } as React.CSSProperties,
+    secondary: {
+      backgroundColor: colors.interactive.secondary,
+      color: colors.text.inverse,
+    } as React.CSSProperties,
+    danger: {
+      backgroundColor: colors.interactive.danger,
+      color: colors.text.inverse,
+    } as React.CSSProperties,
+    success: {
+      backgroundColor: colors.interactive.success,
+      color: colors.text.inverse,
+    } as React.CSSProperties,
+    info: {
+      backgroundColor: colors.interactive.info,
+      color: colors.text.inverse,
+    } as React.CSSProperties,
+  };
+
+  const baseStyles = `
+    cursor-pointer
+    transition-all
+    focus:outline-none
+    focus:ring-2
+    disabled:opacity-60
+    disabled:cursor-not-allowed
+    hover:shadow-2xl
+    active:shadow-lg
+  `;
+
+  return (
+    <button
+      style={{
+        ...variantStyles[variant],
+        borderRadius: BORDER_RADIUS.xl,
+        boxShadow: shadowStyles[elevation],
+        transition: TRANSITIONS.base,
+      }}
+      className={`${baseStyles} ${sizeStyles[size]} ${className}`}
+      {...props}
+    />
+  );
 };
