@@ -7,11 +7,12 @@ import { ThemeProvider } from '@/context';
 interface ProvidersProps {
   children: React.ReactNode;
   messages: any;
+  locale: string;
 }
 
-export function Providers({ children, messages }: ProvidersProps) {
+export function Providers({ children, messages, locale }: ProvidersProps) {
   return (
-    <NextIntlClientProvider messages={messages}>
+    <NextIntlClientProvider messages={messages} locale={locale}>
       <ThemeProvider>
         {children}
       </ThemeProvider>

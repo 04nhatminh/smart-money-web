@@ -74,7 +74,7 @@ export const DARK_COLORS = {
     primary: '#FFFFFF',
     secondary: '#BDBDBD',
     tertiary: '#757575',
-    inverse: '#212121',
+    inverse: '#FFFFFF',
   },
   
   // Surfaces (elevated components)
@@ -92,19 +92,19 @@ export const DARK_COLORS = {
   
   // Interactive
   interactive: {
-    primary: '#42A5F5',
-    primaryHover: '#64B5F6',
-    primaryActive: '#1E88E5',
-    secondary: '#FFA726',
-    secondaryHover: '#FFB74D',
-    danger: '#EF5350',
-    dangerHover: '#F44336',
-    success: '#66BB6A',
-    successHover: '#81C784',
-    warning: '#FFA726',
-    warningHover: '#FFB74D',
-    info: '#29B6F6',
-    infoHover: '#4FC3F7',
+    primary: '#3629B7',
+    primaryHover: '#1565C0',
+    primaryActive: '#1565C0',
+    secondary: '#5655B9',
+    secondaryHover: '#5655B9',
+    danger: '#D32F2F',
+    dangerHover: '#C62828',
+    success: '#388E3C',
+    successHover: '#2E7D32',
+    warning: '#F57F17',
+    warningHover: '#E65100',
+    info: '#0288D1',
+    infoHover: '#01579B',
   },
   
   // Borders

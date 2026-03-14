@@ -2,7 +2,8 @@
 
 import React from 'react';
 import { Card } from '@/components/molecules';
-import { Heading } from '@/components/atoms';
+import { Heading, Text } from '@/components/atoms';
+import { useTheme } from '@/context';
 
 interface Item {
   id: string;
@@ -24,12 +25,14 @@ export const ItemList: React.FC<ItemListProps> = ({
   isLoading = false,
   isEmpty = false,
 }) => {
+  const { colors } = useTheme();
+
   if (isLoading) {
-    return <div className="text-center py-8">Loading...</div>;
+    return <div className="text-center py-8"><Text style={{ color: colors.text.primary }}>Loading...</Text></div>;
   }
 
   if (isEmpty) {
-    return <div className="text-center py-8 text-gray-500">No items found</div>;
+    return <div className="text-center py-8"><Text style={{ color: colors.text.secondary }}>No items found</Text></div>;
   }
 
   return (

@@ -5,7 +5,7 @@ import { useTheme } from '@/context';
 import { BORDER_RADIUS, SHADOWS, TRANSITIONS } from '@/constants';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'danger' | 'success' | 'info';
+  variant?: 'primary' | 'secondary' | 'danger' | 'success';
   size?: 'sm' | 'md' | 'lg';
   elevation?: 'sm' | 'md' | 'lg';
 }
@@ -48,10 +48,6 @@ export const Button: React.FC<ButtonProps> = ({
       backgroundColor: colors.interactive.success,
       color: colors.text.inverse,
     } as React.CSSProperties,
-    info: {
-      backgroundColor: colors.interactive.info,
-      color: colors.text.inverse,
-    } as React.CSSProperties,
   };
 
   const baseStyles = `
@@ -69,7 +65,7 @@ export const Button: React.FC<ButtonProps> = ({
     <button
       style={{
         ...variantStyles[variant],
-        borderRadius: BORDER_RADIUS.xl,
+        borderRadius: BORDER_RADIUS.full,
         boxShadow: shadowStyles[elevation],
         transition: TRANSITIONS.base,
       }}

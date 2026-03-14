@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { Heading, Text, Button } from '@/components/atoms';
+import { useTheme } from '@/context';
 
 interface CardProps {
   title: string;
@@ -20,8 +21,10 @@ export const Card: React.FC<CardProps> = ({
   className = '',
   children,
 }) => {
+  const { colors } = useTheme();
+
   return (
-    <div className={`bg-white rounded-lg shadow-lg hover:shadow-2xl border border-gray-200 p-6 transition-shadow ${className}`}>
+    <div className={`rounded-lg shadow-lg hover:shadow-2xl border p-6 transition-shadow ${className}`} style={{ backgroundColor: colors.surface.primary, borderColor: colors.border.light }}>
       <Heading level={3} className="mb-2">
         {title}
       </Heading>

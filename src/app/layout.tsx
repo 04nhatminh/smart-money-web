@@ -25,6 +25,40 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  const saved = localStorage.getItem('colorScheme');
+                  const html = document.documentElement;
+                  
+                  // Always prioritize localStorage
+                  if (saved) {
+                    if (saved === 'dark') {
+                      html.classList.add('dark');
+                      html.style.colorScheme = 'dark';
+                    } else {
+                      html.classList.remove('dark');
+                      html.style.colorScheme = 'light';
+                    }
+                  } else {
+                    // Fallback to system preference only if nothing in localStorage
+                    if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                      html.classList.add('dark');
+                      html.style.colorScheme = 'dark';
+                    } else {
+                      html.classList.remove('dark');
+                      html.style.colorScheme = 'light';
+                    }
+                  }
+                } catch (e) {}
+              })();
+            `,
+          }}
+        />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >

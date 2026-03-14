@@ -12,30 +12,33 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
+// Helper to get initial theme synchronously
+const getInitialTheme = (): ColorScheme => {
+  if (typeof window === 'undefined') return 'light';
+  
+  try {
+    const saved = localStorage.getItem('colorScheme') as ColorScheme | null;
+    if (saved) return saved;
+    
+    if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      return 'dark';
+    }
+  } catch (e) {}
+  
+  return 'light';
+};
+
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [colorScheme, setColorSchemeState] = useState<ColorScheme>('light');
+  // Initialize with actual value, not just 'light'
+  const [colorScheme, setColorSchemeState] = useState<ColorScheme>(() => getInitialTheme());
   const [isMounted, setIsMounted] = useState(false);
 
-  // Initialize theme from localStorage or system preference
+  // Apply theme on mount to ensure consistency
   useEffect(() => {
+    const current = getInitialTheme();
+    setColorSchemeState(current);
+    applyTheme(current);
     setIsMounted(true);
-    
-    // Check localStorage first
-    const savedTheme = localStorage.getItem('colorScheme') as ColorScheme | null;
-    if (savedTheme) {
-      setColorSchemeState(savedTheme);
-      applyTheme(savedTheme);
-      return;
-    }
-
-    // Check system preference
-    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      setColorSchemeState('dark');
-      applyTheme('dark');
-    } else {
-      setColorSchemeState('light');
-      applyTheme('light');
-    }
   }, []);
 
   const applyTheme = (scheme: ColorScheme) => {
@@ -69,7 +72,6 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setColorScheme,
   };
 
-  // Always provide context to avoid errors, even if not mounted
   return (
     <ThemeContext.Provider value={value}>
       {children}

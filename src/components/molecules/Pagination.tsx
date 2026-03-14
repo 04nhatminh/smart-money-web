@@ -1,7 +1,8 @@
 'use client';
 
 import React from 'react';
-import { Button } from '@/components/atoms';
+import { Button, Text } from '@/components/atoms';
+import { useTheme } from '@/context';
 
 interface PaginationProps {
   currentPage: number;
@@ -14,6 +15,8 @@ export const Pagination: React.FC<PaginationProps> = ({
   totalPages,
   onPageChange,
 }) => {
+  const { colors } = useTheme();
+
   return (
     <div className="flex items-center justify-center gap-2">
       <Button
@@ -24,9 +27,9 @@ export const Pagination: React.FC<PaginationProps> = ({
       >
         Previous
       </Button>
-      <span className="text-sm font-medium text-gray-700">
+      <Text variant="caption" weight="medium" style={{ color: colors.text.primary }}>
         Page {currentPage} of {totalPages}
-      </span>
+      </Text>
       <Button
         variant="secondary"
         size="sm"

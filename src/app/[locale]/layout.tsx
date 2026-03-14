@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { getMessages } from 'next-intl/server';
+import { setRequestLocale } from 'next-intl/server';
 import { Providers } from './providers';
 import "../globals.css";
 
@@ -21,19 +21,23 @@ export const metadata: Metadata = {
 
 export default async function RootLayout({
   children,
-  params: { locale }
+  params,
 }: Readonly<{
   children: React.ReactNode;
-  params: { locale: string };
+  params: Promise<{ locale: string }>;
 }>) {
-  const messages = await getMessages();
+  const { locale } = await params;
+  setRequestLocale(locale);
+  
+  // Load messages directly for the locale
+  const messages = await import(`../../../messages/${locale}.json`).then(m => m.default);
 
   return (
     <html lang={locale} suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Providers messages={messages}>
+        <Providers messages={messages} locale={locale}>
           {children}
         </Providers>
       </body>
