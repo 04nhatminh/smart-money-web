@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useTheme } from '@/context';
 import { BORDER_RADIUS, SHADOWS, TRANSITIONS } from '@/constants';
 
@@ -18,6 +18,7 @@ export const Button: React.FC<ButtonProps> = ({
   ...props
 }) => {
   const { colors } = useTheme();
+  const [isHovered, setIsHovered] = useState(false);
 
   const sizeStyles = {
     sm: 'px-3 py-1.5 text-sm font-semibold',
@@ -31,21 +32,27 @@ export const Button: React.FC<ButtonProps> = ({
     lg: SHADOWS.lg,
   };
 
+  const getHoverColor = (v: string) => {
+    if (v === 'primary') return colors.interactive.secondary;
+    if (v === 'secondary') return colors.interactive.primary;
+    return colors.interactive[v as 'danger' | 'success']; // danger and success stay the same
+  };
+
   const variantStyles = {
     primary: {
-      backgroundColor: colors.interactive.primary,
+      backgroundColor: isHovered ? getHoverColor('primary') : colors.interactive.primary,
       color: colors.text.inverse,
     } as React.CSSProperties,
     secondary: {
-      backgroundColor: colors.interactive.secondary,
+      backgroundColor: isHovered ? getHoverColor('secondary') : colors.interactive.secondary,
       color: colors.text.inverse,
     } as React.CSSProperties,
     danger: {
-      backgroundColor: colors.interactive.danger,
+      backgroundColor: isHovered ? getHoverColor('danger') : colors.interactive.danger,
       color: colors.text.inverse,
     } as React.CSSProperties,
     success: {
-      backgroundColor: colors.interactive.success,
+      backgroundColor: isHovered ? getHoverColor('success') : colors.interactive.success,
       color: colors.text.inverse,
     } as React.CSSProperties,
   };
@@ -70,6 +77,8 @@ export const Button: React.FC<ButtonProps> = ({
         transition: TRANSITIONS.base,
       }}
       className={`${baseStyles} ${sizeStyles[size]} ${className}`}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
       {...props}
     />
   );
