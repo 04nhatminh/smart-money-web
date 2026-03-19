@@ -1,3 +1,28 @@
+export const PRIMARY_COLORS = {
+  50: '#ffffff',
+  100: '#eceafa',
+  150: '#d8d5f6',
+  200: '#c5c1f1',
+  250: '#b1acec',
+  300: '#9e97e7',
+  350: '#8a82e3',
+  400: '#776ede',
+  450: '#6359d9',
+  500: '#5044d5',
+  550: '#3d2fd0',
+  600: '#372abb',
+  base: '#3629b7',
+  700: '#3026a6',
+  800: '#2a2191',
+  850: '#241c7d',
+  900: '#1e1868',
+  925: '#181353',
+  950: '#120e3e',
+  975: '#0c092a',
+  990: '#060515',
+  1000: '#000000'
+} as const;
+
 // Light Theme Colors
 export const LIGHT_COLORS = {
   // Backgrounds
