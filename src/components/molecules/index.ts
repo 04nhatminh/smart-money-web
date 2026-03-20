@@ -4,3 +4,4 @@ export { Pagination } from './Pagination';
 export { LoginForm } from './LoginForm';
 export { ThemeToggle } from './ThemeToggle';
 export { LanguageToggle } from './LanguageToggle';
+export { FeatureCard } from './FeatureCard';

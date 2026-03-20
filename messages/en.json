@@ -23,7 +23,12 @@
     "about": "About",
     "links": "Links",
     "features": "Features",
-    "contact": "Contact"
+    "contact": "Contact",
+    "pricing": "Pricing",
+    "security": "Security",
+    "blog": "Blog",
+    "helpCenter": "Help Center",
+    "privacy": "Privacy"
   },
   "page": {
     "title": "UI Component Library",
@@ -56,6 +61,59 @@
     "warning": "Warning",
     "buildingProducts": "Building amazing products.",
     "copyright": "Copyright"
+  },
+  "finance": {
+    "appName": "SmartMoney",
+    "appDescription": "Smart personal finance management app",
+    "hero": {
+      "title": "Take Control of Your Finances",
+      "subtitle": "Smart spending planner with AI-powered insights. Track expenses, achieve saving goals, and build better financial habits.",
+      "cta": "Get Started Free",
+      "login": "Sign In"
+    },
+    "dashboard": {
+      "title": "Dashboard Preview",
+      "monthlySpending": "Monthly Spending Trend",
+      "spendingByCategory": "Spending by Category",
+      "budgetVsActual": "Budget vs Actual Spending",
+      "planned": "Planned",
+      "actual": "Actual"
+    },
+    "features": {
+      "title": "Everything You Need",
+      "subtitle": "Powerful features to manage your finances effectively",
+      "tracking": {
+        "title": "Transaction Tracking",
+        "description": "Organize and categorize all your expenses organized in personal categories"
+      },
+      "goals": {
+        "title": "Saving Goals",
+        "description": "Set personal and group saving goals, track finances and family to save together"
+      },
+      "recommendations": {
+        "title": "Smart Spending Recommendations",
+        "description": "Get personalized insights and recommendations to optimize your spending habits."
+      }
+    },
+    "benefits": {
+      "title": "Why Choose SmartMoney?",
+      "benefit1": "AI-powered expense categorization",
+      "benefit2": "Collaborative group savings",
+      "benefit3": "Real-time spending insights",
+      "benefit4": "Secure and private data",
+      "benefit5": "Multi-device sync",
+      "benefit6": "Smart budget recommendations"
+    },
+    "testimonial": {
+      "balance": "Account Balance",
+      "date": "Date in Oldest",
+      "savingsGoal": "Money Saved"
+    },
+    "cta": {
+      "title": "Ready to Start Your Financial Journey?",
+      "subtitle": "Join thousands of users already managing their finances smarter.",
+      "button": "Get Started Today"
+    }
   },
   "auth": {
     "email": "Email",

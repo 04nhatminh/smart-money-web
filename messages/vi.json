@@ -23,7 +23,12 @@
     "about": "Về chúng tôi",
     "links": "Liên kết",
     "features": "Tính năng",
-    "contact": "Liên hệ"
+    "contact": "Liên hệ",
+    "pricing": "Giá",
+    "security": "Bảo mật",
+    "blog": "Blog",
+    "helpCenter": "Trung tâm Trợ giúp",
+    "privacy": "Riêng tư"
   },
   "page": {
     "title": "Thư viện Thành phần UI",
@@ -56,6 +61,59 @@
     "warning": "Warning",
     "buildingProducts": "Xây dựng những sản phẩm tuyệt vời.",
     "copyright": "Bản quyền"
+  },
+  "finance": {
+    "appName": "SmartMoney",
+    "appDescription": "Ứng dụng quản lý tài chính cá nhân thông minh",
+    "hero": {
+      "title": "Kiểm Soát Tài Chính Của Bạn",
+      "subtitle": "Trình lập kế hoạch chi tiêu thông minh với những hiểu biết do AI hỗ trợ. Theo dõi chi tiêu, đạt các mục tiêu tiết kiệm và xây dựng thói quen tài chính tốt hơn.",
+      "cta": "Bắt Đầu Miễn Phí",
+      "login": "Đăng Nhập"
+    },
+    "dashboard": {
+      "title": "Dashboard Preview",
+      "monthlySpending": "Xu Hướng Chi Tiêu Hàng Tháng",
+      "spendingByCategory": "Chi Tiêu Theo Danh Mục",
+      "budgetVsActual": "Ngân Sách So Với Chi Tiêu Thực Tế",
+      "planned": "Kế Hoạch",
+      "actual": "Thực Tế"
+    },
+    "features": {
+      "title": "Tất Cả Những Gì Bạn Cần",
+      "subtitle": "Các tính năng mạnh mẽ để quản lý tài chính của bạn một cách hiệu quả",
+      "tracking": {
+        "title": "Theo Dõi Giao Dịch",
+        "description": "Tổ chức và phân loại tất cả chi tiêu của bạn theo danh mục cá nhân"
+      },
+      "goals": {
+        "title": "Mục Tiêu Tiết Kiệm",
+        "description": "Đặt mục tiêu tiết kiệm cá nhân và nhóm, theo dõi tài chính và gia đình để tiết kiệm cùng nhau"
+      },
+      "recommendations": {
+        "title": "Đề Xuất Chi Tiêu Thông Minh",
+        "description": "Nhận những hiểu biết được cá nhân hóa và đề xuất để tối ưu hóa thói quen chi tiêu của bạn."
+      }
+    },
+    "benefits": {
+      "title": "Tại Sao Chọn SmartMoney?",
+      "benefit1": "Phân loại chi tiêu do AI hỗ trợ",
+      "benefit2": "Tiết kiệm nhóm cộng tác",
+      "benefit3": "Thông tin chi tiêu theo thời gian thực",
+      "benefit4": "Dữ liệu an toàn và riêng tư",
+      "benefit5": "Đồng bộ hóa nhiều thiết bị",
+      "benefit6": "Khuyến nghị ngân sách thông minh"
+    },
+    "testimonial": {
+      "balance": "Số Dư Tài Khoản",
+      "date": "Ngày Lâu Nhất",
+      "savingsGoal": "Tiền Tiết Kiệm Được"
+    },
+    "cta": {
+      "title": "Sẵn Sàng Bắt Đầu Hành Trình Tài Chính Của Bạn?",
+      "subtitle": "Tham gia hàng nghìn người dùng đã quản lý tài chính của họ một cách thông minh hơn.",
+      "button": "Bắt Đầu Hôm Nay"
+    }
   },
   "auth": {
     "email": "Email",
