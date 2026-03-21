@@ -4,6 +4,9 @@ import React from 'react';
 import { Button, Heading, Text } from '@/components/atoms';
 import { useTheme } from '@/context';
 import { useTranslations } from 'next-intl';
+import { apiClient } from '@/lib/api-client';
+import { HealthCheckResponse } from '@/types/api';
+import { API_ENDPOINTS } from '@/constants/api';
 
 interface NavItem {
   label: string;
@@ -21,6 +24,18 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   const { colors, colorScheme } = useTheme();
   const t = useTranslations();
+
+  const handleHealthCheck = async () => {
+    try {
+      console.log('Checking backend health...');
+      const response = await apiClient.get<HealthCheckResponse>('/api/v1/auth/health');
+      console.log('Backend is healthy:', response);
+      alert(`✅ Backend is healthy!\n\nMessage: ${response.message}`);
+    } catch (error) {
+      console.error('Backend health check failed:', error);
+      alert(`❌ Backend connection failed!\n\nError: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  };
 
   const defaultNavItems = navItems.length > 0 ? navItems : [
     { label: t('common.home'), href: '#' },
@@ -46,7 +61,7 @@ export const Header: React.FC<HeaderProps> = ({
 
           {/* Actions - Positioned Absolute Right */}
           <div className="flex gap-4 absolute right-4 sm:right-6 lg:right-8">
-            <Button variant="secondary" size="md" className="hidden sm:block">
+            <Button variant="secondary" size="md" className="hidden sm:block" onClick={handleHealthCheck}>
               {t('finance.hero.login')}
             </Button>
             <Button variant="primary" size="md">
