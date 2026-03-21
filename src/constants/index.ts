@@ -1,4 +1,4 @@
-export { PRIMARY_COLORS, type ColorScheme } from './colors';
+export { PRIMARY_COLORS, DARK_COLORS, type ColorScheme } from './colors';
 export { 
   SPACING, 
   BORDER_RADIUS, 

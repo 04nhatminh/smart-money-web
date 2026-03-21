@@ -4,7 +4,6 @@ import React from 'react';
 import { Heading, Text, Button } from '@/components/atoms';
 import { useTheme } from '@/context';
 import { useTranslations } from 'next-intl';
-import { PRIMARY_COLORS } from '@/constants/colors';
 
 interface CTASectionProps {
   title?: string;
@@ -29,18 +28,19 @@ export const CTASection: React.FC<CTASectionProps> = ({
   return (
     <section
       className="py-16 md:py-24 transition-colors"
-      style={{ backgroundColor: PRIMARY_COLORS.base }}
+      style={{ backgroundColor: colors.background.primary }}
     >
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         {/* Title */}
-        <Heading level={2} className="mb-4 text-white text-3xl md:text-4xl">
+        <Heading level={2} className="mb-4 text-3xl md:text-4xl" style={{ color: colors.text.primary }}>
           {finalTitle}
         </Heading>
 
         {/* Subtitle */}
         <Text
           variant="body"
-          className="mb-8 text-lg text-white opacity-90"
+          className="mb-8 text-lg"
+          style={{ color: colors.text.secondary }}
         >
           {finalSubtitle}
         </Text>

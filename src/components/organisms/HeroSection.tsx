@@ -4,7 +4,6 @@ import React from 'react';
 import { Heading, Text, Button } from '@/components/atoms';
 import { useTheme } from '@/context';
 import { useTranslations } from 'next-intl';
-import { PRIMARY_COLORS } from '@/constants/colors';
 
 interface HeroSectionProps {
   title?: string;
@@ -36,7 +35,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-3xl mx-auto">
           {/* Title */}
-          <Heading level={1} className="mb-6 text-4xl md:text-5xl lg:text-6xl font-bold" style={{ color: PRIMARY_COLORS.base }}>
+          <Heading level={1} className="mb-6 text-4xl md:text-5xl lg:text-6xl font-bold" style={{ color: colors.interactive.primary }}>
             {finalTitle}
           </Heading>
 

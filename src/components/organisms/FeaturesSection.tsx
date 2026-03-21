@@ -6,7 +6,6 @@ import { FeatureCard } from '@/components/molecules';
 import { useTheme } from '@/context';
 import { useTranslations } from 'next-intl';
 import { FaChartBar, FaBullseye, FaMagic } from 'react-icons/fa';
-import { PRIMARY_COLORS } from '@/constants/colors';
 
 interface Feature {
   title: string;
@@ -35,17 +34,17 @@ export const FeaturesSection: React.FC<FeaturesProps> = ({
     {
       title: t('finance.features.tracking.title'),
       description: t('finance.features.tracking.description'),
-      icon: <FaChartBar className="text-3xl" style={{ color: PRIMARY_COLORS.base }} />,
+      icon: <FaChartBar className="text-3xl" style={{ color: colors.interactive.primary }} />,
     },
     {
       title: t('finance.features.goals.title'),
       description: t('finance.features.goals.description'),
-      icon: <FaBullseye className="text-3xl" style={{ color: PRIMARY_COLORS.base }} />,
+      icon: <FaBullseye className="text-3xl" style={{ color: colors.interactive.primary }} />,
     },
     {
       title: t('finance.features.recommendations.title'),
       description: t('finance.features.recommendations.description'),
-      icon: <FaMagic className="text-3xl" style={{ color: PRIMARY_COLORS.base }} />,
+      icon: <FaMagic className="text-3xl" style={{ color: colors.interactive.primary }} />,
     },
   ];
 

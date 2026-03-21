@@ -5,7 +5,6 @@ import { Button, Text, Heading } from '@/components/atoms';
 import { ThemeToggle, LanguageToggle } from '@/components/molecules';
 import { useTheme } from '@/context';
 import { useTranslations } from 'next-intl';
-import { PRIMARY_COLORS } from '@/constants/colors';
 
 interface FooterProps {
   year?: number;
@@ -16,7 +15,7 @@ export const Footer: React.FC<FooterProps> = ({
   year = new Date().getFullYear(),
   appName = 'SmartMoney',
 }) => {
-  const { colors } = useTheme();
+  const { colors, colorScheme } = useTheme();
   const t = useTranslations();
 
   const productLinks = [
@@ -38,27 +37,31 @@ export const Footer: React.FC<FooterProps> = ({
   ];
 
   return (
-    <footer className="mt-12 transition-colors" style={{ backgroundColor: PRIMARY_COLORS.base }}>
+    <footer className="mt-12 transition-colors border-t" style={{ backgroundColor: colors.background.primary, borderTopColor: colors.border.light }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Main Footer Content */}
         <div className="py-12">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
             {/* Company Info */}
             <div>
-              <div className="flex items-center gap-2 mb-4">
-                <img src="/logo-nobg.png" alt={appName} className="h-10 w-10 object-contain" />
-                <Heading level={3} className="text-white m-0 text-lg">
-                  {appName}
+              <div className="flex items-center gap-3 mb-4">
+                <img src="/logo-nobg.png" alt={appName} className="h-12 w-12 object-contain flex-shrink-0" style={{ filter: colorScheme === 'dark' ? 'brightness(0) invert(1)' : 'none' }} />
+                <Heading 
+                  level={2} 
+                  className="text-xl m-0 font-bold flex items-center"
+                >
+                  <span style={{ color: colorScheme === 'dark' ? colors.palette.white : colors.interactive.primary }}>Smart</span>
+                  <span style={{ color: colorScheme === 'dark' ? colors.palette.white : colors.interactive.secondary }}>Money</span>
                 </Heading>
               </div>
-              <Text variant="caption" className="text-white opacity-70">
+              <Text variant="caption" style={{ color: colors.text.secondary }}>
                 {t('finance.appDescription')}
               </Text>
             </div>
 
             {/* Product */}
             <div>
-              <Text className="font-semibold mb-4 text-white">
+              <Text className="font-semibold mb-4" style={{ color: colors.text.primary }}>
                 {t('common.features')}
               </Text>
               <ul className="space-y-2">
@@ -66,7 +69,8 @@ export const Footer: React.FC<FooterProps> = ({
                   <li key={link.href}>
                     <a
                       href={link.href}
-                      className="transition-colors hover:opacity-80 text-white opacity-70"
+                      className="transition-colors hover:opacity-80"
+                      style={{ color: colors.text.secondary }}
                     >
                       {link.label}
                     </a>
@@ -77,7 +81,7 @@ export const Footer: React.FC<FooterProps> = ({
 
             {/* Company */}
             <div>
-              <Text className="font-semibold mb-4 text-white">
+              <Text className="font-semibold mb-4" style={{ color: colors.text.primary }}>
                 {t('common.about')}
               </Text>
               <ul className="space-y-2">
@@ -85,7 +89,8 @@ export const Footer: React.FC<FooterProps> = ({
                   <li key={link.href}>
                     <a
                       href={link.href}
-                      className="transition-colors hover:opacity-80 text-white opacity-70"
+                      className="transition-colors hover:opacity-80"
+                      style={{ color: colors.text.secondary }}
                     >
                       {link.label}
                     </a>
@@ -96,7 +101,7 @@ export const Footer: React.FC<FooterProps> = ({
 
             {/* Support */}
             <div>
-              <Text className="font-semibold mb-4 text-white">
+              <Text className="font-semibold mb-4" style={{ color: colors.text.primary }}>
                 {t('common.settings')}
               </Text>
               <ul className="space-y-2">
@@ -104,7 +109,8 @@ export const Footer: React.FC<FooterProps> = ({
                   <li key={link.href}>
                     <a
                       href={link.href}
-                      className="transition-colors hover:opacity-80 text-white opacity-70"
+                      className="transition-colors hover:opacity-80"
+                      style={{ color: colors.text.secondary }}
                     >
                       {link.label}
                     </a>
@@ -115,14 +121,14 @@ export const Footer: React.FC<FooterProps> = ({
           </div>
 
           {/* Divider */}
-          <div style={{ borderTopColor: 'rgba(255, 255, 255, 0.2)', borderTopWidth: '1px' }} className="py-8">
+          <div style={{ borderTopColor: colors.border.light, borderTopWidth: '1px' }} className="py-8">
             <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-              <Text variant="caption" className="text-white opacity-70 text-center md:text-left">
+              <Text variant="caption" style={{ color: colors.text.secondary }} className="text-center md:text-left">
                 © {year} {appName}. {t('page.copyright')} reserved.
               </Text>
               <div className="flex gap-6">
                 <div className="flex items-center gap-2">
-                  <Text variant="caption" className="text-white opacity-70">
+                  <Text variant="caption" style={{ color: colors.text.secondary }}>
                     {t('common.theme')}:
                   </Text>
                   <ThemeToggle />

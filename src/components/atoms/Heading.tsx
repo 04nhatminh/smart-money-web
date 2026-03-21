@@ -38,7 +38,7 @@ export const Heading: React.FC<HeadingProps> = ({ level = 1, className = '', ...
         fontWeight: FONT_WEIGHTS.bold,
         color: colors.text.primary,
         lineHeight: '1.2',
-        margin: '0 0 1rem 0',
+        margin: '0',
       }}
       className={className}
       {...props}

@@ -41,19 +41,19 @@ export const Button: React.FC<ButtonProps> = ({
   const variantStyles = {
     primary: {
       backgroundColor: isHovered ? getHoverColor('primary') : colors.interactive.primary,
-      color: colors.text.inverse,
+      color: colors.palette.white,
     } as React.CSSProperties,
     secondary: {
       backgroundColor: isHovered ? getHoverColor('secondary') : colors.interactive.secondary,
-      color: colors.text.inverse,
+      color: colors.palette.white,
     } as React.CSSProperties,
     danger: {
       backgroundColor: isHovered ? getHoverColor('danger') : colors.interactive.danger,
-      color: colors.text.inverse,
+      color: colors.palette.white,
     } as React.CSSProperties,
     success: {
       backgroundColor: isHovered ? getHoverColor('success') : colors.interactive.success,
-      color: colors.text.inverse,
+      color: colors.palette.white,
     } as React.CSSProperties,
   };
 
@@ -72,7 +72,7 @@ export const Button: React.FC<ButtonProps> = ({
     <button
       style={{
         ...variantStyles[variant],
-        borderRadius: BORDER_RADIUS.full,
+        borderRadius: BORDER_RADIUS.xl,
         boxShadow: shadowStyles[elevation],
         transition: TRANSITIONS.base,
       }}

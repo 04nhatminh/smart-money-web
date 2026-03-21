@@ -5,7 +5,6 @@ import { Heading, Text } from '@/components/atoms';
 import { useTheme } from '@/context';
 import { useTranslations } from 'next-intl';
 import { FaCheck } from 'react-icons/fa';
-import { PRIMARY_COLORS } from '@/constants/colors';
 
 interface BenefitItemProps {
   label: string;
@@ -16,12 +15,12 @@ interface BenefitsProps {
   benefits?: BenefitItemProps[];
 }
 
-const BenefitItem: React.FC<BenefitItemProps> = ({ label }) => {
+const BenefitItem: React.FC<BenefitItemProps & { successColor: string }> = ({ label, successColor }) => {
   return (
     <div className="flex items-start gap-3">
       <div
         className="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center mt-0.5"
-        style={{ backgroundColor: PRIMARY_COLORS.interactive.success }}
+        style={{ backgroundColor: successColor }}
       >
         <FaCheck className="text-white text-sm" />
       </div>
@@ -61,7 +60,7 @@ export const BenefitsSection: React.FC<BenefitsProps> = ({
             </Heading>
             <div className="space-y-4">
               {defaultBenefits.map((benefit, index) => (
-                <BenefitItem key={index} label={benefit.label} />
+                <BenefitItem key={index} label={benefit.label} successColor={colors.interactive.success} />
               ))}
             </div>
           </div>

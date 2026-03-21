@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { FaSun, FaMoon } from 'react-icons/fa';
 import { useTheme } from '@/context';
 
 export const ThemeToggle: React.FC = () => {
@@ -25,7 +26,11 @@ export const ThemeToggle: React.FC = () => {
           transform: colorScheme === 'light' ? 'translateX(2px)' : 'translateX(28px)',
         }}
       >
-        {colorScheme === 'light' ? '☀️' : '🌙'}
+        {colorScheme === 'light' ? (
+          <FaSun className="w-3 h-3" style={{ color: colors.text.primary }} />
+        ) : (
+          <FaMoon className="w-3 h-3" style={{ color: colors.text.primary }} />
+        )}
       </div>
     </button>
   );

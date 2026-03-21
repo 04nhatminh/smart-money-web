@@ -1,11 +1,11 @@
 'use client';
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { ColorScheme, PRIMARY_COLORS } from '@/constants';
+import { ColorScheme, PRIMARY_COLORS, DARK_COLORS } from '@/constants';
 
 interface ThemeContextType {
   colorScheme: ColorScheme;
-  colors: typeof PRIMARY_COLORS;
+  colors: typeof PRIMARY_COLORS | typeof DARK_COLORS;
   toggleColorScheme: () => void;
   setColorScheme: (scheme: ColorScheme) => void;
 }
@@ -63,7 +63,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setColorScheme(newScheme);
   };
 
-  const colors = PRIMARY_COLORS;
+  const colors = colorScheme === 'dark' ? DARK_COLORS : PRIMARY_COLORS;
 
   const value: ThemeContextType = {
     colorScheme,
