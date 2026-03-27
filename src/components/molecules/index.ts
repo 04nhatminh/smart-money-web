@@ -1,7 +1,11 @@
-export { SearchBar } from './SearchBar';
-export { Card } from './Card';
-export { Pagination } from './Pagination';
-export { LoginForm } from './LoginForm';
-export { ThemeToggle } from './ThemeToggle';
-export { LanguageToggle } from './LanguageToggle';
-export { FeatureCard } from './FeatureCard';
+// Common molecules
+export { SearchBar, Card, Pagination } from './common';
+
+// Auth molecules
+export { LoginForm } from './auth';
+
+// Theme molecules
+export { ThemeToggle, LanguageToggle } from './theme';
+
+// Landing molecules
+export { FeatureCard } from './landing';
