@@ -1,9 +1,11 @@
-export { Header } from './Header';
-export { Footer } from './Footer';
-export { ItemList } from './ItemList';
-export { AuthSection } from './AuthSection';
-export { HeroSection } from './HeroSection';
-export { FeaturesSection } from './FeaturesSection';
-export { BenefitsSection } from './BenefitsSection';
-export { CTASection } from './CTASection';
-export { DashboardPreview } from './DashboardPreview';
+// Common organisms
+export { Header, Footer } from './common';
+
+// Auth organisms
+export { AuthSection } from './auth';
+
+// Landing organisms
+export { HeroSection, FeaturesSection, BenefitsSection, CTASection, DashboardPreview } from './landing';
+
+// Dashboard organisms
+export { ItemList } from './dashboard';
