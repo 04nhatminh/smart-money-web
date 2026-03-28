@@ -1,6 +1,9 @@
 'use client';
 
 import React from 'react';
+import { useRouter } from 'next/navigation';
+import { useLocale } from 'next-intl';
+import { FiArrowRight } from 'react-icons/fi';
 import { Heading, Text, Button } from '@/components/atoms';
 import { useTheme } from '@/context';
 import { useTranslations } from 'next-intl';
@@ -22,8 +25,13 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   onPrimaryCTA,
   onSecondaryCTA,
 }) => {
+  const router = useRouter();
+  const locale = useLocale();
   const { colors } = useTheme();
   const t = useTranslations();
+
+  const handlePrimary = onPrimaryCTA || (() => router.push(`/${locale}/register`));
+  const handleSecondary = onSecondaryCTA || (() => router.push(`/${locale}/login`));
 
   const finalTitle = title || t('finance.hero.title');
   const finalSubtitle = subtitle || t('finance.hero.subtitle');
@@ -49,15 +57,15 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             <Button
               variant="primary"
               size="lg"
-              onClick={onPrimaryCTA}
-              className="font-semibold"
+              onClick={handlePrimary}
+              className="font-semibold inline-flex items-center justify-center gap-2"
             >
-              {finalPrimaryCTA}
+              {finalPrimaryCTA} <FiArrowRight className="w-5 h-5" />
             </Button>
             <Button
               variant="secondary"
               size="lg"
-              onClick={onSecondaryCTA}
+              onClick={handleSecondary}
               className="font-semibold"
             >
               {finalSecondaryCTA}

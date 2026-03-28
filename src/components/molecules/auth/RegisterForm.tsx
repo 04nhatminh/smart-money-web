@@ -2,16 +2,21 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { Button, Input } from '@/components/atoms';
+import { useRouter } from 'next/navigation';
+import { useLocale } from 'next-intl';
+import { Button, Input, Heading, Text } from '@/components/atoms';
 import { useAuth } from '@/context/AuthContext';
 import { useAuthForm } from '@/hooks/useAuthForm';
+import { useTheme } from '@/context/ThemeContext';
 
 interface RegisterFormProps {
   onSuccess?: () => void;
 }
 
 export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
-  const [username, setUsername] = useState('');
+  const router = useRouter();
+  const locale = useLocale();
+  const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -19,9 +24,14 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
   const [agreeTerms, setAgreeTerms] = useState(false);
   const { register, isLoading } = useAuth();
   const { handlePasswordHash } = useAuthForm();
+  const { colors, colorScheme } = useTheme();
+
+  const handleLogoClick = () => {
+    router.push(`/${locale}`);
+  };
 
   const validateForm = () => {
-    if (!username.trim() || !email.trim() || !password.trim()) {
+    if (!fullName.trim() || !email.trim() || !password.trim()) {
       setError('Please fill in all fields');
       return false;
     }
@@ -63,7 +73,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
       const hashedPassword = await handlePasswordHash(password);
       
       // Call register through auth context
-      await register(username, email, hashedPassword);
+      await register(fullName, email, hashedPassword);
 
       // Call callback if provided
       onSuccess?.();
@@ -75,29 +85,49 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 w-full max-w-md">
+    <form onSubmit={handleSubmit} className="space-y-6 w-full">
+      {/* Logo and Website Name - Clickable */}
+      <div className="flex items-center justify-center mb-8 cursor-pointer group" onClick={handleLogoClick}>
+        <img 
+          src="/logo-nobg.png" 
+          alt="SmartMoney" 
+          className="h-12 w-12 object-contain mr-3 group-opacity-80 transition-opacity flex-shrink-0"
+          style={{ filter: colorScheme === 'dark' ? 'brightness(0) invert(1)' : 'none' }}
+        />
+        <h1 className="text-2xl font-bold flex items-center">
+          <span style={{ color: colorScheme === 'dark' ? colors.palette?.white : colors.interactive.primary }}>Smart</span>
+          <span style={{ color: colorScheme === 'dark' ? colors.palette?.white : colors.interactive.secondary }}>Money</span>
+        </h1>
+      </div>
+
+      {/* Title and Subtitle */}
+      <div className="text-center mb-8">
+        <Heading level={1} className="mb-2">Create Account</Heading>
+        <Text className="text-base" style={{ color: colors.text.secondary }}>Start your journey to financial freedom</Text>
+      </div>
+
       {error && (
-        <div className="p-3 bg-red-100 text-red-700 rounded border border-red-400">
+        <div className="p-4 bg-red-100 text-red-700 rounded-lg border border-red-400">
           {error}
         </div>
       )}
       
       <Input
         type="text"
-        label="Username"
-        value={username}
-        onChange={(e) => setUsername(e.target.value)}
-        placeholder="Choose a username"
+        label="Full Name"
+        value={fullName}
+        onChange={(e) => setFullName(e.target.value)}
+        placeholder="John Doe"
         required
         disabled={isLoading}
       />
 
       <Input
         type="email"
-        label="Email"
+        label="Email Address"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
-        placeholder="Enter your email"
+        placeholder="you@example.com"
         required
         disabled={isLoading}
       />
@@ -107,7 +137,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
         label="Password"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
-        placeholder="Enter a strong password"
+        placeholder="Create a strong password"
         required
         disabled={isLoading}
       />
@@ -122,19 +152,23 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
         disabled={isLoading}
       />
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-start gap-3 pt-2">
         <input
           type="checkbox"
           id="terms"
           checked={agreeTerms}
           onChange={(e) => setAgreeTerms(e.target.checked)}
           disabled={isLoading}
-          className="w-4 h-4"
+          className="w-4 h-4 rounded mt-1 flex-shrink-0"
         />
-        <label htmlFor="terms" className="text-sm text-gray-600">
+        <label htmlFor="terms" className="text-sm leading-relaxed" style={{ color: colors.text.secondary }}>
           I agree to the{' '}
-          <Link href="/terms" className="text-blue-600 hover:text-blue-800 underline">
-            Terms and Conditions
+          <Link href="/terms" className="font-semibold hover:opacity-80 transition-opacity" style={{ color: colors.interactive.primary }}>
+            Terms of Service
+          </Link>
+          {' '}and{' '}
+          <Link href="/privacy" className="font-semibold hover:opacity-80 transition-opacity" style={{ color: colors.interactive.primary }}>
+            Privacy Policy
           </Link>
         </label>
       </div>
@@ -142,16 +176,20 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
       <Button 
         variant="primary" 
         type="submit" 
-        className="w-full" 
+        className="w-full py-3 mt-6 text-lg font-semibold" 
         disabled={isLoading}
       >
-        {isLoading ? 'Creating account...' : 'Register'}
+        {isLoading ? 'Creating account...' : 'Create Account'}
       </Button>
 
-      <p className="text-center text-sm text-gray-600">
+      <p className="text-center text-sm" style={{ color: colors.text.secondary }}>
         Already have an account?{' '}
-        <Link href="/login" className="text-blue-600 hover:text-blue-800 underline">
-          Login here
+        <Link 
+          href={`/${locale}/login`} 
+          className="font-semibold hover:opacity-80 transition-opacity"
+          style={{ color: colors.interactive.primary }}
+        >
+          Sign in
         </Link>
       </p>
     </form>

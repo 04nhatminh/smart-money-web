@@ -5,13 +5,15 @@ import { useRouter } from 'next/navigation';
 import { useLocale } from 'next-intl';
 import { RegisterForm } from '@/components/molecules/auth';
 import { CenteredLayout } from '@/components/templates';
-import { Heading, Text } from '@/components/atoms';
+import { Heading } from '@/components/atoms';
 import { useAuth } from '@/context/AuthContext';
+import { useTheme } from '@/context/ThemeContext';
 
 export default function RegisterPage() {
   const router = useRouter();
   const locale = useLocale();
   const { isAuthenticated, isLoading } = useAuth();
+  const { colors } = useTheme();
 
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
@@ -21,23 +23,22 @@ export default function RegisterPage() {
 
   if (isLoading) {
     return (
-      <CenteredLayout>
+      <CenteredLayout hideHeader hideFooter showBackButton>
         <Heading level={2}>Loading...</Heading>
       </CenteredLayout>
     );
   }
 
   return (
-    <CenteredLayout>
-      <div className="text-center mb-8">
-        <Heading level={1}>Create Account</Heading>
-        <Text>Sign up to start managing your finances</Text>
+    <CenteredLayout hideHeader hideFooter>
+      <div className="w-full max-w-[520px] rounded-2xl shadow-xl p-10" style={{ backgroundColor: colors.surface.primary }}>
+        {/* Form */}
+        <RegisterForm
+          onSuccess={() => {
+            router.push(`/${locale}/dashboard`);
+          }}
+        />
       </div>
-      <RegisterForm
-        onSuccess={() => {
-          router.push(`/${locale}/dashboard`);
-        }}
-      />
     </CenteredLayout>
   );
 }

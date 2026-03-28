@@ -1,6 +1,8 @@
 'use client';
 
 import React from 'react';
+import { useRouter } from 'next/navigation';
+import { useLocale } from 'next-intl';
 import { Button, Heading, Text } from '@/components/atoms';
 import { useTheme } from '@/context';
 import { useTranslations } from 'next-intl';
@@ -22,8 +24,18 @@ export const Header: React.FC<HeaderProps> = ({
   navItems = [],
   appName = 'SmartMoney',
 }) => {
+  const router = useRouter();
+  const locale = useLocale();
   const { colors, colorScheme } = useTheme();
   const t = useTranslations();
+
+  const handleLoginClick = () => {
+    router.push(`/${locale}/login`);
+  };
+
+  const handleSignupClick = () => {
+    router.push(`/${locale}/register`);
+  };
 
   return (
     <header className="shadow-md transition-colors sticky top-0 z-50" style={{ backgroundColor: colors.background.primary, borderBottomColor: colors.border.light, borderBottomWidth: '1px' }}>
@@ -43,10 +55,10 @@ export const Header: React.FC<HeaderProps> = ({
 
           {/* Actions - Positioned Absolute Right */}
           <div className="flex gap-4 absolute right-4 sm:right-6 lg:right-8">
-            <Button variant="secondary" size="md" className="hidden sm:block">
+            <Button variant="secondary" size="md" className="hidden sm:block" onClick={handleLoginClick}>
               {t('finance.hero.login')}
             </Button>
-            <Button variant="primary" size="md">
+            <Button variant="primary" size="md" onClick={handleSignupClick}>
               {t('finance.hero.cta')}
             </Button>
           </div>

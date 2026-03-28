@@ -11,7 +11,7 @@ export default function ResetPasswordPage() {
   const token = searchParams.get('token') || '';
 
   return (
-    <CenteredLayout>
+    <CenteredLayout hideHeader hideFooter showBackButton>
       <div className="text-center mb-8">
         <Heading level={1}>Reset Your Password</Heading>
         <Text>Enter your new password below</Text>
