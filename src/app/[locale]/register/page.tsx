@@ -3,12 +3,12 @@
 import React, { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useLocale } from 'next-intl';
-import { LoginForm } from '@/components/molecules/auth';
+import { RegisterForm } from '@/components/molecules/auth';
 import { CenteredLayout } from '@/components/templates';
 import { Heading, Text } from '@/components/atoms';
 import { useAuth } from '@/context/AuthContext';
 
-export default function LoginPage() {
+export default function RegisterPage() {
   const router = useRouter();
   const locale = useLocale();
   const { isAuthenticated, isLoading } = useAuth();
@@ -30,10 +30,10 @@ export default function LoginPage() {
   return (
     <CenteredLayout>
       <div className="text-center mb-8">
-        <Heading level={1}>Welcome Back</Heading>
-        <Text>Sign in to your account to continue</Text>
+        <Heading level={1}>Create Account</Heading>
+        <Text>Sign up to start managing your finances</Text>
       </div>
-      <LoginForm
+      <RegisterForm
         onSuccess={() => {
           router.push(`/${locale}/dashboard`);
         }}

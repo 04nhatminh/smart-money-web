@@ -1,12 +1,13 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { useLocale } from 'next-intl';
 import { useTheme } from '@/context';
 import { Button } from '@/components/atoms';
 
-export const LanguageToggle: React.FC = () => {
+// Component that uses useLocale (requires NextIntlClientProvider)
+const LanguageToggleContent: React.FC = () => {
+  const { useLocale } = require('next-intl') as { useLocale: () => string };
   const locale = useLocale();
   const router = useRouter();
   const pathname = usePathname();
@@ -16,18 +17,11 @@ export const LanguageToggle: React.FC = () => {
   const toggleLanguage = async () => {
     const newLocale = locale === 'en' ? 'vi' : 'en';
     
-    // Show loading
     setIsLoading(true);
-    
-    // Replace the locale in the pathname
     const newPathname = pathname.replace(`/${locale}`, `/${newLocale}`);
     
-    // Use a small delay to ensure loading state is visible
     await new Promise(resolve => setTimeout(resolve, 100));
-    
     router.push(newPathname);
-    
-    // Hide loading after navigation
     setTimeout(() => setIsLoading(false), 1000);
   };
 
@@ -54,5 +48,14 @@ export const LanguageToggle: React.FC = () => {
         {isLoading ? '...' : (locale === 'en' ? '🇻🇳 Tiếng Việt' : '🇺🇸 English')}
       </Button>
     </>
+  );
+};
+
+// Wrapper that handles missing context gracefully
+export const LanguageToggle: React.FC = () => {
+  return (
+    <Suspense fallback={null}>
+      <LanguageToggleContent />
+    </Suspense>
   );
 };
