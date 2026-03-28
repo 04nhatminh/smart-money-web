@@ -23,11 +23,22 @@ export const apiClient = {
         headers: getHeaders(),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error(`API error: ${response.statusText}`);
+        const errorMessage = data?.message || `API error: ${response.statusText}`;
+        const error = new Error(errorMessage);
+        (error as any).data = data;
+        throw error;
       }
 
-      const data = await response.json();
+      // Even if HTTP status is 200, check if API indicates failure
+      if (data && data.success === false) {
+        const error = new Error(data.message || 'Request failed');
+        (error as any).data = data;
+        throw error;
+      }
+
       console.log(`Connected to backend at ${API_URL}${endpoint}`);
       return data;
     } catch (error) {
@@ -44,11 +55,23 @@ export const apiClient = {
         body: JSON.stringify(body),
       });
 
+      const data = await response.json();
+
+      // Check if response is not ok OR if the API returns success: false
       if (!response.ok) {
-        throw new Error(`API error: ${response.statusText}`);
+        const errorMessage = data?.message || `API error: ${response.statusText}`;
+        const error = new Error(errorMessage);
+        (error as any).data = data;
+        throw error;
       }
 
-      const data = await response.json();
+      // Even if HTTP status is 200, check if API indicates failure
+      if (data && data.success === false) {
+        const error = new Error(data.message || 'Request failed');
+        (error as any).data = data;
+        throw error;
+      }
+
       console.log(`Connected to backend at ${API_URL}${endpoint}`);
       return data;
     } catch (error) {
@@ -65,11 +88,22 @@ export const apiClient = {
         body: JSON.stringify(body),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error(`API error: ${response.statusText}`);
+        const errorMessage = data?.message || `API error: ${response.statusText}`;
+        const error = new Error(errorMessage);
+        (error as any).data = data;
+        throw error;
       }
 
-      const data = await response.json();
+      // Even if HTTP status is 200, check if API indicates failure
+      if (data && data.success === false) {
+        const error = new Error(data.message || 'Request failed');
+        (error as any).data = data;
+        throw error;
+      }
+
       console.log(`Connected to backend at ${API_URL}${endpoint}`);
       return data;
     } catch (error) {
@@ -85,11 +119,22 @@ export const apiClient = {
         headers: getHeaders(),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error(`API error: ${response.statusText}`);
+        const errorMessage = data?.message || `API error: ${response.statusText}`;
+        const error = new Error(errorMessage);
+        (error as any).data = data;
+        throw error;
       }
 
-      const data = await response.json();
+      // Even if HTTP status is 200, check if API indicates failure
+      if (data && data.success === false) {
+        const error = new Error(data.message || 'Request failed');
+        (error as any).data = data;
+        throw error;
+      }
+
       console.log(`Connected to backend at ${API_URL}${endpoint}`);
       return data;
     } catch (error) {

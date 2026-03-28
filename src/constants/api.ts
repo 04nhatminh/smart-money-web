@@ -9,6 +9,10 @@ export const API_ENDPOINTS = {
     refresh: '/api/v1/auth/refresh',
     loginGoogle: '/api/v1/auth/login/google',
     loginFacebook: '/api/v1/auth/login/facebook',
+    verifyEmail: '/api/v1/auth/verify-email',
+    verifyOtp: '/api/v1/auth/verify-otp',
+    resetPassword: '/api/v1/auth/reset-password',
+    forgotPassword: '/api/v1/auth/forgot',
   },
 
   // Transactions

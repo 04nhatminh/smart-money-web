@@ -17,11 +17,15 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
   const router = useRouter();
   const locale = useLocale();
   const [fullName, setFullName] = useState('');
+  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [dateOfBirth, setDateOfBirth] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [agreeTerms, setAgreeTerms] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { register, isLoading } = useAuth();
   const { handlePasswordHash } = useAuthForm();
   const { colors, colorScheme } = useTheme();
@@ -30,9 +34,34 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
     router.push(`/${locale}`);
   };
 
+  const handleDateOfBirthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    // If value is in yyyy-MM-dd format (from date picker)
+    if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+      setDateOfBirth(value);
+    } 
+    // If value is in dd/mm/yyyy format (manual input)
+    else if (/^\d{2}\/\d{2}\/\d{4}$/.test(value)) {
+      const parts = value.split('/');
+      if (parts.length === 3) {
+        const [day, month, year] = parts;
+        setDateOfBirth(`${year}-${month}-${day}`);
+      } else {
+        setDateOfBirth(value);
+      }
+    } else {
+      setDateOfBirth(value);
+    }
+  };
+
   const validateForm = () => {
-    if (!fullName.trim() || !email.trim() || !password.trim()) {
+    if (!fullName.trim() || !username.trim() || !email.trim() || !password.trim() || !phone.trim() || !dateOfBirth.trim()) {
       setError('Please fill in all fields');
+      return false;
+    }
+
+    if (username.length < 3) {
+      setError('Username must be at least 3 characters');
       return false;
     }
 
@@ -52,6 +81,19 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
       return false;
     }
 
+    const phoneRegex = /^[0-9]{10,11}$/;
+    if (!phoneRegex.test(phone.replace(/\D/g, ''))) {
+      setError('Please enter a valid phone number');
+      return false;
+    }
+
+    // Validate date format (yyyy-MM-dd from date picker or dd/mm/yyyy from manual input)
+    const isValidFormat = /^\d{4}-\d{2}-\d{2}$/.test(dateOfBirth) || /^\d{2}\/\d{2}\/\d{4}$/.test(dateOfBirth);
+    if (!isValidFormat) {
+      setError('Please enter a valid date');
+      return false;
+    }
+
     if (!agreeTerms) {
       setError('You must agree to the terms and conditions');
       return false;
@@ -63,24 +105,55 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    console.log('[RegisterForm] handleSubmit started with email:', email);
 
     if (!validateForm()) {
       return;
     }
 
     try {
+      setIsSubmitting(true);
       // TODO: Hash password before sending to API
       // const hashedPassword = await handlePasswordHash(password);
       
+      // Format dateOfBirth to dd/mm/yyyy
+      let formattedDate = dateOfBirth;
+      if (/^\d{4}-\d{2}-\d{2}$/.test(dateOfBirth)) {
+        const [year, month, day] = dateOfBirth.split('-');
+        formattedDate = `${day}/${month}/${year}`;
+      }
+      
+      console.log('[RegisterForm] Calling register API...');
       // Call register through auth context
-      await register(fullName, email, password);
+      await register(username, fullName, email, password, phone, formattedDate);
+      console.log('[RegisterForm] Register API success');
 
-      // Call callback if provided
-      onSuccess?.();
+      // Build redirect URL and perform redirect immediately
+      // Don't use setTimeout to avoid navigation interruption
+      const redirectUrl = `/${locale}/verify-email?email=${encodeURIComponent(email)}`;
+      console.log('[RegisterForm] Redirecting to URL:', redirectUrl);
+      
+      // Use router.push with options to ensure navigation
+      router.push(redirectUrl);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Registration failed';
+      // API returned error or network error - display to user
+      let errorMessage = 'Registration failed';
+      
+      // Extract error message from different possible locations
+      if (err instanceof Error) {
+        errorMessage = err.message;
+      } else if (typeof err === 'object' && err !== null) {
+        const errorObj = err as any;
+        errorMessage = errorObj.message || errorObj.data?.message || JSON.stringify(err);
+      }
+      
+      console.error('[RegisterForm] Registration error:', errorMessage, err);
       setError(errorMessage);
-      console.error('Registration error:', err);
+      
+      // Scroll to top to show error
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -107,8 +180,14 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
       </div>
 
       {error && (
-        <div className="p-4 bg-red-100 text-red-700 rounded-lg border border-red-400">
-          {error}
+        <div className="p-4 bg-red-50 text-red-800 rounded-lg border-l-4 border-red-500 mb-4 animate-pulse">
+          <div className="flex items-start gap-3">
+            <div className="text-xl font-bold">⚠️</div>
+            <div>
+              <h3 className="font-semibold mb-1">Registration Error</h3>
+              <p className="text-sm">{error}</p>
+            </div>
+          </div>
         </div>
       )}
       
@@ -119,7 +198,17 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
         onChange={(e) => setFullName(e.target.value)}
         placeholder="John Doe"
         required
-        disabled={isLoading}
+        disabled={isSubmitting}
+      />
+
+      <Input
+        type="text"
+        label="Username"
+        value={username}
+        onChange={(e) => setUsername(e.target.value)}
+        placeholder="johndoe123"
+        required
+        disabled={isSubmitting}
       />
 
       <Input
@@ -129,7 +218,26 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
         onChange={(e) => setEmail(e.target.value)}
         placeholder="you@example.com"
         required
-        disabled={isLoading}
+        disabled={isSubmitting}
+      />
+
+      <Input
+        type="tel"
+        label="Phone Number"
+        value={phone}
+        onChange={(e) => setPhone(e.target.value)}
+        placeholder="+84 123 456 789"
+        required
+        disabled={isSubmitting}
+      />
+
+      <Input
+        type="date"
+        label="Date of Birth"
+        value={dateOfBirth}
+        onChange={handleDateOfBirthChange}
+        required
+        disabled={isSubmitting}
       />
       
       <Input
@@ -139,7 +247,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
         onChange={(e) => setPassword(e.target.value)}
         placeholder="Create a strong password"
         required
-        disabled={isLoading}
+        disabled={isSubmitting}
       />
 
       <Input
@@ -149,7 +257,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
         onChange={(e) => setConfirmPassword(e.target.value)}
         placeholder="Confirm your password"
         required
-        disabled={isLoading}
+        disabled={isSubmitting}
       />
 
       <div className="flex items-start gap-3 pt-2">
@@ -158,7 +266,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
           id="terms"
           checked={agreeTerms}
           onChange={(e) => setAgreeTerms(e.target.checked)}
-          disabled={isLoading}
+          disabled={isSubmitting}
           className="w-4 h-4 rounded mt-1 flex-shrink-0"
         />
         <label htmlFor="terms" className="text-sm leading-relaxed" style={{ color: colors.text.secondary }}>
@@ -177,9 +285,9 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
         variant="primary" 
         type="submit" 
         className="w-full py-3 mt-6 text-lg font-semibold" 
-        disabled={isLoading}
+        disabled={isSubmitting}
       >
-        {isLoading ? 'Creating account...' : 'Create Account'}
+        {isSubmitting ? 'Creating account...' : 'Create Account'}
       </Button>
 
       <p className="text-center text-sm" style={{ color: colors.text.secondary }}>

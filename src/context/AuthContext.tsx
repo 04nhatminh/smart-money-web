@@ -21,8 +21,11 @@ interface AuthContextType {
   login: (email: string, hashedPassword: string) => Promise<void>;
   register: (
     username: string,
+    fullName: string,
     email: string,
-    hashedPassword: string
+    hashedPassword: string,
+    phone: string,
+    dateOfBirth: string
   ) => Promise<void>;
   loginWithGoogle: (idToken: string, userData?: any) => Promise<void>;
   loginWithFacebook: (accessToken: string) => Promise<void>;
@@ -62,19 +65,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           }
         );
 
-        // Handle API response format: { success, message, data: { accessToken, user }, errorCode }
-        if (response && response.data) {
-          const loginData = response.data;
-          if (loginData.accessToken && loginData.user) {
-            setToken(loginData.accessToken);
-            setAuthToken(loginData.accessToken);
-            setUser(loginData.user);
-            setAuthUser(loginData.user);
-          } else {
-            throw new Error('Invalid response format from API');
-          }
+        // Handle API response format: { success, message, data: { accessToken, user } } OR { success, data: { accessToken, user } }
+        // apiClient.post returns response data directly (not wrapped in .data)
+        if (!response) {
+          throw new Error('No response from API');
+        }
+
+        // Check if response has nested data object (for login/social login)
+        const loginData = response.data || response;
+        
+        if (loginData.accessToken && loginData.user) {
+          setToken(loginData.accessToken);
+          setAuthToken(loginData.accessToken);
+          setUser(loginData.user);
+          setAuthUser(loginData.user);
         } else {
-          throw new Error('No data in API response');
+          throw new Error('Invalid response format from API - missing accessToken or user');
         }
       } catch (error) {
         const errorMsg = error instanceof Error ? error.message : 'Login failed';
@@ -87,35 +93,34 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   );
 
   const register = useCallback(
-    async (username: string, email: string, hashedPassword: string) => {
+    async (username: string, fullName: string, email: string, hashedPassword: string, phone: string, dateOfBirth: string) => {
       try {
         setIsLoading(true);
         const response = await apiClient.post<any>(
           API_ENDPOINTS.auth.register,
           {
             username,
+            fullName,
             email,
             password: hashedPassword,
             confirmPassword: hashedPassword,
+            phone,
+            dateOfBirth,
           }
         );
 
-        // Handle API response format: { success, message, data: { accessToken, user }, errorCode }
-        if (response && response.data) {
-          const loginData = response.data;
-          if (loginData.accessToken && loginData.user) {
-            setToken(loginData.accessToken);
-            setAuthToken(loginData.accessToken);
-            setUser(loginData.user);
-            setAuthUser(loginData.user);
-          } else {
-            throw new Error('Invalid response format from API');
-          }
-        } else {
-          throw new Error('No data in API response');
+        // Handle API response format: { success, message }
+        // apiClient.post returns response data directly (not wrapped in .data)
+        // Registration doesn't log in the user - they must verify email first
+        if (!response || response.success !== true) {
+          throw new Error(response?.message || 'Registration failed');
         }
+        
+        // Registration successful - user will verify email on the next page
+        console.log('[AuthContext] Registration successful');
       } catch (error) {
         const errorMsg = error instanceof Error ? error.message : 'Registration failed';
+        console.error('[AuthContext] Registration error:', errorMsg);
         throw new Error(errorMsg);
       } finally {
         setIsLoading(false);
@@ -146,19 +151,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           }
         );
 
-        // Handle API response format: { success, message, data: { accessToken, user }, errorCode }
-        if (response && response.data) {
-          const loginData = response.data;
-          if (loginData.accessToken && loginData.user) {
-            setToken(loginData.accessToken);
-            setAuthToken(loginData.accessToken);
-            setUser(loginData.user);
-            setAuthUser(loginData.user);
-          } else {
-            throw new Error('Invalid response format from API');
-          }
+        // Handle API response format: { success, message, data: { accessToken, user } }
+        if (!response) {
+          throw new Error('No response from API');
+        }
+
+        // Check if response has nested data object
+        const loginData = response.data || response;
+        
+        if (loginData.accessToken && loginData.user) {
+          setToken(loginData.accessToken);
+          setAuthToken(loginData.accessToken);
+          setUser(loginData.user);
+          setAuthUser(loginData.user);
         } else {
-          throw new Error('No data in API response');
+          throw new Error('Invalid response format from API');
         }
       } catch (error) {
         const errorMsg = error instanceof Error ? error.message : 'Google login failed';
@@ -181,19 +188,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           }
         );
 
-        // Handle API response format: { success, message, data: { accessToken, user }, errorCode }
-        if (response && response.data) {
-          const loginData = response.data;
-          if (loginData.accessToken && loginData.user) {
-            setToken(loginData.accessToken);
-            setAuthToken(loginData.accessToken);
-            setUser(loginData.user);
-            setAuthUser(loginData.user);
-          } else {
-            throw new Error('Invalid response format from API');
-          }
+        // Handle API response format: { success, message, data: { accessToken, user } }
+        if (!response) {
+          throw new Error('No response from API');
+        }
+
+        // Check if response has nested data object
+        const loginData = response.data || response;
+        
+        if (loginData.accessToken && loginData.user) {
+          setToken(loginData.accessToken);
+          setAuthToken(loginData.accessToken);
+          setUser(loginData.user);
+          setAuthUser(loginData.user);
         } else {
-          throw new Error('No data in API response');
+          throw new Error('Invalid response format from API');
         }
       } catch (error) {
         const errorMsg = error instanceof Error ? error.message : 'Facebook login failed';
