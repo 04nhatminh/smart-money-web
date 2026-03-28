@@ -13,6 +13,19 @@ export interface RegisterRequest {
   confirmPassword: string;
 }
 
+export interface GoogleLoginRequest {
+  idToken: string;
+  email?: string;
+  name?: string;
+  picture?: string;
+  givenName?: string;
+  familyName?: string;
+}
+
+export interface FacebookLoginRequest {
+  accessToken: string;
+}
+
 export type HealthCheckResponse = ApiResponse<null>;
 
 export interface LoginData {
@@ -21,8 +34,18 @@ export interface LoginData {
     id: string;
     username: string;
     email: string;
+    fullName?: string;
+    avatar?: string;
+    dateOfBirth?: string;
+    phone?: string;
+    coin?: number;
+    role?: string;
+    rate?: number;
+    active?: boolean;
   };
 }
 
 export type LoginResponse = ApiResponse<LoginData>;
 export type RegisterResponse = ApiResponse<LoginData>;
+export type GoogleLoginResponse = ApiResponse<LoginData>;
+export type FacebookLoginResponse = ApiResponse<LoginData>;

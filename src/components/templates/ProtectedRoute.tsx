@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, ReactNode } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { Heading } from '@/components/atoms';
 import { CenteredLayout } from '@/components/templates';
@@ -29,11 +29,13 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   requiredRole,
 }) => {
   const router = useRouter();
+  const params = useParams();
+  const locale = params.locale as string;
   const { isAuthenticated, user, isLoading } = useAuth();
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      router.push('/login');
+      router.push(`/${locale}/login`);
     }
   }, [isAuthenticated, isLoading, router]);
 

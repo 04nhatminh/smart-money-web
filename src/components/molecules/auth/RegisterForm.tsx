@@ -69,11 +69,11 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
     }
 
     try {
-      // Hash password before sending to API
-      const hashedPassword = await handlePasswordHash(password);
+      // TODO: Hash password before sending to API
+      // const hashedPassword = await handlePasswordHash(password);
       
       // Call register through auth context
-      await register(fullName, email, hashedPassword);
+      await register(fullName, email, password);
 
       // Call callback if provided
       onSuccess?.();

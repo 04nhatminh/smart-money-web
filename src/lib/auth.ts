@@ -6,6 +6,14 @@ export interface User {
   id: string;
   username: string;
   email: string;
+  fullName?: string;
+  avatar?: string;
+  dateOfBirth?: string;
+  phone?: string;
+  coin?: number;
+  role?: string;
+  rate?: number;
+  active?: boolean;
 }
 
 /**

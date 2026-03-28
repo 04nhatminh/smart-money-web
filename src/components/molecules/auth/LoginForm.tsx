@@ -1,9 +1,11 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useLocale } from 'next-intl';
+import { FcGoogle } from 'react-icons/fc';
+import { FaFacebook } from 'react-icons/fa';
 import { Button, Input, Heading, Text } from '@/components/atoms';
 import { useAuth } from '@/context/AuthContext';
 import { useAuthForm } from '@/hooks/useAuthForm';
@@ -20,9 +22,166 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { login, isLoading } = useAuth();
+  const [socialLoading, setSocialLoading] = useState(false);
+  const { login, loginWithGoogle, loginWithFacebook, isLoading } = useAuth();
   const { handlePasswordHash } = useAuthForm();
   const { colors, colorScheme } = useTheme();
+
+  const handleGoogleLogin = useCallback(async (response: any) => {
+    try {
+      setSocialLoading(true);
+      setError(null);
+
+      console.log('Google response:', response);
+
+      if (response.credential) {
+        const credentialResponse = JSON.parse(
+          atob(response.credential.split('.')[1])
+        );
+
+        console.log('Google credential decoded:', credentialResponse);
+
+        await loginWithGoogle(response.credential, {
+          email: credentialResponse.email,
+          name: credentialResponse.name,
+          picture: credentialResponse.picture,
+          givenName: credentialResponse.given_name,
+          familyName: credentialResponse.family_name,
+        });
+
+        onSuccess?.();
+      } else {
+        throw new Error('No credential in Google response');
+      }
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Google login failed';
+      setError(errorMessage);
+      console.error('Google login error:', err);
+    } finally {
+      setSocialLoading(false);
+    }
+  }, [loginWithGoogle, onSuccess]);
+
+  const handleFacebookLogin = useCallback(() => {
+    console.log('Facebook button clicked');
+    console.log('FB available:', typeof (window as any).FB !== 'undefined');
+    console.log('Window FB:', (window as any).FB);
+
+    if (typeof window === 'undefined') {
+      setError('Window is not available');
+      return;
+    }
+
+    const FB = (window as any).FB;
+    
+    if (!FB) {
+      setError('Facebook SDK not loaded yet. Please try again or refresh the page.');
+      console.error('FB object is undefined');
+      return;
+    }
+
+    if (!FB.login) {
+      setError('Facebook login method not available');
+      console.error('FB.login method not available');
+      return;
+    }
+
+    try {
+      console.log('Calling FB.login');
+      FB.login(
+        (response: any) => {
+          console.log('FB.login callback received:', response);
+          
+          if (!response) {
+            setError('No response from Facebook');
+            return;
+          }
+
+          if (response.authResponse) {
+            console.log('Auth response received:', response.authResponse);
+            loginWithFacebook(response.authResponse.accessToken)
+              .then(() => {
+                console.log('Facebook login successful');
+                onSuccess?.();
+              })
+              .catch((err: any) => {
+                const errorMessage = err instanceof Error ? err.message : 'Facebook login failed';
+                setError(errorMessage);
+                console.error('Facebook login error:', err);
+              });
+          } else {
+            setError(`Facebook login failed: ${response.status || 'Unknown error'}`);
+            console.log('No auth response. Status:', response.status);
+          }
+        },
+        { scope: 'public_profile,email' }
+      );
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Error calling Facebook login';
+      setError(errorMessage);
+      console.error('Exception in FB.login:', err);
+    }
+  }, [loginWithFacebook, onSuccess]);
+
+  // Initialize Google Sign-In and Facebook SDK
+  useEffect(() => {
+    // Load Google Sign-In script
+    const script = document.createElement('script');
+    script.src = 'https://accounts.google.com/gsi/client';
+    script.async = true;
+    script.defer = true;
+    
+    script.onload = () => {
+      if ((window as any).google) {
+        (window as any).google.accounts.id.initialize({
+          client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '',
+          callback: handleGoogleLogin,
+        });
+        console.log('Google Sign-In initialized');
+      }
+    };
+    
+    document.body.appendChild(script);
+
+    // Initialize Facebook SDK - Set fbAsyncInit BEFORE loading script
+    (window as any).fbAsyncInit = function () {
+      console.log('fbAsyncInit called');
+      if ((window as any).FB) {
+        (window as any).FB.init({
+          appId: process.env.NEXT_PUBLIC_FACEBOOK_APP_ID,
+          xfbml: false,
+          version: 'v19.0',
+          status: true,
+          cookie: true,
+        });
+        console.log('Facebook SDK initialized with appId:', process.env.NEXT_PUBLIC_FACEBOOK_APP_ID);
+      } else {
+        console.error('FB object not available in fbAsyncInit');
+      }
+    };
+
+    // Load Facebook SDK script with appId parameter
+    const fbScript = document.createElement('script');
+    fbScript.src = 'https://connect.facebook.net/en_US/sdk.js';
+    fbScript.async = true;
+    fbScript.defer = true;
+    fbScript.onload = () => {
+      console.log('Facebook SDK script loaded');
+    };
+    fbScript.onerror = () => {
+      console.error('Failed to load Facebook SDK script');
+    };
+    document.body.appendChild(fbScript);
+
+    return () => {
+      if (document.body.contains(script)) {
+        document.body.removeChild(script);
+      }
+      if (document.body.contains(fbScript)) {
+        document.body.removeChild(fbScript);
+      }
+    };
+  }, [handleGoogleLogin]);
 
   const handleLogoClick = () => {
     router.push(`/${locale}`);
@@ -38,11 +197,11 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
     }
 
     try {
-      // Hash password before sending to API
-      const hashedPassword = await handlePasswordHash(password);
+      // TODO: Hash password before sending to API
+      // const hashedPassword = await handlePasswordHash(password);
       
       // Call login through auth context
-      await login(email, hashedPassword);
+      await login(email, password);
 
       // Call callback if provided
       onSuccess?.();
@@ -51,6 +210,22 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
       setError(errorMessage);
       console.error('Login error:', err);
     }
+  };
+
+  // Render Google Sign-In button
+  const renderGoogleButton = () => {
+    useEffect(() => {
+      if (typeof window !== 'undefined' && (window as any).google) {
+        (window as any).google.accounts.id.renderButton(
+          document.getElementById('google-signin-button'),
+          { theme: 'outline', size: 'large', width: '100%' }
+        );
+
+        (window as any).google.accounts.id.callback = handleGoogleLogin;
+      }
+    }, []);
+
+    return <div id="google-signin-button" />;
   };
 
   return (
@@ -88,7 +263,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
         onChange={(e) => setEmail(e.target.value)}
         placeholder="you@example.com"
         required
-        disabled={isLoading}
+        disabled={isLoading || socialLoading}
       />
       
       <Input
@@ -98,7 +273,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
         onChange={(e) => setPassword(e.target.value)}
         placeholder="Enter your password"
         required
-        disabled={isLoading}
+        disabled={isLoading || socialLoading}
       />
       
       <div className="flex items-center justify-between pt-2">
@@ -108,7 +283,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
             id="remember"
             checked={rememberMe}
             onChange={(e) => setRememberMe(e.target.checked)}
-            disabled={isLoading}
+            disabled={isLoading || socialLoading}
             className="w-4 h-4 rounded"
           />
           <label htmlFor="remember" className="text-sm" style={{ color: colors.text.secondary }}>
@@ -128,10 +303,62 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
         variant="primary" 
         type="submit" 
         className="w-full py-3 mt-6 text-lg font-semibold" 
-        disabled={isLoading}
+        disabled={isLoading || socialLoading}
       >
         {isLoading ? 'Signing in...' : 'Sign In'}
       </Button>
+
+      {/* Social Login Divider */}
+      <div className="relative my-3">
+        <div className="absolute inset-0 flex items-center">
+          <div className="w-full border-t" style={{ borderColor: colors.border?.light }}></div>
+        </div>
+        <div className="relative flex justify-center text-sm">
+          <span className="px-2" style={{ color: colors.text.secondary, backgroundColor: colorScheme === 'dark' ? colors.palette?.[900] : colors.palette?.white }}>
+            Or continue with
+          </span>
+        </div>
+      </div>
+
+      {/* Social Login Buttons */}
+      <div className="space-y-3">
+        {/* Google Login Button */}
+        <button
+          type="button"
+          onClick={() => {
+            try {
+              if (typeof window !== 'undefined' && (window as any).google) {
+                (window as any).google.accounts.id.prompt(handleGoogleLogin);
+                console.log('Google prompt opened');
+              } else {
+                console.error('Google not loaded');
+                setError('Google Sign-In is not loaded. Please refresh the page.');
+              }
+            } catch (err) {
+              console.error('Error opening Google prompt:', err);
+              setError('Error opening Google Sign-In');
+            }
+          }}
+          disabled={socialLoading}
+          className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-lg border-2 transition-all hover:opacity-80 hover:cursor-pointer disabled:opacity-50"
+          style={{ borderColor: colors.border?.light }}
+        >
+          <FcGoogle size={24} />
+          <span style={{ color: colors.text.primary }} className="font-semibold">Sign in with Google</span>
+        </button>
+
+        {/* Facebook Login Button */}
+        <button
+          type="button"
+          onClick={handleFacebookLogin}
+          disabled={socialLoading}
+          className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-lg transition-all hover:opacity-80 hover:cursor-pointer disabled:opacity-50"
+          style={{ backgroundColor: '#1877F2', color: '#FFFFFF' }}
+        >
+          <FaFacebook size={24} />
+          <span className="font-semibold">Sign in with Facebook</span>
+        </button>
+      </div>
 
       <p className="text-center text-sm" style={{ color: colors.text.secondary }}>
         Don't have an account?{' '}

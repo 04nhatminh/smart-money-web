@@ -31,8 +31,7 @@ export const LogoutButton: React.FC<LogoutButtonProps> = ({
       setIsLoading(true);
       logout();
       onSuccess?.();
-      // Redirect `/${locale}/login` page
-      router.push('/login');
+      router.push(`/${locale}/login`);
     } catch (error) {
       console.error('Logout error:', error);
     } finally {

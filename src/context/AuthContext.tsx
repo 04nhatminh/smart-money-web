@@ -18,12 +18,14 @@ interface AuthContextType {
   token: string | null;
   isLoading: boolean;
   isAuthenticated: boolean;
-  login: (username: string, hashedPassword: string) => Promise<void>;
+  login: (email: string, hashedPassword: string) => Promise<void>;
   register: (
     username: string,
     email: string,
     hashedPassword: string
   ) => Promise<void>;
+  loginWithGoogle: (idToken: string, userData?: any) => Promise<void>;
+  loginWithFacebook: (accessToken: string) => Promise<void>;
   logout: () => void;
   refreshAuth: () => Promise<void>;
 }
@@ -49,23 +51,34 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const login = useCallback(
-    async (username: string, hashedPassword: string) => {
+    async (email: string, hashedPassword: string) => {
       try {
         setIsLoading(true);
-        const response = await apiClient.post<LoginResponse>(
+        const response = await apiClient.post<any>(
           API_ENDPOINTS.auth.login,
           {
-            username,
+            email,
             password: hashedPassword,
           }
         );
 
-        if (response.data) {
-          setToken(response.data.token);
-          setAuthToken(response.data.token);
-          setUser(response.data.user);
-          setAuthUser(response.data.user);
+        // Handle API response format: { success, message, data: { accessToken, user }, errorCode }
+        if (response && response.data) {
+          const loginData = response.data;
+          if (loginData.accessToken && loginData.user) {
+            setToken(loginData.accessToken);
+            setAuthToken(loginData.accessToken);
+            setUser(loginData.user);
+            setAuthUser(loginData.user);
+          } else {
+            throw new Error('Invalid response format from API');
+          }
+        } else {
+          throw new Error('No data in API response');
         }
+      } catch (error) {
+        const errorMsg = error instanceof Error ? error.message : 'Login failed';
+        throw new Error(errorMsg);
       } finally {
         setIsLoading(false);
       }
@@ -77,7 +90,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     async (username: string, email: string, hashedPassword: string) => {
       try {
         setIsLoading(true);
-        const response = await apiClient.post<LoginResponse>(
+        const response = await apiClient.post<any>(
           API_ENDPOINTS.auth.register,
           {
             username,
@@ -87,12 +100,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           }
         );
 
-        if (response.data) {
-          setToken(response.data.token);
-          setAuthToken(response.data.token);
-          setUser(response.data.user);
-          setAuthUser(response.data.user);
+        // Handle API response format: { success, message, data: { accessToken, user }, errorCode }
+        if (response && response.data) {
+          const loginData = response.data;
+          if (loginData.accessToken && loginData.user) {
+            setToken(loginData.accessToken);
+            setAuthToken(loginData.accessToken);
+            setUser(loginData.user);
+            setAuthUser(loginData.user);
+          } else {
+            throw new Error('Invalid response format from API');
+          }
+        } else {
+          throw new Error('No data in API response');
         }
+      } catch (error) {
+        const errorMsg = error instanceof Error ? error.message : 'Registration failed';
+        throw new Error(errorMsg);
       } finally {
         setIsLoading(false);
       }
@@ -105,6 +129,81 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setAuthToken(null);
     setAuthUser(null);
   }, []);
+
+  const loginWithGoogle = useCallback(
+    async (idToken: string, userData?: any) => {
+      try {
+        setIsLoading(true);
+        const response = await apiClient.post<any>(
+          API_ENDPOINTS.auth.loginGoogle,
+          {
+            idToken,
+            email: userData?.email,
+            name: userData?.name,
+            picture: userData?.picture,
+            givenName: userData?.givenName,
+            familyName: userData?.familyName,
+          }
+        );
+
+        // Handle API response format: { success, message, data: { accessToken, user }, errorCode }
+        if (response && response.data) {
+          const loginData = response.data;
+          if (loginData.accessToken && loginData.user) {
+            setToken(loginData.accessToken);
+            setAuthToken(loginData.accessToken);
+            setUser(loginData.user);
+            setAuthUser(loginData.user);
+          } else {
+            throw new Error('Invalid response format from API');
+          }
+        } else {
+          throw new Error('No data in API response');
+        }
+      } catch (error) {
+        const errorMsg = error instanceof Error ? error.message : 'Google login failed';
+        throw new Error(errorMsg);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    []
+  );
+
+  const loginWithFacebook = useCallback(
+    async (accessToken: string) => {
+      try {
+        setIsLoading(true);
+        const response = await apiClient.post<any>(
+          API_ENDPOINTS.auth.loginFacebook,
+          {
+            accessToken,
+          }
+        );
+
+        // Handle API response format: { success, message, data: { accessToken, user }, errorCode }
+        if (response && response.data) {
+          const loginData = response.data;
+          if (loginData.accessToken && loginData.user) {
+            setToken(loginData.accessToken);
+            setAuthToken(loginData.accessToken);
+            setUser(loginData.user);
+            setAuthUser(loginData.user);
+          } else {
+            throw new Error('Invalid response format from API');
+          }
+        } else {
+          throw new Error('No data in API response');
+        }
+      } catch (error) {
+        const errorMsg = error instanceof Error ? error.message : 'Facebook login failed';
+        throw new Error(errorMsg);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    []
+  );
 
   const refreshAuth = useCallback(async () => {
     try {
@@ -127,6 +226,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     isAuthenticated: !!token && !!user,
     login,
     register,
+    loginWithGoogle,
+    loginWithFacebook,
     logout,
     refreshAuth,
   };

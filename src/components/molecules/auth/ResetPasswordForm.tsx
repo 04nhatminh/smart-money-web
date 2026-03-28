@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Button, Input } from '@/components/atoms';
 import { useAuthForm } from '@/hooks/useAuthForm';
 import { apiClient } from '@/lib/api-client';
+import { useParams } from 'next/navigation';
 
 interface ResetPasswordFormProps {
   token?: string;
@@ -30,6 +31,9 @@ export const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({
   const [success, setSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { handlePasswordHash } = useAuthForm();
+
+  const params = useParams();
+  const locale = params.locale as string;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -93,7 +97,7 @@ export const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({
           </p>
         </div>
 
-        <Link href="/login">
+        <Link href={`/${locale}/login`}>
           <Button variant="primary" className="w-full">
             Back to Login
           </Button>
@@ -148,7 +152,7 @@ export const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({
 
       <p className="text-center text-sm text-gray-600">
         Remember your password?{' '}
-        <Link href="/login" className="text-blue-600 hover:text-blue-800 underline">
+        <Link href={`/${locale}/login`} className="text-blue-600 hover:text-blue-800 underline">
           Back to Login
         </Link>
       </p>
