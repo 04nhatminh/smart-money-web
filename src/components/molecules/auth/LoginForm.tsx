@@ -6,10 +6,12 @@ import { useRouter } from 'next/navigation';
 import { useLocale } from 'next-intl';
 import { FcGoogle } from 'react-icons/fc';
 import { FaFacebook } from 'react-icons/fa';
+import { MdVisibility, MdVisibilityOff } from 'react-icons/md';
 import { Button, Input, Heading, Text } from '@/components/atoms';
 import { useAuth } from '@/context/AuthContext';
 import { useAuthForm } from '@/hooks/useAuthForm';
 import { useTheme } from '@/context/ThemeContext';
+import { isBcryptHash } from '@/lib/password';
 
 interface LoginFormProps {
   onSuccess?: () => void;
@@ -23,6 +25,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
   const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [socialLoading, setSocialLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const { login, loginWithGoogle, loginWithFacebook, isLoading } = useAuth();
   const { handlePasswordHash } = useAuthForm();
   const { colors, colorScheme } = useTheme();
@@ -197,11 +200,18 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
     }
 
     try {
-      // TODO: Hash password before sending to API
-      // const hashedPassword = await handlePasswordHash(password);
+      // Hash password before sending to API
+      const hashedPassword = await handlePasswordHash(password);
+      
+      // Verify password was properly hashed
+      if (!isBcryptHash(hashedPassword)) {
+        throw new Error('Password hashing failed. Please try again.');
+      }
+      
+      console.log('[LoginForm] Password successfully hashed');
       
       // Call login through auth context
-      await login(email, password);
+      await login(email, hashedPassword);
 
       // Call callback if provided
       onSuccess?.();
@@ -266,15 +276,31 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
         disabled={isLoading || socialLoading}
       />
       
-      <Input
-        type="password"
-        label="Password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        placeholder="Enter your password"
-        required
-        disabled={isLoading || socialLoading}
-      />
+      <div className="relative">
+        <Input
+          type={showPassword ? 'text' : 'password'}
+          label="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder="Enter your password"
+          required
+          disabled={isLoading || socialLoading}
+        />
+        <button
+          type="button"
+          onClick={() => setShowPassword(!showPassword)}
+          disabled={isLoading || socialLoading}
+          className="absolute right-5 top-10 flex items-center transition-opacity hover:opacity-70 disabled:opacity-50 hover:cursor-pointer"
+          style={{ color: colors.interactive.primary }}
+          title={showPassword ? 'Hide password' : 'Show password'}
+        >
+          {showPassword ? (
+            <MdVisibilityOff size={20} />
+          ) : (
+            <MdVisibility size={20} />
+          )}
+        </button>
+      </div>
       
       <div className="flex items-center justify-between pt-2">
         <div className="flex items-center gap-2">

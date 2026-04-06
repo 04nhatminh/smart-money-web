@@ -4,10 +4,12 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useLocale } from 'next-intl';
+import { MdVisibility, MdVisibilityOff } from 'react-icons/md';
 import { Button, Input, Heading, Text } from '@/components/atoms';
 import { useAuth } from '@/context/AuthContext';
 import { useAuthForm } from '@/hooks/useAuthForm';
 import { useTheme } from '@/context/ThemeContext';
+import { isBcryptHash } from '@/lib/password';
 
 interface RegisterFormProps {
   onSuccess?: () => void;
@@ -26,6 +28,8 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
   const [error, setError] = useState<string | null>(null);
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { register, isLoading } = useAuth();
   const { handlePasswordHash } = useAuthForm();
   const { colors, colorScheme } = useTheme();
@@ -113,8 +117,15 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
 
     try {
       setIsSubmitting(true);
-      // TODO: Hash password before sending to API
-      // const hashedPassword = await handlePasswordHash(password);
+      // Hash password before sending to API
+      const hashedPassword = await handlePasswordHash(password);
+      
+      // Verify password was properly hashed
+      if (!isBcryptHash(hashedPassword)) {
+        throw new Error('Password hashing failed. Please try again.');
+      }
+      
+      console.log('[RegisterForm] Password successfully hashed');
       
       // Format dateOfBirth to dd/mm/yyyy
       let formattedDate = dateOfBirth;
@@ -125,7 +136,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
       
       console.log('[RegisterForm] Calling register API...');
       // Call register through auth context
-      await register(username, fullName, email, password, phone, formattedDate);
+      await register(username, fullName, email, hashedPassword, phone, formattedDate);
       console.log('[RegisterForm] Register API success');
 
       // Build redirect URL and perform redirect immediately
@@ -240,25 +251,57 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
         disabled={isSubmitting}
       />
       
-      <Input
-        type="password"
-        label="Password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        placeholder="Create a strong password"
-        required
-        disabled={isSubmitting}
-      />
+      <div className="relative">
+        <Input
+          type={showPassword ? 'text' : 'password'}
+          label="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder="Create a strong password"
+          required
+          disabled={isSubmitting}
+        />
+        <button
+          type="button"
+          onClick={() => setShowPassword(!showPassword)}
+          disabled={isSubmitting}
+          className="absolute right-5 top-10 flex items-center transition-opacity hover:opacity-70 disabled:opacity-50 hover:cursor-pointer"
+          style={{ color: colors.interactive.primary }}
+          title={showPassword ? 'Hide password' : 'Show password'}
+        >
+          {showPassword ? (
+            <MdVisibilityOff size={20} />
+          ) : (
+            <MdVisibility size={20} />
+          )}
+        </button>
+      </div>
 
-      <Input
-        type="password"
-        label="Confirm Password"
-        value={confirmPassword}
-        onChange={(e) => setConfirmPassword(e.target.value)}
-        placeholder="Confirm your password"
-        required
-        disabled={isSubmitting}
-      />
+      <div className="relative">
+        <Input
+          type={showConfirmPassword ? 'text' : 'password'}
+          label="Confirm Password"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          placeholder="Confirm your password"
+          required
+          disabled={isSubmitting}
+        />
+        <button
+          type="button"
+          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+          disabled={isSubmitting}
+          className="absolute right-5 top-10 flex items-center transition-opacity hover:opacity-70 disabled:opacity-50 hover:cursor-pointer"
+          style={{ color: colors.interactive.primary }}
+          title={showConfirmPassword ? 'Hide password' : 'Show password'}
+        >
+          {showConfirmPassword ? (
+            <MdVisibilityOff size={20} />
+          ) : (
+            <MdVisibility size={20} />
+          )}
+        </button>
+      </div>
 
       <div className="flex items-start gap-3 pt-2">
         <input
