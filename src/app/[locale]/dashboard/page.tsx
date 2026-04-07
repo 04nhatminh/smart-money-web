@@ -1,175 +1,209 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useLocale } from 'next-intl';
 import { useAuth } from '@/context/AuthContext';
-import { ProtectedRoute, MainLayout } from '@/components/templates';
+import { SidebarLayout } from '@/components/templates';
 import { Heading, Text, Button } from '@/components/atoms';
-import { LogoutButton } from '@/components/molecules/auth';
-import { Card } from '@/components/molecules/common';
+import { Card, StatCard, TransactionRow, SearchBar } from '@/components/molecules/common';
 import { useTheme } from '@/context/ThemeContext';
+import { MdAdd } from 'react-icons/md';
+import { MdAccountBalanceWallet, MdTrendingUp, MdTrendingDown } from 'react-icons/md';
+
+interface Transaction {
+  id: string;
+  title: string;
+  category: string;
+  date: string;
+  amount: number;
+  type: 'income' | 'expense';
+}
 
 export default function DashboardPage() {
   const { user } = useAuth();
   const router = useRouter();
   const locale = useLocale();
   const { colors } = useTheme();
+  const [selectedFilter, setSelectedFilter] = useState<'all' | 'income' | 'expense'>('all');
+  const [searchTerm, setSearchTerm] = useState('');
 
-  const formatDate = (dateString?: string) => {
-    if (!dateString) return 'N/A';
-    try {
-      const date = new Date(dateString);
-      return date.toLocaleDateString();
-    } catch {
-      return dateString;
-    }
-  };
+  // Mock data - replace with real data from API
+  const mockTransactions: Transaction[] = [
+    {
+      id: '1',
+      title: 'Salary Deposit',
+      category: 'Salary',
+      date: '2024-03-15',
+      amount: 5000,
+      type: 'income',
+    },
+    {
+      id: '2',
+      title: 'Grocery Shopping',
+      category: 'Food',
+      date: '2024-03-14',
+      amount: 120.5,
+      type: 'expense',
+    },
+    {
+      id: '3',
+      title: 'Coffee Shop',
+      category: 'Food',
+      date: '2024-03-14',
+      amount: 15.8,
+      type: 'expense',
+    },
+    {
+      id: '4',
+      title: 'Rent Payment',
+      category: 'Housing',
+      date: '2024-03-13',
+      amount: 1200,
+      type: 'expense',
+    },
+  ];
+
+  const filteredTransactions = mockTransactions.filter((t) => {
+    const matchesFilter = selectedFilter === 'all' || t.type === selectedFilter;
+    const matchesSearch =
+      t.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      t.category.toLowerCase().includes(searchTerm.toLowerCase());
+    return matchesFilter && matchesSearch;
+  });
+
+  const totalBalance = 4358.5;
+  const totalIncome = 5800;
+  const totalExpenses = 1441.5;
 
   return (
-    <ProtectedRoute>
-      <MainLayout>
-        <div className="space-y-8">
-          {/* Welcome Section */}
-          <div className="mb-8">
-            <Heading level={1} style={{ color: colors.interactive.primary }}>
-              Welcome back, {user?.fullName || user?.username || 'User'}! 👋
+    <SidebarLayout>
+      <div className="space-y-8">
+        {/* Welcome Section */}
+        <div className="flex items-center justify-between">
+          <div>
+            <Heading level={1} style={{ color: colors.text.primary }}>
+              Welcome back, {user?.fullName || user?.username || 'User'}!
             </Heading>
-            <Text style={{ color: colors.text.secondary }}>
-              Manage and track your finances with ease
+            <Text style={{ color: colors.text.secondary }} className="text-sm">
+              Here's your financial overview
             </Text>
           </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* User Profile Card */}
-            <div className="md:col-span-1">
-              <Card className="p-6 h-full">
-                <div className="text-center">
-                  {user?.avatar ? (
-                    <img 
-                      src={user.avatar} 
-                      alt={user.fullName || user.username} 
-                      className="w-20 h-20 rounded-full mx-auto mb-4 object-cover"
-                    />
-                  ) : (
-                    <div 
-                      className="w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center text-2xl font-bold text-white"
-                      style={{ backgroundColor: colors.interactive.primary }}
-                    >
-                      {(user?.fullName || user?.username || 'U')[0].toUpperCase()}
-                    </div>
-                  )}
-                  <Heading level={3} className="mb-2">
-                    {user?.fullName || user?.username}
-                  </Heading>
-                  <p 
-                    className="text-sm mb-4 break-all"
-                    style={{ color: colors.text.secondary }}
-                  >
-                    {user?.email}
-                  </p>
-                  {user?.coin !== undefined && (
-                    <div 
-                      className="p-3 rounded-lg mb-4"
-                      style={{ backgroundColor: colors.surface.secondary }}
-                    >
-                      <p className="text-xs" style={{ color: colors.text.secondary }}>
-                        Coins Balance
-                      </p>
-                      <p className="text-2xl font-bold" style={{ color: colors.interactive.primary }}>
-                        {user.coin}
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </Card>
-            </div>
-
-            {/* Account Information Card */}
-            <div className="md:col-span-2">
-              <Card className="p-6">
-                <Heading level={3} className="mb-6">Account Information</Heading>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <p className="text-sm font-medium mb-2" style={{ color: colors.text.secondary }}>
-                      Username
-                    </p>
-                    <p className="text-lg font-semibold">{user?.username || 'N/A'}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium mb-2" style={{ color: colors.text.secondary }}>
-                      Email
-                    </p>
-                    <p className="text-lg font-semibold break-all">{user?.email || 'N/A'}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium mb-2" style={{ color: colors.text.secondary }}>
-                      Phone
-                    </p>
-                    <p className="text-lg font-semibold">{user?.phone || 'N/A'}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium mb-2" style={{ color: colors.text.secondary }}>
-                      Date of Birth
-                    </p>
-                    <p className="text-lg font-semibold">{formatDate(user?.dateOfBirth)}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium mb-2" style={{ color: colors.text.secondary }}>
-                      User ID
-                    </p>
-                    <p className="text-lg font-semibold break-all text-sm">{user?.id || 'N/A'}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium mb-2" style={{ color: colors.text.secondary }}>
-                      Role
-                    </p>
-                    <p className="text-lg font-semibold capitalize">{user?.role || 'User'}</p>
-                  </div>
-                </div>
-              </Card>
-            </div>
-          </div>
-
-          {/* Features Coming Soon */}
-          <Card className="p-6">
-            <Heading level={3} className="mb-4">Features Coming Soon</Heading>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {[
-                { icon: '💰', title: 'Transaction Management', desc: 'Track all your income and expenses' },
-                { icon: '🎯', title: 'Savings Goals', desc: 'Set and achieve your financial goals' },
-                { icon: '📊', title: 'Financial Analytics', desc: 'Get insights into your spending habits' },
-                { icon: '💼', title: 'Budget Tracking', desc: 'Monitor your budget in real-time' },
-                { icon: '📈', title: 'Reports & Insights', desc: 'Generate detailed financial reports' },
-                { icon: '🤖', title: 'AI-Powered Insights', desc: 'Get smart recommendations' },
-              ].map((feature, idx) => (
-                <div key={idx} className="p-4 rounded-lg" style={{ backgroundColor: colors.surface.secondary }}>
-                  <p className="text-2xl mb-2">{feature.icon}</p>
-                  <p className="font-semibold">{feature.title}</p>
-                  <p className="text-sm" style={{ color: colors.text.secondary }}>
-                    {feature.desc}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </Card>
-
-          {/* Action Buttons */}
-          <div className="flex gap-4 pt-4">
-            <Button 
-              variant="primary"
-              onClick={() => router.push(`/${locale}/dashboard`)}
-            >
-              Refresh
-            </Button>
-            <LogoutButton 
-              variant="secondary"
-            >
-              Logout
-            </LogoutButton>
-          </div>
+          <Button
+            variant="primary"
+            onClick={() => router.push(`/${locale}/transaction/new`)}
+            className="flex items-center gap-2"
+          >
+            <MdAdd className="w-5 h-5" />
+            Add Transaction
+          </Button>
         </div>
-      </MainLayout>
-    </ProtectedRoute>
+
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <StatCard
+            label="Total Balance"
+            value={`$${totalBalance.toFixed(2)}`}
+            icon={<MdAccountBalanceWallet className="w-6 h-6" style={{ color: colors.interactive.primary }} />}
+          />
+          <StatCard
+            label="Total Income"
+            value={`$${totalIncome.toFixed(0)}`}
+            icon={<MdTrendingUp className="w-6 h-6" style={{ color: '#10B981' }} />}
+            trend={{ direction: 'up', percentage: 12 }}
+          />
+          <StatCard
+            label="Total Expenses"
+            value={`$${totalExpenses.toFixed(2)}`}
+            icon={<MdTrendingDown className="w-6 h-6" style={{ color: '#EF4444' }} />}
+            trend={{ direction: 'down', percentage: 8 }}
+          />
+        </div>
+
+        {/* Recent Transactions */}
+        <Card className="p-6">
+          <div className="mb-6">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <Heading level={3}>Recent Transactions</Heading>
+                <Text style={{ color: colors.text.secondary }} className="text-sm">
+                  Track all your income and expenses
+                </Text>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setSelectedFilter('all')}
+                  className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                    selectedFilter === 'all'
+                      ? 'text-white'
+                      : 'text-gray-600'
+                  }`}
+                  style={{
+                    backgroundColor: selectedFilter === 'all' ? colors.interactive.primary : colors.surface.secondary,
+                  }}
+                >
+                  All
+                </button>
+                <button
+                  onClick={() => setSelectedFilter('income')}
+                  className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                    selectedFilter === 'income'
+                      ? 'text-white'
+                      : 'text-gray-600'
+                  }`}
+                  style={{
+                    backgroundColor: selectedFilter === 'income' ? colors.interactive.primary : colors.surface.secondary,
+                  }}
+                >
+                  Income
+                </button>
+                <button
+                  onClick={() => setSelectedFilter('expense')}
+                  className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                    selectedFilter === 'expense'
+                      ? 'text-white'
+                      : 'text-gray-600'
+                  }`}
+                  style={{
+                    backgroundColor: selectedFilter === 'expense' ? colors.interactive.primary : colors.surface.secondary,
+                  }}
+                >
+                  Expenses
+                </button>
+              </div>
+            </div>
+
+            <SearchBar
+              placeholder="Search transactions..."
+              value={searchTerm}
+              onChange={setSearchTerm}
+            />
+          </div>
+
+          {/* Transaction List */}
+          <div className="space-y-3">
+            {filteredTransactions.length > 0 ? (
+              filteredTransactions.map((transaction) => (
+                <TransactionRow
+                  key={transaction.id}
+                  id={transaction.id}
+                  title={transaction.title}
+                  category={transaction.category}
+                  date={transaction.date}
+                  amount={transaction.amount}
+                  type={transaction.type}
+                />
+              ))
+            ) : (
+              <div className="text-center py-8">
+                <Text style={{ color: colors.text.secondary }}>
+                  No transactions found
+                </Text>
+              </div>
+            )}
+          </div>
+        </Card>
+      </div>
+    </SidebarLayout>
   );
 }
