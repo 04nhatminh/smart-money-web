@@ -6,7 +6,7 @@ import { useLocale } from 'next-intl';
 import { useAuth } from '@/context/AuthContext';
 import { SidebarLayout } from '@/components/templates';
 import { Heading, Text, Button } from '@/components/atoms';
-import { Card, StatCard, TransactionRow, SearchBar } from '@/components/molecules/common';
+import { Card, StatCard, TransactionRow } from '@/components/molecules/common';
 import { useTheme } from '@/context/ThemeContext';
 import { MdAdd } from 'react-icons/md';
 import { MdAccountBalanceWallet, MdTrendingUp, MdTrendingDown } from 'react-icons/md';
@@ -173,10 +173,17 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            <SearchBar
+            <input
+              type="text"
               placeholder="Search transactions..."
               value={searchTerm}
-              onChange={setSearchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full px-4 py-2 rounded-lg border"
+              style={{
+                backgroundColor: colors.surface.secondary,
+                borderColor: colors.border.light,
+                color: colors.text.primary,
+              }}
             />
           </div>
 

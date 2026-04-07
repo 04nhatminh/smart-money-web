@@ -28,7 +28,10 @@
     "security": "Security",
     "blog": "Blog",
     "helpCenter": "Help Center",
-    "privacy": "Privacy"
+    "privacy": "Privacy",
+    "notifications": "Notifications",
+    "dashboard": "Dashboard",
+    "profile": "Profile"
   },
   "page": {
     "title": "UI Component Library",
@@ -133,5 +136,13 @@
     "minLength": "Minimum {min} characters required",
     "maxLength": "Maximum {max} characters allowed",
     "passwordMatch": "Passwords do not match"
+  },
+  "notifications": {
+    "welcome": "Welcome",
+    "accountUpdated": "Account Updated",
+    "transaction": "Transaction Confirmed",
+    "markAllAsRead": "Mark All as Read",
+    "noNotifications": "No Notifications",
+    "noNotificationsDesc": "You don't have any notifications yet."
   }
 }

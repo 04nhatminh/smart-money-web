@@ -28,7 +28,10 @@
     "security": "Bảo mật",
     "blog": "Blog",
     "helpCenter": "Trung tâm Trợ giúp",
-    "privacy": "Riêng tư"
+    "privacy": "Riêng tư",
+    "notifications": "Thông báo",
+    "dashboard": "Bảng điều khiển",
+    "profile": "Hồ sơ"
   },
   "page": {
     "title": "Thư viện Thành phần UI",
@@ -133,5 +136,13 @@
     "minLength": "Tối thiểu {min} ký tự",
     "maxLength": "Tối đa {max} ký tự",
     "passwordMatch": "Mật khẩu không trùng khớp"
+  },
+  "notifications": {
+    "welcome": "Chào mừng",
+    "accountUpdated": "Tài Khoản Được Cập Nhật",
+    "transaction": "Giao Dịch Được Xác Nhận",
+    "markAllAsRead": "Đánh Dấu Tất Cả Là Đã Đọc",
+    "noNotifications": "Không Có Thông Báo",
+    "noNotificationsDesc": "Bạn chưa có thông báo nào."
   }
 }

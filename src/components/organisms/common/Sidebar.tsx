@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useLocale } from 'next-intl';
 import { useAuth } from '@/context/AuthContext';
@@ -21,6 +21,7 @@ export const Sidebar: React.FC = () => {
   const locale = useLocale();
   const { user } = useAuth();
   const { colors } = useTheme();
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
 
   const navItems: NavItem[] = [
     {
@@ -59,13 +60,20 @@ export const Sidebar: React.FC = () => {
       <div className="flex-1 px-6 py-8 space-y-2">
         {navItems.map((item) => {
           const active = isActive(item.href);
+          const isHovered = hoveredId === item.id;
           return (
             <button
               key={item.id}
               onClick={() => router.push(item.href)}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200"
+              onMouseEnter={() => setHoveredId(item.id)}
+              onMouseLeave={() => setHoveredId(null)}
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 hover:cursor-pointer hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2"
               style={{
-                backgroundColor: active ? colors.interactive.primary : 'transparent',
+                backgroundColor: active 
+                  ? colors.interactive.primary 
+                  : isHovered 
+                  ? `${colors.interactive.primary}20`
+                  : 'transparent',
                 color: active ? colors.text.inverse : colors.text.primary,
               }}
             >
@@ -74,16 +82,6 @@ export const Sidebar: React.FC = () => {
             </button>
           );
         })}
-      </div>
-
-      <div className="px-6 py-6 border-t" style={{ borderTopColor: colors.border.light }}>
-        <div className="mb-4 p-4 rounded-lg" style={{ backgroundColor: colors.surface.secondary }}>
-          <p className="text-xs font-medium mb-1" style={{ color: colors.text.secondary }}>
-            Logged in as
-          </p>
-          <p className="text-sm font-semibold truncate">{user?.fullName || user?.username}</p>
-        </div>
-        <LogoutButton />
       </div>
     </aside>
   );
