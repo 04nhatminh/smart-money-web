@@ -366,7 +366,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
             }
           }}
           disabled={socialLoading}
-          className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-lg border-2 transition-all hover:opacity-80 hover:cursor-pointer disabled:opacity-50"
+          className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-xl border-2 transition-all hover:opacity-80 hover:cursor-pointer disabled:opacity-50"
           style={{ borderColor: colors.border?.light }}
         >
           <FcGoogle size={24} />
@@ -378,7 +378,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
           type="button"
           onClick={handleFacebookLogin}
           disabled={socialLoading}
-          className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-lg transition-all hover:opacity-80 hover:cursor-pointer disabled:opacity-50"
+          className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-xl transition-all hover:opacity-80 hover:cursor-pointer disabled:opacity-50"
           style={{ backgroundColor: '#1877F2', color: '#FFFFFF' }}
         >
           <FaFacebook size={24} />

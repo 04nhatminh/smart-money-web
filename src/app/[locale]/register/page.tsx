@@ -12,16 +12,16 @@ import { useTheme } from '@/context/ThemeContext';
 export default function RegisterPage() {
   const router = useRouter();
   const locale = useLocale();
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isInitializing } = useAuth();
   const { colors } = useTheme();
 
   useEffect(() => {
-    if (!isLoading && isAuthenticated) {
+    if (!isInitializing && isAuthenticated) {
       router.push(`/${locale}/dashboard`);
     }
-  }, [isAuthenticated, isLoading, router, locale]);
+  }, [isAuthenticated, isInitializing, router, locale]);
 
-  if (isLoading) {
+  if (isInitializing) {
     return (
       <CenteredLayout hideHeader hideFooter showBackButton>
         <Heading level={2}>Loading...</Heading>

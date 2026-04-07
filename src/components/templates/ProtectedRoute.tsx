@@ -31,15 +31,15 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   const router = useRouter();
   const params = useParams();
   const locale = params.locale as string;
-  const { isAuthenticated, user, isLoading } = useAuth();
+  const { isAuthenticated, user, isInitializing } = useAuth();
 
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
+    if (!isInitializing && !isAuthenticated) {
       router.push(`/${locale}/login`);
     }
-  }, [isAuthenticated, isLoading, router]);
+  }, [isAuthenticated, isInitializing, locale, router]);
 
-  if (isLoading) {
+  if (isInitializing) {
     return (
       <CenteredLayout>
         <Heading level={2}>Loading...</Heading>

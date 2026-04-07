@@ -17,6 +17,7 @@ interface AuthContextType {
   user: User | null;
   token: string | null;
   isLoading: boolean;
+  isInitializing: boolean;
   isAuthenticated: boolean;
   login: (email: string, hashedPassword: string) => Promise<void>;
   register: (
@@ -38,6 +39,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setAuthUser] = useState<User | null>(null);
   const [token, setAuthToken] = useState<string | null>(null);
+  const [isInitializing, setIsInitializing] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
 
   // Initialize auth state from localStorage
@@ -50,6 +52,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (savedUser) {
       setAuthUser(savedUser);
     }
+    setIsInitializing(false);
     setIsLoading(false);
   }, []);
 
@@ -232,6 +235,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     user,
     token,
     isLoading,
+    isInitializing,
     isAuthenticated: !!token && !!user,
     login,
     register,
