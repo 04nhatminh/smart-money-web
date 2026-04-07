@@ -1,23 +1,28 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useLocale } from 'next-intl';
 import { useAuth } from '@/context/AuthContext';
 import { SidebarLayout } from '@/components/templates';
 import { Heading, Text, Button } from '@/components/atoms';
-import { Card, StatCard, TransactionRow } from '@/components/molecules/common';
+import { Card, StatCard, TransactionRow, CreateTransactionModal, EditTransactionModal } from '@/components/molecules/common';
 import { useTheme } from '@/context/ThemeContext';
+import { useTransactions } from '@/hooks/useTransactions';
 import { MdAdd } from 'react-icons/md';
 import { MdAccountBalanceWallet, MdTrendingUp, MdTrendingDown } from 'react-icons/md';
 
 interface Transaction {
   id: string;
-  title: string;
+  userId?: string;
+  title?: string;
   category: string;
   date: string;
   amount: number;
-  type: 'income' | 'expense';
+  type: 'INCOME' | 'EXPENSE';
+  description?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export default function DashboardPage() {
@@ -25,56 +30,86 @@ export default function DashboardPage() {
   const router = useRouter();
   const locale = useLocale();
   const { colors } = useTheme();
+  const { isLoading, listTransactions, deleteTransaction } = useTransactions();
   const [selectedFilter, setSelectedFilter] = useState<'all' | 'income' | 'expense'>('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingTransactionId, setEditingTransactionId] = useState<string | null>(null);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
-  // Mock data - replace with real data from API
-  const mockTransactions: Transaction[] = [
-    {
-      id: '1',
-      title: 'Salary Deposit',
-      category: 'Salary',
-      date: '2024-03-15',
-      amount: 5000,
-      type: 'income',
-    },
-    {
-      id: '2',
-      title: 'Grocery Shopping',
-      category: 'Food',
-      date: '2024-03-14',
-      amount: 120.5,
-      type: 'expense',
-    },
-    {
-      id: '3',
-      title: 'Coffee Shop',
-      category: 'Food',
-      date: '2024-03-14',
-      amount: 15.8,
-      type: 'expense',
-    },
-    {
-      id: '4',
-      title: 'Rent Payment',
-      category: 'Housing',
-      date: '2024-03-13',
-      amount: 1200,
-      type: 'expense',
-    },
-  ];
+  // Load transactions on mount
+  useEffect(() => {
+    loadTransactions();
+  }, []);
 
-  const filteredTransactions = mockTransactions.filter((t) => {
-    const matchesFilter = selectedFilter === 'all' || t.type === selectedFilter;
+  const loadTransactions = async () => {
+    const result = await listTransactions(0, 50);
+    if (result.success && result.data) {
+      setTransactions((result.data as any).transactions || result.data.content || []);
+    } else {
+      setTransactions([]);
+    }
+  };
+
+  const handleEditClick = (id: string) => {
+    setEditingTransactionId(id);
+    setIsEditModalOpen(true);
+  };
+
+  const handleDeleteClick = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this transaction?')) {
+      return;
+    }
+
+    try {
+      setDeleteLoading(true);
+      const result = await deleteTransaction(id);
+      if (result.success) {
+        setTransactions(transactions.filter(t => t.id !== id));
+      } else {
+        alert('Failed to delete transaction: ' + (result.error || 'Unknown error'));
+      }
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
+  // Format data for display
+  const displayTransactions = (transactions || []).map(t => ({
+    id: t.id,
+    title: t.description || t.category,
+    category: t.category,
+    date: t.date,
+    amount: t.amount,
+    type: t.type,
+  }));
+
+  const filteredTransactions = displayTransactions.filter((t) => {
+    const matchesFilter = selectedFilter === 'all' || (
+      selectedFilter === 'income' && t.type === 'INCOME'
+    ) || (
+      selectedFilter === 'expense' && t.type === 'EXPENSE'
+    );
     const matchesSearch =
       t.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       t.category.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesFilter && matchesSearch;
   });
 
-  const totalBalance = 4358.5;
-  const totalIncome = 5800;
-  const totalExpenses = 1441.5;
+  // Calculate stats
+  const totalBalance = displayTransactions.reduce((acc, t) => {
+    return t.type === 'INCOME' ? acc + t.amount : acc - t.amount;
+  }, 0);
+
+  const totalIncome = displayTransactions
+    .filter(t => t.type === 'INCOME')
+    .reduce((acc, t) => acc + t.amount, 0);
+
+  const totalExpenses = displayTransactions
+    .filter(t => t.type === 'EXPENSE')
+    .reduce((acc, t) => acc + t.amount, 0);
 
   return (
     <SidebarLayout>
@@ -91,7 +126,7 @@ export default function DashboardPage() {
           </div>
           <Button
             variant="primary"
-            onClick={() => router.push(`/${locale}/transaction/new`)}
+            onClick={() => setIsCreateModalOpen(true)}
             className="flex items-center gap-2"
           >
             <MdAdd className="w-5 h-5" />
@@ -189,7 +224,11 @@ export default function DashboardPage() {
 
           {/* Transaction List */}
           <div className="space-y-3">
-            {filteredTransactions.length > 0 ? (
+            {isLoading ? (
+              <div className="text-center py-8">
+                <Text style={{ color: colors.text.secondary }}>Loading transactions...</Text>
+              </div>
+            ) : filteredTransactions.length > 0 ? (
               filteredTransactions.map((transaction) => (
                 <TransactionRow
                   key={transaction.id}
@@ -199,6 +238,8 @@ export default function DashboardPage() {
                   date={transaction.date}
                   amount={transaction.amount}
                   type={transaction.type}
+                  onEdit={handleEditClick}
+                  onDelete={handleDeleteClick}
                 />
               ))
             ) : (
@@ -210,6 +251,32 @@ export default function DashboardPage() {
             )}
           </div>
         </Card>
+
+        {/* Create Transaction Modal */}
+        <CreateTransactionModal
+          isOpen={isCreateModalOpen}
+          onClose={() => setIsCreateModalOpen(false)}
+          onSuccess={() => {
+            // Refresh transaction list
+            loadTransactions();
+            setSearchTerm('');
+            setSelectedFilter('all');
+          }}
+        />
+
+        {/* Edit Transaction Modal */}
+        <EditTransactionModal
+          isOpen={isEditModalOpen}
+          transactionId={editingTransactionId}
+          onClose={() => {
+            setIsEditModalOpen(false);
+            setEditingTransactionId(null);
+          }}
+          onSuccess={() => {
+            // Refresh transaction list
+            loadTransactions();
+          }}
+        />
       </div>
     </SidebarLayout>
   );

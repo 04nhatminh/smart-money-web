@@ -3,3 +3,5 @@ export { Pagination } from './Pagination';
 export { SearchBar } from './SearchBar';
 export { StatCard } from './StatCard';
 export { TransactionRow } from './TransactionRow';
+export { CreateTransactionModal } from './CreateTransactionModal';
+export { EditTransactionModal } from './EditTransactionModal';

@@ -11,7 +11,8 @@ import {
   MdShoppingCart,
   MdWaterDrop,
   MdElectricBolt,
-  MdMoreVert,
+  MdEdit,
+  MdDelete,
 } from 'react-icons/md';
 
 interface TransactionRowProps {
@@ -20,8 +21,10 @@ interface TransactionRowProps {
   category: string;
   date: string;
   amount: number;
-  type: 'income' | 'expense';
+  type: 'income' | 'expense' | 'INCOME' | 'EXPENSE';
   icon?: React.ReactNode;
+  onEdit?: (id: string) => void;
+  onDelete?: (id: string) => void;
 }
 
 const getCategoryIcon = (category: string): React.ReactNode => {
@@ -45,6 +48,8 @@ export const TransactionRow: React.FC<TransactionRowProps> = ({
   amount,
   type,
   icon,
+  onEdit,
+  onDelete,
 }) => {
   const { colors } = useTheme();
 
@@ -61,8 +66,9 @@ export const TransactionRow: React.FC<TransactionRowProps> = ({
     }
   };
 
-  const amountColor = type === 'income' ? '#10B981' : '#EF4444';
-  const amountPrefix = type === 'income' ? '+' : '-';
+  const normalizedType = type.toLowerCase() as 'income' | 'expense';
+  const amountColor = normalizedType === 'income' ? '#10B981' : '#EF4444';
+  const amountPrefix = normalizedType === 'income' ? '+' : '-';
 
   return (
     <div
@@ -108,12 +114,34 @@ export const TransactionRow: React.FC<TransactionRowProps> = ({
         >
           {amountPrefix}${Math.abs(amount).toFixed(2)}
         </p>
-        <button
-          className="p-2 rounded-lg hover:bg-opacity-80 transition-colors"
-          style={{ color: colors.text.secondary }}
-        >
-          <MdMoreVert className="w-5 h-5" />
-        </button>
+        <div className="flex items-center gap-2">
+          {onEdit && (
+            <button
+              onClick={() => onEdit(id)}
+              className="p-2 rounded-lg transition-colors hover:bg-opacity-80"
+              style={{
+                color: colors.interactive.primary,
+                backgroundColor: `${colors.interactive.primary}10`,
+              }}
+              title="Edit"
+            >
+              <MdEdit className="w-4 h-4" />
+            </button>
+          )}
+          {onDelete && (
+            <button
+              onClick={() => onDelete(id)}
+              className="p-2 rounded-lg transition-colors hover:bg-opacity-80"
+              style={{
+                color: colors.interactive.danger,
+                backgroundColor: `${colors.interactive.danger}10`,
+              }}
+              title="Delete"
+            >
+              <MdDelete className="w-4 h-4" />
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );
