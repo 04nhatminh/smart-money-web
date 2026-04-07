@@ -33,6 +33,12 @@ export const API_ENDPOINTS = {
     delete: (id: string) => `/api/v1/saving-goals/${id}`,
   },
 
+  // Media (Image and Voice uploads for AI analysis)
+  media: {
+    uploadImage: '/api/v1/transactions/upload-image',
+    uploadVoice: '/api/v1/transactions/upload-voice',
+  },
+
   // Users
   users: {
     list: '/api/v1/users',
