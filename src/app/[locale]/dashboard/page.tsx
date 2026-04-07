@@ -138,18 +138,18 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <StatCard
             label="Total Balance"
-            value={`$${totalBalance.toFixed(2)}`}
+            value={`VND ${totalBalance.toFixed(0)}`}
             icon={<MdAccountBalanceWallet className="w-6 h-6" style={{ color: colors.interactive.primary }} />}
           />
           <StatCard
             label="Total Income"
-            value={`$${totalIncome.toFixed(0)}`}
+            value={`VND ${totalIncome.toFixed(0)}`}
             icon={<MdTrendingUp className="w-6 h-6" style={{ color: '#10B981' }} />}
             trend={{ direction: 'up', percentage: 12 }}
           />
           <StatCard
             label="Total Expenses"
-            value={`$${totalExpenses.toFixed(2)}`}
+            value={`VND ${totalExpenses.toFixed(0)}`}
             icon={<MdTrendingDown className="w-6 h-6" style={{ color: '#EF4444' }} />}
             trend={{ direction: 'down', percentage: 8 }}
           />

@@ -57,7 +57,7 @@ export const useTransactions = () => {
         );
 
         return {
-          data: response as Transaction,
+          data: response.data as Transaction,
           success: true,
         };
       } catch (err) {
@@ -88,7 +88,7 @@ export const useTransactions = () => {
         );
 
         return {
-          data: response as Transaction,
+          data: response.data as Transaction,
           success: true,
         };
       } catch (err) {
@@ -119,7 +119,7 @@ export const useTransactions = () => {
         );
 
         return {
-          data: response as Transaction,
+          data: response.data as Transaction,
           success: true,
         };
       } catch (err) {
