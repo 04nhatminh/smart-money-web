@@ -67,6 +67,29 @@ export const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
     date: '',
   });
 
+  // Prevent scrolling when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+      document.documentElement.style.overflow = 'hidden';
+      document.documentElement.style.paddingRight = `${scrollbarWidth}px`;
+      document.body.style.overflow = 'hidden';
+      document.body.style.paddingRight = `${scrollbarWidth}px`;
+    } else {
+      document.documentElement.style.overflow = '';
+      document.documentElement.style.paddingRight = '';
+      document.body.style.overflow = '';
+      document.body.style.paddingRight = '';
+    }
+
+    return () => {
+      document.documentElement.style.overflow = '';
+      document.documentElement.style.paddingRight = '';
+      document.body.style.overflow = '';
+      document.body.style.paddingRight = '';
+    };
+  }, [isOpen]);
+
   // Load transaction data when modal opens
   useEffect(() => {
     if (isOpen && transactionId) {
@@ -184,12 +207,20 @@ export const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
     return (
       <>
         <div
-          className="fixed inset-0 z-40 transition-opacity"
-          style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}
+          className="fixed inset-0 transition-opacity"
+          style={{
+            backgroundColor: 'rgba(0, 0, 0, 0.3)',
+            pointerEvents: 'auto',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            zIndex: 999,
+          }}
         />
-        <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 flex items-center justify-center p-4 pointer-events-none" style={{ zIndex: 1000 }}>
           <div
-            className="bg-white rounded-lg shadow-2xl max-w-md w-full p-6"
+            className="bg-white rounded-lg shadow-2xl max-w-md w-full p-6 pointer-events-auto"
             style={{ backgroundColor: colors.background.primary }}
           >
             <Text style={{ color: colors.text.primary }}>Loading transaction...</Text>
@@ -203,15 +234,23 @@ export const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 z-40 transition-opacity"
-        style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}
+        className="fixed inset-0 transition-opacity"
+        style={{
+          backgroundColor: 'rgba(0, 0, 0, 0.3)',
+          pointerEvents: 'auto',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          zIndex: 999,
+        }}
         onClick={onClose}
       />
 
       {/* Modal */}
-      <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
+      <div className="fixed inset-0 flex items-center justify-center p-4 pointer-events-none" style={{ zIndex: 1000 }}>
         <div
-          className="bg-white rounded-lg shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto"
+          className="bg-white rounded-lg shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto pointer-events-auto"
           style={{ backgroundColor: colors.background.primary }}
           onClick={e => e.stopPropagation()}
         >
