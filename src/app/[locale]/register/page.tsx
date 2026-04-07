@@ -3,13 +3,13 @@
 import React, { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useLocale } from 'next-intl';
-import { LoginForm } from '@/components/molecules/auth';
+import { RegisterForm } from '@/components/molecules/auth';
 import { CenteredLayout } from '@/components/templates';
 import { Heading } from '@/components/atoms';
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
 
-export default function LoginPage() {
+export default function RegisterPage() {
   const router = useRouter();
   const locale = useLocale();
   const { isAuthenticated, isInitializing } = useAuth();
@@ -33,7 +33,7 @@ export default function LoginPage() {
     <CenteredLayout hideHeader hideFooter>
       <div className="w-full max-w-[520px] rounded-2xl shadow-xl p-10" style={{ backgroundColor: colors.surface.primary }}>
         {/* Form */}
-        <LoginForm
+        <RegisterForm
           onSuccess={() => {
             router.push(`/${locale}/dashboard`);
           }}

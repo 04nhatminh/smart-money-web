@@ -1,8 +1,11 @@
 'use client';
 
 import React from 'react';
+import { useRouter } from 'next/navigation';
+import { useLocale } from 'next-intl';
 import { Button, Heading, Text } from '@/components/atoms';
 import { useTheme } from '@/context';
+import { useAuth } from '@/context/AuthContext';
 import { useTranslations } from 'next-intl';
 import { apiClient } from '@/lib/api-client';
 import { HealthCheckResponse } from '@/types/api';
@@ -22,8 +25,21 @@ export const Header: React.FC<HeaderProps> = ({
   navItems = [],
   appName = 'SmartMoney',
 }) => {
+  const router = useRouter();
+  const locale = useLocale();
   const { colors, colorScheme } = useTheme();
   const t = useTranslations();
+  const { token, isInitializing } = useAuth();
+
+  const handleLoginClick = () => {
+    router.push(`/${locale}/login`);
+  };
+
+  const handleSignupClick = () => {
+    router.push(`/${locale}/register`);
+  };
+
+  const showAuthActions = !isInitializing && !token;
 
   return (
     <header className="shadow-md transition-colors sticky top-0 z-50" style={{ backgroundColor: colors.background.primary, borderBottomColor: colors.border.light, borderBottomWidth: '1px' }}>
@@ -42,14 +58,16 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
 
           {/* Actions - Positioned Absolute Right */}
-          <div className="flex gap-4 absolute right-4 sm:right-6 lg:right-8">
-            <Button variant="secondary" size="md" className="hidden sm:block">
-              {t('finance.hero.login')}
-            </Button>
-            <Button variant="primary" size="md">
-              {t('finance.hero.cta')}
-            </Button>
-          </div>
+          {showAuthActions && (
+            <div className="flex gap-4 absolute right-4 sm:right-6 lg:right-8">
+              <Button variant="secondary" size="md" className="hidden sm:block" onClick={handleLoginClick}>
+                {t('finance.hero.login')}
+              </Button>
+              <Button variant="primary" size="md" onClick={handleSignupClick}>
+                {t('finance.hero.cta')}
+              </Button>
+            </div>
+          )}
         </div>
       </div>
     </header>

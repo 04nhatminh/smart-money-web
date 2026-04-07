@@ -126,14 +126,16 @@ export const Footer: React.FC<FooterProps> = ({
               <Text variant="caption" style={{ color: colors.text.secondary }} className="text-center md:text-left">
                 © {year} {appName}. {t('page.copyright')} reserved.
               </Text>
-              <div className="flex gap-6">
-                <div className="flex items-center gap-2">
+              <div className="flex flex-wrap gap-6 items-center justify-center md:justify-end">
+                <div className="flex items-center gap-2 flex-shrink-0">
                   <Text variant="caption" style={{ color: colors.text.secondary }}>
                     {t('common.theme')}:
                   </Text>
                   <ThemeToggle />
                 </div>
-                <LanguageToggle />
+                <div className="flex-shrink-0">
+                  <LanguageToggle />
+                </div>
               </div>
             </div>
           </div>

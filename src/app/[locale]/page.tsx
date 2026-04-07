@@ -1,13 +1,28 @@
 'use client';
 
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Header, Footer, HeroSection, DashboardPreview, FeaturesSection, BenefitsSection, CTASection } from '@/components/organisms';
-import { useTheme } from '@/context';
+import { useAuth } from '@/context/AuthContext';
+import { useLocale } from 'next-intl';
 import { PRIMARY_COLORS } from '@/constants/colors';
 
 export default function Home() {
   const t = useTranslations();
-  const { colors } = useTheme();
+  const router = useRouter();
+  const locale = useLocale();
+  const { token, isInitializing } = useAuth();
+
+  useEffect(() => {
+    if (!isInitializing && token) {
+      router.replace(`/${locale}/dashboard`);
+    }
+  }, [isInitializing, locale, router, token]);
+
+  if (isInitializing || token) {
+    return null;
+  }
 
   return (
     <>

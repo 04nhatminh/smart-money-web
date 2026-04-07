@@ -1,9 +1,12 @@
 'use client';
 
 import React from 'react';
+import { useRouter } from 'next/navigation';
+import { useLocale } from 'next-intl';
 import { Heading, Text, Button } from '@/components/atoms';
 import { useTheme } from '@/context';
 import { useTranslations } from 'next-intl';
+import { FiArrowRight } from 'react-icons/fi';
 
 interface CTASectionProps {
   title?: string;
@@ -18,8 +21,12 @@ export const CTASection: React.FC<CTASectionProps> = ({
   buttonText,
   onButtonClick,
 }) => {
+  const router = useRouter();
+  const locale = useLocale();
   const { colors } = useTheme();
   const t = useTranslations();
+
+  const handleClick = onButtonClick || (() => router.push(`/${locale}/register`));
 
   const finalTitle = title || t('finance.cta.title');
   const finalSubtitle = subtitle || t('finance.cta.subtitle');
@@ -49,10 +56,10 @@ export const CTASection: React.FC<CTASectionProps> = ({
         <Button
           variant="secondary"
           size="lg"
-          onClick={onButtonClick}
-          className="font-semibold"
+          onClick={handleClick}
+          className="font-semibold inline-flex items-center justify-center gap-2"
         >
-          {finalButtonText}
+          {finalButtonText} <FiArrowRight className="w-5 h-5" />
         </Button>
       </div>
     </section>
