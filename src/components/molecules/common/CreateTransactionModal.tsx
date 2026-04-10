@@ -80,7 +80,9 @@ export const CreateTransactionModal: React.FC<CreateTransactionModalProps> = ({
     setFormData(prev => ({
       ...prev,
       type: value as TransactionType,
-      category: value === 'INCOME' ? null : 'FOOD',
+      // Always set a category (API requires it)
+      // For INCOME, use 'OTHER' as default
+      category: value === 'INCOME' ? 'OTHER' : 'FOOD',
     }));
     setError(null);
   };
@@ -132,8 +134,8 @@ export const CreateTransactionModal: React.FC<CreateTransactionModalProps> = ({
       setError('Transaction type is required');
       return false;
     }
-    if (formData.type === 'EXPENSE' && !formData.category) {
-      setError('Category is required for expenses');
+    if (!formData.category) {
+      setError('Category is required');
       return false;
     }
     if (!formData.date) {
@@ -167,7 +169,7 @@ export const CreateTransactionModal: React.FC<CreateTransactionModalProps> = ({
         {
           amount: parseFloat(formData.amount),
           type: formData.type,
-          category: formData.type === 'INCOME' ? null : formData.category,
+          category: formData.category, // Always send category (API requires it)
           description: formData.description || undefined,
           date: formData.date,
         }
@@ -206,6 +208,7 @@ export const CreateTransactionModal: React.FC<CreateTransactionModalProps> = ({
 
       setError('Failed to create transaction');
     } catch (err) {
+      // Extract error message from Error object
       const errorMsg = err instanceof Error ? err.message : 'Failed to create transaction';
       setError(errorMsg);
     } finally {

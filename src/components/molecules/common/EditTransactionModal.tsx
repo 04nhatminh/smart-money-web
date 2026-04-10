@@ -111,7 +111,8 @@ export const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
         setFormData({
           amount: tx.amount.toString(),
           type: tx.type as TransactionType,
-          category: tx.type === 'INCOME' ? null : (tx.category as TransactionCategory),
+          // Always keep category value from DB
+          category: tx.category as TransactionCategory || 'OTHER',
           description: tx.description || '',
           date: tx.date,
         });
@@ -146,7 +147,9 @@ export const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
     setFormData(prev => ({
       ...prev,
       type: value as TransactionType,
-      category: value === 'INCOME' ? null : 'FOOD',
+      // Always set a category (API requires it)
+      // For INCOME, use 'OTHER' as default
+      category: value === 'INCOME' ? 'OTHER' : 'FOOD',
     }));
     setError(null);
   };
@@ -160,8 +163,8 @@ export const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
       setError('Transaction type is required');
       return false;
     }
-    if (formData.type === 'EXPENSE' && !formData.category) {
-      setError('Category is required for expenses');
+    if (!formData.category) {
+      setError('Category is required');
       return false;
     }
     if (!formData.date) {
@@ -193,7 +196,7 @@ export const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
       const result = await updateTransaction(transactionId, {
         amount: parseFloat(formData.amount),
         type: formData.type,
-        category: formData.type === 'INCOME' ? null : formData.category,
+        category: formData.category, // Always send category (API requires it)
         description: formData.description || undefined,
         date: formData.date,
       });
