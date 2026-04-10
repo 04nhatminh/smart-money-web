@@ -28,7 +28,7 @@ type TransactionCategory =
 interface FormData {
   amount: string;
   type: TransactionType;
-  category: TransactionCategory;
+  category: TransactionCategory | null;
   description: string;
   date: string;
 }
@@ -111,7 +111,7 @@ export const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
         setFormData({
           amount: tx.amount.toString(),
           type: tx.type as TransactionType,
-          category: tx.category as TransactionCategory,
+          category: tx.type === 'INCOME' ? null : (tx.category as TransactionCategory),
           description: tx.description || '',
           date: tx.date,
         });
@@ -130,9 +130,23 @@ export const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
+    if (name === 'type') {
+      // Use handleTypeChange for type changes
+      return;
+    }
     setFormData(prev => ({
       ...prev,
       [name]: value,
+    }));
+    setError(null);
+  };
+
+  const handleTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const { value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      type: value as TransactionType,
+      category: value === 'INCOME' ? null : 'FOOD',
     }));
     setError(null);
   };
@@ -146,8 +160,8 @@ export const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
       setError('Transaction type is required');
       return false;
     }
-    if (!formData.category) {
-      setError('Category is required');
+    if (formData.type === 'EXPENSE' && !formData.category) {
+      setError('Category is required for expenses');
       return false;
     }
     if (!formData.date) {
@@ -179,7 +193,7 @@ export const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
       const result = await updateTransaction(transactionId, {
         amount: parseFloat(formData.amount),
         type: formData.type,
-        category: formData.category,
+        category: formData.type === 'INCOME' ? null : formData.category,
         description: formData.description || undefined,
         date: formData.date,
       });
@@ -327,7 +341,7 @@ export const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
               <select
                 name="type"
                 value={formData.type}
-                onChange={handleInputChange}
+                onChange={handleTypeChange}
                 className="w-full px-3 py-2 rounded-lg border transition-colors focus:outline-none focus:ring-2"
                 style={{
                   backgroundColor: colors.background.secondary,
@@ -343,29 +357,31 @@ export const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
               </select>
             </div>
 
-            {/* Category */}
-            <div>
-              <label className="block text-sm font-medium mb-2" style={{ color: colors.text.primary }}>
-                Category <span style={{ color: colors.interactive.danger }}>*</span>
-              </label>
-              <select
-                name="category"
-                value={formData.category}
-                onChange={handleInputChange}
-                className="w-full px-3 py-2 rounded-lg border transition-colors focus:outline-none focus:ring-2"
-                style={{
-                  backgroundColor: colors.background.secondary,
-                  borderColor: colors.border.light,
-                  color: colors.text.primary,
-                }}
-              >
-                {TRANSACTION_CATEGORIES.map(category => (
-                  <option key={category} value={category}>
-                    {category.charAt(0).toUpperCase() + category.slice(1).toLowerCase()}
-                  </option>
-                ))}
-              </select>
-            </div>
+            {/* Category - Only show for EXPENSE */}
+            {formData.type === 'EXPENSE' && (
+              <div>
+                <label className="block text-sm font-medium mb-2" style={{ color: colors.text.primary }}>
+                  Category <span style={{ color: colors.interactive.danger }}>*</span>
+                </label>
+                <select
+                  name="category"
+                  value={formData.category || ''}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-2 rounded-lg border transition-colors focus:outline-none focus:ring-2"
+                  style={{
+                    backgroundColor: colors.background.secondary,
+                    borderColor: colors.border.light,
+                    color: colors.text.primary,
+                  }}
+                >
+                  {TRANSACTION_CATEGORIES.map(category => (
+                    <option key={category} value={category}>
+                      {category.charAt(0).toUpperCase() + category.slice(1).toLowerCase()}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
 
             {/* Date */}
             <div>
