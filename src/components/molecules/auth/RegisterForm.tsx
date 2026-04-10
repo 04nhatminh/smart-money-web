@@ -9,7 +9,6 @@ import { Button, Input, Heading, Text } from '@/components/atoms';
 import { useAuth } from '@/context/AuthContext';
 import { useAuthForm } from '@/hooks/useAuthForm';
 import { useTheme } from '@/context/ThemeContext';
-import { isBcryptHash } from '@/lib/password';
 
 interface RegisterFormProps {
   onSuccess?: () => void;
@@ -117,15 +116,6 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
 
     try {
       setIsSubmitting(true);
-      // Hash password before sending to API
-      const hashedPassword = await handlePasswordHash(password);
-      
-      // Verify password was properly hashed
-      if (!isBcryptHash(hashedPassword)) {
-        throw new Error('Password hashing failed. Please try again.');
-      }
-      
-      console.log('[RegisterForm] Password successfully hashed');
       
       // Format dateOfBirth to dd/mm/yyyy
       let formattedDate = dateOfBirth;
@@ -136,7 +126,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
       
       console.log('[RegisterForm] Calling register API...');
       // Call register through auth context
-      await register(username, fullName, email, hashedPassword, phone, formattedDate);
+      await register(username, fullName, email, password, phone, formattedDate);
       console.log('[RegisterForm] Register API success');
 
       // Build redirect URL and perform redirect immediately

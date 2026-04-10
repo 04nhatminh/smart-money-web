@@ -11,7 +11,6 @@ import { Button, Input, Heading, Text } from '@/components/atoms';
 import { useAuth } from '@/context/AuthContext';
 import { useAuthForm } from '@/hooks/useAuthForm';
 import { useTheme } from '@/context/ThemeContext';
-import { isBcryptHash } from '@/lib/password';
 
 interface LoginFormProps {
   onSuccess?: () => void;
@@ -200,18 +199,8 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
     }
 
     try {
-      // Hash password before sending to API
-      const hashedPassword = await handlePasswordHash(password);
-      
-      // Verify password was properly hashed
-      if (!isBcryptHash(hashedPassword)) {
-        throw new Error('Password hashing failed. Please try again.');
-      }
-      
-      console.log('[LoginForm] Password successfully hashed');
-      
       // Call login through auth context
-      await login(email, hashedPassword);
+      await login(email, password);
 
       // Call callback if provided
       onSuccess?.();
