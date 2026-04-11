@@ -11,6 +11,7 @@ import { useTheme } from '@/context/ThemeContext';
 import { useTransactions } from '@/hooks/useTransactions';
 import { MdAdd } from 'react-icons/md';
 import { MdAccountBalanceWallet, MdTrendingUp, MdTrendingDown } from 'react-icons/md';
+import { formatVietnamsePrice } from '@/lib/format';
 
 interface Transaction {
   id: string;
@@ -138,18 +139,18 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <StatCard
             label="Total Balance"
-            value={`VND ${totalBalance.toFixed(0)}`}
+            value={formatVietnamsePrice(totalBalance)}
             icon={<MdAccountBalanceWallet className="w-6 h-6" style={{ color: colors.interactive.primary }} />}
           />
           <StatCard
             label="Total Income"
-            value={`VND ${totalIncome.toFixed(0)}`}
+            value={formatVietnamsePrice(totalIncome)}
             icon={<MdTrendingUp className="w-6 h-6" style={{ color: '#10B981' }} />}
             trend={{ direction: 'up', percentage: 12 }}
           />
           <StatCard
             label="Total Expenses"
-            value={`VND ${totalExpenses.toFixed(0)}`}
+            value={formatVietnamsePrice(totalExpenses)}
             icon={<MdTrendingDown className="w-6 h-6" style={{ color: '#EF4444' }} />}
             trend={{ direction: 'down', percentage: 8 }}
           />

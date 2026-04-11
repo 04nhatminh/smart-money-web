@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Button, Heading, Text, Input } from '@/components/atoms';
 import { useTheme } from '@/context/ThemeContext';
 import { useTransactions } from '@/hooks/useTransactions';
+import { formatAmountInput, parseFormattedNumber } from '@/lib/format';
 import { MdClose } from 'react-icons/md';
 
 interface EditTransactionModalProps {
@@ -109,7 +110,7 @@ export const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
       if (result.success && result.data) {
         const tx = result.data;
         setFormData({
-          amount: tx.amount.toString(),
+          amount: formatAmountInput(tx.amount.toString()),
           type: tx.type as TransactionType,
           // Always keep category value from DB
           category: tx.category as TransactionCategory || 'OTHER',
@@ -135,10 +136,20 @@ export const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
       // Use handleTypeChange for type changes
       return;
     }
-    setFormData(prev => ({
-      ...prev,
-      [name]: value,
-    }));
+    
+    // Format amount input when it's the amount field
+    if (name === 'amount') {
+      const formatted = formatAmountInput(value);
+      setFormData(prev => ({
+        ...prev,
+        [name]: formatted,
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
     setError(null);
   };
 
@@ -155,7 +166,8 @@ export const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
   };
 
   const validateForm = (): boolean => {
-    if (!formData.amount || parseFloat(formData.amount) <= 0) {
+    const amount = parseFormattedNumber(formData.amount);
+    if (!amount || amount <= 0) {
       setError('Amount must be greater than 0');
       return false;
     }
@@ -194,7 +206,7 @@ export const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
       setError(null);
 
       const result = await updateTransaction(transactionId, {
-        amount: parseFloat(formData.amount),
+        amount: parseFormattedNumber(formData.amount),
         type: formData.type,
         category: formData.category, // Always send category (API requires it)
         description: formData.description || undefined,
@@ -325,13 +337,11 @@ export const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
                 Amount <span style={{ color: colors.interactive.danger }}>*</span>
               </label>
               <Input
-                type="number"
+                type="text"
                 name="amount"
                 placeholder="0.00"
                 value={formData.amount}
                 onChange={handleInputChange}
-                step="0.01"
-                min="0"
                 required
               />
             </div>
@@ -360,7 +370,7 @@ export const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
               </select>
             </div>
 
-            {/* Category - Only show for EXPENSE */}
+            {/* Category - Only shown for EXPENSE */}
             {formData.type === 'EXPENSE' && (
               <div>
                 <label className="block text-sm font-medium mb-2" style={{ color: colors.text.primary }}>

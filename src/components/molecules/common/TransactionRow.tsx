@@ -3,6 +3,7 @@
 import React from 'react';
 import { useTheme } from '@/context/ThemeContext';
 import { Text } from '@/components/atoms';
+import { formatVietnamsePrice } from '@/lib/format';
 import {
   MdAttachMoney,
   MdFastfood,
@@ -101,15 +102,17 @@ export const TransactionRow: React.FC<TransactionRowProps> = ({
             <Text className="text-xs" style={{ color: colors.text.secondary }}>
               {formatDate(date)}
             </Text>
-            <span
-              className="text-xs px-2 py-1 rounded"
-              style={{
-                backgroundColor: colors.surface.secondary,
-                color: colors.text.secondary,
-              }}
-            >
-              {category}
-            </span>
+            {normalizedType === 'expense' && (
+              <span
+                className="text-xs px-2 py-1 rounded"
+                style={{
+                  backgroundColor: colors.surface.secondary,
+                  color: colors.text.secondary,
+                }}
+              >
+                {category}
+              </span>
+            )}
           </div>
         </div>
       </div>
@@ -118,7 +121,7 @@ export const TransactionRow: React.FC<TransactionRowProps> = ({
           className="font-bold text-lg min-w-24 text-right"
           style={{ color: amountColor }}
         >
-          {amountPrefix}VND {Math.abs(amount).toFixed(0)}
+          {amountPrefix}{formatVietnamsePrice(Math.abs(amount))}
         </p>
         <div className="flex items-center gap-2">
           {onEdit && (
