@@ -6,7 +6,7 @@ import { useLocale } from 'next-intl';
 import { useAuth } from '@/context/AuthContext';
 import { SidebarLayout } from '@/components/templates';
 import { Heading, Text, Button } from '@/components/atoms';
-import { Card, StatCard, TransactionRow, CreateTransactionModal, EditTransactionModal } from '@/components/molecules/common';
+import { Card, StatCard, TransactionRow, CreateTransactionModal, EditTransactionModal, TransactionMethodModal, ImageBillUploadModal, VoiceRecordModal } from '@/components/molecules/common';
 import { useTheme } from '@/context/ThemeContext';
 import { useTransactions } from '@/hooks/useTransactions';
 import { MdAdd } from 'react-icons/md';
@@ -63,7 +63,10 @@ export default function DashboardPage() {
   const [selectedFilter, setSelectedFilter] = useState<'all' | 'income' | 'expense'>('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [isMethodModalOpen, setIsMethodModalOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+  const [isVoiceModalOpen, setIsVoiceModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingTransactionId, setEditingTransactionId] = useState<string | null>(null);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -163,7 +166,7 @@ export default function DashboardPage() {
           </div>
           <Button
             variant="primary"
-            onClick={() => setIsCreateModalOpen(true)}
+            onClick={() => setIsMethodModalOpen(true)}
             className="flex items-center gap-2"
           >
             <MdAdd className="w-5 h-5" />
@@ -375,6 +378,36 @@ export default function DashboardPage() {
             // Refresh transaction list
             loadTransactions();
           }}
+        />
+
+        {/* Transaction Method Selection Modal */}
+        <TransactionMethodModal
+          isOpen={isMethodModalOpen}
+          onClose={() => setIsMethodModalOpen(false)}
+          onSelectForm={() => {
+            setIsMethodModalOpen(false);
+            setIsCreateModalOpen(true);
+          }}
+          onSelectImage={() => {
+            setIsMethodModalOpen(false);
+            setIsImageModalOpen(true);
+          }}
+          onSelectVoice={() => {
+            setIsMethodModalOpen(false);
+            setIsVoiceModalOpen(true);
+          }}
+        />
+
+        {/* Image Bill Upload Modal */}
+        <ImageBillUploadModal
+          isOpen={isImageModalOpen}
+          onClose={() => setIsImageModalOpen(false)}
+        />
+
+        {/* Voice Record Modal */}
+        <VoiceRecordModal
+          isOpen={isVoiceModalOpen}
+          onClose={() => setIsVoiceModalOpen(false)}
         />
       </div>
     </SidebarLayout>

@@ -7,3 +7,6 @@ export { CreateTransactionModal } from './CreateTransactionModal';
 export { EditTransactionModal } from './EditTransactionModal';
 export { ImageUpload } from './ImageUpload';
 export { VoiceRecorder } from './VoiceRecorder';
+export { TransactionMethodModal } from './TransactionMethodModal';
+export { ImageBillUploadModal } from './ImageBillUploadModal';
+export { VoiceRecordModal } from './VoiceRecordModal';
