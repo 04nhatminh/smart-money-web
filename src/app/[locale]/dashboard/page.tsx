@@ -11,6 +11,7 @@ import { useTheme } from '@/context/ThemeContext';
 import { useTransactions } from '@/hooks/useTransactions';
 import { MdAdd } from 'react-icons/md';
 import { MdAccountBalanceWallet, MdTrendingUp, MdTrendingDown } from 'react-icons/md';
+import { MdAttachMoney, MdFastfood, MdDirectionsCar, MdShoppingBag, MdLightbulb, MdLocalMovies, MdFavorite, MdSchool, MdShoppingCart, MdHelpOutline } from 'react-icons/md';
 import { formatVietnamsePrice } from '@/lib/format';
 
 interface Transaction {
@@ -26,24 +27,54 @@ interface Transaction {
   updatedAt?: string;
 }
 
+const EXPENSE_CATEGORIES = [
+  'FOOD',
+  'TRANSPORTATION',
+  'CLOTHING',
+  'UTILITIES',
+  'ENTERTAINMENT',
+  'HEALTH',
+  'EDUCATION',
+  'SHOPPING',
+  'OTHER',
+];
+
+const getCategoryIcon = (category: string): React.ReactNode => {
+  const iconMap: { [key: string]: React.ReactNode } = {
+    FOOD: <MdFastfood className="w-6 h-6" />,
+    TRANSPORTATION: <MdDirectionsCar className="w-6 h-6" />,
+    CLOTHING: <MdShoppingBag className="w-6 h-6" />,
+    UTILITIES: <MdLightbulb className="w-6 h-6" />,
+    ENTERTAINMENT: <MdLocalMovies className="w-6 h-6" />,
+    HEALTH: <MdFavorite className="w-6 h-6" />,
+    EDUCATION: <MdSchool className="w-6 h-6" />,
+    SHOPPING: <MdShoppingCart className="w-6 h-6" />,
+    OTHER: <MdHelpOutline className="w-6 h-6" />,
+  };
+  return iconMap[category] || <MdHelpOutline className="w-6 h-6" />;
+};
+
 export default function DashboardPage() {
-  const { user } = useAuth();
+  const { user, isInitializing } = useAuth();
   const router = useRouter();
   const locale = useLocale();
   const { colors } = useTheme();
   const { isLoading, listTransactions, deleteTransaction } = useTransactions();
   const [selectedFilter, setSelectedFilter] = useState<'all' | 'income' | 'expense'>('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingTransactionId, setEditingTransactionId] = useState<string | null>(null);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
-  // Load transactions on mount
+  // Load transactions after auth is initialized
   useEffect(() => {
-    loadTransactions();
-  }, []);
+    if (!isInitializing) {
+      loadTransactions();
+    }
+  }, [isInitializing]);
 
   const loadTransactions = async () => {
     const result = await listTransactions(0, 50);
@@ -93,10 +124,15 @@ export default function DashboardPage() {
     ) || (
       selectedFilter === 'expense' && t.type === 'EXPENSE'
     );
+    
+    // Only apply category filter for expense transactions
+    const matchesCategory = selectedFilter !== 'expense' || selectedCategory === 'all' || t.category === selectedCategory;
+    
     const matchesSearch =
       t.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       t.category.toLowerCase().includes(searchTerm.toLowerCase());
-    return matchesFilter && matchesSearch;
+    
+    return matchesFilter && matchesCategory && matchesSearch;
   });
 
   // Calculate stats
@@ -114,14 +150,14 @@ export default function DashboardPage() {
 
   return (
     <SidebarLayout>
-      <div className="space-y-8">
+      <div className="space-y-5">
         {/* Welcome Section */}
         <div className="flex items-center justify-between">
           <div>
-            <Heading level={1} style={{ color: colors.text.primary }}>
+            <Heading level={2}>
               Welcome back, {user?.fullName || user?.username || 'User'}!
             </Heading>
-            <Text style={{ color: colors.text.secondary }} className="text-sm">
+            <Text style={{ color: colors.text.secondary }} className="text-lg">
               Here's your financial overview
             </Text>
           </div>
@@ -158,7 +194,7 @@ export default function DashboardPage() {
 
         {/* Recent Transactions */}
         <Card className="p-6">
-          <div className="mb-6">
+          <div className="mb-4">
             <div className="flex items-center justify-between mb-4">
               <div>
                 <Heading level={3}>Recent Transactions</Heading>
@@ -168,8 +204,11 @@ export default function DashboardPage() {
               </div>
               <div className="flex gap-2">
                 <button
-                  onClick={() => setSelectedFilter('all')}
-                  className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                  onClick={() => {
+                    setSelectedFilter('all');
+                    setSelectedCategory('all');
+                  }}
+                  className={`px-4 py-2 rounded-lg font-medium transition-all hover:cursor-pointer ${
                     selectedFilter === 'all'
                       ? 'text-white'
                       : 'text-gray-600'
@@ -181,8 +220,11 @@ export default function DashboardPage() {
                   All
                 </button>
                 <button
-                  onClick={() => setSelectedFilter('income')}
-                  className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                  onClick={() => {
+                    setSelectedFilter('income');
+                    setSelectedCategory('all');
+                  }}
+                  className={`px-4 py-2 rounded-lg font-medium transition-all hover:cursor-pointer ${
                     selectedFilter === 'income'
                       ? 'text-white'
                       : 'text-gray-600'
@@ -195,7 +237,7 @@ export default function DashboardPage() {
                 </button>
                 <button
                   onClick={() => setSelectedFilter('expense')}
-                  className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                  className={`px-4 py-2 rounded-lg font-medium transition-all hover:cursor-pointer ${
                     selectedFilter === 'expense'
                       ? 'text-white'
                       : 'text-gray-600'
@@ -221,6 +263,62 @@ export default function DashboardPage() {
                 color: colors.text.primary,
               }}
             />
+
+            {/* Category Filter - Only shown for EXPENSE */}
+            {selectedFilter === 'expense' && (
+              <div className="space-y-3 mt-4">
+                <Text style={{ color: colors.text.secondary }} className="text-sm font-medium">
+                  Filter by Category
+                </Text>
+                <div className="grid grid-cols-5 gap-3 sm:grid-cols-4 md:grid-cols-5">
+                  {/* All Categories Button */}
+                  <button
+                    onClick={() => setSelectedCategory('all')}
+                    className="flex flex-col items-center justify-center p-3 rounded-lg border-2 transition-all hover:cursor-pointer hover:opacity-80"
+                    style={{
+                      backgroundColor: selectedCategory === 'all' ? colors.interactive.primary : colors.surface.secondary,
+                      borderColor: selectedCategory === 'all' ? colors.interactive.primary : colors.border.light,
+                    }}
+                  >
+                    <MdAttachMoney
+                      className="w-6 h-6 mb-1"
+                      style={{ color: selectedCategory === 'all' ? '#ffffff' : colors.text.primary }}
+                    />
+                    <span
+                      className="text-xs font-medium text-center"
+                      style={{ color: selectedCategory === 'all' ? '#ffffff' : colors.text.primary }}
+                    >
+                      All
+                    </span>
+                  </button>
+
+                  {/* Category Buttons */}
+                  {EXPENSE_CATEGORIES.map(category => (
+                    <button
+                      key={category}
+                      onClick={() => setSelectedCategory(category)}
+                      className="flex flex-col items-center justify-center p-3 rounded-lg border-2 transition-all hover:cursor-pointer hover:opacity-80"
+                      style={{
+                        backgroundColor: selectedCategory === category ? colors.interactive.primary : colors.surface.secondary,
+                        borderColor: selectedCategory === category ? colors.interactive.primary : colors.border.light,
+                      }}
+                    >
+                      <div
+                        style={{ color: selectedCategory === category ? '#ffffff' : colors.text.primary }}
+                      >
+                        {getCategoryIcon(category)}
+                      </div>
+                      <span
+                        className="text-xs font-medium text-center mt-1"
+                        style={{ color: selectedCategory === category ? '#ffffff' : colors.text.primary }}
+                      >
+                        {category.charAt(0).toUpperCase() + category.slice(1).toLowerCase()}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Transaction List */}

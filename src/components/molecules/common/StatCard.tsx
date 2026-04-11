@@ -30,9 +30,9 @@ export const StatCard: React.FC<StatCardProps> = ({
   return (
     <Card className="p-6 flex flex-col justify-between">
       <div className="flex items-center justify-between mb-4">
-        <Text style={{ color: colors.text.secondary }} className="text-sm font-medium">
+        <Heading level={4}>
           {label}
-        </Text>
+        </Heading>
         <div
           className="p-3 rounded-lg"
           style={{ backgroundColor: bgColor || colors.surface.secondary }}

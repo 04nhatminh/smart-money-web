@@ -18,7 +18,7 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({
     <ProtectedRoute>
       <div className="flex flex-col min-h-screen">
         <Header navItems={navItems} />
-        <div className="flex flex-1 pt-20">
+        <div className="flex flex-1 pt-10">
           <Sidebar />
           <div className="flex-1 ml-64 flex flex-col">
             <main className="flex-1 px-4 sm:px-6 lg:px-8 py-8">

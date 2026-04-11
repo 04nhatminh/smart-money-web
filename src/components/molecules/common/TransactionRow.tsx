@@ -14,6 +14,13 @@ import {
   MdElectricBolt,
   MdEdit,
   MdDelete,
+  MdDirectionsCar,
+  MdShoppingBag,
+  MdLightbulb,
+  MdLocalMovies,
+  MdFavorite,
+  MdSchool,
+  MdHelpOutline,
 } from 'react-icons/md';
 
 interface TransactionRowProps {
@@ -30,6 +37,7 @@ interface TransactionRowProps {
 
 const getCategoryIcon = (category: string): React.ReactNode => {
   const categoryMap: { [key: string]: React.ReactNode } = {
+    // Old lowercase format (deprecated, kept for backward compatibility)
     salary: <MdAttachMoney className="w-6 h-6" />,
     food: <MdFastfood className="w-6 h-6" />,
     housing: <MdHome className="w-6 h-6" />,
@@ -37,8 +45,18 @@ const getCategoryIcon = (category: string): React.ReactNode => {
     shopping: <MdShoppingCart className="w-6 h-6" />,
     utilities: <MdWaterDrop className="w-6 h-6" />,
     electricity: <MdElectricBolt className="w-6 h-6" />,
+    // New API format (uppercase)
+    FOOD: <MdFastfood className="w-6 h-6" />,
+    TRANSPORTATION: <MdDirectionsCar className="w-6 h-6" />,
+    CLOTHING: <MdShoppingBag className="w-6 h-6" />,
+    UTILITIES: <MdLightbulb className="w-6 h-6" />,
+    ENTERTAINMENT: <MdLocalMovies className="w-6 h-6" />,
+    HEALTH: <MdFavorite className="w-6 h-6" />,
+    EDUCATION: <MdSchool className="w-6 h-6" />,
+    SHOPPING: <MdShoppingCart className="w-6 h-6" />,
+    OTHER: <MdHelpOutline className="w-6 h-6" />,
   };
-  return categoryMap[category.toLowerCase()] || <MdShoppingCart className="w-6 h-6" />;
+  return categoryMap[category] || categoryMap[category.toLowerCase()] || <MdShoppingCart className="w-6 h-6" />;
 };
 
 export const TransactionRow: React.FC<TransactionRowProps> = ({
