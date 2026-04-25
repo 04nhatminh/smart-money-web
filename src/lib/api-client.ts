@@ -144,6 +144,49 @@ export const apiClient = {
     }
   },
 
+  async postFormData<T>(endpoint: string, body: Record<string, string>): Promise<T> {
+    try {
+      const formData = new FormData();
+      Object.entries(body).forEach(([key, value]) => {
+        formData.append(key, value);
+      });
+
+      const token = getToken();
+      const headers: Record<string, string> = {};
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
+      const response = await fetch(`${API_URL}${endpoint}`, {
+        method: 'POST',
+        headers,
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        const errorMessage = extractErrorMessage(data);
+        const error = new Error(errorMessage);
+        (error as any).data = data;
+        throw error;
+      }
+
+      if (data && data.success === false) {
+        const errorMessage = extractErrorMessage(data);
+        const error = new Error(errorMessage);
+        (error as any).data = data;
+        throw error;
+      }
+
+      console.log(`Connected to backend at ${API_URL}${endpoint}`);
+      return data;
+    } catch (error) {
+      console.error(`Failed to connect to backend at ${API_URL}${endpoint}:`, error);
+      throw error;
+    }
+  },
+
   async delete<T>(endpoint: string): Promise<T> {
     try {
       const response = await fetch(`${API_URL}${endpoint}`, {

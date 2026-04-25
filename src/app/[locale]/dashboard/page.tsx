@@ -402,12 +402,14 @@ export default function DashboardPage() {
         <ImageBillUploadModal
           isOpen={isImageModalOpen}
           onClose={() => setIsImageModalOpen(false)}
+          onSuccess={() => setIsImageModalOpen(false)}
         />
 
         {/* Voice Record Modal */}
         <VoiceRecordModal
           isOpen={isVoiceModalOpen}
           onClose={() => setIsVoiceModalOpen(false)}
+          onSuccess={() => setIsVoiceModalOpen(false)}
         />
       </div>
     </SidebarLayout>

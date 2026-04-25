@@ -39,6 +39,11 @@ export const API_ENDPOINTS = {
     uploadVoice: '/api/v1/transactions/upload-voice',
   },
 
+  // AI
+  ai: {
+    submit: '/api/v1/ai',
+  },
+
   // Users
   users: {
     list: '/api/v1/users',

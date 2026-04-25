@@ -5,15 +5,18 @@ import { useTheme } from '@/context/ThemeContext';
 import { Button, Heading, Text } from '@/components/atoms';
 import { MdClose, MdFiberManualRecord, MdStopCircle, MdPlayArrow, MdCheckCircle, MdContentCopy } from 'react-icons/md';
 import { uploadAudioToCloudinary } from '@/lib/cloudinary';
+import { apiClient } from '@/lib/api-client';
+import { API_ENDPOINTS } from '@/constants/api';
 
 interface VoiceRecordModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onSuccess?: () => void;
 }
 
 type RecordingState = 'idle' | 'recording' | 'recorded' | 'playing' | 'uploading' | 'success';
 
-export const VoiceRecordModal: React.FC<VoiceRecordModalProps> = ({ isOpen, onClose }) => {
+export const VoiceRecordModal: React.FC<VoiceRecordModalProps> = ({ isOpen, onClose, onSuccess }) => {
   const { colors } = useTheme();
   const [state, setState] = useState<RecordingState>('idle');
   const [error, setError] = useState<string | null>(null);
@@ -125,6 +128,12 @@ export const VoiceRecordModal: React.FC<VoiceRecordModalProps> = ({ isOpen, onCl
       const url = await uploadAudioToCloudinary(file);
       setUploadedAudioUrl(url);
 
+      // Submit to AI controller with voice type
+      await apiClient.postFormData(API_ENDPOINTS.ai.submit, {
+        data: url,
+        type: 'voice',
+      });
+
       // Show success state with URL
       setState('success');
     } catch (err) {
@@ -148,6 +157,7 @@ export const VoiceRecordModal: React.FC<VoiceRecordModalProps> = ({ isOpen, onCl
     setError(null);
     setUploadedAudioUrl('');
     setCopiedToClipboard(false);
+    onSuccess?.();
     onClose();
   };
 
@@ -222,7 +232,6 @@ export const VoiceRecordModal: React.FC<VoiceRecordModalProps> = ({ isOpen, onCl
               </Text>
               <button
                 onClick={handleStartRecording}
-                disabled={state === 'uploading'}
                 className="flex items-center justify-center gap-2 mx-auto px-6 py-4 rounded-full font-semibold transition-all hover:opacity-80 hover:cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 style={{
                   backgroundColor: colors.interactive.primary,
@@ -368,18 +377,16 @@ export const VoiceRecordModal: React.FC<VoiceRecordModalProps> = ({ isOpen, onCl
           <div className="flex gap-2">
             <button
               onClick={handleSubmit}
-              disabled={state === 'uploading'}
               className="flex-1 px-4 py-2 rounded-lg font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               style={{
                 backgroundColor: colors.interactive.primary,
                 color: '#ffffff',
               }}
             >
-              {state === 'uploading' ? 'Uploading...' : 'Submit'}
+              Submit
             </button>
             <button
               onClick={handleReset}
-              disabled={state === 'uploading'}
               className="flex-1 px-4 py-2 rounded-lg font-medium border transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               style={{
                 borderColor: colors.border.light,

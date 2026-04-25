@@ -5,15 +5,18 @@ import { useTheme } from '@/context/ThemeContext';
 import { Button, Heading, Text } from '@/components/atoms';
 import { MdClose, MdUploadFile, MdCheckCircle, MdContentCopy } from 'react-icons/md';
 import { uploadImageToCloudinary } from '@/lib/cloudinary';
+import { apiClient } from '@/lib/api-client';
+import { API_ENDPOINTS } from '@/constants/api';
 
 interface ImageBillUploadModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onSuccess?: () => void;
 }
 
 type UploadState = 'idle' | 'uploading' | 'success';
 
-export const ImageBillUploadModal: React.FC<ImageBillUploadModalProps> = ({ isOpen, onClose }) => {
+export const ImageBillUploadModal: React.FC<ImageBillUploadModalProps> = ({ isOpen, onClose, onSuccess }) => {
   const { colors } = useTheme();
   const [uploadState, setUploadState] = useState<UploadState>('idle');
   const [error, setError] = useState<string | null>(null);
@@ -66,6 +69,13 @@ export const ImageBillUploadModal: React.FC<ImageBillUploadModalProps> = ({ isOp
 
       const url = await uploadImageToCloudinary(file);
       setUploadedImage({ url, file });
+
+      // Submit to AI controller with OCR type
+      await apiClient.postFormData(API_ENDPOINTS.ai.submit, {
+        data: url,
+        type: 'ocr',
+      });
+
       setUploadState('success');
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : 'Failed to upload image';
@@ -80,14 +90,12 @@ export const ImageBillUploadModal: React.FC<ImageBillUploadModalProps> = ({ isOp
       return;
     }
 
-    // Log the uploaded image URL
-    console.log('Uploaded image URL:', uploadedImage.url);
-    
     // Reset and close
     setUploadedImage(null);
     setPreview('');
     setUploadState('idle');
     setCopiedToClipboard(false);
+    onSuccess?.();
     onClose();
   };
 
@@ -107,6 +115,7 @@ export const ImageBillUploadModal: React.FC<ImageBillUploadModalProps> = ({ isOp
     setCopiedToClipboard(false);
     const fileInput = document.getElementById('bill-image-input') as HTMLInputElement;
     if (fileInput) fileInput.value = '';
+    onSuccess?.();
     onClose();
   };
 
@@ -216,18 +225,16 @@ export const ImageBillUploadModal: React.FC<ImageBillUploadModalProps> = ({ isOp
               <div className="flex gap-2">
                 <button
                   onClick={handleUpload}
-                  disabled={uploadState === 'uploading'}
                   className="flex-1 px-4 py-2 rounded-lg font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                   style={{
                     backgroundColor: colors.interactive.primary,
                     color: '#ffffff',
                   }}
                 >
-                  {uploadState === 'uploading' ? 'Uploading...' : 'Upload to Cloudinary'}
+                  Upload
                 </button>
                 <button
                   onClick={handleReset}
-                  disabled={uploadState === 'uploading'}
                   className="flex-1 px-4 py-2 rounded-lg font-medium border transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                   style={{
                     borderColor: colors.border.light,
@@ -248,7 +255,7 @@ export const ImageBillUploadModal: React.FC<ImageBillUploadModalProps> = ({ isOp
               <div className="w-8 h-8 rounded-full border-4 border-transparent" style={{ borderTopColor: colors.interactive.primary }}></div>
             </div>
             <Text style={{ color: colors.text.primary }} className="font-semibold">
-              Uploading image to Cloudinary...
+              Uploading image...
             </Text>
           </div>
         )}
@@ -263,7 +270,7 @@ export const ImageBillUploadModal: React.FC<ImageBillUploadModalProps> = ({ isOp
                 Upload Successful!
               </Heading>
               <Text style={{ color: colors.text.secondary }} className="text-sm">
-                Your image has been uploaded to Cloudinary
+                Your image has been uploaded.
               </Text>
             </div>
 
