@@ -31,6 +31,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head></head>
       <body
+        suppressHydrationWarning
         className={`${robotoSans.variable} ${robotoMono.variable} antialiased`}
       >
         <Providers>

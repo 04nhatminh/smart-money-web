@@ -1,12 +1,13 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useTheme } from '@/context/ThemeContext';
 import { Button, Heading, Text } from '@/components/atoms';
 import { MdClose, MdFiberManualRecord, MdStopCircle, MdPlayArrow, MdCheckCircle, MdContentCopy } from 'react-icons/md';
 import { uploadAudioToCloudinary } from '@/lib/cloudinary';
 import { apiClient } from '@/lib/api-client';
 import { API_ENDPOINTS } from '@/constants/api';
+import { useWebSocket } from '@/context/WebSocketContext';
 
 interface VoiceRecordModalProps {
   isOpen: boolean;
@@ -14,7 +15,7 @@ interface VoiceRecordModalProps {
   onSuccess?: () => void;
 }
 
-type RecordingState = 'idle' | 'recording' | 'recorded' | 'playing' | 'uploading' | 'success';
+type RecordingState = 'idle' | 'recording' | 'recorded' | 'playing' | 'uploading' | 'processing' | 'success';
 
 export const VoiceRecordModal: React.FC<VoiceRecordModalProps> = ({ isOpen, onClose, onSuccess }) => {
   const { colors } = useTheme();
@@ -24,14 +25,16 @@ export const VoiceRecordModal: React.FC<VoiceRecordModalProps> = ({ isOpen, onCl
   const [audioUrl, setAudioUrl] = useState<string>('');
   const [uploadedAudioUrl, setUploadedAudioUrl] = useState<string>('');
   const [copiedToClipboard, setCopiedToClipboard] = useState(false);
+  const [jobId, setJobId] = useState<string | null>(null);
+  const [aiResult, setAiResult] = useState<Record<string, any> | null>(null);
+  const unsubscribeRef = useRef<(() => void) | null>(null);
+  const { subscribe } = useWebSocket();
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const streamRef = useRef<MediaStream | null>(null);
   const audioElementRef = useRef<HTMLAudioElement | null>(null);
   const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
-
-  if (!isOpen) return null;
 
   const handleStartRecording = async () => {
     try {
@@ -101,6 +104,8 @@ export const VoiceRecordModal: React.FC<VoiceRecordModalProps> = ({ isOpen, onCl
   };
 
   const handleReset = () => {
+    unsubscribeRef.current?.();
+    unsubscribeRef.current = null;
     setAudioUrl('');
     setRecordingTime(0);
     setState('idle');
@@ -129,13 +134,34 @@ export const VoiceRecordModal: React.FC<VoiceRecordModalProps> = ({ isOpen, onCl
       setUploadedAudioUrl(url);
 
       // Submit to AI controller with voice type
-      await apiClient.postFormData(API_ENDPOINTS.ai.submit, {
+      const apiResponse = await apiClient.postFormData<any>(API_ENDPOINTS.ai.submit, {
         data: url,
         type: 'voice',
       });
 
-      // Show success state with URL
-      setState('success');
+      const id = apiResponse.jobId;
+      setJobId(id);
+      setState('processing');
+
+      // Subscribe to WebSocket for AI result
+      // cleanup subscription cũ nếu user submit lại
+      unsubscribeRef.current?.();
+
+      const unsubscribeFn = subscribe(id, (result) => {
+        console.log('AI result received:', result);
+
+        // 🔥 chỉ nhận result cuối (tránh bị spam trạng thái)
+        if (result.status !== 'SUCCESS') return;
+
+        setAiResult(result);
+        setState('success');
+
+        // 🔥 auto unsubscribe sau khi xong
+        unsubscribeFn();
+        unsubscribeRef.current = null;
+      });
+
+      unsubscribeRef.current = unsubscribeFn;
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : 'Failed to upload audio';
       setError(errorMsg);
@@ -150,16 +176,32 @@ export const VoiceRecordModal: React.FC<VoiceRecordModalProps> = ({ isOpen, onCl
   };
 
   const handleSuccessClose = () => {
+    // Unsubscribe from WebSocket
+    unsubscribeRef.current?.();
+    unsubscribeRef.current = null;
+
     // Reset and close
     setAudioUrl('');
     setRecordingTime(0);
     setState('idle');
     setError(null);
     setUploadedAudioUrl('');
+    setJobId(null);
+    setAiResult(null);
     setCopiedToClipboard(false);
     onSuccess?.();
     onClose();
   };
+
+  // Cleanup WebSocket subscription when modal closes
+  useEffect(() => {
+    return () => {
+      unsubscribeRef.current?.();
+      unsubscribeRef.current = null;
+    };
+  }, []);
+
+  if (!isOpen) return null;
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -310,14 +352,28 @@ export const VoiceRecordModal: React.FC<VoiceRecordModalProps> = ({ isOpen, onCl
             </div>
           )}
 
+          {state === 'processing' && (
+            <div className="text-center py-8">
+              <div className="inline-flex items-center justify-center w-12 h-12 rounded-full mb-4 animate-spin" style={{ backgroundColor: `${colors.interactive.primary}20` }}>
+                <div className="w-8 h-8 rounded-full border-4 border-transparent" style={{ borderTopColor: colors.interactive.primary }}></div>
+              </div>
+              <Text style={{ color: colors.text.primary }} className="font-semibold">
+                AI is processing your voice...
+              </Text>
+              <Text style={{ color: colors.text.secondary }} className="text-sm mt-2">
+                This may take a few seconds
+              </Text>
+            </div>
+          )}
+
           {state === 'success' && (
             <div className="text-center">
               <MdCheckCircle className="w-16 h-16 mx-auto mb-4" style={{ color: '#10B981' }} />
               <Heading level={3} style={{ color: colors.text.primary }} className="mb-2">
-                Upload Successful!
+                Analysis Complete!
               </Heading>
               <Text style={{ color: colors.text.secondary }} className="text-sm mb-6">
-                Your voice recording has been uploaded to Cloudinary
+                AI has successfully analyzed your voice recording
               </Text>
               
               {/* URL Display Box */}

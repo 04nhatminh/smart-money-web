@@ -1,12 +1,13 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useTheme } from '@/context/ThemeContext';
 import { Button, Heading, Text } from '@/components/atoms';
 import { MdClose, MdUploadFile, MdCheckCircle, MdContentCopy } from 'react-icons/md';
 import { uploadImageToCloudinary } from '@/lib/cloudinary';
 import { apiClient } from '@/lib/api-client';
 import { API_ENDPOINTS } from '@/constants/api';
+import { useWebSocket } from '@/context/WebSocketContext';
 
 interface ImageBillUploadModalProps {
   isOpen: boolean;
@@ -14,7 +15,7 @@ interface ImageBillUploadModalProps {
   onSuccess?: () => void;
 }
 
-type UploadState = 'idle' | 'uploading' | 'success';
+type UploadState = 'idle' | 'uploading' | 'processing' | 'success';
 
 export const ImageBillUploadModal: React.FC<ImageBillUploadModalProps> = ({ isOpen, onClose, onSuccess }) => {
   const { colors } = useTheme();
@@ -26,8 +27,10 @@ export const ImageBillUploadModal: React.FC<ImageBillUploadModalProps> = ({ isOp
   } | null>(null);
   const [preview, setPreview] = useState<string>('');
   const [copiedToClipboard, setCopiedToClipboard] = useState(false);
-
-  if (!isOpen) return null;
+  const [jobId, setJobId] = useState<string | null>(null);
+  const [aiResult, setAiResult] = useState<Record<string, any> | null>(null);
+  const unsubscribeRef = useRef<(() => void) | null>(null);
+  const { subscribe } = useWebSocket();
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -71,12 +74,32 @@ export const ImageBillUploadModal: React.FC<ImageBillUploadModalProps> = ({ isOp
       setUploadedImage({ url, file });
 
       // Submit to AI controller with OCR type
-      await apiClient.postFormData(API_ENDPOINTS.ai.submit, {
+      const response = await apiClient.postFormData<any>(API_ENDPOINTS.ai.submit, {
         data: url,
         type: 'ocr',
       });
 
-      setUploadState('success');
+      const id = response.jobId;
+      setJobId(id);
+      setUploadState('processing');
+
+      // Subscribe to WebSocket for AI result
+      if (unsubscribeRef.current) {
+        unsubscribeRef.current();
+      }
+
+      const unsubscribeFn = subscribe(id, (result) => {
+        console.log('AI result received:', result);
+
+        setAiResult(result);
+        setUploadState('success');
+
+        // 🔥 auto unsubscribe sau khi nhận result (rất nên làm)
+        unsubscribeFn();
+        unsubscribeRef.current = null;
+      });
+
+      unsubscribeRef.current = unsubscribeFn;
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : 'Failed to upload image';
       setError(errorMsg);
@@ -108,16 +131,32 @@ export const ImageBillUploadModal: React.FC<ImageBillUploadModalProps> = ({ isOp
   };
 
   const handleSuccessClose = () => {
+    // Unsubscribe from WebSocket
+    unsubscribeRef.current?.();
+    unsubscribeRef.current = null;
+    
     setUploadedImage(null);
     setPreview('');
     setUploadState('idle');
     setError(null);
+    setJobId(null);
+    setAiResult(null);
     setCopiedToClipboard(false);
     const fileInput = document.getElementById('bill-image-input') as HTMLInputElement;
     if (fileInput) fileInput.value = '';
     onSuccess?.();
     onClose();
   };
+
+  // Cleanup WebSocket subscription when modal closes
+  useEffect(() => {
+    return () => {
+      unsubscribeRef.current?.();
+      unsubscribeRef.current = null;
+    };
+  }, []);
+
+  if (!isOpen) return null;
 
   const handleReset = () => {
     setUploadedImage(null);
@@ -260,6 +299,21 @@ export const ImageBillUploadModal: React.FC<ImageBillUploadModalProps> = ({ isOp
           </div>
         )}
 
+        {/* Processing State - AI Analysis */}
+        {uploadState === 'processing' && (
+          <div className="text-center py-8">
+            <div className="inline-flex items-center justify-center w-12 h-12 rounded-full mb-4 animate-spin" style={{ backgroundColor: `${colors.interactive.primary}20` }}>
+              <div className="w-8 h-8 rounded-full border-4 border-transparent" style={{ borderTopColor: colors.interactive.primary }}></div>
+            </div>
+            <Text style={{ color: colors.text.primary }} className="font-semibold">
+              AI is analyzing your receipt...
+            </Text>
+            <Text style={{ color: colors.text.secondary }} className="text-sm mt-2">
+              This may take a few seconds
+            </Text>
+          </div>
+        )}
+
         {/* Success State */}
         {uploadState === 'success' && uploadedImage && (
           <div>
@@ -267,10 +321,10 @@ export const ImageBillUploadModal: React.FC<ImageBillUploadModalProps> = ({ isOp
             <div className="text-center mb-6">
               <MdCheckCircle className="w-16 h-16 mx-auto mb-4" style={{ color: '#10B981' }} />
               <Heading level={3} style={{ color: colors.text.primary }} className="mb-2">
-                Upload Successful!
+                Analysis Complete!
               </Heading>
               <Text style={{ color: colors.text.secondary }} className="text-sm">
-                Your image has been uploaded.
+                AI has successfully analyzed your receipt
               </Text>
             </div>
 
