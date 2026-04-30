@@ -89,12 +89,9 @@ export const ImageBillUploadModal: React.FC<ImageBillUploadModalProps> = ({ isOp
       }
 
       const unsubscribeFn = subscribe(id, (result) => {
-        console.log('AI result received:', result);
-
         setAiResult(result);
         setUploadState('success');
 
-        // 🔥 auto unsubscribe sau khi nhận result (rất nên làm)
         unsubscribeFn();
         unsubscribeRef.current = null;
       });
@@ -306,7 +303,7 @@ export const ImageBillUploadModal: React.FC<ImageBillUploadModalProps> = ({ isOp
               <div className="w-8 h-8 rounded-full border-4 border-transparent" style={{ borderTopColor: colors.interactive.primary }}></div>
             </div>
             <Text style={{ color: colors.text.primary }} className="font-semibold">
-              AI is analyzing your receipt...
+              Analyzing your receipt...
             </Text>
             <Text style={{ color: colors.text.secondary }} className="text-sm mt-2">
               This may take a few seconds
@@ -324,48 +321,42 @@ export const ImageBillUploadModal: React.FC<ImageBillUploadModalProps> = ({ isOp
                 Analysis Complete!
               </Heading>
               <Text style={{ color: colors.text.secondary }} className="text-sm">
-                AI has successfully analyzed your receipt
+                Your receipt has been successfully analyzed and uploaded.
               </Text>
             </div>
 
             {/* Uploaded Image Preview */}
             <img src={uploadedImage.url} alt="Uploaded" className="w-full max-h-64 object-cover rounded-lg mb-6" />
 
-            {/* Image URL Display */}
-            <div
-              className="p-4 rounded-lg mb-6 break-all text-left"
-              style={{
-                backgroundColor: colors.background.secondary,
-                borderLeft: `4px solid ${colors.interactive.primary}`,
-              }}
-            >
-              <Text className="text-xs font-semibold mb-2" style={{ color: colors.text.secondary }}>
-                Image URL:
-              </Text>
-              <Text className="text-sm font-mono" style={{ color: colors.text.primary }}>
-                {uploadedImage.url}
-              </Text>
-            </div>
+            {/* AI Analysis Result Display */}
+            {aiResult && (
+              <div
+                className="p-4 rounded-lg mb-6 text-left max-h-64 overflow-y-auto"
+                style={{
+                  backgroundColor: colors.background.secondary,
+                  borderLeft: `4px solid ${colors.interactive.primary}`,
+                }}
+              >
+                <Text className="text-xs font-semibold mb-3" style={{ color: colors.text.secondary }}>
+                  Analysis Result:
+                </Text>
+                <pre
+                  className="text-xs font-mono whitespace-pre-wrap break-words"
+                  style={{ color: colors.text.primary }}
+                >
+                  {JSON.stringify(aiResult, null, 2)}
+                </pre>
+              </div>
+            )}
 
             {/* Action Buttons */}
             <div className="flex gap-2">
               <button
-                onClick={handleCopyUrl}
-                className="flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-medium transition-all hover:opacity-80"
-                style={{
-                  backgroundColor: copiedToClipboard ? '#10B981' : colors.interactive.primary,
-                  color: '#ffffff',
-                }}
-              >
-                <MdContentCopy className="w-5 h-5" />
-                {copiedToClipboard ? 'Copied!' : 'Copy URL'}
-              </button>
-              <button
                 onClick={handleSuccessClose}
-                className="flex-1 px-4 py-2 rounded-lg font-medium border transition-all"
+                className="flex-1 px-4 py-2 rounded-lg font-medium transition-all"
                 style={{
-                  borderColor: colors.border.light,
-                  color: colors.text.primary,
+                  backgroundColor: colors.interactive.primary,
+                  color: '#ffffff',
                 }}
               >
                 Done

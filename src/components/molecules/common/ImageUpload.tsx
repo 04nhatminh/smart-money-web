@@ -67,7 +67,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
         imageUrl,
       });
 
-      setSuccessMessage('Image uploaded and submitted for analysis. AI Agent will process it.');
+      setSuccessMessage('Image uploaded and submitted for analysis.');
       setPreview(null);
       onSuccess?.();
 
@@ -149,9 +149,9 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
         <MdImage className="w-8 h-8 mx-auto mb-2" style={{ color: colors.text.secondary }} />
         <Text className="font-medium mb-1" style={{ color: colors.text.primary }}>
           {isUploading
-            ? 'Uploading to Cloudinary...'
+            ? 'Uploading...'
             : isAnalyzing
-              ? 'Submitting for AI analysis...'
+              ? 'Submitting for analysis...'
               : 'Click or drag to upload receipt image'}
         </Text>
         <Text className="text-xs" style={{ color: colors.text.secondary }}>

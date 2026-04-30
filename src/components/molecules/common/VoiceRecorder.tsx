@@ -79,7 +79,7 @@ export const VoiceRecorder: React.FC<VoiceRecorderProps> = ({
             voiceUrl,
           });
 
-          setSuccessMessage('Voice uploaded and submitted for analysis. AI Agent will process it.');
+          setSuccessMessage('Voice uploaded and submitted for analysis.');
           onSuccess?.();
 
           // Clear message after 3 seconds

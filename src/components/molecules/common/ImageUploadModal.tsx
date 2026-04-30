@@ -83,7 +83,7 @@ export const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
               style={{ color: colors.text.secondary }}
               className="text-sm mb-4"
             >
-              Upload a receipt photo and our AI will analyze it to extract transaction details.
+              Upload a receipt photo to extract transaction details.
             </Text>
             <ImageUpload
               onSuccess={() => {
