@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useLocale } from 'next-intl';
 import { Button, Heading, Text } from '@/components/atoms';
@@ -29,7 +29,8 @@ export const Header: React.FC<HeaderProps> = ({
   const locale = useLocale();
   const { colors, colorScheme } = useTheme();
   const t = useTranslations();
-  const { token, isInitializing } = useAuth();
+  const { token, isInitializing, user, logout } = useAuth();
+  const [openUserMenu, setOpenUserMenu] = useState(false);
 
   const handleLoginClick = () => {
     router.push(`/${locale}/login`);
@@ -39,14 +40,48 @@ export const Header: React.FC<HeaderProps> = ({
     router.push(`/${locale}/register`);
   };
 
+  const handleNotificationClick = () => {
+    router.push(`/${locale}/notifications`);
+  };
+
+  const handleLogout = () => {
+    logout();
+    setOpenUserMenu(false);
+    router.push(`/${locale}`);
+  };
+
+  const handleProfileClick = () => {
+    router.push(`/${locale}/profile`);
+    setOpenUserMenu(false);
+  };
+
+  const handleDashboardClick = () => {
+    router.push(`/${locale}/dashboard`);
+    setOpenUserMenu(false);
+  };
+
   const showAuthActions = !isInitializing && !token;
+  const showUserActions = !isInitializing && token && user;
+
+  // Get avatar initials from fullName or username
+  const getAvatarInitials = () => {
+    if (user?.fullName) {
+      return user.fullName
+        .split(' ')
+        .map(name => name.charAt(0))
+        .join('')
+        .toUpperCase()
+        .slice(0, 2);
+    }
+    return user?.username?.charAt(0).toUpperCase() || '?';
+  };
 
   return (
     <header className="shadow-md transition-colors sticky top-0 z-50" style={{ backgroundColor: colors.background.primary, borderBottomColor: colors.border.light, borderBottomWidth: '1px' }}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20">
-        <div className="flex items-center py-2 relative h-full">
-          {/* Logo - Centered */}
-          <div className="flex items-center justify-center gap-3">
+      <div className="mx-auto px-4 sm:px-6 lg:px-8 h-20">
+        <div className="flex items-center py-2 relative h-full justify-between">
+          {/* Logo - Left */}
+          <div className="flex items-center justify-start gap-3">
             <img src="/logo-nobg.png" alt={appName} className="h-14 w-14 object-contain flex-shrink-0" style={{ filter: colorScheme === 'dark' ? 'brightness(0) invert(1)' : 'none' }} />
             <Heading 
               level={1} 
@@ -57,17 +92,121 @@ export const Header: React.FC<HeaderProps> = ({
             </Heading>
           </div>
 
-          {/* Actions - Positioned Absolute Right */}
-          {showAuthActions && (
-            <div className="flex gap-4 absolute right-4 sm:right-6 lg:right-8">
-              <Button variant="secondary" size="md" className="hidden sm:block" onClick={handleLoginClick}>
-                {t('finance.hero.login')}
-              </Button>
-              <Button variant="primary" size="md" onClick={handleSignupClick}>
-                {t('finance.hero.cta')}
-              </Button>
-            </div>
-          )}
+          {/* Actions - Right */}
+          <div className="flex gap-4 items-center">
+            {showAuthActions && (
+              <>
+                <Button variant="secondary" size="md" className="hidden sm:block" onClick={handleLoginClick}>
+                  {t('finance.hero.login')}
+                </Button>
+                <Button variant="primary" size="md" onClick={handleSignupClick}>
+                  {t('finance.hero.cta')}
+                </Button>
+              </>
+            )}
+
+            {showUserActions && (
+              <div className="flex gap-4 items-center">
+                {/* Notification Bell */}
+                <button
+                  onClick={handleNotificationClick}
+                  className="p-2 rounded-lg transition-colors duration-200 hover:bg-opacity-10 flex items-center justify-center relative hover:cursor-pointer"
+                  style={{
+                    backgroundColor: `${colors.interactive.primary}10`,
+                    color: colors.interactive.primary,
+                  }}
+                  title={t('common.notifications') || 'Notifications'}
+                >
+                  {/* Bell Icon SVG */}
+                  <svg
+                    className="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+                    />
+                  </svg>
+                </button>
+
+                {/* User Avatar - Dropdown */}
+                <div className="relative">
+                  <button
+                    onClick={() => setOpenUserMenu(!openUserMenu)}
+                    className="w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold text-sm transition-all duration-200 hover:opacity-80 hover:cursor-pointer"
+                    style={{ backgroundColor: colors.interactive.primary }}
+                    title={user?.fullName || user?.username}
+                  >
+                    {user?.avatar ? (
+                      <img
+                        src={user.avatar}
+                        alt={user.fullName || user.username}
+                        className="w-full h-full rounded-full object-cover"
+                      />
+                    ) : (
+                      getAvatarInitials()
+                    )}
+                  </button>
+
+                  {/* User Menu Dropdown */}
+                  {openUserMenu && (
+                    <div
+                      className="absolute right-0 mt-2 w-64 rounded-lg shadow-lg py-2 z-50"
+                      style={{ backgroundColor: colors.background.primary, border: `1px solid ${colors.border.light}` }}
+                    >
+                      {/* User Info */}
+                      <div className="px-4 py-2 border-b" style={{ borderColor: colors.border.light }}>
+                        <p className="font-semibold" style={{ color: colors.text.primary }}>
+                          {user?.fullName || user?.username}
+                        </p>
+                        <p className="text-sm" style={{ color: colors.text.secondary }}>
+                          {user?.email}
+                        </p>
+                      </div>
+
+                      {/* Menu Items */}
+                      <button
+                        onClick={handleDashboardClick}
+                        className="w-full text-left px-4 py-2 hover:bg-opacity-50 transition-colors hover:cursor-pointer"
+                        style={{ color: colors.text.primary, backgroundColor: 'transparent' }}
+                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = `${colors.interactive.primary}10`}
+                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                      >
+                        {t('common.dashboard') || 'Dashboard'}
+                      </button>
+
+                      <button
+                        onClick={handleProfileClick}
+                        className="w-full text-left px-4 py-2 hover:bg-opacity-50 transition-colors hover:cursor-pointer"
+                        style={{ color: colors.text.primary, backgroundColor: 'transparent' }}
+                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = `${colors.interactive.primary}10`}
+                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                      >
+                        {t('common.profile') || 'Profile'}
+                      </button>
+
+                      <div style={{ borderColor: colors.border.light, borderTopWidth: '1px' }}></div>
+
+                      <button
+                        onClick={handleLogout}
+                        className="w-full text-left px-4 py-2 transition-colors hover:cursor-pointer"
+                        style={{ color: colors.interactive.danger, backgroundColor: 'transparent' }}
+                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = `${colors.interactive.danger}10`}
+                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                      >
+                        {t('common.logout') || 'Logout'}
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </header>

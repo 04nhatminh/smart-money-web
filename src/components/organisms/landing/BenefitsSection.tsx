@@ -5,6 +5,7 @@ import { Heading, Text } from '@/components/atoms';
 import { useTheme } from '@/context';
 import { useTranslations } from 'next-intl';
 import { FaCheck } from 'react-icons/fa';
+import { formatVietnamsePrice } from '@/lib/format';
 
 interface BenefitItemProps {
   label: string;
@@ -79,7 +80,7 @@ export const BenefitsSection: React.FC<BenefitsProps> = ({
                 {t('finance.testimonial.balance')}
               </Text>
               <Heading level={3} className="text-3xl font-bold mt-1">
-                $1,234.56
+                {formatVietnamsePrice(1234.56, 'VND', 2)}
               </Heading>
             </div>
 
@@ -100,7 +101,7 @@ export const BenefitsSection: React.FC<BenefitsProps> = ({
                   className="text-lg font-semibold mt-1"
                   style={{ color: colors.interactive.success }}
                 >
-                  $8,943.21
+                  {formatVietnamsePrice(8943.21, 'VND', 2)}
                 </Text>
               </div>
             </div>

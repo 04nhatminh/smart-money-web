@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import { hashPassword } from '@/lib/password';
 
 interface UseAuthFormReturn {
   isLoading: boolean;
@@ -19,11 +18,11 @@ export const useAuthForm = (): UseAuthFormReturn => {
     try {
       setIsLoading(true);
       setError(null);
-      const hashedPassword = await hashPassword(password);
-      return hashedPassword;
+      // Password is sent as-is without hashing (secure transmission via HTTPS)
+      return password;
     } catch (err) {
       const errorMessage =
-        err instanceof Error ? err.message : 'Failed to hash password';
+        err instanceof Error ? err.message : 'Failed to process password';
       setError(errorMessage);
       throw err;
     } finally {

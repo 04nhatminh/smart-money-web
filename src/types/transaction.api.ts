@@ -4,9 +4,9 @@ import type { ApiResponse } from './base.api';
 export interface Transaction {
   id: string;
   userId: string;
-  type: 'income' | 'expense';
+  type: 'INCOME' | 'EXPENSE';
   amount: number;
-  category: string;
+  category: 'FOOD' | 'TRANSPORTATION' | 'CLOTHING' | 'UTILITIES' | 'ENTERTAINMENT' | 'HEALTH' | 'EDUCATION' | 'SHOPPING' | 'OTHER';
   description?: string;
   date: string;
   createdAt: string;
@@ -14,9 +14,9 @@ export interface Transaction {
 }
 
 export interface CreateTransactionRequest {
-  type: 'income' | 'expense';
+  type: 'INCOME' | 'EXPENSE';
   amount: number;
-  category: string;
+  category: 'FOOD' | 'TRANSPORTATION' | 'CLOTHING' | 'UTILITIES' | 'ENTERTAINMENT' | 'HEALTH' | 'EDUCATION' | 'SHOPPING' | 'OTHER';
   description?: string;
   date: string;
 }
