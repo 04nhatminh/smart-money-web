@@ -13,11 +13,12 @@ interface ImageBillUploadModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: () => void;
+  onAIResultReceived?: (result: Record<string, any>, source?: 'image' | 'voice') => void;
 }
 
 type UploadState = 'idle' | 'uploading' | 'processing' | 'success';
 
-export const ImageBillUploadModal: React.FC<ImageBillUploadModalProps> = ({ isOpen, onClose, onSuccess }) => {
+export const ImageBillUploadModal: React.FC<ImageBillUploadModalProps> = ({ isOpen, onClose, onSuccess, onAIResultReceived }) => {
   const { colors } = useTheme();
   const [uploadState, setUploadState] = useState<UploadState>('idle');
   const [error, setError] = useState<string | null>(null);
@@ -89,8 +90,16 @@ export const ImageBillUploadModal: React.FC<ImageBillUploadModalProps> = ({ isOp
       }
 
       const unsubscribeFn = subscribe(id, (result) => {
-        setAiResult(result);
-        setUploadState('success');
+        if (onAIResultReceived) {
+          // Call the callback with the AI result and source type
+          onAIResultReceived(result, 'image');
+          // Close the modal
+          handleSuccessClose();
+        } else {
+          // Fall back to showing success state if no callback
+          setAiResult(result);
+          setUploadState('success');
+        }
 
         unsubscribeFn();
         unsubscribeRef.current = null;

@@ -9,6 +9,7 @@ import { Heading, Text, Button } from '@/components/atoms';
 import { Card, StatCard, TransactionRow, CreateTransactionModal, EditTransactionModal, TransactionMethodModal, ImageBillUploadModal, VoiceRecordModal } from '@/components/molecules/common';
 import { useTheme } from '@/context/ThemeContext';
 import { useTransactions } from '@/hooks/useTransactions';
+import { transformAIResultToFormData } from '@/lib/ai-result-transformer';
 import { MdAdd } from 'react-icons/md';
 import { MdAccountBalanceWallet, MdTrendingUp, MdTrendingDown } from 'react-icons/md';
 import { MdAttachMoney, MdFastfood, MdDirectionsCar, MdShoppingBag, MdLightbulb, MdLocalMovies, MdFavorite, MdSchool, MdShoppingCart, MdHelpOutline } from 'react-icons/md';
@@ -71,6 +72,7 @@ export default function DashboardPage() {
   const [editingTransactionId, setEditingTransactionId] = useState<string | null>(null);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [aiFormData, setAiFormData] = useState<any>(null);
 
   // Load transactions after auth is initialized
   useEffect(() => {
@@ -109,6 +111,16 @@ export default function DashboardPage() {
     } finally {
       setDeleteLoading(false);
     }
+  };
+
+  const handleAIResultReceived = (aiResult: Record<string, any>, source: 'voice' | 'image' = 'voice') => {
+    // Transform AI result to form data
+    const formData = transformAIResultToFormData(aiResult, source);
+    setAiFormData(formData);
+    // Close the AI modal (voice/image) and open the create transaction modal
+    setIsVoiceModalOpen(false);
+    setIsImageModalOpen(false);
+    setIsCreateModalOpen(true);
   };
 
   // Format data for display
@@ -357,12 +369,17 @@ export default function DashboardPage() {
         {/* Create Transaction Modal */}
         <CreateTransactionModal
           isOpen={isCreateModalOpen}
-          onClose={() => setIsCreateModalOpen(false)}
+          initialData={aiFormData}
+          onClose={() => {
+            setIsCreateModalOpen(false);
+            setAiFormData(null);
+          }}
           onSuccess={() => {
             // Refresh transaction list
             loadTransactions();
             setSearchTerm('');
             setSelectedFilter('all');
+            setAiFormData(null);
           }}
         />
 
@@ -403,6 +420,7 @@ export default function DashboardPage() {
           isOpen={isImageModalOpen}
           onClose={() => setIsImageModalOpen(false)}
           onSuccess={() => setIsImageModalOpen(false)}
+          onAIResultReceived={handleAIResultReceived}
         />
 
         {/* Voice Record Modal */}
@@ -410,6 +428,7 @@ export default function DashboardPage() {
           isOpen={isVoiceModalOpen}
           onClose={() => setIsVoiceModalOpen(false)}
           onSuccess={() => setIsVoiceModalOpen(false)}
+          onAIResultReceived={handleAIResultReceived}
         />
       </div>
     </SidebarLayout>

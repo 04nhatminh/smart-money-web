@@ -13,6 +13,13 @@ interface CreateTransactionModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: () => void;
+  initialData?: {
+    amount?: string;
+    type?: TransactionType;
+    category?: TransactionCategory;
+    description?: string;
+    date?: string;
+  };
 }
 
 type TransactionType = 'INCOME' | 'EXPENSE';
@@ -52,6 +59,7 @@ export const CreateTransactionModal: React.FC<CreateTransactionModalProps> = ({
   isOpen,
   onClose,
   onSuccess,
+  initialData,
 }) => {
   const { colors } = useTheme();
   const t = useTranslations();
@@ -87,6 +95,23 @@ export const CreateTransactionModal: React.FC<CreateTransactionModalProps> = ({
     }));
     setError(null);
   };
+
+  // Apply initial data when modal opens
+  useEffect(() => {
+    if (isOpen && initialData) {
+      setFormData(prev => ({
+        ...prev,
+        amount: initialData.amount || prev.amount,
+        type: initialData.type || prev.type,
+        category: initialData.category || (initialData.type === 'INCOME' ? 'OTHER' : 'FOOD') || prev.category,
+        description: initialData.description || prev.description,
+        date: initialData.date || prev.date,
+      }));
+      // Reset error and success states when opening with new data
+      setError(null);
+      setSuccess(false);
+    }
+  }, [isOpen, initialData]);
 
   // Prevent scrolling when modal is open
   useEffect(() => {

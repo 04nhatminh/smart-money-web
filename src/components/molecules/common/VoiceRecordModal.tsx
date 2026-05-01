@@ -13,11 +13,12 @@ interface VoiceRecordModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: () => void;
+  onAIResultReceived?: (result: Record<string, any>, source?: 'image' | 'voice') => void;
 }
 
 type RecordingState = 'idle' | 'recording' | 'recorded' | 'playing' | 'uploading' | 'processing' | 'success';
 
-export const VoiceRecordModal: React.FC<VoiceRecordModalProps> = ({ isOpen, onClose, onSuccess }) => {
+export const VoiceRecordModal: React.FC<VoiceRecordModalProps> = ({ isOpen, onClose, onSuccess, onAIResultReceived }) => {
   const { colors } = useTheme();
   const [state, setState] = useState<RecordingState>('idle');
   const [error, setError] = useState<string | null>(null);
@@ -143,8 +144,16 @@ export const VoiceRecordModal: React.FC<VoiceRecordModalProps> = ({ isOpen, onCl
       unsubscribeRef.current?.();
 
       const unsubscribeFn = subscribe(id, (result) => {
-        setAiResult(result);
-        setState('success');
+        if (onAIResultReceived) {
+          // Call the callback with the AI result and source type
+          onAIResultReceived(result, 'voice');
+          // Close the modal
+          handleSuccessClose();
+        } else {
+          // Fall back to showing success state if no callback
+          setAiResult(result);
+          setState('success');
+        }
 
         // auto unsubscribe sau khi xong
         unsubscribeFn();
