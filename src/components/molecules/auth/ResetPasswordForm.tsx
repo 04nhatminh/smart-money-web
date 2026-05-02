@@ -2,45 +2,55 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { Button, Input } from '@/components/atoms';
-import { useAuthForm } from '@/hooks/useAuthForm';
-import { apiClient } from '@/lib/api-client';
+import { useRouter } from 'next/navigation';
 import { useParams } from 'next/navigation';
+import { MdVisibility, MdVisibilityOff } from 'react-icons/md';
+import { Button, Input, Heading, Text } from '@/components/atoms';
+import { useTheme } from '@/context/ThemeContext';
+import { apiClient } from '@/lib/api-client';
+import { API_ENDPOINTS } from '@/constants/api';
 
 interface ResetPasswordFormProps {
-  token?: string;
+  email: string;
+  resetToken: string;
   onSuccess?: () => void;
 }
 
 /**
  * ResetPasswordForm Component
  * 
- * Used after user receives password reset link from email.
- * The token should be extracted from the URL query parameter.
+ * Step 2 of password reset: Set new password
+ * User enters new password using the resetToken from OTP verification
  * 
  * API Endpoint: POST /api/v1/auth/reset-password
- * Body: { token, newPassword, confirmPassword }
+ * Header: X-Reset-Token: {resetToken}
+ * Body: { email, newPassword }
+ * Response: { success: boolean, message: string }
  */
 export const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({
-  token = '',
+  email,
+  resetToken,
   onSuccess,
 }) => {
+  const router = useRouter();
+  const params = useParams();
+  const locale = params.locale as string;
+
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const { handlePasswordHash } = useAuthForm();
-
-  const params = useParams();
-  const locale = params.locale as string;
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const { colors, colorScheme } = useTheme();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
     if (!newPassword.trim() || !confirmPassword.trim()) {
-      setError('Please fill in all fields');
+      setError('Please fill in all password fields');
       return;
     }
 
@@ -54,29 +64,40 @@ export const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({
       return;
     }
 
-    if (!token) {
+    if (!resetToken) {
       setError('Invalid reset token');
       return;
     }
 
+    console.log('[ResetPasswordForm] resetToken:', resetToken);
+    console.log('[ResetPasswordForm] email:', email);
+
     try {
       setIsLoading(true);
 
-      // Hash the new password
-      const hashedPassword = await handlePasswordHash(newPassword);
+      // Call reset password endpoint with reset token in X-Reset-Token header
+      const response = await apiClient.post<any>(
+        API_ENDPOINTS.auth.resetPassword,
+        {
+          email,
+          newPassword,
+        },
+        {
+          headers: {
+            'X-Reset-Token': resetToken,
+          },
+        }
+      );
 
-      // TODO: Implement reset-password endpoint on backend
-      // Suggested endpoint: POST /api/v1/auth/reset-password
-      const endpoint = '/api/v1/auth/reset-password';
-
-      await apiClient.post(endpoint, {
-        token,
-        newPassword: hashedPassword,
-        confirmPassword: hashedPassword,
-      });
+      console.log('[ResetPasswordForm] Response:', response);
 
       setSuccess(true);
       onSuccess?.();
+
+      // Redirect to login page after success message
+      setTimeout(() => {
+        router.push(`/${locale}/login`);
+      }, 2000);
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : 'Failed to reset password';
@@ -89,70 +110,156 @@ export const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({
 
   if (success) {
     return (
-      <div className="space-y-4 w-full max-w-md">
-        <div className="p-4 bg-green-100 text-green-800 rounded border border-green-400">
+      <form className="space-y-6 w-full max-w-md">
+        {/* Logo and Website Name */}
+        <div className="flex items-center justify-center mb-8 cursor-pointer group" onClick={() => router.push(`/${locale}`)}>
+          <img 
+            src="/logo-nobg.png" 
+            alt="SmartMoney" 
+            className="h-12 w-12 object-contain mr-3 group-opacity-80 transition-opacity flex-shrink-0"
+            style={{ filter: colorScheme === 'dark' ? 'brightness(0) invert(1)' : 'none' }}
+          />
+          <h1 className="text-2xl font-bold flex items-center">
+            <span style={{ color: colorScheme === 'dark' ? colors.palette?.white : colors.interactive.primary }}>Smart</span>
+            <span style={{ color: colorScheme === 'dark' ? colors.palette?.white : colors.interactive.secondary }}>Money</span>
+          </h1>
+        </div>
+
+        {/* Success Message */}
+        <div className="text-center mb-8">
+          <Heading level={1} className="mb-2">Success!</Heading>
+          <Text className="text-base" style={{ color: colors.text.secondary }}>
+            Your password has been reset
+          </Text>
+        </div>
+
+        <div className="p-4 bg-green-100 text-green-700 rounded-lg border border-green-400">
           <h3 className="font-semibold mb-2">Password Reset Successful</h3>
           <p className="text-sm">
-            Your password has been reset. You can now login with your new password.
+            Your password has been reset successfully. You can now login with your new password.
           </p>
         </div>
 
+        <p className="text-center text-sm" style={{ color: colors.text.secondary }}>
+          Redirecting to login...
+        </p>
+
         <Link href={`/${locale}/login`}>
-          <Button variant="primary" className="w-full">
-            Back to Login
+          <Button variant="primary" className="w-full py-3 text-lg font-semibold">
+            Go to Login
           </Button>
         </Link>
-      </div>
+      </form>
     );
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 w-full max-w-md">
-      <div className="mb-4">
-        <h2 className="text-xl font-semibold mb-2">Set New Password</h2>
-        <p className="text-sm text-gray-600">
-          Enter your new password below.
-        </p>
+    <form onSubmit={handleSubmit} className="space-y-6 w-full max-w-md">
+      {/* Logo and Website Name - Clickable */}
+      <div className="flex items-center justify-center mb-8 cursor-pointer group" onClick={() => router.push(`/${locale}`)}>
+        <img 
+          src="/logo-nobg.png" 
+          alt="SmartMoney" 
+          className="h-12 w-12 object-contain mr-3 group-opacity-80 transition-opacity flex-shrink-0"
+          style={{ filter: colorScheme === 'dark' ? 'brightness(0) invert(1)' : 'none' }}
+        />
+        <h1 className="text-2xl font-bold flex items-center">
+          <span style={{ color: colorScheme === 'dark' ? colors.palette?.white : colors.interactive.primary }}>Smart</span>
+          <span style={{ color: colorScheme === 'dark' ? colors.palette?.white : colors.interactive.secondary }}>Money</span>
+        </h1>
+      </div>
+
+      {/* Title and Subtitle */}
+      <div className="text-center mb-8">
+        <Heading level={1} className="mb-2">Set New Password</Heading>
+        <Text className="text-base" style={{ color: colors.text.secondary }}>
+          Enter your new password below
+        </Text>
       </div>
 
       {error && (
-        <div className="p-3 bg-red-100 text-red-700 rounded border border-red-400">
+        <div className="p-4 bg-red-100 text-red-700 rounded-lg border border-red-400">
           {error}
         </div>
       )}
 
-      <Input
-        type="password"
-        label="New Password"
-        value={newPassword}
-        onChange={(e) => setNewPassword(e.target.value)}
-        placeholder="Enter new password"
-        required
-        disabled={isLoading}
-      />
+      {/* Email Display (Read-only) */}
+      <div className="p-3 rounded-lg" style={{ backgroundColor: colorScheme === 'dark' ? colors.palette?.[800] : colors.palette?.['100'] }}>
+        <p className="text-sm font-semibold" style={{ color: colors.text.primary }}>
+          Account: <span className="font-bold">{email}</span>
+        </p>
+      </div>
 
-      <Input
-        type="password"
-        label="Confirm Password"
-        value={confirmPassword}
-        onChange={(e) => setConfirmPassword(e.target.value)}
-        placeholder="Confirm new password"
-        required
-        disabled={isLoading}
-      />
+      {/* New Password Input */}
+      <div className="relative">
+        <Input
+          type={showPassword ? 'text' : 'password'}
+          label="New Password"
+          value={newPassword}
+          onChange={(e) => setNewPassword(e.target.value)}
+          placeholder="Enter new password"
+          required
+          disabled={isLoading}
+        />
+        <button
+          type="button"
+          onClick={() => setShowPassword(!showPassword)}
+          disabled={isLoading}
+          className="absolute right-5 top-10 flex items-center transition-opacity hover:opacity-70 disabled:opacity-50 hover:cursor-pointer"
+          style={{ color: colors.interactive.primary }}
+          title={showPassword ? 'Hide password' : 'Show password'}
+        >
+          {showPassword ? (
+            <MdVisibilityOff size={20} />
+          ) : (
+            <MdVisibility size={20} />
+          )}
+        </button>
+      </div>
+
+      {/* Confirm Password Input */}
+      <div className="relative">
+        <Input
+          type={showConfirmPassword ? 'text' : 'password'}
+          label="Confirm Password"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          placeholder="Confirm new password"
+          required
+          disabled={isLoading}
+        />
+        <button
+          type="button"
+          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+          disabled={isLoading}
+          className="absolute right-5 top-10 flex items-center transition-opacity hover:opacity-70 disabled:opacity-50 hover:cursor-pointer"
+          style={{ color: colors.interactive.primary }}
+          title={showConfirmPassword ? 'Hide password' : 'Show password'}
+        >
+          {showConfirmPassword ? (
+            <MdVisibilityOff size={20} />
+          ) : (
+            <MdVisibility size={20} />
+          )}
+        </button>
+      </div>
 
       <Button
         variant="primary"
         type="submit"
-        className="w-full"
+        className="w-full py-3 mt-6 text-lg font-semibold"
         disabled={isLoading}
       >
-        {isLoading ? 'Resetting...' : 'Reset Password'}
+        {isLoading ? 'Resetting Password...' : 'Reset Password'}
       </Button>
 
-      <p className="text-center text-sm text-gray-600">
+      <p className="text-center text-sm" style={{ color: colors.text.secondary }}>
         Remember your password?{' '}
-        <Link href={`/${locale}/login`} className="text-blue-600 hover:text-blue-800 underline">
+        <Link 
+          href={`/${locale}/login`}
+          className="font-semibold hover:opacity-80 transition-opacity"
+          style={{ color: colors.interactive.primary }}
+        >
           Back to Login
         </Link>
       </p>

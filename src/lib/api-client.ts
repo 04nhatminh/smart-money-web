@@ -50,6 +50,7 @@ export const apiClient = {
       const response = await fetch(`${API_URL}${endpoint}`, {
         method: 'GET',
         headers: getHeaders(),
+        credentials: 'include',
       });
 
       const data = await response.json();
@@ -77,13 +78,25 @@ export const apiClient = {
     }
   },
 
-  async post<T>(endpoint: string, body: unknown): Promise<T> {
+  async post<T>(endpoint: string, body: unknown, config?: { headers?: Record<string, string> }): Promise<T> {
     try {
+      const headers = { ...getHeaders(), ...(config?.headers || {}) };
+      const jsonBody = JSON.stringify(body);
+      
+      // Log request details
+      console.log(`[API] POST ${API_URL}${endpoint}`);
+      console.log(`[API] Headers:`, headers);
+      console.log(`[API] Body:`, jsonBody);
+      
       const response = await fetch(`${API_URL}${endpoint}`, {
         method: 'POST',
-        headers: getHeaders(),
-        body: JSON.stringify(body),
+        headers,
+        body: jsonBody,
+        credentials: 'include',
       });
+
+      console.log(`[API] Response status:`, response.status);
+      console.log(`[API] Response headers:`, Object.fromEntries(response.headers.entries()));
 
       const data = await response.json();
 
@@ -117,6 +130,7 @@ export const apiClient = {
         method: 'PUT',
         headers: getHeaders(),
         body: JSON.stringify(body),
+        credentials: 'include',
       });
 
       const data = await response.json();
