@@ -4,23 +4,10 @@ import React from 'react';
 import { useTheme } from '@/context/ThemeContext';
 import { Text } from '@/components/atoms';
 import { formatVietnamsePrice } from '@/lib/format';
+import { getCategoryIcon } from '@/constants/categoryIcons';
 import {
-  MdAttachMoney,
-  MdFastfood,
-  MdHome,
-  MdLocalGroceryStore,
-  MdShoppingCart,
-  MdWaterDrop,
-  MdElectricBolt,
   MdEdit,
   MdDelete,
-  MdDirectionsCar,
-  MdShoppingBag,
-  MdLightbulb,
-  MdLocalMovies,
-  MdFavorite,
-  MdSchool,
-  MdHelpOutline,
 } from 'react-icons/md';
 
 interface TransactionRowProps {
@@ -35,29 +22,17 @@ interface TransactionRowProps {
   onDelete?: (id: string) => void;
 }
 
-const getCategoryIcon = (category: string): React.ReactNode => {
-  const categoryMap: { [key: string]: React.ReactNode } = {
-    // Old lowercase format (deprecated, kept for backward compatibility)
-    salary: <MdAttachMoney className="w-6 h-6" />,
-    food: <MdFastfood className="w-6 h-6" />,
-    housing: <MdHome className="w-6 h-6" />,
-    grocery: <MdLocalGroceryStore className="w-6 h-6" />,
-    shopping: <MdShoppingCart className="w-6 h-6" />,
-    utilities: <MdWaterDrop className="w-6 h-6" />,
-    electricity: <MdElectricBolt className="w-6 h-6" />,
-    // New API format (uppercase)
-    FOOD: <MdFastfood className="w-6 h-6" />,
-    TRANSPORTATION: <MdDirectionsCar className="w-6 h-6" />,
-    CLOTHING: <MdShoppingBag className="w-6 h-6" />,
-    UTILITIES: <MdLightbulb className="w-6 h-6" />,
-    ENTERTAINMENT: <MdLocalMovies className="w-6 h-6" />,
-    HEALTH: <MdFavorite className="w-6 h-6" />,
-    EDUCATION: <MdSchool className="w-6 h-6" />,
-    SHOPPING: <MdShoppingCart className="w-6 h-6" />,
-    OTHER: <MdHelpOutline className="w-6 h-6" />,
-  };
-  return categoryMap[category] || categoryMap[category.toLowerCase()] || <MdShoppingCart className="w-6 h-6" />;
-};
+interface TransactionRowProps {
+  id: string;
+  title: string;
+  category: string;
+  date: string;
+  amount: number;
+  type: 'income' | 'expense' | 'INCOME' | 'EXPENSE';
+  icon?: React.ReactNode;
+  onEdit?: (id: string) => void;
+  onDelete?: (id: string) => void;
+}
 
 export const TransactionRow: React.FC<TransactionRowProps> = ({
   id,

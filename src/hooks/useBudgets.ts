@@ -1,38 +1,42 @@
 import { useCallback, useState } from 'react';
 import { apiClient } from '@/lib/api-client';
 import { API_ENDPOINTS } from '@/constants/api';
-import { Transaction, CreateTransactionRequest, UpdateTransactionRequest } from '@/types/transaction.api';
+import { Budget, CreateBudgetRequest, UpdateBudgetRequest } from '@/types/budget.api';
 
-interface TransactionsResponse {
-  transactions?: Transaction[];
-  content?: Transaction[];
-  items?: Transaction[];
+interface BudgetsResponse {
+  budgets?: Budget[];
+  content?: Budget[];
+  items?: Budget[];
+  month?: number;
+  year?: number;
   totalElements?: number;
   totalPages?: number;
   currentPage?: number;
 }
 
-export const useTransactions = () => {
+export const useBudgets = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // GET - List transactions
-  const listTransactions = useCallback(
-    async (page = 0, size = 10) => {
+  // GET - List budgets
+  const listBudgets = useCallback(
+    async (month: number, year: number) => {
       try {
         setIsLoading(true);
         setError(null);
 
         const response = await apiClient.get<any>(
-          `${API_ENDPOINTS.transactions.list}?page=${page}&size=${size}`
+          `${API_ENDPOINTS.budgets.list}?month=${month}&year=${year}`
         );
 
+        console.log('Fetched budgets:', response);
         return {
-          data: response.data as TransactionsResponse,
+          data: response.data,  // ← Extract inner data object
           success: true,
         };
       } catch (err) {
-        const errorMsg = err instanceof Error ? err.message : 'Failed to fetch transactions';
+        console.error('Failed to fetch budgets:', err);
+        const errorMsg = err instanceof Error ? err.message : 'Failed to fetch budgets';
         setError(errorMsg);
         return {
           data: null,
@@ -46,26 +50,25 @@ export const useTransactions = () => {
     []
   );
 
-  // GET - Get single transaction by ID
-  const getTransaction = useCallback(
+  // GET - Get single budget by ID
+  const getBudget = useCallback(
     async (id: string) => {
       try {
         setIsLoading(true);
         setError(null);
 
         const response = await apiClient.get<any>(
-          API_ENDPOINTS.transactions.getById(id)
+          API_ENDPOINTS.budgets.getById(id)
         );
 
         return {
-          data: response.data as Transaction,
           success: true,
+          data: response.data,
         };
       } catch (err) {
-        const errorMsg = err instanceof Error ? err.message : 'Failed to fetch transaction';
+        const errorMsg = err instanceof Error ? err.message : 'Failed to fetch budget';
         setError(errorMsg);
         return {
-          data: null,
           success: false,
           error: errorMsg,
         };
@@ -76,27 +79,29 @@ export const useTransactions = () => {
     []
   );
 
-  // POST - Create transaction
-  const createTransaction = useCallback(
-    async (data: CreateTransactionRequest) => {
+  // POST - Create budget
+  const createBudget = useCallback(
+    async (data: CreateBudgetRequest) => {
       try {
         setIsLoading(true);
         setError(null);
 
+        console.log('Creating budget with data:', data);
         const response = await apiClient.post<any>(
-          API_ENDPOINTS.transactions.create,
+          API_ENDPOINTS.budgets.create,
           data
         );
 
+        console.log('Budget created successfully:', response);
         return {
-          data: response.data as Transaction,
           success: true,
+          data: response.data,
         };
       } catch (err) {
-        const errorMsg = err instanceof Error ? err.message : 'Failed to create transaction';
+        console.error('Create budget error:', err);
+        const errorMsg = err instanceof Error ? err.message : 'Failed to create budget';
         setError(errorMsg);
         return {
-          data: null,
           success: false,
           error: errorMsg,
         };
@@ -107,27 +112,26 @@ export const useTransactions = () => {
     []
   );
 
-  // PUT - Update transaction
-  const updateTransaction = useCallback(
-    async (id: string, data: UpdateTransactionRequest) => {
+  // PUT - Update budget
+  const updateBudget = useCallback(
+    async (id: string, data: UpdateBudgetRequest) => {
       try {
         setIsLoading(true);
         setError(null);
 
         const response = await apiClient.put<any>(
-          API_ENDPOINTS.transactions.update(id),
+          API_ENDPOINTS.budgets.update(id),
           data
         );
 
         return {
-          data: response.data as Transaction,
           success: true,
+          data: response.data,
         };
       } catch (err) {
-        const errorMsg = err instanceof Error ? err.message : 'Failed to update transaction';
+        const errorMsg = err instanceof Error ? err.message : 'Failed to update budget';
         setError(errorMsg);
         return {
-          data: null,
           success: false,
           error: errorMsg,
         };
@@ -138,20 +142,20 @@ export const useTransactions = () => {
     []
   );
 
-  // DELETE - Delete transaction
-  const deleteTransaction = useCallback(
+  // DELETE - Delete budget
+  const deleteBudget = useCallback(
     async (id: string) => {
       try {
         setIsLoading(true);
         setError(null);
 
-        await apiClient.delete(API_ENDPOINTS.transactions.delete(id));
+        await apiClient.delete<null>(API_ENDPOINTS.budgets.delete(id));
 
         return {
           success: true,
         };
       } catch (err) {
-        const errorMsg = err instanceof Error ? err.message : 'Failed to delete transaction';
+        const errorMsg = err instanceof Error ? err.message : 'Failed to delete budget';
         setError(errorMsg);
         return {
           success: false,
@@ -167,12 +171,10 @@ export const useTransactions = () => {
   return {
     isLoading,
     error,
-    setError,
-    // Operations
-    listTransactions,
-    getTransaction,
-    createTransaction,
-    updateTransaction,
-    deleteTransaction,
+    listBudgets,
+    getBudget,
+    createBudget,
+    updateBudget,
+    deleteBudget,
   };
 };
