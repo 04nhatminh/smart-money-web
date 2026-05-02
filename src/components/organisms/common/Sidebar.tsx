@@ -6,7 +6,7 @@ import { useLocale } from 'next-intl';
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
 import { LogoutButton } from '@/components/molecules/auth';
-import { MdDashboard, MdTrendingUp, MdPersonOutline, MdAccountBalanceWallet } from 'react-icons/md';
+import { MdDashboard, MdTrendingUp, MdPersonOutline, MdAccountBalanceWallet, MdPieChart } from 'react-icons/md';
 
 interface NavItem {
   id: string;
@@ -29,6 +29,12 @@ export const Sidebar: React.FC = () => {
       label: 'Dashboard',
       href: `/${locale}/dashboard`,
       icon: <MdDashboard className="w-5 h-5" />,
+    },
+    {
+      id: 'budgets',
+      label: 'Budgets',
+      href: `/${locale}/budgets`,
+      icon: <MdPieChart className="w-5 h-5" />,
     },
     {
       id: 'goals',

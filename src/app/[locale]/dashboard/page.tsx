@@ -84,7 +84,7 @@ export default function DashboardPage() {
   const loadTransactions = async () => {
     const result = await listTransactions(0, 50);
     if (result.success && result.data) {
-      setTransactions((result.data as any).transactions || result.data.content || []);
+      setTransactions((result.data as any).items || (result.data as any).transactions || result.data.content || []);
     } else {
       setTransactions([]);
     }
