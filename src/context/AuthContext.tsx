@@ -32,6 +32,7 @@ interface AuthContextType {
   loginWithFacebook: (accessToken: string) => Promise<void>;
   logout: () => void;
   refreshAuth: () => Promise<void>;
+  updateUser: (updates: Partial<User>) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -231,6 +232,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [logout]);
 
+  const updateUser = useCallback((updates: Partial<User>) => {
+    if (user) {
+      const updatedUser = { ...user, ...updates };
+      setAuthUser(updatedUser);
+      setUser(updatedUser);
+    }
+  }, [user]);
+
   const value: AuthContextType = {
     user,
     token,
@@ -243,6 +252,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     loginWithFacebook,
     logout,
     refreshAuth,
+    updateUser,
   };
 
   return (

@@ -144,5 +144,31 @@
     "markAllAsRead": "Mark All as Read",
     "noNotifications": "No Notifications",
     "noNotificationsDesc": "You don't have any notifications yet."
+  },
+  "profile": {
+    "editProfile": "Edit Profile",
+    "editProfileDescription": "Update your profile information",
+    "avatar": "Avatar",
+    "uploadAvatar": "Upload Avatar",
+    "avatarHint": "JPG, PNG or GIF (max. 5MB)",
+    "avatarTooLarge": "Avatar file is too large (max. 5MB)",
+    "invalidImageFormat": "Invalid image format. Please upload an image file.",
+    "fullName": "Full Name",
+    "fullNamePlaceholder": "Enter your full name",
+    "nameToolong": "Full name must be at most 40 characters",
+    "phone": "Phone",
+    "phonePlaceholder": "Enter your phone number",
+    "phoneInvalid": "Phone number must contain only digits",
+    "phoneFormatInvalid": "Phone number must have 10 digits and start with 0 (e.g., 0123456789)",
+    "dateOfBirth": "Date of Birth",
+    "dateOfBirthPlaceholder": "dd/MM/yyyy",
+    "dateFormatHint": "Format: dd/MM/yyyy (e.g., 15/03/1990)",
+    "dateFormatInvalid": "Invalid date format. Please use dd/MM/yyyy",
+    "updateSuccess": "Profile updated successfully",
+    "failedToLoadProfile": "Failed to load profile information",
+    "editInfoTitle": "Update Information",
+    "editInfoItem1": "You can update your name, phone number, and date of birth",
+    "editInfoItem2": "Upload a new avatar by clicking the upload button",
+    "editInfoItem3": "All changes will be saved immediately"
   }
 }

@@ -80,3 +80,43 @@ export const formatAmountInput = (value: string): string => {
 // Backward compatibility aliases
 export const formatVietnamseNumber = formatNumber;
 export const formatVietnamsePrice = formatPrice;
+
+/**
+ * Convert date from various formats to dd/MM/yyyy format
+ * Supports: ISO (YYYY-MM-DD), ISO with time, and already formatted dd/MM/yyyy
+ * @param dateString - Date in various formats
+ * @returns Formatted date string in dd/MM/yyyy format
+ */
+export const formatDateToInput = (dateString: string | undefined): string => {
+  if (!dateString || typeof dateString !== 'string') {
+    return '';
+  }
+
+  const trimmed = dateString.trim();
+
+  // If already in dd/MM/yyyy format, return as is
+  if (/^\d{2}\/\d{2}\/\d{4}$/.test(trimmed)) {
+    return trimmed;
+  }
+
+  // Handle ISO format (YYYY-MM-DD or YYYY-MM-DDTHH:mm:ss)
+  try {
+    // Extract just the date part if it has time
+    const datePart = trimmed.split('T')[0];
+    const [year, month, day] = datePart.split('-');
+    
+    if (year && month && day && year.length === 4 && month.length === 2 && day.length === 2) {
+      // Validate the date
+      const date = new Date(`${year}-${month}-${day}`);
+      if (!isNaN(date.getTime())) {
+        return `${day}/${month}/${year}`;
+      }
+    }
+  } catch (error) {
+    console.error('Error formatting date:', dateString, error);
+  }
+
+  // If unable to parse, return empty
+  console.warn('Unable to format date:', dateString);
+  return '';
+};

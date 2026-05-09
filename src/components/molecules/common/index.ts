@@ -14,3 +14,4 @@ export { CreateBudgetModal } from './CreateBudgetModal';
 export { EditBudgetModal } from './EditBudgetModal';
 export { BudgetProgressCard } from './BudgetProgressCard';
 export { DeleteConfirmationModal } from './DeleteConfirmationModal';
+export { ProfileEditForm } from './ProfileEditForm';
