@@ -6,13 +6,12 @@ import { useLocale } from 'next-intl';
 import { useAuth } from '@/context/AuthContext';
 import { SidebarLayout } from '@/components/templates';
 import { Heading, Text, Button } from '@/components/atoms';
-import { Card, StatCard, TransactionRow, CreateTransactionModal, EditTransactionModal, TransactionMethodModal, ImageBillUploadModal, VoiceRecordModal } from '@/components/molecules/common';
+import { Card, StatCard, TransactionRow, CreateTransactionModal, EditTransactionModal, TransactionMethodModal, ImageBillUploadModal, VoiceRecordModal, TransactionFilter, type TransactionFilterState } from '@/components/molecules/common';
 import { useTheme } from '@/context/ThemeContext';
-import { useTransactions } from '@/hooks/useTransactions';
+import { useTransactions, type TransactionFilters } from '@/hooks/useTransactions';
 import { transformAIResultToFormData } from '@/lib/ai-result-transformer';
 import { MdAdd } from 'react-icons/md';
-import { MdAccountBalanceWallet, MdTrendingUp, MdTrendingDown } from 'react-icons/md';
-import { MdAttachMoney, MdFastfood, MdDirectionsCar, MdShoppingBag, MdLightbulb, MdLocalMovies, MdFavorite, MdSchool, MdShoppingCart, MdHelpOutline } from 'react-icons/md';
+import { MdAccountBalanceWallet, MdTrendingUp, MdTrendingDown, MdRefresh } from 'react-icons/md';
 import { formatVietnamsePrice } from '@/lib/format';
 
 interface Transaction {
@@ -28,42 +27,13 @@ interface Transaction {
   updatedAt?: string;
 }
 
-const EXPENSE_CATEGORIES = [
-  'FOOD',
-  'TRANSPORTATION',
-  'CLOTHING',
-  'UTILITIES',
-  'ENTERTAINMENT',
-  'HEALTH',
-  'EDUCATION',
-  'SHOPPING',
-  'OTHER',
-];
-
-const getCategoryIcon = (category: string): React.ReactNode => {
-  const iconMap: { [key: string]: React.ReactNode } = {
-    FOOD: <MdFastfood className="w-6 h-6" />,
-    TRANSPORTATION: <MdDirectionsCar className="w-6 h-6" />,
-    CLOTHING: <MdShoppingBag className="w-6 h-6" />,
-    UTILITIES: <MdLightbulb className="w-6 h-6" />,
-    ENTERTAINMENT: <MdLocalMovies className="w-6 h-6" />,
-    HEALTH: <MdFavorite className="w-6 h-6" />,
-    EDUCATION: <MdSchool className="w-6 h-6" />,
-    SHOPPING: <MdShoppingCart className="w-6 h-6" />,
-    OTHER: <MdHelpOutline className="w-6 h-6" />,
-  };
-  return iconMap[category] || <MdHelpOutline className="w-6 h-6" />;
-};
-
 export default function DashboardPage() {
   const { user, isInitializing } = useAuth();
   const router = useRouter();
   const locale = useLocale();
   const { colors } = useTheme();
   const { isLoading, listTransactions, deleteTransaction } = useTransactions();
-  const [selectedFilter, setSelectedFilter] = useState<'all' | 'income' | 'expense'>('all');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [filterState, setFilterState] = useState<TransactionFilterState>({});
   const [isMethodModalOpen, setIsMethodModalOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
@@ -74,15 +44,21 @@ export default function DashboardPage() {
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [aiFormData, setAiFormData] = useState<any>(null);
 
-  // Load transactions after auth is initialized
+  // Load transactions after auth is initialized or filter changes
   useEffect(() => {
     if (!isInitializing) {
       loadTransactions();
     }
-  }, [isInitializing]);
+  }, [isInitializing, filterState]);
 
   const loadTransactions = async () => {
-    const result = await listTransactions(0, 50);
+    const apiFilters: TransactionFilters = {
+      page: 0,
+      size: 100,
+      ...filterState,
+    };
+    
+    const result = await listTransactions(apiFilters);
     if (result.success && result.data) {
       setTransactions((result.data as any).items || (result.data as any).transactions || result.data.content || []);
     } else {
@@ -133,22 +109,16 @@ export default function DashboardPage() {
     type: t.type,
   }));
 
-  const filteredTransactions = displayTransactions.filter((t) => {
-    const matchesFilter = selectedFilter === 'all' || (
-      selectedFilter === 'income' && t.type === 'INCOME'
-    ) || (
-      selectedFilter === 'expense' && t.type === 'EXPENSE'
-    );
-    
-    // Only apply category filter for expense transactions
-    const matchesCategory = selectedFilter !== 'expense' || selectedCategory === 'all' || t.category === selectedCategory;
-    
-    const matchesSearch =
-      t.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      t.category.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    return matchesFilter && matchesCategory && matchesSearch;
-  });
+  // Client-side search filter (if needed for search term not handled by API)
+  const filteredTransactions = filterState.search
+    ? displayTransactions.filter((t) => {
+        const searchLower = filterState.search!.toLowerCase();
+        return (
+          t.title.toLowerCase().includes(searchLower) ||
+          t.category.toLowerCase().includes(searchLower)
+        );
+      })
+    : displayTransactions;
 
   // Calculate stats
   const totalBalance = displayTransactions.reduce((acc, t) => {
@@ -210,137 +180,33 @@ export default function DashboardPage() {
         {/* Recent Transactions */}
         <Card className="p-6">
           <div className="mb-4">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <Heading level={3}>Recent Transactions</Heading>
-                <Text style={{ color: colors.text.secondary }} className="text-sm">
-                  Track all your income and expenses
-                </Text>
-              </div>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => {
-                    setSelectedFilter('all');
-                    setSelectedCategory('all');
-                  }}
-                  className={`px-4 py-2 rounded-lg font-medium transition-all hover:cursor-pointer ${
-                    selectedFilter === 'all'
-                      ? 'text-white'
-                      : 'text-gray-600'
-                  }`}
-                  style={{
-                    backgroundColor: selectedFilter === 'all' ? colors.interactive.primary : colors.surface.secondary,
-                  }}
-                >
-                  All
-                </button>
-                <button
-                  onClick={() => {
-                    setSelectedFilter('income');
-                    setSelectedCategory('all');
-                  }}
-                  className={`px-4 py-2 rounded-lg font-medium transition-all hover:cursor-pointer ${
-                    selectedFilter === 'income'
-                      ? 'text-white'
-                      : 'text-gray-600'
-                  }`}
-                  style={{
-                    backgroundColor: selectedFilter === 'income' ? colors.interactive.primary : colors.surface.secondary,
-                  }}
-                >
-                  Income
-                </button>
-                <button
-                  onClick={() => setSelectedFilter('expense')}
-                  className={`px-4 py-2 rounded-lg font-medium transition-all hover:cursor-pointer ${
-                    selectedFilter === 'expense'
-                      ? 'text-white'
-                      : 'text-gray-600'
-                  }`}
-                  style={{
-                    backgroundColor: selectedFilter === 'expense' ? colors.interactive.primary : colors.surface.secondary,
-                  }}
-                >
-                  Expenses
-                </button>
-              </div>
+            <div className="mb-6">
+              <Heading level={3}>Recent Transactions</Heading>
+              <Text style={{ color: colors.text.secondary }} className="text-sm">
+                Track all your income and expenses
+              </Text>
             </div>
 
-            <input
-              type="text"
-              placeholder="Search transactions..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full px-4 py-2 rounded-lg border"
-              style={{
-                backgroundColor: colors.surface.secondary,
-                borderColor: colors.border.light,
-                color: colors.text.primary,
-              }}
+            {/* Transaction Filter Component */}
+            <TransactionFilter
+              onFilterChange={setFilterState}
+              initialFilters={filterState}
             />
-
-            {/* Category Filter - Only shown for EXPENSE */}
-            {selectedFilter === 'expense' && (
-              <div className="space-y-3 mt-4">
-                <Text style={{ color: colors.text.secondary }} className="text-sm font-medium">
-                  Filter by Category
-                </Text>
-                <div className="grid grid-cols-5 gap-3 sm:grid-cols-4 md:grid-cols-5">
-                  {/* All Categories Button */}
-                  <button
-                    onClick={() => setSelectedCategory('all')}
-                    className="flex flex-col items-center justify-center p-3 rounded-lg border-2 transition-all hover:cursor-pointer hover:opacity-80"
-                    style={{
-                      backgroundColor: selectedCategory === 'all' ? colors.interactive.primary : colors.surface.secondary,
-                      borderColor: selectedCategory === 'all' ? colors.interactive.primary : colors.border.light,
-                    }}
-                  >
-                    <MdAttachMoney
-                      className="w-6 h-6 mb-1"
-                      style={{ color: selectedCategory === 'all' ? '#ffffff' : colors.text.primary }}
-                    />
-                    <span
-                      className="text-xs font-medium text-center"
-                      style={{ color: selectedCategory === 'all' ? '#ffffff' : colors.text.primary }}
-                    >
-                      All
-                    </span>
-                  </button>
-
-                  {/* Category Buttons */}
-                  {EXPENSE_CATEGORIES.map(category => (
-                    <button
-                      key={category}
-                      onClick={() => setSelectedCategory(category)}
-                      className="flex flex-col items-center justify-center p-3 rounded-lg border-2 transition-all hover:cursor-pointer hover:opacity-80"
-                      style={{
-                        backgroundColor: selectedCategory === category ? colors.interactive.primary : colors.surface.secondary,
-                        borderColor: selectedCategory === category ? colors.interactive.primary : colors.border.light,
-                      }}
-                    >
-                      <div
-                        style={{ color: selectedCategory === category ? '#ffffff' : colors.text.primary }}
-                      >
-                        {getCategoryIcon(category)}
-                      </div>
-                      <span
-                        className="text-xs font-medium text-center mt-1"
-                        style={{ color: selectedCategory === category ? '#ffffff' : colors.text.primary }}
-                      >
-                        {category.charAt(0).toUpperCase() + category.slice(1).toLowerCase()}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
 
           {/* Transaction List */}
           <div className="space-y-3">
             {isLoading ? (
-              <div className="text-center py-8">
-                <Text style={{ color: colors.text.secondary }}>Loading transactions...</Text>
+              <div className="flex items-center justify-center py-12">
+                <div className="flex flex-col items-center gap-3">
+                  <MdRefresh 
+                    className="w-8 h-8 animate-spin" 
+                    style={{ color: colors.interactive.primary }}
+                  />
+                  <Text style={{ color: colors.text.secondary }} className="text-sm">
+                    Loading transactions...
+                  </Text>
+                </div>
               </div>
             ) : filteredTransactions.length > 0 ? (
               filteredTransactions.map((transaction) => (
@@ -377,9 +243,6 @@ export default function DashboardPage() {
           onSuccess={() => {
             // Refresh transaction list
             loadTransactions();
-            setSearchTerm('');
-            setSelectedFilter('all');
-            setAiFormData(null);
           }}
         />
 
