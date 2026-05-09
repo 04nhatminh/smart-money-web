@@ -6,7 +6,7 @@ import { useLocale } from 'next-intl';
 import { useAuth } from '@/context/AuthContext';
 import { SidebarLayout } from '@/components/templates';
 import { Heading, Text, Button } from '@/components/atoms';
-import { Card, StatCard, TransactionRow, CreateTransactionModal, EditTransactionModal, TransactionMethodModal, ImageBillUploadModal, VoiceRecordModal, TransactionFilter, type TransactionFilterState } from '@/components/molecules/common';
+import { Card, StatCard, TransactionRow, CreateTransactionModal, EditTransactionModal, TransactionMethodModal, ImageBillUploadModal, VoiceRecordModal, TransactionFilter, Pagination, type TransactionFilterState } from '@/components/molecules/common';
 import { useTheme } from '@/context/ThemeContext';
 import { useTransactions, type TransactionFilters } from '@/hooks/useTransactions';
 import { transformAIResultToFormData } from '@/lib/ai-result-transformer';
@@ -43,26 +43,35 @@ export default function DashboardPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [aiFormData, setAiFormData] = useState<any>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalElements, setTotalElements] = useState(0);
+  const ITEMS_PER_PAGE = 10;
 
   // Load transactions after auth is initialized or filter changes
   useEffect(() => {
     if (!isInitializing) {
-      loadTransactions();
+      setCurrentPage(1); // Reset to first page when filters change
+      loadTransactions(1);
     }
   }, [isInitializing, filterState]);
 
-  const loadTransactions = async () => {
+  const loadTransactions = async (page: number = currentPage) => {
     const apiFilters: TransactionFilters = {
-      page: 0,
-      size: 100,
+      page: page - 1, // API uses 0-indexed pages
+      size: ITEMS_PER_PAGE,
       ...filterState,
     };
     
     const result = await listTransactions(apiFilters);
     if (result.success && result.data) {
       setTransactions((result.data as any).items || (result.data as any).transactions || result.data.content || []);
+      setTotalPages((result.data as any).totalPages || 1);
+      setTotalElements((result.data as any).totalElements || 0);
     } else {
       setTransactions([]);
+      setTotalPages(1);
+      setTotalElements(0);
     }
   };
 
@@ -209,19 +218,42 @@ export default function DashboardPage() {
                 </div>
               </div>
             ) : filteredTransactions.length > 0 ? (
-              filteredTransactions.map((transaction) => (
-                <TransactionRow
-                  key={transaction.id}
-                  id={transaction.id}
-                  title={transaction.title}
-                  category={transaction.category}
-                  date={transaction.date}
-                  amount={transaction.amount}
-                  type={transaction.type}
-                  onEdit={handleEditClick}
-                  onDelete={handleDeleteClick}
-                />
-              ))
+              <>
+                {filteredTransactions.map((transaction) => (
+                  <TransactionRow
+                    key={transaction.id}
+                    id={transaction.id}
+                    title={transaction.title}
+                    category={transaction.category}
+                    date={transaction.date}
+                    amount={transaction.amount}
+                    type={transaction.type}
+                    onEdit={handleEditClick}
+                    onDelete={handleDeleteClick}
+                  />
+                ))}
+                {/* Pagination */}
+                <div className="mt-6 pt-4 border-t" style={{ borderColor: colors.text.secondary }}>
+                  <div className="space-y-3">
+                    <Pagination
+                      currentPage={currentPage}
+                      totalPages={totalPages}
+                      onPageChange={(page) => {
+                        setCurrentPage(page);
+                        loadTransactions(page);
+                      }}
+                    />
+                    <div className="flex items-center justify-center gap-4" style={{ color: colors.text.secondary }}>
+                      <Text variant="caption" className="text-sm">
+                        Showing {((currentPage - 1) * ITEMS_PER_PAGE) + 1} to {Math.min(currentPage * ITEMS_PER_PAGE, totalElements)} of {totalElements} transactions
+                      </Text>
+                      <Text variant="caption" className="text-sm">
+                        • {ITEMS_PER_PAGE} per page
+                      </Text>
+                    </div>
+                  </div>
+                </div>
+              </>
             ) : (
               <div className="text-center py-8">
                 <Text style={{ color: colors.text.secondary }}>
