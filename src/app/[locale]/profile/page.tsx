@@ -18,12 +18,34 @@ export default function ProfilePage() {
 
   const formatDate = (dateString?: string) => {
     if (!dateString) return 'N/A';
-    try {
-      const date = new Date(dateString);
-      return date.toLocaleDateString();
-    } catch {
+    
+    // If already in dd/MM/yyyy format, return as is
+    if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateString)) {
       return dateString;
     }
+
+    try {
+      // Handle ISO format (YYYY-MM-DD or YYYY-MM-DDTHH:mm:ss)
+      const datePart = dateString.split('T')[0];
+      const [year, month, day] = datePart.split('-');
+      
+      if (year && month && day) {
+        const date = new Date(`${year}-${month}-${day}`);
+        if (!isNaN(date.getTime())) {
+          return date.toLocaleDateString('vi-VN');
+        }
+      }
+      
+      // Fallback: try parsing the date as is
+      const date = new Date(dateString);
+      if (!isNaN(date.getTime())) {
+        return date.toLocaleDateString('vi-VN');
+      }
+    } catch {
+      // If all parsing fails, return original string
+    }
+    
+    return dateString;
   };
 
   return (
@@ -112,12 +134,6 @@ export default function ProfilePage() {
                     Date of Birth
                   </p>
                   <p className="text-lg font-semibold">{formatDate(user?.dateOfBirth)}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium mb-2" style={{ color: colors.text.secondary }}>
-                    User ID
-                  </p>
-                  <p className="text-lg font-semibold break-all text-sm">{user?.id || 'N/A'}</p>
                 </div>
                 <div>
                   <p className="text-sm font-medium mb-2" style={{ color: colors.text.secondary }}>

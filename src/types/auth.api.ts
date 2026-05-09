@@ -49,3 +49,28 @@ export type LoginResponse = ApiResponse<LoginData>;
 export type RegisterResponse = ApiResponse<LoginData>;
 export type GoogleLoginResponse = ApiResponse<LoginData>;
 export type FacebookLoginResponse = ApiResponse<LoginData>;
+
+// ============ User Profile ============
+export interface UserData {
+  id: string;
+  username: string;
+  email: string;
+  fullName?: string;
+  avatar?: string;
+  dateOfBirth?: string;
+  phone?: string;
+  coin?: number;
+  role?: string;
+  rate?: number;
+  active?: boolean;
+}
+
+export interface UpdateUserRequest {
+  fullName?: string;
+  avatar?: File;
+  dateOfBirth?: string; // format: dd/MM/yyyy
+  phone?: string;
+}
+
+export type UserResponse = ApiResponse<UserData>;
+export type GetCurrentUserResponse = ApiResponse<UserData>;

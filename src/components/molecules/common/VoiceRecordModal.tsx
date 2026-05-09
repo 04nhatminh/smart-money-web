@@ -338,7 +338,7 @@ export const VoiceRecordModal: React.FC<VoiceRecordModalProps> = ({ isOpen, onCl
                 <div className="w-8 h-8 rounded-full border-4 border-transparent" style={{ borderTopColor: colors.interactive.primary }}></div>
               </div>
               <Text style={{ color: colors.text.primary }} className="font-semibold">
-                Uploading voice to Cloudinary...
+                Uploading voice...
               </Text>
             </div>
           )}
