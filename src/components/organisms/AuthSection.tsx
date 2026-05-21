@@ -25,7 +25,7 @@ export const AuthSection: React.FC<AuthFormProps> = ({
             <p className="text-red-700 text-sm">{error}</p>
           </div>
         )}
-        <LoginForm onSubmit={onSubmit} isLoading={isLoading} />
+        <LoginForm/>
         <p className="text-center text-gray-600 text-sm mt-4">
           Don need an account yet
         </p>
