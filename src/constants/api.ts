@@ -7,6 +7,12 @@ export const API_ENDPOINTS = {
     logout: '/api/v1/auth/logout',
     register: '/api/v1/auth/register',
     refresh: '/api/v1/auth/refresh',
+    loginGoogle: '/api/v1/auth/login/google',
+    loginFacebook: '/api/v1/auth/login/facebook',
+    verifyEmail: '/api/v1/auth/verify-email',
+    verifyOtp: '/api/v1/auth/verify-otp',
+    resetPassword: '/api/v1/auth/reset-password',
+    forgotPassword: '/api/v1/auth/forgot',
   },
 
   // Transactions
@@ -25,6 +31,26 @@ export const API_ENDPOINTS = {
     getById: (id: string) => `/api/v1/saving-goals/${id}`,
     update: (id: string) => `/api/v1/saving-goals/${id}`,
     delete: (id: string) => `/api/v1/saving-goals/${id}`,
+  },
+
+  // Budgets
+  budgets: {
+    list: '/api/v1/budgets',
+    create: '/api/v1/budgets',
+    getById: (id: string) => `/api/v1/budgets/${id}`,
+    update: (id: string) => `/api/v1/budgets/${id}`,
+    delete: (id: string) => `/api/v1/budgets/${id}`,
+  },
+
+  // Media (Image and Voice uploads for AI analysis)
+  media: {
+    uploadImage: '/api/v1/transactions/upload-image',
+    uploadVoice: '/api/v1/transactions/upload-voice',
+  },
+
+  // AI
+  ai: {
+    submit: '/api/v1/ai',
   },
 
   // Users

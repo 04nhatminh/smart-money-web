@@ -29,11 +29,10 @@ const getInitialTheme = (): ColorScheme => {
 };
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Initialize with actual value, not just 'light'
-  const [colorScheme, setColorSchemeState] = useState<ColorScheme>(() => getInitialTheme());
+  const [colorScheme, setColorSchemeState] = useState<ColorScheme>('light');
   const [isMounted, setIsMounted] = useState(false);
 
-  // Apply theme on mount to ensure consistency
+  // Only run once after hydration
   useEffect(() => {
     const current = getInitialTheme();
     setColorSchemeState(current);

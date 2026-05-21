@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { ThemeProvider } from '@/context';
+import { ThemeProvider, AuthProvider } from '@/context';
 
 interface ProvidersProps {
   children: React.ReactNode;
@@ -9,8 +9,10 @@ interface ProvidersProps {
 
 export function Providers({ children }: ProvidersProps) {
   return (
-    <ThemeProvider>
-      {children}
-    </ThemeProvider>
+    <AuthProvider>
+      <ThemeProvider>
+        {children}
+      </ThemeProvider>
+    </AuthProvider>
   );
 }

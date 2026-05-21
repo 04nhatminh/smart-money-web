@@ -10,7 +10,7 @@ export const ThemeToggle: React.FC = () => {
   return (
     <button
       onClick={toggleColorScheme}
-      className="relative inline-flex items-center rounded-full p-1 transition-colors duration-300 focus:outline-none focus:ring-2"
+      className="relative inline-flex items-center rounded-full p-1 transition-colors duration-300 focus:outline-none focus:ring-2 hover:cursor-pointer"
       style={{
         backgroundColor: colors.interactive.secondary,
         width: '60px',

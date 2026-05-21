@@ -28,7 +28,10 @@
     "security": "Bảo mật",
     "blog": "Blog",
     "helpCenter": "Trung tâm Trợ giúp",
-    "privacy": "Riêng tư"
+    "privacy": "Riêng tư",
+    "notifications": "Thông báo",
+    "dashboard": "Bảng điều khiển",
+    "profile": "Hồ sơ"
   },
   "page": {
     "title": "Thư viện Thành phần UI",
@@ -133,5 +136,39 @@
     "minLength": "Tối thiểu {min} ký tự",
     "maxLength": "Tối đa {max} ký tự",
     "passwordMatch": "Mật khẩu không trùng khớp"
+  },
+  "notifications": {
+    "welcome": "Chào mừng",
+    "accountUpdated": "Tài Khoản Được Cập Nhật",
+    "transaction": "Giao Dịch Được Xác Nhận",
+    "markAllAsRead": "Đánh Dấu Tất Cả Là Đã Đọc",
+    "noNotifications": "Không Có Thông Báo",
+    "noNotificationsDesc": "Bạn chưa có thông báo nào."
+  },
+  "profile": {
+    "editProfile": "Chỉnh Sửa Hồ Sơ",
+    "editProfileDescription": "Cập nhật thông tin hồ sơ của bạn",
+    "avatar": "Ảnh Đại Diện",
+    "uploadAvatar": "Tải Lên Ảnh Đại Diện",
+    "avatarHint": "JPG, PNG hoặc GIF (tối đa 5MB)",
+    "avatarTooLarge": "Tệp ảnh đại diện quá lớn (tối đa 5MB)",
+    "invalidImageFormat": "Định dạng hình ảnh không hợp lệ. Vui lòng tải lên tệp hình ảnh.",
+    "fullName": "Họ và Tên",
+    "fullNamePlaceholder": "Nhập họ và tên của bạn",
+    "nameToolong": "Họ và tên phải có tối đa 40 ký tự",
+    "phone": "Số Điện Thoại",
+    "phonePlaceholder": "Nhập số điện thoại của bạn",
+    "phoneInvalid": "Số điện thoại chỉ được chứa các chữ số",
+    "phoneFormatInvalid": "Số điện thoại phải gồm 10 số và bắt đầu bằng 0 (ví dụ: 0123456789)",
+    "dateOfBirth": "Ngày Sinh",
+    "dateOfBirthPlaceholder": "dd/MM/yyyy",
+    "dateFormatHint": "Định dạng: dd/MM/yyyy (ví dụ: 15/03/1990)",
+    "dateFormatInvalid": "Định dạng ngày không hợp lệ. Vui lòng sử dụng dd/MM/yyyy",
+    "updateSuccess": "Hồ sơ đã được cập nhật thành công",
+    "failedToLoadProfile": "Không thể tải thông tin hồ sơ",
+    "editInfoTitle": "Cập Nhật Thông Tin",
+    "editInfoItem1": "Bạn có thể cập nhật tên, số điện thoại và ngày sinh của mình",
+    "editInfoItem2": "Tải lên ảnh đại diện mới bằng cách nhấp vào nút tải lên",
+    "editInfoItem3": "Tất cả các thay đổi sẽ được lưu ngay lập tức"
   }
 }
