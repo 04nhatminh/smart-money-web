@@ -12,19 +12,49 @@ interface TransactionsResponse {
   currentPage?: number;
 }
 
+export interface TransactionFilters {
+  page?: number;
+  size?: number;
+  type?: 'INCOME' | 'EXPENSE';
+  category?: string;
+  minAmount?: number;
+  maxAmount?: number;
+  startDate?: string; // Format: dd/MM/yyyy HH:mm
+  endDate?: string;   // Format: dd/MM/yyyy HH:mm
+  search?: string;    // For client-side search by description
+  sortBy?: 'date' | 'amount' | 'category' | 'type' | 'description'; // Default: date
+  sortOrder?: 'ASC' | 'DESC'; // Default: DESC
+}
+
 export const useTransactions = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // GET - List transactions
+  // GET - List transactions with filters
   const listTransactions = useCallback(
-    async (page = 0, size = 10) => {
+    async (filters: TransactionFilters = {}) => {
       try {
         setIsLoading(true);
         setError(null);
 
+        const params = new URLSearchParams();
+        const { page = 0, size = 10, search, sortBy = 'date', sortOrder = 'DESC', ...apiFilters } = filters;
+
+        params.append('page', page.toString());
+        params.append('size', size.toString());
+        params.append('sortBy', sortBy);
+        params.append('sortOrder', sortOrder);
+
+        // Add API filter parameters
+        if (apiFilters.type) params.append('type', apiFilters.type);
+        if (apiFilters.category) params.append('category', apiFilters.category);
+        if (apiFilters.minAmount !== undefined) params.append('minAmount', apiFilters.minAmount.toString());
+        if (apiFilters.maxAmount !== undefined) params.append('maxAmount', apiFilters.maxAmount.toString());
+        if (apiFilters.startDate) params.append('startDate', apiFilters.startDate);
+        if (apiFilters.endDate) params.append('endDate', apiFilters.endDate);
+
         const response = await apiClient.get<any>(
-          `${API_ENDPOINTS.transactions.list}?page=${page}&size=${size}`
+          `${API_ENDPOINTS.transactions.list}?${params.toString()}`
         );
 
         return {
