@@ -22,6 +22,8 @@ export interface TransactionFilters {
   startDate?: string; // Format: dd/MM/yyyy HH:mm
   endDate?: string;   // Format: dd/MM/yyyy HH:mm
   search?: string;    // For client-side search by description
+  sortBy?: 'date' | 'amount' | 'category' | 'type' | 'description'; // Default: date
+  sortOrder?: 'ASC' | 'DESC'; // Default: DESC
 }
 
 export const useTransactions = () => {
@@ -36,10 +38,12 @@ export const useTransactions = () => {
         setError(null);
 
         const params = new URLSearchParams();
-        const { page = 0, size = 10, search, ...apiFilters } = filters;
+        const { page = 0, size = 10, search, sortBy = 'date', sortOrder = 'DESC', ...apiFilters } = filters;
 
         params.append('page', page.toString());
         params.append('size', size.toString());
+        params.append('sortBy', sortBy);
+        params.append('sortOrder', sortOrder);
 
         // Add API filter parameters
         if (apiFilters.type) params.append('type', apiFilters.type);

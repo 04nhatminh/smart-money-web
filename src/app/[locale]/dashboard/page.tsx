@@ -11,7 +11,7 @@ import { useTheme } from '@/context/ThemeContext';
 import { useTransactions, type TransactionFilters } from '@/hooks/useTransactions';
 import { transformAIResultToFormData } from '@/lib/ai-result-transformer';
 import { MdAdd } from 'react-icons/md';
-import { MdAccountBalanceWallet, MdTrendingUp, MdTrendingDown, MdRefresh } from 'react-icons/md';
+import { MdAccountBalanceWallet, MdTrendingUp, MdTrendingDown, MdRefresh, MdSort } from 'react-icons/md';
 import { formatVietnamsePrice } from '@/lib/format';
 
 interface Transaction {
@@ -34,6 +34,8 @@ export default function DashboardPage() {
   const { colors } = useTheme();
   const { isLoading, listTransactions, deleteTransaction } = useTransactions();
   const [filterState, setFilterState] = useState<TransactionFilterState>({});
+  const [sortBy, setSortBy] = useState<'date' | 'amount' | 'category' | 'type' | 'description'>('date');
+  const [sortOrder, setSortOrder] = useState<'ASC' | 'DESC'>('DESC');
   const [isMethodModalOpen, setIsMethodModalOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
@@ -48,18 +50,20 @@ export default function DashboardPage() {
   const [totalElements, setTotalElements] = useState(0);
   const ITEMS_PER_PAGE = 10;
 
-  // Load transactions after auth is initialized or filter changes
+  // Load transactions after auth is initialized or filter/sort changes
   useEffect(() => {
     if (!isInitializing) {
       setCurrentPage(1); // Reset to first page when filters change
       loadTransactions(1);
     }
-  }, [isInitializing, filterState]);
+  }, [isInitializing, filterState, sortBy, sortOrder]);
 
   const loadTransactions = async (page: number = currentPage) => {
     const apiFilters: TransactionFilters = {
       page: page - 1, // API uses 0-indexed pages
       size: ITEMS_PER_PAGE,
+      sortBy,
+      sortOrder,
       ...filterState,
     };
     
@@ -107,6 +111,8 @@ export default function DashboardPage() {
     setIsImageModalOpen(false);
     setIsCreateModalOpen(true);
   };
+
+
 
   // Format data for display
   const displayTransactions = (transactions || []).map(t => ({
@@ -201,10 +207,59 @@ export default function DashboardPage() {
               onFilterChange={setFilterState}
               initialFilters={filterState}
             />
+
+            {/* Sort Options */}
+            <div className="mt-4 flex items-center gap-3">
+              <div className="flex items-center gap-2">
+                <MdSort className="w-5 h-5" style={{ color: colors.text.secondary }} />
+                <Text style={{ color: colors.text.secondary }} className="text-sm font-medium">
+                  Sort by:
+                </Text>
+              </div>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as any)}
+                style={{
+                  backgroundColor: colors.background.secondary,
+                  color: colors.text.primary,
+                  borderColor: colors.border.light,
+                  padding: '0.5rem 0.75rem',
+                  borderRadius: '0.375rem',
+                  border: `1px solid ${colors.border.light}`,
+                  cursor: 'pointer',
+                  fontSize: '0.875rem',
+                }}
+                className="focus:outline-none focus:ring-2"
+              >
+                <option value="date">Date</option>
+                <option value="amount">Amount</option>
+                <option value="category">Category</option>
+                <option value="type">Type</option>
+                <option value="description">Description</option>
+              </select>
+              <select
+                value={sortOrder}
+                onChange={(e) => setSortOrder(e.target.value as any)}
+                style={{
+                  backgroundColor: colors.background.secondary,
+                  color: colors.text.primary,
+                  borderColor: colors.border.light,
+                  padding: '0.5rem 0.75rem',
+                  borderRadius: '0.375rem',
+                  border: `1px solid ${colors.border.light}`,
+                  cursor: 'pointer',
+                  fontSize: '0.875rem',
+                }}
+                className="focus:outline-none focus:ring-2"
+              >
+                <option value="DESC">Descending</option>
+                <option value="ASC">Ascending</option>
+              </select>
+            </div>
           </div>
 
           {/* Transaction List */}
-          <div className="space-y-3">
+          <div className="space-y-3 mt-6">
             {isLoading ? (
               <div className="flex items-center justify-center py-12">
                 <div className="flex flex-col items-center gap-3">
