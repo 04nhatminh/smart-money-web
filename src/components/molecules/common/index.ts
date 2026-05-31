@@ -16,3 +16,7 @@ export { BudgetProgressCard } from './BudgetProgressCard';
 export { DeleteConfirmationModal } from './DeleteConfirmationModal';
 export { ProfileEditForm } from './ProfileEditForm';
 export { TransactionFilter, type TransactionFilterState } from './TransactionFilter';
+export { ProjectCard } from './ProjectCard';
+export { CreateProjectModal } from './CreateProjectModal';
+export { EditProjectModal } from './EditProjectModal';
+export { AddContributionModal } from './AddContributionModal';

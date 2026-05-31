@@ -61,4 +61,22 @@ export const API_ENDPOINTS = {
     update: (id: string) => `/api/v1/users/${id}`,
     delete: (id: string) => `/api/v1/users/${id}`,
   },
+
+  // Projects
+  projects: {
+    list: '/api/v1/projects',
+    create: '/api/v1/projects',
+    getById: (id: string) => `/api/v1/projects/${id}`,
+    update: (id: string) => `/api/v1/projects/${id}`,
+    delete: (id: string) => `/api/v1/projects/${id}`,
+    getTracking: (id: string) => `/api/v1/projects/${id}/tracking`,
+    updateTracking: (id: string) => `/api/v1/projects/${id}/tracking`,
+    getContributions: (id: string) => `/api/v1/projects/${id}/contributions`,
+    addContribution: (id: string) => `/api/v1/projects/${id}/contributions`,
+    inviteMember: (id: string) => `/api/v1/projects/${id}/members/invite`,
+    acceptInvitation: (id: string) => `/api/v1/projects/${id}/members/accept`,
+    getHistory: (id: string) => `/api/v1/projects/${id}/history`,
+    getContributionsSummary: (id: string) => `/api/v1/projects/${id}/contributions/summary`,
+    projectAdvisor: '/api/v1/projects/project-advisor',
+  },
 } as const;
