@@ -165,14 +165,14 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
             onClick={() => onViewDetails(project.projectId)}
             className="flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-1"
             style={{
-              backgroundColor: colors.primary.main + '20',
-              color: colors.primary.main,
+              backgroundColor: colors.background.primary + '20',
+              color: colors.background.primary,
             }}
             onMouseEnter={e => {
-              e.currentTarget.style.backgroundColor = colors.primary.main + '30';
+              e.currentTarget.style.backgroundColor = colors.background.secondary + '30';
             }}
             onMouseLeave={e => {
-              e.currentTarget.style.backgroundColor = colors.primary.main + '20';
+              e.currentTarget.style.backgroundColor = colors.background.primary + '20';
             }}
           >
             <MdCheckCircle size={16} /> View
@@ -183,7 +183,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
             onClick={() => onContribute(project.projectId)}
             className="flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
             style={{
-              backgroundColor: colors.primary.main,
+              backgroundColor: colors.background.primary,
               color: 'white',
             }}
             onMouseEnter={e => {

@@ -11,7 +11,8 @@ import {
   CreateProjectModal, 
   EditProjectModal, 
   AddContributionModal,
-  DeleteConfirmationModal 
+  DeleteConfirmationModal,
+  UserIncomeModal,
 } from '@/components/molecules/common';
 import { useTheme } from '@/context/ThemeContext';
 import { useProjects } from '@/hooks/useProjects';
@@ -30,6 +31,7 @@ export default function ProjectsPage() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isContributeModalOpen, setIsContributeModalOpen] = useState(false);
+  const [isUserIncomeModalOpen, setIsUserIncomeModalOpen] = useState(false);
   const [selectedProject, setSelectedProject] = useState<ProjectDetail | null>(null);
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [projectToDelete, setProjectToDelete] = useState<string | null>(null);
@@ -343,8 +345,21 @@ export default function ProjectsPage() {
           isOpen={isCreateModalOpen}
           onClose={() => setIsCreateModalOpen(false)}
           onSuccess={loadProjects}
+          onOpenUserIncomeModal={() => {
+            setIsCreateModalOpen(false);
+            setIsUserIncomeModalOpen(true);
+          }}
           usedPriorities={Array.from(getPrioritiesUsed())}
           maxProjectsReached={!canCreateProject()}
+        />
+
+        <UserIncomeModal
+          isOpen={isUserIncomeModalOpen}
+          onClose={() => setIsUserIncomeModalOpen(false)}
+          onSuccess={() => {
+            setIsUserIncomeModalOpen(false);
+            setIsCreateModalOpen(true);
+          }}
         />
 
         {selectedProject && (

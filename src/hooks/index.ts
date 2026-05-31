@@ -4,3 +4,4 @@ export { useTransactions } from './useTransactions';
 export { useBudgets } from './useBudgets';
 export { useProfile } from './useProfile';
 export { useProjects } from './useProjects';
+export { useUserIncome } from './useUserIncome';

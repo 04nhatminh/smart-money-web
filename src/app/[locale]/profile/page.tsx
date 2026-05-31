@@ -1,20 +1,27 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useLocale } from 'next-intl';
 import { useAuth } from '@/context/AuthContext';
 import { SidebarLayout } from '@/components/templates';
 import { Heading, Text, Button } from '@/components/atoms';
 import { LogoutButton } from '@/components/molecules/auth';
-import { Card } from '@/components/molecules/common';
+import { Card, UserIncomeModal } from '@/components/molecules/common';
 import { useTheme } from '@/context/ThemeContext';
+import { useUserIncome } from '@/hooks/useUserIncome';
+import { UserIncomeResponse } from '@/types/user-income.api';
+import { formatAmountInput } from '@/lib/format';
 
 export default function ProfilePage() {
   const { user } = useAuth();
   const router = useRouter();
   const locale = useLocale();
   const { colors } = useTheme();
+  const { getUserIncome } = useUserIncome();
+  const [userIncome, setUserIncome] = useState<UserIncomeResponse | null>(null);
+  const [isUserIncomeModalOpen, setIsUserIncomeModalOpen] = useState(false);
+  const [isLoadingIncome, setIsLoadingIncome] = useState(false);
 
   const formatDate = (dateString?: string) => {
     if (!dateString) return 'N/A';
@@ -46,6 +53,29 @@ export default function ProfilePage() {
     }
     
     return dateString;
+  };
+
+  // Load user income on component mount
+  useEffect(() => {
+    loadUserIncome();
+  }, []);
+
+  const loadUserIncome = async () => {
+    setIsLoadingIncome(true);
+    try {
+      const result = await getUserIncome();
+      if (result.success && result.data) {
+        setUserIncome(result.data);
+      }
+    } catch (err) {
+      console.error('Failed to load user income:', err);
+    } finally {
+      setIsLoadingIncome(false);
+    }
+  };
+
+  const handleUserIncomeSuccess = () => {
+    loadUserIncome();
   };
 
   return (
@@ -146,6 +176,76 @@ export default function ProfilePage() {
           </div>
         </div>
 
+        {/* User Income Card */}
+        <Card className="p-6">
+          <div className="flex items-center justify-between mb-6">
+            <Heading level={3} className="m-0">User Income Information</Heading>
+            <Button 
+              variant="secondary"
+              onClick={() => setIsUserIncomeModalOpen(true)}
+              disabled={isLoadingIncome}
+            >
+              {userIncome ? 'Edit' : 'Set Up'}
+            </Button>
+          </div>
+
+          {userIncome ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <p className="text-sm font-medium mb-2" style={{ color: colors.text.secondary }}>
+                  Net Income
+                </p>
+                <p className="text-lg font-semibold">
+                  {userIncome.netIncome?.toLocaleString()} {userIncome.currency}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm font-medium mb-2" style={{ color: colors.text.secondary }}>
+                  Usable Income
+                </p>
+                <p className="text-lg font-semibold">
+                  {userIncome.usableIncome?.toLocaleString()} {userIncome.currency}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm font-medium mb-2" style={{ color: colors.text.secondary }}>
+                  Safe Spending
+                </p>
+                <p className="text-lg font-semibold">
+                  {userIncome.safeSpending?.toLocaleString()} {userIncome.currency}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm font-medium mb-2" style={{ color: colors.text.secondary }}>
+                  Auto Invest Surplus
+                </p>
+                <p className="text-lg font-semibold">
+                  {userIncome.autoInvestSurplus ? 'Enabled' : 'Disabled'}
+                </p>
+              </div>
+              {userIncome.calculationNote && (
+                <div className="md:col-span-2">
+                  <p className="text-sm font-medium mb-2" style={{ color: colors.text.secondary }}>
+                    Calculation Note
+                  </p>
+                  <p className="text-sm" style={{ color: colors.text.primary }}>
+                    {userIncome.calculationNote}
+                  </p>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div 
+              className="p-4 rounded-lg text-center"
+              style={{ backgroundColor: colors.background.secondary }}
+            >
+              <Text style={{ color: colors.text.secondary }}>
+                No user income information set up yet. Click "Set Up" to get started.
+              </Text>
+            </div>
+          )}
+        </Card>
+
         {/* Action Buttons */}
         <div className="flex gap-4 pt-4">
           <Button 
@@ -160,6 +260,13 @@ export default function ProfilePage() {
             Logout
           </LogoutButton>
         </div>
+
+        {/* User Income Modal */}
+        <UserIncomeModal
+          isOpen={isUserIncomeModalOpen}
+          onClose={() => setIsUserIncomeModalOpen(false)}
+          onSuccess={handleUserIncomeSuccess}
+        />
       </div>
     </SidebarLayout>
   );

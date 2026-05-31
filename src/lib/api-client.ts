@@ -110,7 +110,17 @@ export const apiClient = {
       console.log(`[API] Response status:`, response.status);
       console.log(`[API] Response headers:`, Object.fromEntries(response.headers.entries()));
 
-      const data = await response.json();
+      // Handle empty response body
+      let data: any;
+      const contentType = response.headers.get('content-type');
+      const contentLength = response.headers.get('content-length');
+      
+      if (contentLength === '0' || !contentType?.includes('application/json')) {
+        // Empty response or non-JSON response
+        data = {};
+      } else {
+        data = await response.json();
+      }
 
       // Check if response is not ok OR if the API returns success: false
       if (!response.ok) {
@@ -145,7 +155,17 @@ export const apiClient = {
         credentials: 'include',
       });
 
-      const data = await response.json();
+      // Handle empty response body
+      let data: any;
+      const contentType = response.headers.get('content-type');
+      const contentLength = response.headers.get('content-length');
+      
+      if (contentLength === '0' || !contentType?.includes('application/json')) {
+        // Empty response or non-JSON response
+        data = {};
+      } else {
+        data = await response.json();
+      }
 
       if (!response.ok) {
         const errorMessage = extractErrorMessage(data);
@@ -189,7 +209,17 @@ export const apiClient = {
         body: formData,
       });
 
-      const data = await response.json();
+      // Handle empty response body
+      let data: any;
+      const contentType = response.headers.get('content-type');
+      const contentLength = response.headers.get('content-length');
+      
+      if (contentLength === '0' || !contentType?.includes('application/json')) {
+        // Empty response or non-JSON response
+        data = {};
+      } else {
+        data = await response.json();
+      }
 
       if (!response.ok) {
         const errorMessage = extractErrorMessage(data);
@@ -228,7 +258,17 @@ export const apiClient = {
         credentials: 'include',
       });
 
-      const data = await response.json();
+      // Handle empty response body
+      let data: any;
+      const contentType = response.headers.get('content-type');
+      const contentLength = response.headers.get('content-length');
+      
+      if (contentLength === '0' || !contentType?.includes('application/json')) {
+        // Empty response or non-JSON response
+        data = {};
+      } else {
+        data = await response.json();
+      }
 
       if (!response.ok) {
         const errorMessage = extractErrorMessage(data);
@@ -259,7 +299,17 @@ export const apiClient = {
         headers: getHeaders(),
       });
 
-      const data = await response.json();
+      // Handle empty response body
+      let data: any;
+      const contentType = response.headers.get('content-type');
+      const contentLength = response.headers.get('content-length');
+      
+      if (contentLength === '0' || !contentType?.includes('application/json')) {
+        // Empty response or non-JSON response
+        data = {};
+      } else {
+        data = await response.json();
+      }
 
       if (!response.ok) {
         const errorMessage = extractErrorMessage(data);

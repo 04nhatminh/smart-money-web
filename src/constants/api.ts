@@ -60,6 +60,15 @@ export const API_ENDPOINTS = {
     getById: (id: string) => `/api/v1/users/${id}`,
     update: (id: string) => `/api/v1/users/${id}`,
     delete: (id: string) => `/api/v1/users/${id}`,
+    me: '/api/v1/auth/me',
+  },
+
+  // User Income
+  userIncome: {
+    get: '/api/v1/user-income/me',
+    create: '/api/v1/user-income/me',
+    update: '/api/v1/user-income/me',
+    delete: '/api/v1/user-income/me',
   },
 
   // Projects

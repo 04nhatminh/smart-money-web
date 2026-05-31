@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Button, Heading, Text, Input } from '@/components/atoms';
 import { useTheme } from '@/context/ThemeContext';
 import { useProjects } from '@/hooks/useProjects';
+import { useUserIncome } from '@/hooks/useUserIncome';
 import { CreateProjectRequest } from '@/types/project.api';
 import { formatAmountInput, parseFormattedNumber } from '@/lib/format';
 import { MdClose } from 'react-icons/md';
@@ -12,6 +13,7 @@ interface CreateProjectModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: () => void;
+  onOpenUserIncomeModal?: () => void;
   usedPriorities?: string[];
   maxProjectsReached?: boolean;
 }
@@ -34,11 +36,13 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
   isOpen,
   onClose,
   onSuccess,
+  onOpenUserIncomeModal,
   usedPriorities = [],
   maxProjectsReached = false,
 }) => {
   const { colors } = useTheme();
   const { isLoading, createProject } = useProjects();
+  const { getUserIncome } = useUserIncome();
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const today = new Date().toISOString().split('T')[0];
@@ -123,6 +127,26 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
     const deadlineDate = new Date(formData.deadline);
     if (deadlineDate <= new Date(today)) {
       setError('Deadline must be in the future');
+      return;
+    }
+
+    // Check if user has set up user income
+    try {
+      const incomeResult = await getUserIncome();
+      if (!incomeResult.success || !incomeResult.data) {
+        setError('Please set up your user income information first');
+        // Open user income modal after a short delay
+        setTimeout(() => {
+          onOpenUserIncomeModal?.();
+        }, 500);
+        return;
+      }
+    } catch (err) {
+      console.error('Error checking user income:', err);
+      setError('Please set up your user income information first');
+      setTimeout(() => {
+        onOpenUserIncomeModal?.();
+      }, 500);
       return;
     }
 
