@@ -100,17 +100,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     async (username: string, fullName: string, email: string, hashedPassword: string, phone: string, dateOfBirth: string) => {
       try {
         setIsLoading(true);
+        
+        // Create FormData for multipart/form-data request
+        const formData = new FormData();
+        formData.append('username', username);
+        formData.append('fullName', fullName);
+        formData.append('email', email);
+        formData.append('password', hashedPassword);
+        formData.append('confirmPassword', hashedPassword);
+        formData.append('phone', phone);
+        formData.append('dateOfBirth', dateOfBirth);
+        
         const response = await apiClient.post<any>(
           API_ENDPOINTS.auth.register,
-          {
-            username,
-            fullName,
-            email,
-            password: hashedPassword,
-            confirmPassword: hashedPassword,
-            phone,
-            dateOfBirth,
-          }
+          formData
         );
 
         // Handle API response format: { success, message }

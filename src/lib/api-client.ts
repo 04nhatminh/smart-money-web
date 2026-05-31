@@ -81,17 +81,29 @@ export const apiClient = {
   async post<T>(endpoint: string, body: unknown, config?: { headers?: Record<string, string> }): Promise<T> {
     try {
       const headers = { ...getHeaders(), ...(config?.headers || {}) };
-      const jsonBody = JSON.stringify(body);
       
-      // Log request details
-      console.log(`[API] POST ${API_URL}${endpoint}`);
-      console.log(`[API] Headers:`, headers);
-      console.log(`[API] Body:`, jsonBody);
+      // Check if body is FormData (for multipart/form-data)
+      const isFormData = body instanceof FormData;
+      let fetchBody: string | FormData;
+      
+      if (isFormData) {
+        fetchBody = body;
+        // Remove Content-Type header for FormData - browser will set it with boundary
+        delete headers['Content-Type'];
+      } else {
+        const jsonBody = JSON.stringify(body);
+        fetchBody = jsonBody;
+        
+        // Log request details
+        console.log(`[API] POST ${API_URL}${endpoint}`);
+        console.log(`[API] Headers:`, headers);
+        console.log(`[API] Body:`, jsonBody);
+      }
       
       const response = await fetch(`${API_URL}${endpoint}`, {
         method: 'POST',
         headers,
-        body: jsonBody,
+        body: fetchBody,
         credentials: 'include',
       });
 
