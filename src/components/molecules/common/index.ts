@@ -11,6 +11,7 @@ export { TransactionMethodModal } from './TransactionMethodModal';
 export { ImageBillUploadModal } from './ImageBillUploadModal';
 export { VoiceRecordModal } from './VoiceRecordModal';
 export { CreateBudgetModal } from './CreateBudgetModal';
+export { CreateBulkBudgetsModal } from './CreateBulkBudgetsModal';
 export { EditBudgetModal } from './EditBudgetModal';
 export { BudgetProgressCard } from './BudgetProgressCard';
 export { DeleteConfirmationModal } from './DeleteConfirmationModal';

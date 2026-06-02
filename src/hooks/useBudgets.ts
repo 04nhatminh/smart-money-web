@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react';
 import { apiClient } from '@/lib/api-client';
 import { API_ENDPOINTS } from '@/constants/api';
-import { Budget, CreateBudgetRequest, UpdateBudgetRequest } from '@/types/budget.api';
+import { Budget, CreateBudgetRequest, UpdateBudgetRequest, CreateBulkBudgetsRequest, BulkBudgetsResponse } from '@/types/budget.api';
 
 interface BudgetsResponse {
   budgets?: Budget[];
@@ -168,6 +168,39 @@ export const useBudgets = () => {
     []
   );
 
+  // POST - Create bulk budgets
+  const createBulkBudgets = useCallback(
+    async (data: CreateBulkBudgetsRequest) => {
+      try {
+        setIsLoading(true);
+        setError(null);
+
+        console.log('Creating bulk budgets with data:', data);
+        const response = await apiClient.post<any>(
+          API_ENDPOINTS.budgets.createBulk,
+          data
+        );
+
+        console.log('Bulk budgets created successfully:', response);
+        return {
+          success: true,
+          data: response.data,
+        };
+      } catch (err) {
+        console.error('Create bulk budgets error:', err);
+        const errorMsg = err instanceof Error ? err.message : 'Failed to create bulk budgets';
+        setError(errorMsg);
+        return {
+          success: false,
+          error: errorMsg,
+        };
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    []
+  );
+
   return {
     isLoading,
     error,
@@ -176,5 +209,6 @@ export const useBudgets = () => {
     createBudget,
     updateBudget,
     deleteBudget,
+    createBulkBudgets,
   };
 };

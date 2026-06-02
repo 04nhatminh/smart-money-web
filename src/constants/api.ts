@@ -37,6 +37,7 @@ export const API_ENDPOINTS = {
   budgets: {
     list: '/api/v1/budgets',
     create: '/api/v1/budgets',
+    createBulk: '/api/v1/budgets/bulk',
     getById: (id: string) => `/api/v1/budgets/${id}`,
     update: (id: string) => `/api/v1/budgets/${id}`,
     delete: (id: string) => `/api/v1/budgets/${id}`,
