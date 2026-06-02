@@ -70,16 +70,17 @@ export interface AddProjectContributionRequest {
 }
 
 export interface ProjectAdvisorRequest {
+  name: string;
+  type: 'PERSONAL' | 'GROUP';
   targetAmount: number;
+  currency: string;
   deadline: string;
-  currentSavings: number;
   mode: 'URGENT' | 'RELAXED';
 }
 
 export interface ProjectAdvisorResponse {
-  adjustedMonthlySaving: number;
+  monthlySaving: number;
   numberOfMonths: number;
-  recommendation: string;
 }
 
 export interface ProjectTracking {

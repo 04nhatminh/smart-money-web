@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react';
 import { apiClient } from '@/lib/api-client';
 import { API_ENDPOINTS } from '@/constants/api';
+import { ApiResponse } from '@/types/base.api';
 import {
   ProjectListItem,
   ProjectDetail,
@@ -10,6 +11,8 @@ import {
   ProjectTracking,
   InviteProjectMemberRequest,
   AddProjectContributionRequest,
+  ProjectAdvisorRequest,
+  ProjectAdvisorResponse,
 } from '@/types/project.api';
 
 export const useProjects = () => {
@@ -307,6 +310,38 @@ export const useProjects = () => {
     []
   );
 
+  // POST - Project Advisor
+  const projectAdvisor = useCallback(
+    async (data: ProjectAdvisorRequest) => {
+      try {
+        setIsLoading(true);
+        setError(null);
+
+        const response = await apiClient.post<ApiResponse<ProjectAdvisorResponse>>(
+          API_ENDPOINTS.projects.projectAdvisor,
+          data
+        );
+
+        console.log('Project advisor response:', response);
+
+        return {
+          success: true,
+          data: response.data,
+        };
+      } catch (err) {
+        const errorMsg = err instanceof Error ? err.message : 'Failed to get project advice';
+        setError(errorMsg);
+        return {
+          success: false,
+          error: errorMsg,
+        };
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    []
+  );
+
   return {
     isLoading,
     error,
@@ -320,5 +355,6 @@ export const useProjects = () => {
     addContribution,
     inviteMember,
     acceptInvitation,
+    projectAdvisor,
   };
 };

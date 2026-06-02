@@ -22,3 +22,5 @@ export { CreateProjectModal } from './CreateProjectModal';
 export { EditProjectModal } from './EditProjectModal';
 export { AddContributionModal } from './AddContributionModal';
 export { UserIncomeModal } from './UserIncomeModal';
+export { ProjectAdvisorModeModal } from './ProjectAdvisorModeModal';
+export { ProjectAdvisorResultModal } from './ProjectAdvisorResultModal';

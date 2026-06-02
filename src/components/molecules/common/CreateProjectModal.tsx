@@ -5,7 +5,8 @@ import { Button, Heading, Text, Input } from '@/components/atoms';
 import { useTheme } from '@/context/ThemeContext';
 import { useProjects } from '@/hooks/useProjects';
 import { useUserIncome } from '@/hooks/useUserIncome';
-import { CreateProjectRequest } from '@/types/project.api';
+import { ProjectAdvisorModeModal, ProjectAdvisorResultModal } from '.';
+import { CreateProjectRequest, ProjectAdvisorResponse } from '@/types/project.api';
 import { formatAmountInput, parseFormattedNumber } from '@/lib/format';
 import { MdClose } from 'react-icons/md';
 
@@ -20,6 +21,7 @@ interface CreateProjectModalProps {
 
 type ProjectType = 'PERSONAL' | 'GROUP';
 type ProjectPriority = 'LOW' | 'MEDIUM' | 'HIGH';
+type ProjectMode = 'RELAXED' | 'URGENT';
 const CURRENCY = 'VND'; // Fixed currency
 
 interface FormData {
@@ -41,11 +43,18 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
   maxProjectsReached = false,
 }) => {
   const { colors } = useTheme();
-  const { isLoading, createProject } = useProjects();
+  const { isLoading, createProject, projectAdvisor } = useProjects();
   const { getUserIncome } = useUserIncome();
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const today = new Date().toISOString().split('T')[0];
+  
+  // New states for advisor flow
+  const [isModeModalOpen, setIsModeModalOpen] = useState(false);
+  const [isAdvisorResultModalOpen, setIsAdvisorResultModalOpen] = useState(false);
+  const [advisorData, setAdvisorData] = useState<ProjectAdvisorResponse | null>(null);
+  const [userIncomeData, setUserIncomeData] = useState<any>(null);
+  const [useAiAdvisor, setUseAiAdvisor] = useState(true);
 
   const [formData, setFormData] = useState<FormData>({
     name: '',
@@ -65,6 +74,8 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
       document.documentElement.style.paddingRight = `${scrollbarWidth}px`;
       document.body.style.overflow = 'hidden';
       document.body.style.paddingRight = `${scrollbarWidth}px`;
+      // Clear error when modal opens
+      setError(null);
     } else {
       document.documentElement.style.overflow = '';
       document.documentElement.style.paddingRight = '';
@@ -141,6 +152,8 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
         }, 500);
         return;
       }
+      // Store user income data for advisor
+      setUserIncomeData(incomeResult.data);
     } catch (err) {
       console.error('Error checking user income:', err);
       setError('Please set up your user income information first');
@@ -150,7 +163,87 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
       return;
     }
 
+    // All validations passed, open mode modal
+    setIsModeModalOpen(true);
+  };
+
+  const handleModeSelected = async (mode: ProjectMode) => {
+    setIsModeModalOpen(false);
+    setError(null);
+    
     try {
+      // Call project advisor API
+      const advisorRequest = {
+        name: formData.name.trim(),
+        type: formData.type,
+        targetAmount: parseFormattedNumber(formData.targetAmount),
+        currency: formData.currency.trim(),
+        deadline: formData.deadline,
+        mode,
+      };
+
+      const result = await projectAdvisor(advisorRequest);
+
+      if (result.success && result.data) {
+        setAdvisorData(result.data);
+        setIsAdvisorResultModalOpen(true);
+      } else {
+        setError(result.error || 'Failed to get AI recommendation');
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to get AI recommendation');
+    }
+  };
+
+  const handleAdvisorAgree = async () => {
+    if (!advisorData) return;
+
+    try {
+      // Create project with adjusted values from advisor
+      const createData: CreateProjectRequest = {
+        name: formData.name.trim(),
+        description: formData.description.trim(),
+        type: formData.type,
+        priority: formData.priority,
+        targetAmount: parseFormattedNumber(formData.targetAmount),
+        currency: formData.currency.trim(),
+        deadline: formData.deadline,
+      };
+
+      const result = await createProject(createData);
+
+      if (result.success) {
+        setSuccess(true);
+        setFormData({
+          name: '',
+          description: '',
+          type: 'PERSONAL',
+          priority: 'MEDIUM',
+          targetAmount: '',
+          currency: 'VND',
+          deadline: today,
+        });
+
+        setTimeout(() => {
+          setSuccess(false);
+          setIsAdvisorResultModalOpen(false);
+          onClose();
+          onSuccess?.();
+        }, 1500);
+      } else {
+        setError(result.error || 'Failed to create project');
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+    }
+  };
+
+  const handleAdvisorDisagree = async () => {
+    setIsAdvisorResultModalOpen(false);
+    setError(null);
+    
+    try {
+      // Create project with original user input
       const createData: CreateProjectRequest = {
         name: formData.name.trim(),
         description: formData.description.trim(),
@@ -190,8 +283,35 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
 
   if (!isOpen) return null;
 
+  // Don't show form modal when advisor modals are open
+  const showFormModal = !isModeModalOpen && !isAdvisorResultModalOpen;
+
   return (
     <>
+      {/* Project Advisor Mode Modal */}
+      <ProjectAdvisorModeModal
+        isOpen={isModeModalOpen}
+        onClose={() => setIsModeModalOpen(false)}
+        onSelectMode={handleModeSelected}
+        isLoading={isLoading}
+      />
+
+      {/* Project Advisor Result Modal */}
+      <ProjectAdvisorResultModal
+        isOpen={isAdvisorResultModalOpen}
+        onClose={() => {
+          setIsAdvisorResultModalOpen(false);
+          setError(null);
+        }}
+        onAgree={handleAdvisorAgree}
+        onDisagree={handleAdvisorDisagree}
+        advisorData={advisorData}
+        isLoading={isLoading}
+        error={error}
+      />
+
+      {showFormModal && (
+      <>
       {/* Backdrop */}
       <div
         className="fixed inset-0 transition-opacity"
@@ -422,6 +542,8 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
           </form>
         </div>
       </div>
+      </>
+      )}
     </>
   );
 };
