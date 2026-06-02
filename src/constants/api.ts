@@ -37,6 +37,7 @@ export const API_ENDPOINTS = {
   budgets: {
     list: '/api/v1/budgets',
     create: '/api/v1/budgets',
+    createBulk: '/api/v1/budgets/bulk',
     getById: (id: string) => `/api/v1/budgets/${id}`,
     update: (id: string) => `/api/v1/budgets/${id}`,
     delete: (id: string) => `/api/v1/budgets/${id}`,
@@ -60,5 +61,32 @@ export const API_ENDPOINTS = {
     getById: (id: string) => `/api/v1/users/${id}`,
     update: (id: string) => `/api/v1/users/${id}`,
     delete: (id: string) => `/api/v1/users/${id}`,
+    me: '/api/v1/auth/me',
+  },
+
+  // User Income
+  userIncome: {
+    get: '/api/v1/user-income/me',
+    create: '/api/v1/user-income/me',
+    update: '/api/v1/user-income/me',
+    delete: '/api/v1/user-income/me',
+  },
+
+  // Projects
+  projects: {
+    list: '/api/v1/projects',
+    create: '/api/v1/projects',
+    getById: (id: string) => `/api/v1/projects/${id}`,
+    update: (id: string) => `/api/v1/projects/${id}`,
+    delete: (id: string) => `/api/v1/projects/${id}`,
+    getTracking: (id: string) => `/api/v1/projects/${id}/tracking`,
+    updateTracking: (id: string) => `/api/v1/projects/${id}/tracking`,
+    getContributions: (id: string) => `/api/v1/projects/${id}/contributions`,
+    addContribution: (id: string) => `/api/v1/projects/${id}/contributions`,
+    inviteMember: (id: string) => `/api/v1/projects/${id}/members/invite`,
+    acceptInvitation: (id: string) => `/api/v1/projects/${id}/members/accept`,
+    getHistory: (id: string) => `/api/v1/projects/${id}/history`,
+    getContributionsSummary: (id: string) => `/api/v1/projects/${id}/contributions/summary`,
+    projectAdvisor: '/api/v1/projects/project-advisor',
   },
 } as const;

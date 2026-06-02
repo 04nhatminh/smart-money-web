@@ -6,7 +6,7 @@ import { useLocale } from 'next-intl';
 import { useAuth } from '@/context/AuthContext';
 import { SidebarLayout } from '@/components/templates';
 import { Heading, Text, Button } from '@/components/atoms';
-import { BudgetProgressCard, CreateBudgetModal, EditBudgetModal, DeleteConfirmationModal } from '@/components/molecules/common';
+import { BudgetProgressCard, CreateBudgetModal, CreateBulkBudgetsModal, EditBudgetModal, DeleteConfirmationModal } from '@/components/molecules/common';
 import { useTheme } from '@/context/ThemeContext';
 import { useBudgets } from '@/hooks/useBudgets';
 import { Budget } from '@/types/budget.api';
@@ -22,6 +22,7 @@ export default function BudgetsPage() {
 
   const [budgets, setBudgets] = useState<Budget[]>([]);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isCreateBulkModalOpen, setIsCreateBulkModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [budgetToDelete, setBudgetToDelete] = useState<string | null>(null);
@@ -127,14 +128,24 @@ export default function BudgetsPage() {
               Track and manage your spending budgets
             </Text>
           </div>
-          <Button
-            variant="primary"
-            onClick={() => setIsCreateModalOpen(true)}
-            className="flex items-center gap-2"
-          >
-            <MdAdd className="w-5 h-5" />
-            Create Budget
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              variant="secondary"
+              onClick={() => setIsCreateBulkModalOpen(true)}
+              className="flex items-center gap-2"
+            >
+              <MdAdd className="w-5 h-5" />
+              Create Multiple
+            </Button>
+            <Button
+              variant="primary"
+              onClick={() => setIsCreateModalOpen(true)}
+              className="flex items-center gap-2"
+            >
+              <MdAdd className="w-5 h-5" />
+              Create Budget
+            </Button>
+          </div>
         </div>
 
         {/* Error Message */}
@@ -276,6 +287,14 @@ export default function BudgetsPage() {
       <CreateBudgetModal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
+        onSuccess={loadBudgets}
+        currentMonth={currentMonth}
+        currentYear={currentYear}
+      />
+
+      <CreateBulkBudgetsModal
+        isOpen={isCreateBulkModalOpen}
+        onClose={() => setIsCreateBulkModalOpen(false)}
         onSuccess={loadBudgets}
         currentMonth={currentMonth}
         currentYear={currentYear}
