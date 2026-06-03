@@ -23,7 +23,7 @@ export const AuthSection: React.FC<AuthSectionProps> = ({
             <p className="text-red-700 text-sm">{error}</p>
           </div>
         )}
-        <LoginForm onSuccess={onSuccess} />
+        <LoginForm />
         <p className="text-center text-gray-600 text-sm mt-4">
           Don't have an account yet?
         </p>

@@ -89,7 +89,17 @@ export const ImageBillUploadModal: React.FC<ImageBillUploadModalProps> = ({ isOp
         unsubscribeRef.current();
       }
 
+      
       const unsubscribeFn = subscribe(id, (result) => {
+        unsubscribeFn();
+        unsubscribeRef.current = null;
+
+        if (result.error) {
+          setError(result.error);
+          setUploadState('idle');
+          return;
+        }
+
         if (onAIResultReceived) {
           // Call the callback with the AI result and source type
           onAIResultReceived(result, 'image');
@@ -100,9 +110,6 @@ export const ImageBillUploadModal: React.FC<ImageBillUploadModalProps> = ({ isOp
           setAiResult(result);
           setUploadState('success');
         }
-
-        unsubscribeFn();
-        unsubscribeRef.current = null;
       });
 
       unsubscribeRef.current = unsubscribeFn;

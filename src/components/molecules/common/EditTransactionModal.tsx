@@ -29,7 +29,7 @@ type TransactionCategory =
 interface FormData {
   amount: string;
   type: TransactionType;
-  category: TransactionCategory | null;
+  category: TransactionCategory ;
   description: string;
   date: string;
 }

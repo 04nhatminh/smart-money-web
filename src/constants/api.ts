@@ -24,6 +24,11 @@ export const API_ENDPOINTS = {
     delete: (id: string) => `/api/v1/transactions/${id}`,
   },
 
+  // Analytics
+  analytics: {
+    list: '/api/v1/transactions/analytics',
+  },
+
   // Saving Goals
   savingGoals: {
     list: '/api/v1/saving-goals',

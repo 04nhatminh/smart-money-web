@@ -144,6 +144,15 @@ export const VoiceRecordModal: React.FC<VoiceRecordModalProps> = ({ isOpen, onCl
       unsubscribeRef.current?.();
 
       const unsubscribeFn = subscribe(id, (result) => {
+        unsubscribeFn();
+        unsubscribeRef.current = null;
+
+        if (result.error) {
+          setError(result.error);
+          setState('recorded');
+          return;
+        }
+
         if (onAIResultReceived) {
           // Call the callback with the AI result and source type
           onAIResultReceived(result, 'voice');
@@ -154,10 +163,6 @@ export const VoiceRecordModal: React.FC<VoiceRecordModalProps> = ({ isOpen, onCl
           setAiResult(result);
           setState('success');
         }
-
-        // auto unsubscribe sau khi xong
-        unsubscribeFn();
-        unsubscribeRef.current = null;
       });
 
       unsubscribeRef.current = unsubscribeFn;

@@ -2,6 +2,20 @@ import { getToken } from './auth';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
 
+const safeJsonParse = async (response: Response): Promise<any> => {
+  const text = await response.text();
+  if (!text) return null;
+  return JSON.parse(text);
+};
+
+const handleUnauthorized = () => {
+  if (typeof window === 'undefined') return;
+  localStorage.removeItem('token');
+  localStorage.removeItem('user');
+  const locale = window.location.pathname.split('/')[1] || 'en';
+  window.location.href = `/${locale}/login`;
+};
+
 const getHeaders = () => {
   const token = getToken();
   const headers: Record<string, string> = {
@@ -53,7 +67,12 @@ export const apiClient = {
         credentials: 'include',
       });
 
-      const data = await response.json();
+      if (response.status === 401) {
+        handleUnauthorized();
+        throw new Error('Session expired. Please log in again.');
+      }
+
+      const data = await safeJsonParse(response);
 
       if (!response.ok) {
         const errorMessage = extractErrorMessage(data);
@@ -82,12 +101,11 @@ export const apiClient = {
     try {
       const headers = { ...getHeaders(), ...(config?.headers || {}) };
       const jsonBody = JSON.stringify(body);
-      
-      // Log request details
-      console.log(`[API] POST ${API_URL}${endpoint}`);
-      console.log(`[API] Headers:`, headers);
-      console.log(`[API] Body:`, jsonBody);
-      
+
+      if (!headers['Authorization']) {
+        console.warn(`[API] No auth token for POST ${endpoint}`);
+      }
+
       const response = await fetch(`${API_URL}${endpoint}`, {
         method: 'POST',
         headers,
@@ -95,10 +113,12 @@ export const apiClient = {
         credentials: 'include',
       });
 
-      console.log(`[API] Response status:`, response.status);
-      console.log(`[API] Response headers:`, Object.fromEntries(response.headers.entries()));
+      if (response.status === 401) {
+        handleUnauthorized();
+        throw new Error('Session expired. Please log in again.');
+      }
 
-      const data = await response.json();
+      const data = await safeJsonParse(response);
 
       // Check if response is not ok OR if the API returns success: false
       if (!response.ok) {
@@ -133,7 +153,12 @@ export const apiClient = {
         credentials: 'include',
       });
 
-      const data = await response.json();
+      if (response.status === 401) {
+        handleUnauthorized();
+        throw new Error('Session expired. Please log in again.');
+      }
+
+      const data = await safeJsonParse(response);
 
       if (!response.ok) {
         const errorMessage = extractErrorMessage(data);
@@ -177,7 +202,7 @@ export const apiClient = {
         body: formData,
       });
 
-      const data = await response.json();
+      const data = await safeJsonParse(response);
 
       if (!response.ok) {
         const errorMessage = extractErrorMessage(data);
@@ -216,7 +241,7 @@ export const apiClient = {
         credentials: 'include',
       });
 
-      const data = await response.json();
+      const data = await safeJsonParse(response);
 
       if (!response.ok) {
         const errorMessage = extractErrorMessage(data);
@@ -247,7 +272,12 @@ export const apiClient = {
         headers: getHeaders(),
       });
 
-      const data = await response.json();
+      if (response.status === 401) {
+        handleUnauthorized();
+        throw new Error('Session expired. Please log in again.');
+      }
+
+      const data = await safeJsonParse(response);
 
       if (!response.ok) {
         const errorMessage = extractErrorMessage(data);

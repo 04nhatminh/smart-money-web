@@ -4,3 +4,4 @@ export * from './auth.api';
 export * from './transaction.api';
 export * from './goal.api';
 export * from './budget.api';
+export * from './analytics.api';
