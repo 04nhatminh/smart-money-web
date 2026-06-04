@@ -34,6 +34,39 @@ export const VoiceRecordModal: React.FC<VoiceRecordModalProps> = ({ isOpen, onCl
   const streamRef = useRef<MediaStream | null>(null);
   const audioElementRef = useRef<HTMLAudioElement | null>(null);
   const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const processingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const stopProcessingWatchers = () => {
+    if (pollIntervalRef.current) {
+      clearInterval(pollIntervalRef.current);
+      pollIntervalRef.current = null;
+    }
+    if (processingTimeoutRef.current) {
+      clearTimeout(processingTimeoutRef.current);
+      processingTimeoutRef.current = null;
+    }
+    unsubscribeRef.current?.();
+    unsubscribeRef.current = null;
+  };
+
+  const handleJobResult = (result: Record<string, any>) => {
+    stopProcessingWatchers();
+
+    if (result.error) {
+      setError(result.error);
+      setState('recorded');
+      return;
+    }
+
+    if (onAIResultReceived) {
+      onAIResultReceived(result, 'voice');
+      handleSuccessClose();
+    } else {
+      setAiResult(result);
+      setState('success');
+    }
+  };
 
   const handleStartRecording = async () => {
     try {
@@ -103,8 +136,7 @@ export const VoiceRecordModal: React.FC<VoiceRecordModalProps> = ({ isOpen, onCl
   };
 
   const handleReset = () => {
-    unsubscribeRef.current?.();
-    unsubscribeRef.current = null;
+    stopProcessingWatchers();
     setAudioUrl('');
     setRecordingTime(0);
     setState('idle');
@@ -139,33 +171,35 @@ export const VoiceRecordModal: React.FC<VoiceRecordModalProps> = ({ isOpen, onCl
       setJobId(id);
       setState('processing');
 
-      // Subscribe to WebSocket for AI result
-      // cleanup subscription cũ nếu user submit lại
-      unsubscribeRef.current?.();
+      // Clean up any previous watchers before starting new ones
+      stopProcessingWatchers();
 
+      // Subscribe to WebSocket — primary delivery path
       const unsubscribeFn = subscribe(id, (result) => {
-        unsubscribeFn();
-        unsubscribeRef.current = null;
-
-        if (result.error) {
-          setError(result.error);
-          setState('recorded');
-          return;
-        }
-
-        if (onAIResultReceived) {
-          // Call the callback with the AI result and source type
-          onAIResultReceived(result, 'voice');
-          // Close the modal
-          handleSuccessClose();
-        } else {
-          // Fall back to showing success state if no callback
-          setAiResult(result);
-          setState('success');
-        }
+        handleJobResult(result);
       });
-
       unsubscribeRef.current = unsubscribeFn;
+
+      // HTTP polling fallback — handles the race condition where the backend
+      // publishes the WS message before the frontend finishes subscribing
+      // (common for empty/silent audio that fails near-instantly)
+      pollIntervalRef.current = setInterval(async () => {
+        try {
+          const statusResponse = await apiClient.get<any>(`${API_ENDPOINTS.ai.submit}/${id}`);
+          if (statusResponse && (statusResponse.error || statusResponse.text !== undefined)) {
+            handleJobResult(statusResponse);
+          }
+        } catch {
+          // ignore transient polling errors
+        }
+      }, 2000);
+
+      // Hard timeout — prevents endless processing state if both WS and polling fail
+      processingTimeoutRef.current = setTimeout(() => {
+        stopProcessingWatchers();
+        setError('Processing timed out. Please try again.');
+        setState('recorded');
+      }, 30000);
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : 'Failed to upload audio';
       setError(errorMsg);
@@ -174,11 +208,7 @@ export const VoiceRecordModal: React.FC<VoiceRecordModalProps> = ({ isOpen, onCl
   };
 
   const handleSuccessClose = () => {
-    // Unsubscribe from WebSocket
-    unsubscribeRef.current?.();
-    unsubscribeRef.current = null;
-
-    // Reset and close
+    stopProcessingWatchers();
     setAudioUrl('');
     setRecordingTime(0);
     setState('idle');
@@ -189,11 +219,10 @@ export const VoiceRecordModal: React.FC<VoiceRecordModalProps> = ({ isOpen, onCl
     onClose();
   };
 
-  // Cleanup WebSocket subscription when modal closes
+  // Cleanup all watchers when modal unmounts
   useEffect(() => {
     return () => {
-      unsubscribeRef.current?.();
-      unsubscribeRef.current = null;
+      stopProcessingWatchers();
     };
   }, []);
 
@@ -412,7 +441,7 @@ export const VoiceRecordModal: React.FC<VoiceRecordModalProps> = ({ isOpen, onCl
           {/* Audio Element - Always mounted */}
           <audio
             ref={audioElementRef}
-            src={audioUrl}
+            src={audioUrl || undefined}
             onEnded={() => setState('recorded')}
             className="hidden"
           />

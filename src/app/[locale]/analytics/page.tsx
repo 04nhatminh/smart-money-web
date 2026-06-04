@@ -6,10 +6,11 @@ import { useRouter } from 'next/navigation';
 import { useLocale } from 'next-intl';
 import { useAuth } from '@/context/AuthContext';
 import { SidebarLayout } from '@/components/templates';
-import { Heading, Text } from '@/components/atoms';
+import { Button, Heading, Text } from '@/components/atoms';
 import { useTheme } from '@/context/ThemeContext';
 import { useTransactionAnalytics } from '@/hooks/useAnalytics';
 import { MonthlyStats, CategoryProportion } from '@/types/analytics.api';
+import { BORDER_RADIUS, SHADOWS, FONT_SIZES, FONT_WEIGHTS } from '@/constants';
 import {
     VictoryAxis,
     VictoryBar,
@@ -20,6 +21,8 @@ import {
     VictoryTheme,
     VictoryTooltip,
 } from 'victory';
+import { MdDownload } from 'react-icons/md';
+import { exportToExcel } from '@/lib/excel-export';
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
@@ -29,6 +32,7 @@ const MONTH_NAMES = [
     'September', 'October', 'November', 'December',
 ];
 
+// Chart palette — distinct data-visualization colors, separate from UI theme tokens
 const CATEGORY_COLORS = [
     '#2563EB', '#F97316', '#16A34A', '#9333EA',
     '#0891B2', '#E11D48', '#F59E0B', '#64748B',
@@ -119,6 +123,13 @@ export default function AnalyticsPage() {
         loadAnalytics(nextMonth.month, nextMonth.year);
     };
 
+    const handleDownloadExcel = () => {
+        exportToExcel(
+            { monthlyStats, categoryProportions },
+            `analytics-${selectedMonth.label}-${selectedMonth.year}`
+        );
+    };
+
     // ── Chart data ──
     const incomeData = useMemo(
         () => monthlyStats.map((item) => ({
@@ -158,6 +169,17 @@ export default function AnalyticsPage() {
 
     if (!isAuthenticated) return null;
 
+    // ── Shared chart axis style (derived from theme) ──
+    const axisStyle = {
+        tickLabels: { fill: colors.text.secondary, fontSize: 11 },
+        grid: { stroke: colors.border.light },
+    };
+
+    const tooltipProps = {
+        flyoutStyle: { fill: colors.text.primary, stroke: colors.text.primary },
+        style: { fill: colors.text.inverse, fontSize: 12 },
+    };
+
     return (
         <SidebarLayout>
             <div className="space-y-5">
@@ -166,19 +188,43 @@ export default function AnalyticsPage() {
                 <div className="flex items-center justify-between">
                     <div>
                         <Heading level={2}>Analytics</Heading>
-                        <Text style={{ color: colors.text.secondary }} className="text-lg">
+                        <Text
+                            variant="body"
+                            style={{
+                                color: colors.text.secondary,
+                                fontSize: FONT_SIZES.lg,
+                            }}
+                        >
                             Visualize your income and spending patterns
                         </Text>
                     </div>
+                    <Button
+                        variant="primary"
+                        size="md"
+                        onClick={handleDownloadExcel}
+                        disabled={monthlyStats.length === 0 && categoryProportions.length === 0}
+                        className="flex items-center gap-2"
+                    >
+                        <MdDownload className="w-5 h-5" />
+                        Download Excel
+                    </Button>
                 </div>
 
                 {/* ── Error ── */}
                 {(pageError || error) && (
                     <div
-                        className="p-4 rounded-lg"
-                        style={{ backgroundColor: '#FEF2F2', borderColor: '#FECACA', border: '1px solid' }}
+                        className="p-4"
+                        style={{
+                            backgroundColor: `${colors.interactive.danger}15`,
+                            border: `1px solid ${colors.interactive.danger}`,
+                            borderRadius: BORDER_RADIUS.lg,
+                        }}
                     >
-                        <Text className="text-sm font-medium" style={{ color: '#991B1B' }}>
+                        <Text
+                            variant="caption"
+                            weight="medium"
+                            style={{ color: colors.interactive.danger }}
+                        >
                             {pageError || error}
                         </Text>
                     </div>
@@ -186,64 +232,83 @@ export default function AnalyticsPage() {
 
                 {/* ── Month Slider ── */}
                 <div
-                    className="flex items-center justify-between rounded-xl p-4 border"
+                    className="flex items-center justify-between p-4 border"
                     style={{
                         backgroundColor: colors.surface.primary,
                         borderColor: colors.border.light,
+                        borderRadius: BORDER_RADIUS.xl,
+                        boxShadow: SHADOWS.sm,
                     }}
                 >
-                    <button
+                    <Button
+                        variant="secondary"
+                        size="sm"
                         disabled={!canGoPrev}
                         onClick={() => handleChangeMonth('prev')}
-                        className="w-10 h-10 flex items-center justify-center rounded-lg transition-colors"
-                        style={{
-                            color: canGoPrev ? colors.text.primary : colors.border.light,
-                            cursor: canGoPrev ? 'pointer' : 'not-allowed',
-                        }}
+                        className="w-10 h-10 flex items-center justify-center !px-0 !py-0"
                     >
-                        <span className="text-3xl leading-none">‹</span>
-                    </button>
+                        <span style={{ fontSize: FONT_SIZES['3xl'], lineHeight: 1 }}>‹</span>
+                    </Button>
 
                     <div className="text-center">
-                        <Text className="text-2xl font-bold" style={{ color: colors.text.primary }}>
+                        <Text
+                            style={{
+                                color: colors.text.primary,
+                                fontSize: FONT_SIZES['2xl'],
+                                fontWeight: FONT_WEIGHTS.bold,
+                            }}
+                        >
                             {selectedMonth.label}
                         </Text>
-                        <Text className="text-sm font-semibold mt-0.5" style={{ color: colors.text.secondary }}>
+                        <Text
+                            variant="caption"
+                            weight="semibold"
+                            className="mt-0.5"
+                            style={{ color: colors.text.secondary }}
+                        >
                             {selectedMonth.year}
                         </Text>
                     </div>
 
-                    <button
+                    <Button
+                        variant="secondary"
+                        size="sm"
                         disabled={!canGoNext}
                         onClick={() => handleChangeMonth('next')}
-                        className="w-10 h-10 flex items-center justify-center rounded-lg transition-colors"
-                        style={{
-                            color: canGoNext ? colors.text.primary : colors.border.light,
-                            cursor: canGoNext ? 'pointer' : 'not-allowed',
-                        }}
+                        className="w-10 h-10 flex items-center justify-center !px-0 !py-0"
                     >
-                        <span className="text-3xl leading-none">›</span>
-                    </button>
+                        <span style={{ fontSize: FONT_SIZES['3xl'], lineHeight: 1 }}>›</span>
+                    </Button>
                 </div>
 
                 {/* ── Loading ── */}
                 {isLoading && (
                     <div className="py-10 text-center">
-                        <Text style={{ color: colors.text.secondary }}>Loading analytics...</Text>
+                        <Text variant="caption" style={{ color: colors.text.secondary }}>
+                            Loading analytics...
+                        </Text>
                     </div>
                 )}
 
                 {/* ── Bar Chart: Income / Expense ── */}
                 {!isLoading && monthlyStats.length > 0 && (
                     <div
-                        className="rounded-xl p-5 border"
+                        className="p-5 border"
                         style={{
                             backgroundColor: colors.surface.primary,
                             borderColor: colors.border.light,
+                            borderRadius: BORDER_RADIUS.xl,
+                            boxShadow: SHADOWS.sm,
                         }}
                     >
                         <div className="mb-3">
-                            <Text className="text-lg font-extrabold" style={{ color: colors.text.primary }}>
+                            <Text
+                                style={{
+                                    color: colors.text.primary,
+                                    fontSize: FONT_SIZES.lg,
+                                    fontWeight: FONT_WEIGHTS.bold,
+                                }}
+                            >
                                 Income / Expense by Week
                             </Text>
                         </div>
@@ -258,8 +323,8 @@ export default function AnalyticsPage() {
                         >
                             <VictoryAxis
                                 style={{
-                                    axis: { stroke: '#E5E7EB' },
-                                    tickLabels: { fill: '#64748B', fontSize: 11 },
+                                    axis: { stroke: colors.border.light },
+                                    tickLabels: axisStyle.tickLabels,
                                     grid: { stroke: 'transparent' },
                                 }}
                             />
@@ -267,8 +332,8 @@ export default function AnalyticsPage() {
                                 dependentAxis
                                 style={{
                                     axis: { stroke: 'transparent' },
-                                    tickLabels: { fill: '#64748B', fontSize: 11 },
-                                    grid: { stroke: '#EEF2F7' },
+                                    tickLabels: axisStyle.tickLabels,
+                                    grid: axisStyle.grid,
                                 }}
                             />
                             <VictoryStack>
@@ -277,13 +342,14 @@ export default function AnalyticsPage() {
                                     x="week"
                                     y="value"
                                     labels={({ datum }) => datum.label}
-                                    labelComponent={
-                                        <VictoryTooltip
-                                            flyoutStyle={{ fill: '#111827', stroke: '#111827' }}
-                                            style={{ fill: '#FFFFFF', fontSize: 12 }}
-                                        />
-                                    }
-                                    style={{ data: { fill: '#22C55E', width: 24, strokeWidth: 0 } }}
+                                    labelComponent={<VictoryTooltip {...tooltipProps} />}
+                                    style={{
+                                        data: {
+                                            fill: colors.interactive.success,
+                                            width: 24,
+                                            strokeWidth: 0,
+                                        },
+                                    }}
                                 />
                                 <VictoryBar
                                     data={expenseData}
@@ -291,13 +357,14 @@ export default function AnalyticsPage() {
                                     y="value"
                                     labels={({ datum }) => datum.label}
                                     cornerRadius={{ top: 4 }}
-                                    labelComponent={
-                                        <VictoryTooltip
-                                            flyoutStyle={{ fill: '#111827', stroke: '#111827' }}
-                                            style={{ fill: '#FFFFFF', fontSize: 12 }}
-                                        />
-                                    }
-                                    style={{ data: { fill: '#EF4444', width: 24, strokeWidth: 0 } }}
+                                    labelComponent={<VictoryTooltip {...tooltipProps} />}
+                                    style={{
+                                        data: {
+                                            fill: colors.interactive.danger,
+                                            width: 24,
+                                            strokeWidth: 0,
+                                        },
+                                    }}
                                 />
                             </VictoryStack>
                         </VictoryChart>
@@ -305,12 +372,18 @@ export default function AnalyticsPage() {
                         {/* Legend */}
                         <div className="flex justify-center gap-6 mt-1">
                             {[
-                                { color: '#22C55E', label: 'Income' },
-                                { color: '#EF4444', label: 'Expense' },
+                                { color: colors.interactive.success, label: 'Income' },
+                                { color: colors.interactive.danger, label: 'Expense' },
                             ].map(({ color, label }) => (
                                 <div key={label} className="flex items-center gap-2">
-                                    <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: color }} />
-                                    <Text className="text-sm font-semibold" style={{ color: colors.text.secondary }}>
+                                    <div
+                                        className="w-2.5 h-2.5"
+                                        style={{
+                                            backgroundColor: color,
+                                            borderRadius: BORDER_RADIUS.full,
+                                        }}
+                                    />
+                                    <Text variant="caption" weight="semibold">
                                         {label}
                                     </Text>
                                 </div>
@@ -322,14 +395,22 @@ export default function AnalyticsPage() {
                 {/* ── Pie Chart: Category Proportions ── */}
                 {!isLoading && pieData.length > 0 && (
                     <div
-                        className="rounded-xl p-5 border"
+                        className="p-5 border"
                         style={{
                             backgroundColor: colors.surface.primary,
                             borderColor: colors.border.light,
+                            borderRadius: BORDER_RADIUS.xl,
+                            boxShadow: SHADOWS.sm,
                         }}
                     >
                         <div className="mb-3">
-                            <Text className="text-lg font-extrabold" style={{ color: colors.text.primary }}>
+                            <Text
+                                style={{
+                                    color: colors.text.primary,
+                                    fontSize: FONT_SIZES.lg,
+                                    fontWeight: FONT_WEIGHTS.bold,
+                                }}
+                            >
                                 Category Proportions
                             </Text>
                         </div>
@@ -350,8 +431,14 @@ export default function AnalyticsPage() {
                                         containerComponent={<VictoryContainer responsive={true} />}
                                         labelComponent={
                                             <VictoryTooltip
-                                                flyoutStyle={{ fill: '#FFFFFF', stroke: '#D0D5DD' }}
-                                                style={{ fill: '#111827', fontSize: 9 }}
+                                                flyoutStyle={{
+                                                    fill: colors.surface.primary,
+                                                    stroke: colors.border.light,
+                                                }}
+                                                style={{
+                                                    fill: colors.text.primary,
+                                                    fontSize: 9,
+                                                }}
                                             />
                                         }
                                         style={{ data: { stroke: 'none', strokeWidth: 0 } }}
@@ -364,17 +451,17 @@ export default function AnalyticsPage() {
                                 {categoryProportions.map((item, index) => (
                                     <div key={item.category} className="flex items-center gap-2">
                                         <div
-                                            className="w-3 h-3 rounded-full shrink-0"
-                                            style={{ backgroundColor: CATEGORY_COLORS[index % CATEGORY_COLORS.length] }}
+                                            className="w-3 h-3 shrink-0"
+                                            style={{
+                                                backgroundColor: CATEGORY_COLORS[index % CATEGORY_COLORS.length],
+                                                borderRadius: BORDER_RADIUS.full,
+                                            }}
                                         />
                                         <div>
-                                            <Text
-                                                className="text-sm font-bold"
-                                                style={{ color: colors.text.primary }}
-                                            >
+                                            <Text variant="caption" weight="bold">
                                                 {item.category}
                                             </Text>
-                                            <Text className="text-xs font-semibold" style={{ color: colors.text.secondary }}>
+                                            <Text variant="small" weight="semibold">
                                                 {item.percentage.toFixed(1)}%
                                             </Text>
                                         </div>
@@ -388,13 +475,14 @@ export default function AnalyticsPage() {
                 {/* ── Empty State ── */}
                 {!isLoading && monthlyStats.length === 0 && pieData.length === 0 && !pageError && (
                     <div
-                        className="rounded-xl p-10 text-center border-2 border-dashed"
+                        className="p-10 text-center border-2 border-dashed"
                         style={{
                             borderColor: colors.border.light,
                             backgroundColor: colors.surface.secondary,
+                            borderRadius: BORDER_RADIUS.xl,
                         }}
                     >
-                        <Text style={{ color: colors.text.secondary }}>
+                        <Text variant="caption" style={{ color: colors.text.secondary }}>
                             No analytics data available for {selectedMonth.label} {selectedMonth.year}.
                         </Text>
                     </div>
