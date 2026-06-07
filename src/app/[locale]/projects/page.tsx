@@ -6,10 +6,10 @@ import { useLocale } from 'next-intl';
 import { useAuth } from '@/context/AuthContext';
 import { SidebarLayout } from '@/components/templates';
 import { Heading, Text, Button } from '@/components/atoms';
-import { 
-  ProjectCard, 
-  CreateProjectModal, 
-  EditProjectModal, 
+import {
+  ProjectCard,
+  CreateProjectModal,
+  EditProjectModal,
   AddContributionModal,
   DeleteConfirmationModal,
   UserIncomeModal,
@@ -137,8 +137,8 @@ export default function ProjectsPage() {
   };
 
   // Filter projects based on status
-  const filteredProjects = filterStatus === 'ALL' 
-    ? projects 
+  const filteredProjects = filterStatus === 'ALL'
+    ? projects
     : projects.filter(p => p.status === filterStatus);
 
   const getProjectStats = () => {
@@ -154,7 +154,7 @@ export default function ProjectsPage() {
 
   // Helper functions for project limits
   const canCreateProject = () => projects.length < 3;
-  
+
   const getPrioritiesUsed = () => {
     const used = new Set<string>();
     projects.forEach(p => used.add(p.priority));
@@ -182,7 +182,7 @@ export default function ProjectsPage() {
         {/* Header */}
         <div className="flex items-center justify-between flex-wrap gap-4">
           <div>
-            <Heading level={1} style={{ color: colors.text.primary }}>
+            <Heading level={2}>
               Projects
             </Heading>
             <Text style={{ color: colors.text.secondary }} className="mt-1">
@@ -201,7 +201,7 @@ export default function ProjectsPage() {
                 You've reached the limit of 3 projects
               </div>
             )}
-            <Button 
+            <Button
               variant="primary"
               onClick={() => setIsCreateModalOpen(true)}
               className="flex items-center gap-2"
@@ -232,8 +232,8 @@ export default function ProjectsPage() {
               <Text className="text-sm" style={{ color: colors.text.secondary }}>
                 {stat.label}
               </Text>
-              <Heading 
-                level={2} 
+              <Heading
+                level={2}
                 className="mt-1"
                 style={{ color: stat.color }}
               >
@@ -317,7 +317,7 @@ export default function ProjectsPage() {
               {projects.length === 0 ? "Create your first project to get started" : "No projects match the selected filter"}
             </Text>
             {projects.length === 0 && (
-              <Button 
+              <Button
                 variant="primary"
                 onClick={() => setIsCreateModalOpen(true)}
               >

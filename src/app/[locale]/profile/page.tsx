@@ -25,7 +25,7 @@ export default function ProfilePage() {
 
   const formatDate = (dateString?: string) => {
     if (!dateString) return 'N/A';
-    
+
     // If already in dd/MM/yyyy format, return as is
     if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateString)) {
       return dateString;
@@ -35,14 +35,14 @@ export default function ProfilePage() {
       // Handle ISO format (YYYY-MM-DD or YYYY-MM-DDTHH:mm:ss)
       const datePart = dateString.split('T')[0];
       const [year, month, day] = datePart.split('-');
-      
+
       if (year && month && day) {
         const date = new Date(`${year}-${month}-${day}`);
         if (!isNaN(date.getTime())) {
           return date.toLocaleDateString('vi-VN');
         }
       }
-      
+
       // Fallback: try parsing the date as is
       const date = new Date(dateString);
       if (!isNaN(date.getTime())) {
@@ -51,7 +51,7 @@ export default function ProfilePage() {
     } catch {
       // If all parsing fails, return original string
     }
-    
+
     return dateString;
   };
 
@@ -83,7 +83,7 @@ export default function ProfilePage() {
       <div className="space-y-8">
         {/* Welcome Section */}
         <div className="mb-8">
-          <Heading level={1} style={{ color: colors.interactive.primary }}>
+          <Heading level={2}>
             Profile
           </Heading>
           <Text style={{ color: colors.text.secondary }}>
@@ -97,13 +97,13 @@ export default function ProfilePage() {
             <Card className="p-6 h-full">
               <div className="text-center">
                 {user?.avatar ? (
-                  <img 
-                    src={user.avatar} 
-                    alt={user.fullName || user.username} 
+                  <img
+                    src={user.avatar}
+                    alt={user.fullName || user.username}
                     className="w-20 h-20 rounded-full mx-auto mb-4 object-cover"
                   />
                 ) : (
-                  <div 
+                  <div
                     className="w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center text-2xl font-bold text-white"
                     style={{ backgroundColor: colors.interactive.primary }}
                   >
@@ -113,14 +113,14 @@ export default function ProfilePage() {
                 <Heading level={3} className="mb-2">
                   {user?.fullName || user?.username}
                 </Heading>
-                <p 
+                <p
                   className="text-sm mb-4 break-all"
                   style={{ color: colors.text.secondary }}
                 >
                   {user?.email}
                 </p>
                 {user?.coin !== undefined && (
-                  <div 
+                  <div
                     className="p-3 rounded-lg mb-4"
                     style={{ backgroundColor: colors.surface.secondary }}
                   >
@@ -180,7 +180,7 @@ export default function ProfilePage() {
         <Card className="p-6">
           <div className="flex items-center justify-between mb-6">
             <Heading level={3} className="m-0">User Income Information</Heading>
-            <Button 
+            <Button
               variant="secondary"
               onClick={() => setIsUserIncomeModalOpen(true)}
               disabled={isLoadingIncome}
@@ -235,7 +235,7 @@ export default function ProfilePage() {
               )}
             </div>
           ) : (
-            <div 
+            <div
               className="p-4 rounded-lg text-center"
               style={{ backgroundColor: colors.background.secondary }}
             >
@@ -248,13 +248,13 @@ export default function ProfilePage() {
 
         {/* Action Buttons */}
         <div className="flex gap-4 pt-4">
-          <Button 
+          <Button
             variant="primary"
             onClick={() => router.push(`/${locale}/profile/edit`)}
           >
             Edit Profile
           </Button>
-          <LogoutButton 
+          <LogoutButton
             variant="secondary"
           >
             Logout

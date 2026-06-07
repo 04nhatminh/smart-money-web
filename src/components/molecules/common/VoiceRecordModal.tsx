@@ -215,7 +215,7 @@ export const VoiceRecordModal: React.FC<VoiceRecordModalProps> = ({ isOpen, onCl
       >
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
-          <Heading level={2} style={{ color: colors.text.primary }}>
+          <Heading level={3}>
             Record Voice
           </Heading>
           <button
@@ -366,7 +366,7 @@ export const VoiceRecordModal: React.FC<VoiceRecordModalProps> = ({ isOpen, onCl
               <Text style={{ color: colors.text.secondary }} className="text-sm mb-6">
                 Your voice recording has been successfully analyzed and uploaded.
               </Text>
-              
+
               {/* AI Analysis Result Display */}
               {aiResult && (
                 <div

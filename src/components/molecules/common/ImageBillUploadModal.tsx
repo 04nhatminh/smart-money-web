@@ -140,7 +140,7 @@ export const ImageBillUploadModal: React.FC<ImageBillUploadModalProps> = ({ isOp
     // Unsubscribe from WebSocket
     unsubscribeRef.current?.();
     unsubscribeRef.current = null;
-    
+
     setUploadedImage(null);
     setPreview('');
     setUploadState('idle');
@@ -188,7 +188,7 @@ export const ImageBillUploadModal: React.FC<ImageBillUploadModalProps> = ({ isOp
       >
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
-          <Heading level={2} style={{ color: colors.text.primary }}>
+          <Heading level={3}>
             Upload Receipt/Invoice
           </Heading>
           <button
@@ -238,7 +238,7 @@ export const ImageBillUploadModal: React.FC<ImageBillUploadModalProps> = ({ isOp
                 onChange={handleFileSelect}
                 className="hidden"
               />
-              
+
               {preview ? (
                 <div>
                   <img src={preview} alt="Preview" className="max-w-full max-h-64 mx-auto mb-4 rounded-lg" />
