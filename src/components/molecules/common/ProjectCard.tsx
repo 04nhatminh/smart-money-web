@@ -76,17 +76,17 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
       {/* Header with Title and Status */}
       <div className="flex items-start justify-between mb-3">
         <div className="flex-1">
-          <Text 
-            className="font-semibold text-base mb-1" 
+          <Text
+            className="font-semibold text-base mb-1"
             style={{ color: colors.text.primary }}
           >
             {project.name}
           </Text>
-          <Text 
-            className="text-xs" 
+          <Text
+            className="text-xs"
             style={{ color: colors.text.tertiary }}
           >
-            {project.type === 'PERSONAL' ? '👤 Personal' : '👥 Group'} • {project.currency}
+            {project.type === 'PERSONAL' ? 'Personal' : 'Group'} • {project.currency}
           </Text>
         </div>
         <div className="flex items-center gap-2">
@@ -147,9 +147,9 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
           <Text className="text-xs" style={{ color: colors.text.tertiary }}>
             Deadline
           </Text>
-          <Text 
+          <Text
             className="text-xs font-medium"
-            style={{ 
+            style={{
               color: daysLeft < 7 ? '#EF4444' : daysLeft < 30 ? '#F59E0B' : colors.text.primary
             }}
           >

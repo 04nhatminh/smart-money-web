@@ -22,6 +22,7 @@ export const API_ENDPOINTS = {
     getById: (id: string) => `/api/v1/transactions/${id}`,
     update: (id: string) => `/api/v1/transactions/${id}`,
     delete: (id: string) => `/api/v1/transactions/${id}`,
+    analytics: '/api/v1/transactions/analytics',
   },
 
   // Saving Goals

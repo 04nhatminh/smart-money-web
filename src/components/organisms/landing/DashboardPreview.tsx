@@ -1,13 +1,78 @@
 'use client';
 
 import React from 'react';
-import { Heading, Text } from '@/components/atoms';
+import {
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
+  PieChart, Pie, Cell, Tooltip as PieTooltip,
+} from 'recharts';
+import { Heading, Text, Button } from '@/components/atoms';
 import { useTheme } from '@/context';
 import { useTranslations } from 'next-intl';
+import { useRouter } from 'next/navigation';
+import { useLocale } from 'next-intl';
+import landingMockData from '@/data/landingMockData.json';
+import { formatVietnamsePrice } from '@/lib/format';
+
+const DONUT_COLORS = ['#5044d5', '#8a82e3', '#3629b7', '#c5c1f1', '#776ede'];
+
+const formatMillionVND = (value: number) => {
+  if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(0)}M`;
+  if (value >= 1_000) return `${(value / 1_000).toFixed(0)}K`;
+  return `${value}`;
+};
+
+const CustomTooltip = ({ active, payload, label }: any) => {
+  if (active && payload && payload.length) {
+    return (
+      <div
+        style={{
+          background: 'rgba(30,24,104,0.95)',
+          border: '1px solid #5044d5',
+          borderRadius: 10,
+          padding: '10px 16px',
+          minWidth: 160,
+        }}
+      >
+        <p style={{ color: '#c5c1f1', fontWeight: 600, marginBottom: 4 }}>{label}</p>
+        {payload.map((entry: any) => (
+          <p key={entry.name} style={{ color: entry.color, margin: '2px 0' }}>
+            {entry.name}: {formatVietnamsePrice(entry.value)}
+          </p>
+        ))}
+      </div>
+    );
+  }
+  return null;
+};
+
+const DonutTooltip = ({ active, payload }: any) => {
+  if (active && payload && payload.length) {
+    const d = payload[0].payload;
+    return (
+      <div
+        style={{
+          background: 'rgba(30,24,104,0.95)',
+          border: '1px solid #5044d5',
+          borderRadius: 10,
+          padding: '10px 16px',
+        }}
+      >
+        <p style={{ color: '#c5c1f1', fontWeight: 600 }}>{d.category}</p>
+        <p style={{ color: '#8a82e3' }}>{(d.percentage * 100).toFixed(0)}%</p>
+        <p style={{ color: '#c5c1f1' }}>{d.count} transactions</p>
+      </div>
+    );
+  }
+  return null;
+};
 
 export const DashboardPreview: React.FC = () => {
   const { colors } = useTheme();
   const t = useTranslations();
+  const router = useRouter();
+  const locale = useLocale();
+
+  const { monthlyStats, categoryProportions, monthlyTotalIncome, monthlyTotalExpense } = landingMockData;
 
   return (
     <section className="py-16 md:py-24 transition-colors" style={{ backgroundColor: colors.background.secondary }}>
@@ -15,88 +80,152 @@ export const DashboardPreview: React.FC = () => {
         {/* Header */}
         <div className="text-center mb-12">
           <Heading level={2}>{t('finance.dashboard.title')}</Heading>
+          <Text variant="body" style={{ color: colors.text.secondary }} className="mt-3">
+            A real-time snapshot of what your financial dashboard looks like
+          </Text>
+        </div>
+
+        {/* KPI Strip */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+          {[
+            { label: 'Total Income', value: monthlyTotalIncome, color: '#10B981' },
+            { label: 'Total Expenses', value: monthlyTotalExpense, color: '#EF4444' },
+            { label: 'Net Savings', value: monthlyTotalIncome - monthlyTotalExpense, color: colors.interactive.primary },
+          ].map((kpi) => (
+            <div
+              key={kpi.label}
+              className="rounded-xl p-5 flex flex-col gap-1 shadow"
+              style={{ backgroundColor: colors.surface.primary, borderLeft: `4px solid ${kpi.color}` }}
+            >
+              <Text variant="caption" style={{ color: colors.text.secondary }}>{kpi.label}</Text>
+              <span className="text-xl font-bold" style={{ color: kpi.color }}>
+                {formatVietnamsePrice(kpi.value)}
+              </span>
+            </div>
+          ))}
         </div>
 
         {/* Dashboard Card */}
         <div
-          className="rounded-lg shadow-lg p-8 border"
+          className="rounded-2xl shadow-xl p-8 border"
           style={{
             backgroundColor: colors.surface.primary,
             borderColor: colors.border.light,
-            minHeight: '400px',
           }}
         >
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Monthly Spending Trend Chart */}
-            <div className="lg:col-span-1">
-              <Text className="font-semibold mb-4">
-                {t('finance.dashboard.monthlySpending')}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+            {/* Stacked Bar Chart — Weekly Income vs Expense */}
+            <div>
+              <Text className="font-semibold mb-4 text-base">
+                Weekly Income vs Expense
               </Text>
-              <div
-                className="h-48 rounded flex items-center justify-center"
-                style={{
-                  backgroundColor: colors.background.secondary,
-                  border: `2px dashed ${colors.border.light}`,
-                }}
-              >
-                <Text variant="caption" style={{ color: colors.text.tertiary }}>
-                  Line Chart Placeholder
-                </Text>
-              </div>
+              <ResponsiveContainer width="100%" height={220}>
+                <BarChart data={monthlyStats} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke={colors.border.light} />
+                  <XAxis
+                    dataKey="week"
+                    tick={{ fill: colors.text.secondary, fontSize: 12 }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <YAxis
+                    tickFormatter={formatMillionVND}
+                    tick={{ fill: colors.text.secondary, fontSize: 11 }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Legend
+                    formatter={(value) => (
+                      <span style={{ color: colors.text.primary, fontSize: 12 }}>{value}</span>
+                    )}
+                  />
+                  <Bar dataKey="income" name="Income" fill="#10B981" radius={[4, 4, 0, 0]} maxBarSize={36} />
+                  <Bar dataKey="expense" name="Expense" fill="#EF4444" radius={[4, 4, 0, 0]} maxBarSize={36} />
+                </BarChart>
+              </ResponsiveContainer>
             </div>
 
-            {/* Spending by Category Pie Chart */}
-            <div className="lg:col-span-1">
-              <Text className="font-semibold mb-4">
-                {t('finance.dashboard.spendingByCategory')}
+            {/* Donut Chart — Category Proportions */}
+            <div>
+              <Text className="font-semibold mb-4 text-base">
+                Spending by Category
               </Text>
-              <div
-                className="h-48 rounded flex items-center justify-center"
-                style={{
-                  backgroundColor: colors.background.secondary,
-                  border: `2px dashed ${colors.border.light}`,
-                }}
-              >
-                <Text variant="caption" style={{ color: colors.text.tertiary }}>
-                  Pie Chart Placeholder
-                </Text>
-              </div>
-            </div>
-
-            {/* Budget vs Actual Bar Chart */}
-            <div className="lg:col-span-1">
-              <Text className="font-semibold mb-4">
-                {t('finance.dashboard.budgetVsActual')}
-              </Text>
-              <div
-                className="h-48 rounded flex items-center justify-center"
-                style={{
-                  backgroundColor: colors.background.secondary,
-                  border: `2px dashed ${colors.border.light}`,
-                }}
-              >
-                <Text variant="caption" style={{ color: colors.text.tertiary }}>
-                  Bar Chart Placeholder
-                </Text>
+              <div className="flex items-center gap-4">
+                <ResponsiveContainer width="55%" height={220}>
+                  <PieChart>
+                    <Pie
+                      data={categoryProportions}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={55}
+                      outerRadius={90}
+                      dataKey="percentage"
+                      paddingAngle={3}
+                    >
+                      {categoryProportions.map((entry, index) => (
+                        <Cell key={entry.category} fill={DONUT_COLORS[index % DONUT_COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <PieTooltip content={<DonutTooltip />} />
+                  </PieChart>
+                </ResponsiveContainer>
+                <div className="flex flex-col gap-2 flex-1">
+                  {categoryProportions.map((entry, index) => (
+                    <div key={entry.category} className="flex items-center gap-2">
+                      <div
+                        className="w-3 h-3 rounded-full flex-shrink-0"
+                        style={{ backgroundColor: DONUT_COLORS[index % DONUT_COLORS.length] }}
+                      />
+                      <Text variant="caption" style={{ fontSize: 11, color: colors.text.secondary }}>
+                        {entry.category} — {(entry.percentage * 100).toFixed(0)}%
+                      </Text>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Legend */}
-          <div className="flex justify-center gap-8 mt-8 pt-8 border-t" style={{ borderColor: colors.border.light }}>
-            <div className="flex items-center gap-2">
-              <div
-                className="w-3 h-3 rounded-full"
-                style={{ backgroundColor: colors.interactive.primary }}
-              />
-              <Text variant="caption">{t('finance.dashboard.planned')}</Text>
+          {/* Blurred CTA Overlay */}
+          <div className="relative mt-10">
+            <div
+              className="rounded-xl p-6"
+              style={{
+                filter: 'blur(4px)',
+                pointerEvents: 'none',
+                backgroundColor: colors.background.secondary,
+              }}
+            >
+              <div className="grid grid-cols-3 gap-4">
+                {[
+                  { label: 'Savings Rate', value: '5.9%', icon: '' },
+                  { label: 'Top Category', value: 'Food & Bev', icon: '🍜' },
+                  { label: 'Runway (months)', value: '3.2', icon: '🏦' },
+                ].map((item) => (
+                  <div key={item.label} className="text-center p-4 rounded-lg" style={{ backgroundColor: colors.surface.primary }}>
+                    <div className="text-2xl mb-1">{item.icon}</div>
+                    <div className="font-bold text-lg">{item.value}</div>
+                    <div className="text-sm" style={{ color: colors.text.secondary }}>{item.label}</div>
+                  </div>
+                ))}
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <div
-                className="w-3 h-3 rounded-full"
-                style={{ backgroundColor: colors.interactive.secondary }}
-              />
-              <Text variant="caption">{t('finance.dashboard.actual')}</Text>
+
+            {/* CTA Overlay */}
+            <div
+              className="absolute inset-0 flex flex-col items-center justify-center rounded-xl"
+              style={{ background: 'rgba(54,41,183,0.72)', backdropFilter: 'blur(2px)' }}
+            >
+              <Text className="font-bold text-xl mb-2" style={{ color: '#fff' }}>
+                Sign up now to analyze your own financial health
+              </Text>
+              <Text variant="caption" style={{ color: '#c5c1f1' }} className="mb-4">
+                Unlock deep insights, health score, budget tracking & more
+              </Text>
+              <Button variant="primary" size="lg" onClick={() => router.push(`/${locale}/register`)}>
+                Get Started — It&apos;s Free
+              </Button>
             </div>
           </div>
         </div>

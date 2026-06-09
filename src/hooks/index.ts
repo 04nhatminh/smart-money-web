@@ -5,3 +5,4 @@ export { useBudgets } from './useBudgets';
 export { useProfile } from './useProfile';
 export { useProjects } from './useProjects';
 export { useUserIncome } from './useUserIncome';
+export { useAnalytics } from './useAnalytics';

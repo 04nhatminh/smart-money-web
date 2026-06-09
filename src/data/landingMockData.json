@@ -1,0 +1,18 @@
+{
+  "monthlyStats": [
+    { "week": "Week 1", "income": 12000000, "expense": 4500000 },
+    { "week": "Week 2", "income": 0, "expense": 3800000 },
+    { "week": "Week 3", "income": 5000000, "expense": 6200000 },
+    { "week": "Week 4", "income": 1500000, "expense": 2900000 }
+  ],
+  "categoryProportions": [
+    { "category": "Food & Beverage", "count": 18, "percentage": 0.35 },
+    { "category": "Housing & Rent", "count": 1, "percentage": 0.25 },
+    { "category": "Shopping", "count": 12, "percentage": 0.20 },
+    { "category": "Utilities", "count": 4, "percentage": 0.10 },
+    { "category": "Entertainment", "count": 5, "percentage": 0.10 }
+  ],
+  "monthlyTotalTransactions": 40,
+  "monthlyTotalExpense": 17400000,
+  "monthlyTotalIncome": 18500000
+}
