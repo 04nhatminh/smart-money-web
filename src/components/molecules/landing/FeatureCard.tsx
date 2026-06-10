@@ -21,7 +21,7 @@ export const FeatureCard: React.FC<FeatureCardProps> = ({
 
   return (
     <div
-      className={`p-8 rounded-lg transition-all hover:shadow-lg hover:-translate-y-1 ${className}`}
+      className={`p-8 rounded-lg transition-all hover:shadow-lg hover:-translate-y-1 min-h-64 ${className}`}
       style={{
         backgroundColor: colors.surface.primary,
         borderColor: colors.border.light,
