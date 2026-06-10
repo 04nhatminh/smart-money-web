@@ -74,6 +74,53 @@ export const DashboardPreview: React.FC = () => {
 
   const { monthlyStats, categoryProportions, monthlyTotalIncome, monthlyTotalExpense } = landingMockData;
 
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div
+          style={{
+            background: 'rgba(30,24,104,0.95)',
+            border: '1px solid #5044d5',
+            borderRadius: 10,
+            padding: '10px 16px',
+            minWidth: 160,
+          }}
+        >
+          <p style={{ color: '#c5c1f1', fontWeight: 600, marginBottom: 4 }}>{label}</p>
+          {payload.map((entry: any) => (
+            <p key={entry.name} style={{ color: entry.color, margin: '2px 0' }}>
+              {entry.name}: {formatVietnamsePrice(entry.value)}
+            </p>
+          ))}
+        </div>
+      );
+    }
+    return null;
+  };
+
+  const DonutTooltip = ({ active, payload }: any) => {
+    if (active && payload && payload.length) {
+      const d = payload[0].payload;
+      return (
+        <div
+          style={{
+            background: 'rgba(30,24,104,0.95)',
+            border: '1px solid #5044d5',
+            borderRadius: 10,
+            padding: '10px 16px',
+          }}
+        >
+          <p style={{ color: '#c5c1f1', fontWeight: 600 }}>
+            {d.category === 'Food & Bev' ? t('finance.dashboard.foodBev') : d.category}
+          </p>
+          <p style={{ color: '#8a82e3' }}>{(d.percentage * 100).toFixed(0)}%</p>
+          <p style={{ color: '#c5c1f1' }}>{d.count} transactions</p>
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
     <section className="py-16 md:py-24 transition-colors" style={{ backgroundColor: colors.background.secondary }}>
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -81,16 +128,16 @@ export const DashboardPreview: React.FC = () => {
         <div className="text-center mb-12">
           <Heading level={2}>{t('finance.dashboard.title')}</Heading>
           <Text variant="body" style={{ color: colors.text.secondary }} className="mt-3">
-            A real-time snapshot of what your financial dashboard looks like
+            {t('finance.dashboard.subtitle')}
           </Text>
         </div>
 
         {/* KPI Strip */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
           {[
-            { label: 'Total Income', value: monthlyTotalIncome, color: '#10B981' },
-            { label: 'Total Expenses', value: monthlyTotalExpense, color: '#EF4444' },
-            { label: 'Net Savings', value: monthlyTotalIncome - monthlyTotalExpense, color: colors.interactive.primary },
+            { label: t('finance.dashboard.totalIncome'), value: monthlyTotalIncome, color: '#10B981' },
+            { label: t('finance.dashboard.totalExpenses'), value: monthlyTotalExpense, color: '#EF4444' },
+            { label: t('finance.dashboard.netSavings'), value: monthlyTotalIncome - monthlyTotalExpense, color: colors.interactive.primary },
           ].map((kpi) => (
             <div
               key={kpi.label}
@@ -117,7 +164,7 @@ export const DashboardPreview: React.FC = () => {
             {/* Stacked Bar Chart — Weekly Income vs Expense */}
             <div>
               <Text className="font-semibold mb-4 text-base">
-                Weekly Income vs Expense
+                {t('finance.dashboard.weeklyIncomeVsExpense')}
               </Text>
               <ResponsiveContainer width="100%" height={220}>
                 <BarChart data={monthlyStats} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
@@ -140,8 +187,8 @@ export const DashboardPreview: React.FC = () => {
                       <span style={{ color: colors.text.primary, fontSize: 12 }}>{value}</span>
                     )}
                   />
-                  <Bar dataKey="income" name="Income" fill="#10B981" radius={[4, 4, 0, 0]} maxBarSize={36} />
-                  <Bar dataKey="expense" name="Expense" fill="#EF4444" radius={[4, 4, 0, 0]} maxBarSize={36} />
+                  <Bar dataKey="income" name={t('finance.dashboard.totalIncome')} fill="#10B981" radius={[4, 4, 0, 0]} maxBarSize={36} />
+                  <Bar dataKey="expense" name={t('finance.dashboard.totalExpenses')} fill="#EF4444" radius={[4, 4, 0, 0]} maxBarSize={36} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -149,7 +196,7 @@ export const DashboardPreview: React.FC = () => {
             {/* Donut Chart — Category Proportions */}
             <div>
               <Text className="font-semibold mb-4 text-base">
-                Spending by Category
+                {t('finance.dashboard.spendingByCategory')}
               </Text>
               <div className="flex items-center gap-4">
                 <ResponsiveContainer width="55%" height={220}>
@@ -178,7 +225,7 @@ export const DashboardPreview: React.FC = () => {
                         style={{ backgroundColor: DONUT_COLORS[index % DONUT_COLORS.length] }}
                       />
                       <Text variant="caption" style={{ fontSize: 11, color: colors.text.secondary }}>
-                        {entry.category} — {(entry.percentage * 100).toFixed(0)}%
+                        {entry.category === 'Food & Bev' ? t('finance.dashboard.foodBev') : entry.category} — {(entry.percentage * 100).toFixed(0)}%
                       </Text>
                     </div>
                   ))}
@@ -199,12 +246,11 @@ export const DashboardPreview: React.FC = () => {
             >
               <div className="grid grid-cols-3 gap-4">
                 {[
-                  { label: 'Savings Rate', value: '5.9%', icon: '' },
-                  { label: 'Top Category', value: 'Food & Bev', icon: '🍜' },
-                  { label: 'Runway (months)', value: '3.2', icon: '🏦' },
+                  { label: t('finance.dashboard.savingsRate'), value: '5.9%' },
+                  { label: t('finance.dashboard.topCategory'), value: t('finance.dashboard.foodBev') },
+                  { label: t('finance.dashboard.runwayMonths'), value: '3.2' },
                 ].map((item) => (
                   <div key={item.label} className="text-center p-4 rounded-lg" style={{ backgroundColor: colors.surface.primary }}>
-                    <div className="text-2xl mb-1">{item.icon}</div>
                     <div className="font-bold text-lg">{item.value}</div>
                     <div className="text-sm" style={{ color: colors.text.secondary }}>{item.label}</div>
                   </div>
@@ -217,14 +263,14 @@ export const DashboardPreview: React.FC = () => {
               className="absolute inset-0 flex flex-col items-center justify-center rounded-xl"
               style={{ background: 'rgba(54,41,183,0.72)', backdropFilter: 'blur(2px)' }}
             >
-              <Text className="font-bold text-xl mb-2" style={{ color: '#fff' }}>
-                Sign up now to analyze your own financial health
+              <Text className="font-bold text-xl mb-2 text-center" style={{ color: '#fff' }}>
+                {t('finance.dashboard.overlayTitle')}
               </Text>
-              <Text variant="caption" style={{ color: '#c5c1f1' }} className="mb-4">
-                Unlock deep insights, health score, budget tracking & more
+              <Text variant="caption" style={{ color: '#c5c1f1', textAlign: 'justify' }} className="mb-4 text-center">
+                {t('finance.dashboard.overlaySubtitle')}
               </Text>
               <Button variant="primary" size="lg" onClick={() => router.push(`/${locale}/register`)}>
-                Get Started — It&apos;s Free
+                {t('finance.dashboard.overlayCta')}
               </Button>
             </div>
           </div>

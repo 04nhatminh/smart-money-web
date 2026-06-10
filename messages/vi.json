@@ -76,11 +76,23 @@
     },
     "dashboard": {
       "title": "Dashboard Preview",
+      "subtitle": "Tổng quan về bảng điều khiển tài chính của bạn",
       "monthlySpending": "Xu Hướng Chi Tiêu Hàng Tháng",
       "spendingByCategory": "Chi Tiêu Theo Danh Mục",
       "budgetVsActual": "Ngân Sách So Với Chi Tiêu Thực Tế",
       "planned": "Kế Hoạch",
-      "actual": "Thực Tế"
+      "actual": "Thực Tế",
+      "totalIncome": "Tổng Thu Nhập",
+      "totalExpenses": "Tổng Chi Tiêu",
+      "netSavings": "Tích Lũy Ròng",
+      "weeklyIncomeVsExpense": "Thu Nhập & Chi Tiêu Hàng Tuần",
+      "savingsRate": "Tỷ Lệ Tiết Kiệm",
+      "topCategory": "Danh Mục Lớn Nhất",
+      "runwayMonths": "Dự Phòng (tháng)",
+      "foodBev": "Ăn Uống",
+      "overlayTitle": "Đăng ký ngay để phân tích sức khỏe tài chính của riêng bạn",
+      "overlaySubtitle": "Mở khóa thông tin chuyên sâu, điểm sức khỏe, theo dõi ngân sách và hơn thế nữa",
+      "overlayCta": "Bắt Đầu — Hoàn Toàn Miễn Phí"
     },
     "features": {
       "title": "Tất Cả Những Gì Bạn Cần",

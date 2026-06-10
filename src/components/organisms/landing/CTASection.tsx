@@ -47,7 +47,7 @@ export const CTASection: React.FC<CTASectionProps> = ({
         <Text
           variant="body"
           className="mb-8 text-lg"
-          style={{ color: colors.text.secondary }}
+          style={{ color: colors.text.secondary, textAlign: 'justify' }}
         >
           {finalSubtitle}
         </Text>

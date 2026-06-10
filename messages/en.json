@@ -76,11 +76,23 @@
     },
     "dashboard": {
       "title": "Dashboard Preview",
+      "subtitle": "Overview of your financial dashboard",
       "monthlySpending": "Monthly Spending Trend",
       "spendingByCategory": "Spending by Category",
       "budgetVsActual": "Budget vs Actual Spending",
       "planned": "Planned",
-      "actual": "Actual"
+      "actual": "Actual",
+      "totalIncome": "Total Income",
+      "totalExpenses": "Total Expenses",
+      "netSavings": "Net Savings",
+      "weeklyIncomeVsExpense": "Weekly Income vs Expense",
+      "savingsRate": "Savings Rate",
+      "topCategory": "Top Category",
+      "runwayMonths": "Runway (months)",
+      "foodBev": "Food & Bev",
+      "overlayTitle": "Sign up now to analyze your own financial health",
+      "overlaySubtitle": "Unlock deep insights, health score, budget tracking & more",
+      "overlayCta": "Get Started — It's Free"
     },
     "features": {
       "title": "Everything You Need",
