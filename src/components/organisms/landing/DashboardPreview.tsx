@@ -212,7 +212,7 @@ export const DashboardPreview: React.FC = () => {
                         innerRadius={55}
                         outerRadius={90}
                         dataKey="percentage"
-                        paddingAngle={3}
+                        paddingAngle={1}
                       >
                         {categoryProportions.map((entry, index) => (
                           <Cell key={entry.category} fill={DONUT_COLORS[index % DONUT_COLORS.length]} />

@@ -64,7 +64,7 @@ const ChartTooltip = ({ active, payload, label }: any) => {
   );
 };
 
-const PieTooltipCustom = ({ active, payload }: any) => {
+export const PieTooltipCustom = ({ active, payload }: any) => {
   if (!active || !payload?.length) return null;
   const d = payload[0].payload;
   return (
@@ -76,7 +76,7 @@ const PieTooltipCustom = ({ active, payload }: any) => {
       boxShadow: '0 4px 20px rgba(80,68,213,0.3)',
     }}>
       <p style={{ color: '#c5c1f1', fontWeight: 700, fontSize: 13 }}>{d.category}</p>
-      <p style={{ color: '#8a82e3', fontSize: 12 }}>{(d.percentage * 100).toFixed(1)}%</p>
+      <p style={{ color: '#8a82e3', fontSize: 12 }}>{(d.percentage).toFixed(1)}%</p>
       <p style={{ color: '#c5c1f1', fontSize: 12 }}>{d.count} transactions</p>
     </div>
   );
@@ -167,11 +167,11 @@ export default function AnalysisPage() {
     let cum = 0;
     return monthlyStats.map((m, i) => {
       cum += (m.income || 0) - (m.expense || 0);
-      return { 
-        month: m.week ? `Week ${m.week}` : `Week ${i + 1}`, 
-        cumulative: cum, 
-        income: m.income || 0, 
-        expense: m.expense || 0 
+      return {
+        month: m.week ? `Week ${m.week}` : `Week ${i + 1}`,
+        cumulative: cum,
+        income: m.income || 0,
+        expense: m.expense || 0
       };
     });
   }, [analyticsData]);
@@ -183,7 +183,7 @@ export default function AnalysisPage() {
     return [...categoryProportions]
       .map((c) => ({
         ...c,
-        estimatedExpense: kpis.totalExpense * c.percentage,
+        estimatedExpense: kpis.totalExpense * (c.percentage / 100),
       }))
       .sort((a, b) => b.estimatedExpense - a.estimatedExpense);
   }, [analyticsData, kpis]);
@@ -419,7 +419,7 @@ export default function AnalysisPage() {
                           innerRadius={60}
                           outerRadius={100}
                           dataKey="percentage"
-                          paddingAngle={3}
+                          paddingAngle={1}
                         >
                           {(analyticsData.categoryProportions ?? []).map((entry, index) => (
                             <Cell key={entry.category} fill={CHART_COLORS[index % CHART_COLORS.length]} />
@@ -436,7 +436,7 @@ export default function AnalysisPage() {
                             style={{ backgroundColor: CHART_COLORS[index % CHART_COLORS.length] }}
                           />
                           <Text variant="caption" style={{ fontSize: 11, color: colors.text.secondary }} className="truncate">
-                            {entry.category} — <strong>{(entry.percentage * 100).toFixed(0)}%</strong>
+                            {entry.category} — <strong>{(entry.percentage).toFixed(0)}%</strong>
                           </Text>
                         </div>
                       ))}
@@ -512,13 +512,13 @@ export default function AnalysisPage() {
                                 <div
                                   className="h-full rounded-full"
                                   style={{
-                                    width: `${cat.percentage * 100}%`,
+                                    width: `${cat.percentage}%`,
                                     backgroundColor: CHART_COLORS[index % CHART_COLORS.length],
                                   }}
                                 />
                               </div>
                               <Text variant="caption" style={{ color: colors.text.secondary, fontSize: 12, minWidth: 36 }}>
-                                {(cat.percentage * 100).toFixed(1)}%
+                                {(cat.percentage).toFixed(1)}%
                               </Text>
                             </div>
                           </td>

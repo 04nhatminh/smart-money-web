@@ -6,7 +6,7 @@ import { useLocale } from 'next-intl';
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
 import { LogoutButton } from '@/components/molecules/auth';
-import { MdDashboard, MdPersonOutline, MdPieChart, MdFolderOpen, MdInsights } from 'react-icons/md';
+import { MdDashboard, MdPersonOutline, MdPieChart, MdFolderOpen, MdInsights, MdSwapHoriz } from 'react-icons/md';
 
 interface NavItem {
   id: string;
@@ -31,6 +31,12 @@ export const Sidebar: React.FC = () => {
       icon: <MdDashboard className="w-5 h-5" />,
     },
     {
+      id: 'transactions',
+      label: 'Transactions',
+      href: `/${locale}/transactions`,
+      icon: <MdSwapHoriz className="w-5 h-5" />,
+    },
+    {
       id: 'budgets',
       label: 'Budgets',
       href: `/${locale}/budgets`,
@@ -39,7 +45,7 @@ export const Sidebar: React.FC = () => {
     {
       id: 'analysis',
       label: 'Analysis',
-      href: `/${locale}/dashboard/analysis`,
+      href: `/${locale}/analysis`,
       icon: <MdInsights className="w-5 h-5" />,
     },
     {
@@ -75,11 +81,11 @@ export const Sidebar: React.FC = () => {
               onMouseLeave={() => setHoveredId(null)}
               className="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 hover:cursor-pointer hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2"
               style={{
-                backgroundColor: active 
-                  ? colors.interactive.primary 
-                  : isHovered 
-                  ? `${colors.interactive.primary}20`
-                  : 'transparent',
+                backgroundColor: active
+                  ? colors.interactive.primary
+                  : isHovered
+                    ? `${colors.interactive.primary}20`
+                    : 'transparent',
                 color: active ? colors.text.inverse : colors.text.primary,
               }}
             >
