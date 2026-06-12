@@ -5,7 +5,8 @@ import { Text } from '@/components/atoms';
 import { useTheme } from '@/context/ThemeContext';
 import { Budget } from '@/types/budget.api';
 import { getCategoryIcon } from '@/constants/categoryIcons';
-import { formatVietnamsePrice, formatNumber } from '@/lib/format';
+import { formatVietnamsePrice } from '@/lib/format';
+import { useTranslations } from 'next-intl';
 
 interface BudgetProgressCardProps {
   budget: Budget;
@@ -23,22 +24,13 @@ const getAlertColor = (alertLevel: string): string => {
   return colors[alertLevel] || '#6B7280';
 };
 
-const getAlertLabel = (alertLevel: string): string => {
-  const labels: { [key: string]: string } = {
-    SAFE: 'Safe',
-    CAUTION: 'Caution',
-    WARNING: 'Warning',
-    EXCEEDED: 'Exceeded',
-  };
-  return labels[alertLevel] || alertLevel;
-};
-
 export const BudgetProgressCard: React.FC<BudgetProgressCardProps> = ({
   budget,
   onEdit,
   onDelete,
 }) => {
   const { colors } = useTheme();
+  const t = useTranslations();
 
   const spentPercentage = Math.min((budget.spent / budget.amountLimit) * 100, 100);
   const alertColor = getAlertColor(budget.alertLevel);
@@ -64,7 +56,7 @@ export const BudgetProgressCard: React.FC<BudgetProgressCardProps> = ({
           </div>
           <div className="flex-1">
             <Text className="font-semibold" style={{ color: colors.text.primary }}>
-              {budget.category}
+              {t(`categories.${budget.category}`)}
             </Text>
             <Text className="text-xs" style={{ color: colors.text.tertiary }}>
               {new Date(budget.year, budget.month - 1).toLocaleString('default', {
@@ -79,7 +71,7 @@ export const BudgetProgressCard: React.FC<BudgetProgressCardProps> = ({
             className="px-3 py-1 rounded-full text-xs font-medium"
             style={{ backgroundColor: alertColor + '20', color: alertColor }}
           >
-            {getAlertLabel(budget.alertLevel)}
+            {t(`budgets.status.${budget.alertLevel}`)}
           </div>
         </div>
       </div>
@@ -88,7 +80,7 @@ export const BudgetProgressCard: React.FC<BudgetProgressCardProps> = ({
       <div className="mb-4 space-y-2">
         <div className="flex justify-between items-baseline">
           <Text className="text-sm" style={{ color: colors.text.secondary }}>
-            Spent / Limit
+            {t('budgets.spentLimit')}
           </Text>
           <Text className="font-semibold" style={{ color: colors.text.primary }}>
             {formatVietnamsePrice(budget.spent)} / {formatVietnamsePrice(budget.amountLimit)}
@@ -112,10 +104,10 @@ export const BudgetProgressCard: React.FC<BudgetProgressCardProps> = ({
         {/* Progress Info */}
         <div className="flex justify-between items-center">
           <Text className="text-xs" style={{ color: colors.text.tertiary }}>
-            {spentPercentage.toFixed(1)}% used
+            {t('budgets.used', { percent: spentPercentage.toFixed(1) })}
           </Text>
           <Text className="text-xs font-medium" style={{ color: colors.text.primary }}>
-            {formatVietnamsePrice(budget.remaining)} remaining
+            {t('budgets.remainingAmount', { amount: formatVietnamsePrice(budget.remaining) })}
           </Text>
         </div>
       </div>
@@ -136,7 +128,7 @@ export const BudgetProgressCard: React.FC<BudgetProgressCardProps> = ({
             e.currentTarget.style.backgroundColor = colors.background.primary + '15';
           }}
         >
-          Edit
+          {t('common.edit')}
         </button>
         <button
           onClick={() => onDelete(budget.budgetId)}
@@ -152,7 +144,7 @@ export const BudgetProgressCard: React.FC<BudgetProgressCardProps> = ({
             e.currentTarget.style.backgroundColor = '#EF4444' + '15';
           }}
         >
-          Delete
+          {t('common.delete')}
         </button>
       </div>
     </div>

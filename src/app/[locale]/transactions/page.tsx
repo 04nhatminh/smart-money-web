@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useLocale } from 'next-intl';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useLocale, useTranslations } from 'next-intl';
 import { useAuth } from '@/context/AuthContext';
 import { SidebarLayout } from '@/components/templates';
 import { Heading, Text, Button } from '@/components/atoms';
@@ -30,10 +30,15 @@ interface Transaction {
 export default function TransactionsPage() {
   const { isAuthenticated, isInitializing } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const categoryParam = searchParams.get('category');
   const locale = useLocale();
+  const t = useTranslations();
   const { colors } = useTheme();
   const { isLoading, listTransactions, deleteTransaction } = useTransactions();
-  const [filterState, setFilterState] = useState<TransactionFilterState>({});
+  const [filterState, setFilterState] = useState<TransactionFilterState>({
+    category: categoryParam || undefined,
+  });
   const [sortBy, setSortBy] = useState<'date' | 'amount' | 'category' | 'type' | 'description'>('date');
   const [sortOrder, setSortOrder] = useState<'ASC' | 'DESC'>('DESC');
   const [isMethodModalOpen, setIsMethodModalOpen] = useState(false);
@@ -56,6 +61,16 @@ export default function TransactionsPage() {
       router.push(`/${locale}/login`);
     }
   }, [isAuthenticated, isInitializing, router, locale]);
+
+  // Sync categoryParam query filter parameter to filterState
+  useEffect(() => {
+    if (categoryParam) {
+      setFilterState(prev => ({
+        ...prev,
+        category: categoryParam,
+      }));
+    }
+  }, [categoryParam]);
 
   // Load transactions after auth is initialized or filter/sort changes
   useEffect(() => {
@@ -92,7 +107,7 @@ export default function TransactionsPage() {
   };
 
   const handleDeleteClick = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this transaction?')) {
+    if (!confirm(t('transactions.deleteConfirm'))) {
       return;
     }
 
@@ -102,7 +117,7 @@ export default function TransactionsPage() {
       if (result.success) {
         setTransactions(transactions.filter(t => t.id !== id));
       } else {
-        alert('Failed to delete transaction: ' + (result.error || 'Unknown error'));
+        alert(t('transactions.deleteFailed') + (result.error || 'Unknown error'));
       }
     } finally {
       setDeleteLoading(false);
@@ -156,7 +171,7 @@ export default function TransactionsPage() {
   if (isInitializing) {
     return (
       <SidebarLayout>
-        <Heading level={2}>Loading...</Heading>
+        <Heading level={2}>{t('common.loading')}</Heading>
       </SidebarLayout>
     );
   }
@@ -172,10 +187,10 @@ export default function TransactionsPage() {
         <div className="flex items-center justify-between">
           <div>
             <Heading level={2}>
-              Transaction Management
+              {t('transactions.title')}
             </Heading>
             <Text style={{ color: colors.text.secondary }} className="text-lg">
-              Track and manage all your income and expenses
+              {t('transactions.subtitle')}
             </Text>
           </div>
           <Button
@@ -184,25 +199,25 @@ export default function TransactionsPage() {
             className="flex items-center gap-2"
           >
             <MdAdd className="w-5 h-5" />
-            Add Transaction
+            {t('transactions.addTransaction')}
           </Button>
         </div>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <StatCard
-            label="Total Balance"
+            label={t('transactions.totalBalance')}
             value={formatVietnamsePrice(totalBalance)}
             icon={<MdAccountBalanceWallet className="w-6 h-6" style={{ color: colors.interactive.primary }} />}
           />
           <StatCard
-            label="Total Income"
+            label={t('transactions.totalIncome')}
             value={formatVietnamsePrice(totalIncome)}
             icon={<MdTrendingUp className="w-6 h-6" style={{ color: '#10B981' }} />}
             trend={{ direction: 'up', percentage: 12 }}
           />
           <StatCard
-            label="Total Expenses"
+            label={t('transactions.totalExpenses')}
             value={formatVietnamsePrice(totalExpenses)}
             icon={<MdTrendingDown className="w-6 h-6" style={{ color: '#EF4444' }} />}
             trend={{ direction: 'down', percentage: 8 }}
@@ -213,9 +228,9 @@ export default function TransactionsPage() {
         <Card className="p-6">
           <div className="mb-4">
             <div className="mb-6">
-              <Heading level={3}>All Transactions</Heading>
+              <Heading level={3}>{t('transactions.allTransactions')}</Heading>
               <Text style={{ color: colors.text.secondary }} className="text-sm">
-                Search, filter, and sort your transactions
+                {t('transactions.searchFilterSort')}
               </Text>
             </div>
 
@@ -230,7 +245,7 @@ export default function TransactionsPage() {
               <div className="flex items-center gap-2">
                 <MdSort className="w-5 h-5" style={{ color: colors.text.secondary }} />
                 <Text style={{ color: colors.text.secondary }} className="text-sm font-medium">
-                  Sort by:
+                  {t('transactions.sortBy')}
                 </Text>
               </div>
               <select
@@ -248,11 +263,11 @@ export default function TransactionsPage() {
                 }}
                 className="focus:outline-none focus:ring-2"
               >
-                <option value="date">Date</option>
-                <option value="amount">Amount</option>
-                <option value="category">Category</option>
-                <option value="type">Type</option>
-                <option value="description">Description</option>
+                <option value="date">{t('transactions.sortOptions.date')}</option>
+                <option value="amount">{t('transactions.sortOptions.amount')}</option>
+                <option value="category">{t('transactions.sortOptions.category')}</option>
+                <option value="type">{t('transactions.sortOptions.type')}</option>
+                <option value="description">{t('transactions.sortOptions.description')}</option>
               </select>
               <select
                 value={sortOrder}
@@ -269,8 +284,8 @@ export default function TransactionsPage() {
                 }}
                 className="focus:outline-none focus:ring-2"
               >
-                <option value="DESC">Descending</option>
-                <option value="ASC">Ascending</option>
+                <option value="DESC">{t('transactions.sortOptions.descending')}</option>
+                <option value="ASC">{t('transactions.sortOptions.ascending')}</option>
               </select>
             </div>
           </div>
@@ -285,7 +300,7 @@ export default function TransactionsPage() {
                     style={{ color: colors.interactive.primary }}
                   />
                   <Text style={{ color: colors.text.secondary }} className="text-sm">
-                    Loading transactions...
+                    {t('transactions.loadingTransactions')}
                   </Text>
                 </div>
               </div>
@@ -317,10 +332,14 @@ export default function TransactionsPage() {
                     />
                     <div className="flex items-center justify-center gap-4" style={{ color: colors.text.secondary }}>
                       <Text variant="caption" className="text-sm">
-                        Showing {((currentPage - 1) * ITEMS_PER_PAGE) + 1} to {Math.min(currentPage * ITEMS_PER_PAGE, totalElements)} of {totalElements} transactions
+                        {t('transactions.showing', {
+                          start: ((currentPage - 1) * ITEMS_PER_PAGE) + 1,
+                          end: Math.min(currentPage * ITEMS_PER_PAGE, totalElements),
+                          total: totalElements
+                        })}
                       </Text>
                       <Text variant="caption" className="text-sm">
-                        • {ITEMS_PER_PAGE} per page
+                        • {t('transactions.perPage', { perPage: ITEMS_PER_PAGE })}
                       </Text>
                     </div>
                   </div>
@@ -329,7 +348,7 @@ export default function TransactionsPage() {
             ) : (
               <div className="text-center py-8">
                 <Text style={{ color: colors.text.secondary }}>
-                  No transactions found
+                  {t('transactions.noTransactions')}
                 </Text>
               </div>
             )}

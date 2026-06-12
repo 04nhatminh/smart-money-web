@@ -124,7 +124,7 @@ export const Footer: React.FC<FooterProps> = ({
           <div style={{ borderTopColor: colors.border.light, borderTopWidth: '1px' }} className="py-8">
             <div className="flex flex-col md:flex-row justify-between items-center gap-4">
               <Text variant="caption" style={{ color: colors.text.secondary }} className="text-center md:text-left">
-                © {year} {appName}. {t('page.copyright')} reserved.
+                © {year} {appName}. {t('page.copyright')}
               </Text>
               <div className="flex flex-wrap gap-6 items-center justify-center md:justify-end">
                 <div className="flex items-center gap-2 flex-shrink-0">

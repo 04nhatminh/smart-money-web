@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { useAuth } from '@/context/AuthContext';
 import { SidebarLayout } from '@/components/templates';
 import { Heading, Text, Button } from '@/components/atoms';
@@ -16,6 +16,7 @@ import { MdAdd } from 'react-icons/md';
 export default function BudgetsPage() {
   const router = useRouter();
   const locale = useLocale();
+  const t = useTranslations();
   const { isAuthenticated, isInitializing } = useAuth();
   const { colors } = useTheme();
   const { listBudgets, deleteBudget, isLoading } = useBudgets();
@@ -54,10 +55,10 @@ export default function BudgetsPage() {
         const budgetList = result.data.items || result.data.content || result.data.budgets || [];
         setBudgets(budgetList);
       } else {
-        setError(result.error || 'Failed to load budgets');
+        setError(result.error || t('budgets.failedLoad'));
       }
     } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : 'Failed to load budgets';
+      const errorMsg = err instanceof Error ? err.message : t('budgets.failedLoad');
       setError(errorMsg);
     }
   };
@@ -79,10 +80,10 @@ export default function BudgetsPage() {
         setIsDeleteModalOpen(false);
         setBudgetToDelete(null);
       } else {
-        setError(result.error || 'Failed to delete budget');
+        setError(result.error || t('budgets.failedDelete'));
       }
     } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : 'Failed to delete budget';
+      const errorMsg = err instanceof Error ? err.message : t('budgets.failedDelete');
       setError(errorMsg);
     }
   };
@@ -103,7 +104,7 @@ export default function BudgetsPage() {
   if (isInitializing) {
     return (
       <SidebarLayout>
-        <Heading level={2}>Loading...</Heading>
+        <Heading level={2}>{t('common.loading')}</Heading>
       </SidebarLayout>
     );
   }
@@ -123,9 +124,9 @@ export default function BudgetsPage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <Heading level={2}>Budget Management</Heading>
+            <Heading level={2}>{t('budgets.title')}</Heading>
             <Text style={{ color: colors.text.secondary }} className="text-lg">
-              Track and manage your spending budgets
+              {t('budgets.subtitle')}
             </Text>
           </div>
           <div className="flex gap-2">
@@ -135,7 +136,7 @@ export default function BudgetsPage() {
               className="flex items-center gap-2"
             >
               <MdAdd className="w-5 h-5" />
-              Create Multiple
+              {t('budgets.createMultiple')}
             </Button>
             <Button
               variant="primary"
@@ -143,7 +144,7 @@ export default function BudgetsPage() {
               className="flex items-center gap-2"
             >
               <MdAdd className="w-5 h-5" />
-              Create Budget
+              {t('budgets.createBudget')}
             </Button>
           </div>
         </div>
@@ -162,7 +163,7 @@ export default function BudgetsPage() {
         <div className="flex gap-4 items-center">
           <div className="flex-1 max-w-xs">
             <label className="block text-sm font-medium mb-2" style={{ color: colors.text.primary }}>
-              Select Month & Year
+              {t('budgets.selectMonthYear')}
             </label>
             <div className="flex gap-2">
               <select
@@ -211,7 +212,7 @@ export default function BudgetsPage() {
             }}
           >
             <Text className="text-sm font-medium" style={{ color: colors.text.secondary }}>
-              Total Budget
+              {t('budgets.totalBudget')}
             </Text>
             <Text className="text-2xl font-bold mt-2" style={{ color: colors.text.primary }}>
               {formatVietnamsePrice(totalLimit)}
@@ -226,7 +227,7 @@ export default function BudgetsPage() {
             }}
           >
             <Text className="text-sm font-medium" style={{ color: colors.text.secondary }}>
-              Total Spent
+              {t('budgets.totalSpent')}
             </Text>
             <Text className="text-2xl font-bold mt-2" style={{ color: '#EF4444' }}>
               {formatVietnamsePrice(totalSpent)}
@@ -241,7 +242,7 @@ export default function BudgetsPage() {
             }}
           >
             <Text className="text-sm font-medium" style={{ color: colors.text.secondary }}>
-              Remaining
+              {t('budgets.remaining')}
             </Text>
             <Text className="text-2xl font-bold mt-2" style={{ color: '#10B981' }}>
               {formatVietnamsePrice(totalRemaining)}
@@ -252,7 +253,7 @@ export default function BudgetsPage() {
         {/* Budgets Grid */}
         {isLoading ? (
           <div className="text-center py-8">
-            <Text style={{ color: colors.text.secondary }}>Loading budgets...</Text>
+            <Text style={{ color: colors.text.secondary }}>{t('budgets.loadingBudgets')}</Text>
           </div>
         ) : budgets.length === 0 ? (
           <div
@@ -263,7 +264,7 @@ export default function BudgetsPage() {
             }}
           >
             <Text style={{ color: colors.text.secondary }}>
-              No budgets yet. Create one to get started!
+              {t('budgets.noBudgetsYet')}
             </Text>
           </div>
         ) : (
@@ -312,10 +313,10 @@ export default function BudgetsPage() {
 
       <DeleteConfirmationModal
         isOpen={isDeleteModalOpen}
-        title="Delete Budget"
-        message="Are you sure you want to delete this budget? This action cannot be undone."
-        confirmLabel="Delete"
-        cancelLabel="Cancel"
+        title={t('budgets.deleteTitle')}
+        message={t('budgets.deleteConfirm')}
+        confirmLabel={t('budgets.delete')}
+        cancelLabel={t('budgets.cancel')}
         isLoading={isLoading}
         onConfirm={handleDeleteConfirm}
         onCancel={handleDeleteCancel}

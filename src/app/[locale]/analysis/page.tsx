@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
 import { useAnalytics, type AnalyticsData } from '@/hooks/useAnalytics';
@@ -65,6 +65,7 @@ const ChartTooltip = ({ active, payload, label }: any) => {
 };
 
 export const PieTooltipCustom = ({ active, payload }: any) => {
+  const t = useTranslations();
   if (!active || !payload?.length) return null;
   const d = payload[0].payload;
   return (
@@ -75,9 +76,9 @@ export const PieTooltipCustom = ({ active, payload }: any) => {
       padding: '10px 16px',
       boxShadow: '0 4px 20px rgba(80,68,213,0.3)',
     }}>
-      <p style={{ color: '#c5c1f1', fontWeight: 700, fontSize: 13 }}>{d.category}</p>
+      <p style={{ color: '#c5c1f1', fontWeight: 700, fontSize: 13 }}>{t(`categories.${d.category}`)}</p>
       <p style={{ color: '#8a82e3', fontSize: 12 }}>{(d.percentage).toFixed(1)}%</p>
-      <p style={{ color: '#c5c1f1', fontSize: 12 }}>{d.count} transactions</p>
+      <p style={{ color: '#c5c1f1', fontSize: 12 }}>{d.count} {t('analysis.table.transactions').toLowerCase()}</p>
     </div>
   );
 };
@@ -128,6 +129,7 @@ export default function AnalysisPage() {
   const { isInitializing } = useAuth();
   const router = useRouter();
   const locale = useLocale();
+  const t = useTranslations();
   const { isLoading, fetchAnalytics } = useAnalytics();
 
   const [selectedYear, setSelectedYear] = useState(CURRENT_YEAR);
@@ -168,13 +170,13 @@ export default function AnalysisPage() {
     return monthlyStats.map((m, i) => {
       cum += (m.income || 0) - (m.expense || 0);
       return {
-        month: m.week ? `Week ${m.week}` : `Week ${i + 1}`,
+        month: m.week ? t('analysis.week', { number: m.week }) : t('analysis.week', { number: i + 1 }),
         cumulative: cum,
         income: m.income || 0,
         expense: m.expense || 0
       };
     });
-  }, [analyticsData]);
+  }, [analyticsData, t]);
 
   // Category table sorted by expense (approximated from percentage * totalExpense)
   const categoryTableData = useMemo(() => {
@@ -189,7 +191,8 @@ export default function AnalysisPage() {
   }, [analyticsData, kpis]);
 
   const formatMillionVND = (value: number) => {
-    if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(0)}M`;
+    const isVi = locale === 'vi';
+    if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(0)}${isVi ? 'tr' : 'M'}`;
     if (value >= 1_000) return `${(value / 1_000).toFixed(0)}K`;
     return `${value}`;
   };
@@ -204,17 +207,17 @@ export default function AnalysisPage() {
           <div>
             <Heading level={2} className="flex items-center gap-2">
               <MdAnalytics className="w-7 h-7" style={{ color: colors.interactive.primary }} />
-              Financial Analysis
+              {t('analysis.title')}
             </Heading>
             <Text style={{ color: colors.text.secondary }} className="text-sm mt-1">
-              Deep-dive insights into your finances for {selectedYear}
+              {t('analysis.subtitle', { year: selectedYear })}
             </Text>
           </div>
 
           {/* Filter Controls (Month & Year) */}
           <div className="flex items-center gap-3 flex-wrap">
             <Text variant="caption" style={{ color: colors.text.secondary }} className="font-semibold">
-              Month:
+              {t('analysis.month')}
             </Text>
             <select
               id="month-selector"
@@ -234,13 +237,13 @@ export default function AnalysisPage() {
             >
               {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
                 <option key={m} value={m}>
-                  {MONTHS[m - 1]}
+                  {new Date(2024, m - 1).toLocaleString(locale, { month: 'short' })}
                 </option>
               ))}
             </select>
 
             <Text variant="caption" style={{ color: colors.text.secondary }} className="font-semibold ml-2">
-              Year:
+              {t('analysis.year')}
             </Text>
             <select
               id="year-selector"
@@ -266,7 +269,7 @@ export default function AnalysisPage() {
               id="refresh-analytics-btn"
               onClick={loadAnalytics}
               disabled={isLoading}
-              title="Refresh"
+              title={t('analysis.refresh')}
               className="w-10 h-10 rounded-full flex items-center justify-center transition hover:opacity-80"
               style={{ backgroundColor: `${colors.interactive.primary}22` }}
             >
@@ -281,9 +284,9 @@ export default function AnalysisPage() {
         {/* ── Tab Navigation ── */}
         <div className="flex gap-2 border-b" style={{ borderColor: colors.border.light }}>
           {([
-            { key: 'overview', label: 'Overview', icon: <MdBarChart className="w-4 h-4" /> },
-            { key: 'categories', label: 'Categories', icon: <MdTableChart className="w-4 h-4" /> },
-            { key: 'trend', label: 'Wealth Trend', icon: <MdTrendingUp className="w-4 h-4" /> },
+            { key: 'overview', label: t('analysis.overview'), icon: <MdBarChart className="w-4 h-4" /> },
+            { key: 'categories', label: t('analysis.categories'), icon: <MdTableChart className="w-4 h-4" /> },
+            { key: 'trend', label: t('analysis.wealthTrend'), icon: <MdTrendingUp className="w-4 h-4" /> },
           ] as const).map((tab) => (
             <button
               key={tab.key}
@@ -317,9 +320,12 @@ export default function AnalysisPage() {
         {!isLoading && !analyticsData && (
           <div className="flex flex-col items-center justify-center py-24 gap-4">
             <MdAnalytics className="w-16 h-16" style={{ color: colors.text.tertiary }} />
-            <Heading level={3} style={{ color: colors.text.secondary }}>No analytics data found</Heading>
+            <Heading level={3} style={{ color: colors.text.secondary }}>{t('analysis.noData')}</Heading>
             <Text style={{ color: colors.text.tertiary }}>
-              No transactions recorded for {MONTHS[selectedMonth - 1]} {selectedYear}. Try selecting a different month or year.
+              {t('analysis.noTransactions', {
+                month: new Date(2024, selectedMonth - 1).toLocaleString(locale, { month: 'long' }),
+                year: selectedYear
+              })}
             </Text>
           </div>
         )}
@@ -330,34 +336,34 @@ export default function AnalysisPage() {
             {/* KPI Cards — always visible */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <KPICard
-                label="Total Income"
+                label={t('analysis.totalIncome')}
                 value={formatVietnamsePrice(kpis.totalIncome)}
                 icon={<MdTrendingUp className="w-5 h-5" />}
                 accentColor="#10B981"
-                trend="Year total"
+                trend={t('analysis.yearTotal')}
               />
               <KPICard
-                label="Total Expenses"
+                label={t('analysis.totalExpenses')}
                 value={formatVietnamsePrice(kpis.totalExpense)}
                 icon={<MdTrendingDown className="w-5 h-5" />}
                 accentColor="#EF4444"
-                trend="Year total"
+                trend={t('analysis.yearTotal')}
               />
               <KPICard
-                label="Net Savings"
+                label={t('analysis.netSavings')}
                 value={formatVietnamsePrice(kpis.netSavings)}
                 icon={<MdSavings className="w-5 h-5" />}
                 accentColor={kpis.netSavings >= 0 ? '#5044d5' : '#EF4444'}
                 trendUp={kpis.netSavings >= 0}
-                trend={kpis.netSavings >= 0 ? 'Positive' : 'Deficit'}
+                trend={kpis.netSavings >= 0 ? t('analysis.positive') : t('analysis.deficit')}
               />
               <KPICard
-                label="Savings Rate"
+                label={t('analysis.savingsRate')}
                 value={`${kpis.savingsRate.toFixed(1)}%`}
                 icon={<MdAccountBalanceWallet className="w-5 h-5" />}
                 accentColor="#F59E0B"
                 trendUp={kpis.savingsRate >= 20}
-                trend={kpis.savingsRate >= 20 ? 'Healthy' : kpis.savingsRate >= 0 ? 'Needs improvement' : 'Over-spending'}
+                trend={kpis.savingsRate >= 20 ? t('analysis.healthy') : kpis.savingsRate >= 0 ? t('analysis.needsImprovement') : t('analysis.overSpending')}
               />
             </div>
 
@@ -371,7 +377,7 @@ export default function AnalysisPage() {
                   style={{ backgroundColor: colors.surface.primary, border: `1px solid ${colors.border.light}` }}
                 >
                   <Heading level={3} className="mb-4 text-base font-semibold">
-                    Monthly Income vs Expense
+                    {t('analysis.monthlyIncomeVsExpense')}
                   </Heading>
                   <ResponsiveContainer width="100%" height={260}>
                     <BarChart
@@ -394,8 +400,8 @@ export default function AnalysisPage() {
                       />
                       <Tooltip content={<ChartTooltip />} />
                       <Legend formatter={(v) => <span style={{ color: colors.text.primary, fontSize: 12 }}>{v}</span>} />
-                      <Bar dataKey="income" name="Income" fill="#10B981" radius={[4, 4, 0, 0]} maxBarSize={28} />
-                      <Bar dataKey="expense" name="Expense" fill="#EF4444" radius={[4, 4, 0, 0]} maxBarSize={28} />
+                      <Bar dataKey="income" name={t('analysis.income')} fill="#10B981" radius={[4, 4, 0, 0]} maxBarSize={28} />
+                      <Bar dataKey="expense" name={t('analysis.expense')} fill="#EF4444" radius={[4, 4, 0, 0]} maxBarSize={28} />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
@@ -407,7 +413,7 @@ export default function AnalysisPage() {
                   style={{ backgroundColor: colors.surface.primary, border: `1px solid ${colors.border.light}` }}
                 >
                   <Heading level={3} className="mb-4 text-base font-semibold">
-                    Spending by Category
+                    {t('analysis.spendingByCategory')}
                   </Heading>
                   <div className="flex items-center gap-4">
                     <ResponsiveContainer width="55%" height={240}>
@@ -436,7 +442,7 @@ export default function AnalysisPage() {
                             style={{ backgroundColor: CHART_COLORS[index % CHART_COLORS.length] }}
                           />
                           <Text variant="caption" style={{ fontSize: 11, color: colors.text.secondary }} className="truncate">
-                            {entry.category} — <strong>{(entry.percentage).toFixed(0)}%</strong>
+                            {t(`categories.${entry.category}`)} — <strong>{(entry.percentage).toFixed(0)}%</strong>
                           </Text>
                         </div>
                       ))}
@@ -455,17 +461,17 @@ export default function AnalysisPage() {
               >
                 <div className="p-6 border-b" style={{ borderColor: colors.border.light }}>
                   <Heading level={3} className="text-base font-semibold">
-                    Category Breakdown — Ranked by Expense
+                    {t('analysis.categoryBreakdown')}
                   </Heading>
                   <Text variant="caption" style={{ color: colors.text.secondary, fontSize: 12 }}>
-                    Click &quot;View Transactions&quot; to filter the transaction ledger
+                    {t('analysis.viewTransactionsDesc')}
                   </Text>
                 </div>
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
                       <tr style={{ backgroundColor: colors.background.secondary }}>
-                        {['Rank', 'Category', 'Transactions', 'Contribution', 'Est. Amount', ''].map((h) => (
+                        {[t('analysis.table.rank'), t('analysis.table.category'), t('analysis.table.transactions'), t('analysis.table.contribution'), t('analysis.table.estAmount'), ''].map((h) => (
                           <th
                             key={h}
                             className="px-6 py-3 text-left"
@@ -500,7 +506,7 @@ export default function AnalysisPage() {
                                 className="w-3 h-3 rounded-full"
                                 style={{ backgroundColor: CHART_COLORS[index % CHART_COLORS.length] }}
                               />
-                              <Text style={{ fontWeight: 600, color: colors.text.primary }}>{cat.category}</Text>
+                              <Text style={{ fontWeight: 600, color: colors.text.primary }}>{t(`categories.${cat.category}`)}</Text>
                             </div>
                           </td>
                           <td className="px-6 py-4">
@@ -530,7 +536,7 @@ export default function AnalysisPage() {
                           <td className="px-6 py-4">
                             <button
                               id={`view-transactions-${cat.category.toLowerCase().replace(/\s+/g, '-')}`}
-                              onClick={() => router.push(`/${locale}/dashboard?category=${encodeURIComponent(cat.category)}`)}
+                              onClick={() => router.push(`/${locale}/transactions?category=${encodeURIComponent(cat.category)}`)}
                               className="px-3 py-1.5 rounded-lg text-xs font-semibold transition hover:opacity-80"
                               style={{
                                 backgroundColor: `${colors.interactive.primary}18`,
@@ -538,7 +544,7 @@ export default function AnalysisPage() {
                                 border: `1px solid ${colors.interactive.primary}40`,
                               }}
                             >
-                              View Transactions →
+                              {t('analysis.viewTransactionsBtn')}
                             </button>
                           </td>
                         </tr>
@@ -559,10 +565,10 @@ export default function AnalysisPage() {
                   style={{ backgroundColor: colors.surface.primary, border: `1px solid ${colors.border.light}` }}
                 >
                   <Heading level={3} className="mb-1 text-base font-semibold">
-                    Accumulated Wealth Trend
+                    {t('analysis.accumulatedWealthTrend')}
                   </Heading>
                   <Text variant="caption" style={{ color: colors.text.secondary, fontSize: 12 }} className="mb-6 block">
-                    Running cumulative net balance across {selectedYear}
+                    {t('analysis.runningCumulative', { year: selectedYear })}
                   </Text>
                   <ResponsiveContainer width="100%" height={280}>
                     <AreaChart data={cumulativeData} margin={{ top: 4, right: 16, left: 0, bottom: 0 }}>
@@ -589,7 +595,7 @@ export default function AnalysisPage() {
                       <Area
                         type="monotone"
                         dataKey="cumulative"
-                        name="Net Balance"
+                        name={t('analysis.netBalance')}
                         stroke="#5044d5"
                         strokeWidth={2.5}
                         fill="url(#wealthGradient)"
@@ -607,10 +613,10 @@ export default function AnalysisPage() {
                   style={{ backgroundColor: colors.surface.primary, border: `1px solid ${colors.border.light}` }}
                 >
                   <Heading level={3} className="mb-1 text-base font-semibold">
-                    Monthly Net Savings
+                    {t('analysis.monthlyNetSavings')}
                   </Heading>
                   <Text variant="caption" style={{ color: colors.text.secondary, fontSize: 12 }} className="mb-6 block">
-                    Income minus expenses per month
+                    {t('analysis.incomeMinusExpense')}
                   </Text>
                   <ResponsiveContainer width="100%" height={220}>
                     <LineChart
@@ -634,7 +640,7 @@ export default function AnalysisPage() {
                       <Line
                         type="monotone"
                         dataKey="netSavings"
-                        name="Net Savings"
+                        name={t('analysis.netSavings')}
                         stroke="#10B981"
                         strokeWidth={2.5}
                         dot={{ fill: '#10B981', r: 4 }}

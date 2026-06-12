@@ -15,11 +15,6 @@ import { formatVietnamsePrice } from '@/lib/format';
 
 const DONUT_COLORS = ['#5044d5', '#8a82e3', '#3629b7', '#c5c1f1', '#776ede'];
 
-const formatMillionVND = (value: number) => {
-  if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(0)}M`;
-  if (value >= 1_000) return `${(value / 1_000).toFixed(0)}K`;
-  return `${value}`;
-};
 
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
@@ -71,6 +66,13 @@ export const DashboardPreview: React.FC = () => {
   const t = useTranslations();
   const router = useRouter();
   const locale = useLocale();
+
+  const formatMillionVND = (value: number) => {
+    const isVi = locale === 'vi';
+    if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(0)}${isVi ? 'tr' : 'M'}`;
+    if (value >= 1_000) return `${(value / 1_000).toFixed(0)}K`;
+    return `${value}`;
+  };
 
   const { monthlyStats, categoryProportions, monthlyTotalIncome, monthlyTotalExpense } = landingMockData;
 

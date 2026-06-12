@@ -2,7 +2,7 @@
 
 import React, { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { LoginForm } from '@/components/molecules/auth';
 import { CenteredLayout } from '@/components/templates';
 import { Heading } from '@/components/atoms';
@@ -12,6 +12,7 @@ import { useTheme } from '@/context/ThemeContext';
 export default function LoginPage() {
   const router = useRouter();
   const locale = useLocale();
+  const t = useTranslations();
   const { isAuthenticated, isInitializing } = useAuth();
   const { colors } = useTheme();
 
@@ -24,7 +25,7 @@ export default function LoginPage() {
   if (isInitializing) {
     return (
       <CenteredLayout hideHeader hideFooter showBackButton>
-        <Heading level={2}>Loading...</Heading>
+        <Heading level={2}>{t('common.loading')}</Heading>
       </CenteredLayout>
     );
   }

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { useAuth } from '@/context/AuthContext';
 import { SidebarLayout } from '@/components/templates';
 import { Heading, Text, Button } from '@/components/atoms';
@@ -17,6 +17,7 @@ export default function ProfilePage() {
   const { user } = useAuth();
   const router = useRouter();
   const locale = useLocale();
+  const t = useTranslations();
   const { colors } = useTheme();
   const { getUserIncome } = useUserIncome();
   const [userIncome, setUserIncome] = useState<UserIncomeResponse | null>(null);
@@ -84,10 +85,10 @@ export default function ProfilePage() {
         {/* Welcome Section */}
         <div className="mb-8">
           <Heading level={2}>
-            Profile
+            {t('common.profile')}
           </Heading>
           <Text style={{ color: colors.text.secondary }}>
-            Manage your profile information
+            {t('profile.editProfileDescription')}
           </Text>
         </div>
 
@@ -125,7 +126,7 @@ export default function ProfilePage() {
                     style={{ backgroundColor: colors.surface.secondary }}
                   >
                     <p className="text-xs" style={{ color: colors.text.secondary }}>
-                      Coins Balance
+                      {t('profile.coinsBalance')}
                     </p>
                     <p className="text-2xl font-bold" style={{ color: colors.interactive.primary }}>
                       {user.coin}
@@ -139,37 +140,37 @@ export default function ProfilePage() {
           {/* Account Information Card */}
           <div className="md:col-span-2">
             <Card className="p-6">
-              <Heading level={3} className="mb-6">Account Information</Heading>
+              <Heading level={3} className="mb-6">{t('profile.accountInfo')}</Heading>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <p className="text-sm font-medium mb-2" style={{ color: colors.text.secondary }}>
-                    Username
+                    {t('profile.username')}
                   </p>
                   <p className="text-lg font-semibold">{user?.username || 'N/A'}</p>
                 </div>
                 <div>
                   <p className="text-sm font-medium mb-2" style={{ color: colors.text.secondary }}>
-                    Email
+                    {t('auth.email')}
                   </p>
                   <p className="text-lg font-semibold break-all">{user?.email || 'N/A'}</p>
                 </div>
                 <div>
                   <p className="text-sm font-medium mb-2" style={{ color: colors.text.secondary }}>
-                    Phone
+                    {t('profile.phone')}
                   </p>
                   <p className="text-lg font-semibold">{user?.phone || 'N/A'}</p>
                 </div>
                 <div>
                   <p className="text-sm font-medium mb-2" style={{ color: colors.text.secondary }}>
-                    Date of Birth
+                    {t('profile.dateOfBirth')}
                   </p>
                   <p className="text-lg font-semibold">{formatDate(user?.dateOfBirth)}</p>
                 </div>
                 <div>
                   <p className="text-sm font-medium mb-2" style={{ color: colors.text.secondary }}>
-                    Role
+                    {t('profile.role')}
                   </p>
-                  <p className="text-lg font-semibold capitalize">{user?.role || 'User'}</p>
+                  <p className="text-lg font-semibold capitalize">{user?.role || t('profile.defaultRole')}</p>
                 </div>
               </div>
             </Card>
@@ -179,13 +180,13 @@ export default function ProfilePage() {
         {/* User Income Card */}
         <Card className="p-6">
           <div className="flex items-center justify-between mb-6">
-            <Heading level={3} className="m-0">User Income Information</Heading>
+            <Heading level={3} className="m-0">{t('profile.incomeInfo')}</Heading>
             <Button
               variant="secondary"
               onClick={() => setIsUserIncomeModalOpen(true)}
               disabled={isLoadingIncome}
             >
-              {userIncome ? 'Edit' : 'Set Up'}
+              {userIncome ? t('common.edit') : t('profile.setUp')}
             </Button>
           </div>
 
@@ -193,7 +194,7 @@ export default function ProfilePage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <p className="text-sm font-medium mb-2" style={{ color: colors.text.secondary }}>
-                  Net Income
+                  {t('profile.netIncome')}
                 </p>
                 <p className="text-lg font-semibold">
                   {userIncome.netIncome?.toLocaleString()} {userIncome.currency}
@@ -201,7 +202,7 @@ export default function ProfilePage() {
               </div>
               <div>
                 <p className="text-sm font-medium mb-2" style={{ color: colors.text.secondary }}>
-                  Usable Income
+                  {t('profile.usableIncome')}
                 </p>
                 <p className="text-lg font-semibold">
                   {userIncome.usableIncome?.toLocaleString()} {userIncome.currency}
@@ -209,7 +210,7 @@ export default function ProfilePage() {
               </div>
               <div>
                 <p className="text-sm font-medium mb-2" style={{ color: colors.text.secondary }}>
-                  Safe Spending
+                  {t('profile.safeSpending')}
                 </p>
                 <p className="text-lg font-semibold">
                   {userIncome.safeSpending?.toLocaleString()} {userIncome.currency}
@@ -217,16 +218,16 @@ export default function ProfilePage() {
               </div>
               <div>
                 <p className="text-sm font-medium mb-2" style={{ color: colors.text.secondary }}>
-                  Auto Invest Surplus
+                  {t('profile.autoInvest')}
                 </p>
                 <p className="text-lg font-semibold">
-                  {userIncome.autoInvestSurplus ? 'Enabled' : 'Disabled'}
+                  {userIncome.autoInvestSurplus ? t('profile.enabled') : t('profile.disabled')}
                 </p>
               </div>
               {userIncome.calculationNote && (
                 <div className="md:col-span-2">
                   <p className="text-sm font-medium mb-2" style={{ color: colors.text.secondary }}>
-                    Calculation Note
+                    {t('profile.calcNote')}
                   </p>
                   <p className="text-sm" style={{ color: colors.text.primary }}>
                     {userIncome.calculationNote}
@@ -240,7 +241,7 @@ export default function ProfilePage() {
               style={{ backgroundColor: colors.background.secondary }}
             >
               <Text style={{ color: colors.text.secondary }}>
-                No user income information set up yet. Click "Set Up" to get started.
+                {t('profile.noIncomeInfo')}
               </Text>
             </div>
           )}
@@ -252,12 +253,12 @@ export default function ProfilePage() {
             variant="primary"
             onClick={() => router.push(`/${locale}/profile/edit`)}
           >
-            Edit Profile
+            {t('profile.editProfile')}
           </Button>
           <LogoutButton
             variant="secondary"
           >
-            Logout
+            {t('profile.logout')}
           </LogoutButton>
         </div>
 

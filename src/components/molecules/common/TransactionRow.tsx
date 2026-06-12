@@ -9,6 +9,7 @@ import {
   MdEdit,
   MdDelete,
 } from 'react-icons/md';
+import { useTranslations } from 'next-intl';
 
 interface TransactionRowProps {
   id: string;
@@ -46,19 +47,20 @@ export const TransactionRow: React.FC<TransactionRowProps> = ({
   onDelete,
 }) => {
   const { colors } = useTheme();
+  const t = useTranslations();
 
   const formatDate = (dateString: string) => {
     try {
       // Parse format: dd/mm/yyyy hh:mm
       const regex = /^(\d{2})\/(\d{2})\/(\d{4})\s(\d{2}):(\d{2})$/;
       const match = dateString.match(regex);
-      
+
       if (!match) {
         return dateString;
       }
-      
+
       const [, day, month, year, hour, minute] = match;
-      
+
       // Return in dd/mm/yyyy hh:mm format
       return `${day}/${month}/${year} ${hour}:${minute}`;
     } catch {
@@ -89,7 +91,7 @@ export const TransactionRow: React.FC<TransactionRowProps> = ({
         </div>
         <div className="flex-1">
           <p className="font-semibold" style={{ color: colors.text.primary }}>
-            {title}
+            {t.has(`categories.${title}`) ? t(`categories.${title}`) : title}
           </p>
           <div className="flex items-center gap-2">
             <Text className="text-xs" style={{ color: colors.text.secondary }}>
@@ -103,7 +105,7 @@ export const TransactionRow: React.FC<TransactionRowProps> = ({
                   color: colors.text.secondary,
                 }}
               >
-                {category}
+                {t(`categories.${category}`)}
               </span>
             )}
           </div>

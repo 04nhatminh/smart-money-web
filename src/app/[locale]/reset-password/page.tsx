@@ -2,11 +2,13 @@
 
 import React, { Suspense, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { VerifyOtpForm } from '@/components/molecules/auth';
 import { ResetPasswordForm } from '@/components/molecules/auth';
 import { CenteredLayout } from '@/components/templates';
 
 function ResetPasswordContent() {
+  const t = useTranslations();
   const searchParams = useSearchParams();
   const email = searchParams.get('email') || '';
   const [resetToken, setResetToken] = useState<string | null>(null);
@@ -16,8 +18,8 @@ function ResetPasswordContent() {
     return (
       <CenteredLayout hideHeader hideFooter showBackButton>
         <div className="text-center">
-          <h1 className="text-2xl font-bold mb-2">Invalid Request</h1>
-          <p>Please go back and try again.</p>
+          <h1 className="text-2xl font-bold mb-2">{t('resetPassword.invalidRequest')}</h1>
+          <p>{t('resetPassword.pleaseGoBack')}</p>
         </div>
       </CenteredLayout>
     );
@@ -51,8 +53,9 @@ function ResetPasswordContent() {
 }
 
 export default function ResetPasswordPage() {
+  const t = useTranslations();
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<div>{t('common.loading')}</div>}>
       <ResetPasswordContent />
     </Suspense>
   );
