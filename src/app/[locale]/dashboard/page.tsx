@@ -15,19 +15,24 @@ import { useProjects } from '@/hooks/useProjects';
 
 const PieTooltipCustom = ({ active, payload }: any) => {
   const t = useTranslations();
+  const { colors } = useTheme();
+  
   if (!active || !payload?.length) return null;
   const d = payload[0].payload;
+  
   return (
     <div style={{
-      background: 'rgba(6,5,21,0.92)',
-      border: '1px solid #5044d5',
+      background: colors.surface.primary === '#ffffff' ? 'rgba(255, 255, 255, 0.96)' : 'rgba(6, 5, 21, 0.96)',
+      border: `1px solid ${colors.border.light}`,
       borderRadius: 10,
       padding: '10px 16px',
-      boxShadow: '0 4px 20px rgba(80,68,213,0.3)',
+      boxShadow: colors.surface.primary === '#ffffff' 
+        ? '0 4px 20px rgba(54, 41, 183, 0.15)' 
+        : '0 4px 20px rgba(0, 0, 0, 0.5)',
     }}>
-      <p style={{ color: '#c5c1f1', fontWeight: 700, fontSize: 13 }}>{t(`categories.${d.category}`)}</p>
-      <p style={{ color: '#8a82e3', fontSize: 12 }}>{(d.percentage).toFixed(1)}%</p>
-      <p style={{ color: '#c5c1f1', fontSize: 12 }}>{d.count || 0} {t('analysis.table.transactions').toLowerCase()}</p>
+      <p style={{ color: colors.text.primary, fontWeight: 700, fontSize: 13 }}>{t(`categories.${d.category}`)}</p>
+      <p style={{ color: colors.interactive.primary, fontSize: 12, fontWeight: 600 }}>{(d.percentage).toFixed(1)}%</p>
+      <p style={{ color: colors.text.secondary, fontSize: 12 }}>{d.count || 0} {t('analysis.table.transactions').toLowerCase()}</p>
     </div>
   );
 };

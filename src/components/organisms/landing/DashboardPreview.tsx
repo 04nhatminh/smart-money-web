@@ -16,51 +16,6 @@ import { formatVietnamsePrice } from '@/lib/format';
 const DONUT_COLORS = ['#5044d5', '#8a82e3', '#3629b7', '#c5c1f1', '#776ede'];
 
 
-const CustomTooltip = ({ active, payload, label }: any) => {
-  if (active && payload && payload.length) {
-    return (
-      <div
-        style={{
-          background: 'rgba(30,24,104,0.95)',
-          border: '1px solid #5044d5',
-          borderRadius: 10,
-          padding: '10px 16px',
-          minWidth: 160,
-        }}
-      >
-        <p style={{ color: '#c5c1f1', fontWeight: 600, marginBottom: 4 }}>{label}</p>
-        {payload.map((entry: any) => (
-          <p key={entry.name} style={{ color: entry.color, margin: '2px 0' }}>
-            {entry.name}: {formatVietnamsePrice(entry.value)}
-          </p>
-        ))}
-      </div>
-    );
-  }
-  return null;
-};
-
-const DonutTooltip = ({ active, payload }: any) => {
-  if (active && payload && payload.length) {
-    const d = payload[0].payload;
-    return (
-      <div
-        style={{
-          background: 'rgba(30,24,104,0.95)',
-          border: '1px solid #5044d5',
-          borderRadius: 10,
-          padding: '10px 16px',
-        }}
-      >
-        <p style={{ color: '#c5c1f1', fontWeight: 600 }}>{d.category}</p>
-        <p style={{ color: '#8a82e3' }}>{(d.percentage * 100).toFixed(0)}%</p>
-        <p style={{ color: '#c5c1f1' }}>{d.count} transactions</p>
-      </div>
-    );
-  }
-  return null;
-};
-
 export const DashboardPreview: React.FC = () => {
   const { colors } = useTheme();
   const t = useTranslations();
@@ -81,14 +36,17 @@ export const DashboardPreview: React.FC = () => {
       return (
         <div
           style={{
-            background: 'rgba(30,24,104,0.95)',
-            border: '1px solid #5044d5',
+            background: colors.surface.primary === '#ffffff' ? 'rgba(255, 255, 255, 0.96)' : 'rgba(6, 5, 21, 0.96)',
+            border: `1px solid ${colors.border.light}`,
             borderRadius: 10,
             padding: '10px 16px',
             minWidth: 160,
+            boxShadow: colors.surface.primary === '#ffffff' 
+              ? '0 4px 20px rgba(54, 41, 183, 0.15)' 
+              : '0 4px 20px rgba(0, 0, 0, 0.5)',
           }}
         >
-          <p style={{ color: '#c5c1f1', fontWeight: 600, marginBottom: 4 }}>{label}</p>
+          <p style={{ color: colors.text.primary, fontWeight: 600, marginBottom: 4 }}>{label}</p>
           {payload.map((entry: any) => (
             <p key={entry.name} style={{ color: entry.color, margin: '2px 0' }}>
               {entry.name}: {formatVietnamsePrice(entry.value)}
@@ -106,17 +64,20 @@ export const DashboardPreview: React.FC = () => {
       return (
         <div
           style={{
-            background: 'rgba(30,24,104,0.95)',
-            border: '1px solid #5044d5',
+            background: colors.surface.primary === '#ffffff' ? 'rgba(255, 255, 255, 0.96)' : 'rgba(6, 5, 21, 0.96)',
+            border: `1px solid ${colors.border.light}`,
             borderRadius: 10,
             padding: '10px 16px',
+            boxShadow: colors.surface.primary === '#ffffff' 
+              ? '0 4px 20px rgba(54, 41, 183, 0.15)' 
+              : '0 4px 20px rgba(0, 0, 0, 0.5)',
           }}
         >
-          <p style={{ color: '#c5c1f1', fontWeight: 600 }}>
+          <p style={{ color: colors.text.primary, fontWeight: 600 }}>
             {d.category === 'Food & Bev' ? t('finance.dashboard.foodBev') : d.category}
           </p>
-          <p style={{ color: '#8a82e3' }}>{(d.percentage * 100).toFixed(0)}%</p>
-          <p style={{ color: '#c5c1f1' }}>{d.count} transactions</p>
+          <p style={{ color: colors.interactive.primary, fontWeight: 600 }}>{(d.percentage * 100).toFixed(0)}%</p>
+          <p style={{ color: colors.text.secondary }}>{d.count} transactions</p>
         </div>
       );
     }
