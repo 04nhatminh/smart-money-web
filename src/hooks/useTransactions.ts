@@ -10,6 +10,9 @@ interface TransactionsResponse {
   totalElements?: number;
   totalPages?: number;
   currentPage?: number;
+  totalIncome?: number;
+  totalExpenses?: number;
+  totalBalance?: number;
 }
 
 export interface TransactionFilters {

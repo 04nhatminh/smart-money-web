@@ -72,6 +72,9 @@ export default function TransactionsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalElements, setTotalElements] = useState(0);
+  const [totalIncome, setTotalIncome] = useState(0);
+  const [totalExpenses, setTotalExpenses] = useState(0);
+  const [totalBalance, setTotalBalance] = useState(0);
   const ITEMS_PER_PAGE = 10;
 
   // Check authentication
@@ -146,10 +149,16 @@ export default function TransactionsPage() {
       setTransactions((result.data as any).items || (result.data as any).transactions || result.data.content || []);
       setTotalPages((result.data as any).totalPages || 1);
       setTotalElements((result.data as any).totalElements || 0);
+      setTotalIncome(result.data.totalIncome || 0);
+      setTotalExpenses(result.data.totalExpenses || 0);
+      setTotalBalance(result.data.totalBalance || 0);
     } else {
       setTransactions([]);
       setTotalPages(1);
       setTotalElements(0);
+      setTotalIncome(0);
+      setTotalExpenses(0);
+      setTotalBalance(0);
     }
   };
 
@@ -207,18 +216,7 @@ export default function TransactionsPage() {
       })
     : displayTransactions;
 
-  // Calculate stats
-  const totalBalance = displayTransactions.reduce((acc, t) => {
-    return t.type === 'INCOME' ? acc + t.amount : acc - t.amount;
-  }, 0);
-
-  const totalIncome = displayTransactions
-    .filter(t => t.type === 'INCOME')
-    .reduce((acc, t) => acc + t.amount, 0);
-
-  const totalExpenses = displayTransactions
-    .filter(t => t.type === 'EXPENSE')
-    .reduce((acc, t) => acc + t.amount, 0);
+  // Stats are retrieved directly from the backend via totalBalance, totalIncome, totalExpenses state variables
 
   if (isInitializing) {
     return (
