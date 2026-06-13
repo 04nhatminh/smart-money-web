@@ -36,9 +36,28 @@ export default function TransactionsPage() {
   const t = useTranslations();
   const { colors } = useTheme();
   const { isLoading, listTransactions, deleteTransaction } = useTransactions();
-  const [filterState, setFilterState] = useState<TransactionFilterState>({
-    category: categoryParam || undefined,
+  // Parse initial filters from URL search params
+  const [filterState, setFilterState] = useState<TransactionFilterState>(() => {
+    const filters: TransactionFilterState = {};
+    const category = searchParams.get('category');
+    const type = searchParams.get('type') as 'INCOME' | 'EXPENSE' | null;
+    const minAmount = searchParams.get('minAmount');
+    const maxAmount = searchParams.get('maxAmount');
+    const startDate = searchParams.get('startDate');
+    const endDate = searchParams.get('endDate');
+    const search = searchParams.get('search');
+
+    if (category) filters.category = category;
+    if (type === 'INCOME' || type === 'EXPENSE') filters.type = type;
+    if (minAmount) filters.minAmount = Number(minAmount);
+    if (maxAmount) filters.maxAmount = Number(maxAmount);
+    if (startDate) filters.startDate = startDate;
+    if (endDate) filters.endDate = endDate;
+    if (search) filters.search = search;
+
+    return filters;
   });
+
   const [sortBy, setSortBy] = useState<'date' | 'amount' | 'category' | 'type' | 'description'>('date');
   const [sortOrder, setSortOrder] = useState<'ASC' | 'DESC'>('DESC');
   const [isMethodModalOpen, setIsMethodModalOpen] = useState(false);
@@ -62,15 +81,48 @@ export default function TransactionsPage() {
     }
   }, [isAuthenticated, isInitializing, router, locale]);
 
-  // Sync categoryParam query filter parameter to filterState
+  // Sync filterState change back to browser URL
   useEffect(() => {
-    if (categoryParam) {
-      setFilterState(prev => ({
-        ...prev,
-        category: categoryParam,
-      }));
+    if (!isAuthenticated) return;
+
+    const params = new URLSearchParams();
+    if (filterState.category) params.set('category', filterState.category);
+    if (filterState.type) params.set('type', filterState.type);
+    if (filterState.minAmount) params.set('minAmount', filterState.minAmount.toString());
+    if (filterState.maxAmount) params.set('maxAmount', filterState.maxAmount.toString());
+    if (filterState.startDate) params.set('startDate', filterState.startDate);
+    if (filterState.endDate) params.set('endDate', filterState.endDate);
+    if (filterState.search) params.set('search', filterState.search);
+
+    const newQueryStr = params.toString();
+    const currentQueryStr = window.location.search.replace(/^\?/, '');
+
+    if (newQueryStr !== currentQueryStr) {
+      const newPath = `/${locale}/transactions${newQueryStr ? `?${newQueryStr}` : ''}`;
+      router.replace(newPath, { scroll: false });
     }
-  }, [categoryParam]);
+  }, [filterState, locale, router, isAuthenticated]);
+
+  // Sync external search params changes (e.g. backward/forward navigation or initial searchParams resolving) to filterState
+  useEffect(() => {
+    const category = searchParams.get('category') || undefined;
+    const type = (searchParams.get('type') as 'INCOME' | 'EXPENSE') || undefined;
+    const minAmount = searchParams.get('minAmount') ? Number(searchParams.get('minAmount')) : undefined;
+    const maxAmount = searchParams.get('maxAmount') ? Number(searchParams.get('maxAmount')) : undefined;
+    const startDate = searchParams.get('startDate') || undefined;
+    const endDate = searchParams.get('endDate') || undefined;
+    const search = searchParams.get('search') || undefined;
+
+    setFilterState({
+      category,
+      type,
+      minAmount,
+      maxAmount,
+      startDate,
+      endDate,
+      search,
+    });
+  }, [searchParams]);
 
   // Load transactions after auth is initialized or filter/sort changes
   useEffect(() => {

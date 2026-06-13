@@ -52,8 +52,8 @@ const ChartTooltip = ({ active, payload, label }: any) => {
       borderRadius: 10,
       padding: '10px 16px',
       minWidth: 160,
-      boxShadow: colors.surface.primary === '#ffffff' 
-        ? '0 4px 20px rgba(54, 41, 183, 0.15)' 
+      boxShadow: colors.surface.primary === '#ffffff'
+        ? '0 4px 20px rgba(54, 41, 183, 0.15)'
         : '0 4px 20px rgba(0, 0, 0, 0.5)',
     }}>
       <p style={{ color: colors.text.primary, fontWeight: 700, marginBottom: 6, fontSize: 13 }}>{label}</p>
@@ -78,8 +78,8 @@ export const PieTooltipCustom = ({ active, payload }: any) => {
       border: `1px solid ${colors.border.light}`,
       borderRadius: 10,
       padding: '10px 16px',
-      boxShadow: colors.surface.primary === '#ffffff' 
-        ? '0 4px 20px rgba(54, 41, 183, 0.15)' 
+      boxShadow: colors.surface.primary === '#ffffff'
+        ? '0 4px 20px rgba(54, 41, 183, 0.15)'
         : '0 4px 20px rgba(0, 0, 0, 0.5)',
     }}>
       <p style={{ color: colors.text.primary, fontWeight: 700, fontSize: 13 }}>{t(`categories.${d.category}`)}</p>
@@ -298,7 +298,7 @@ export default function AnalysisPage() {
               key={tab.key}
               id={`tab-${tab.key}`}
               onClick={() => setActiveTab(tab.key)}
-              className="flex items-center gap-2 px-4 py-2 rounded-t-lg font-medium text-sm transition-all"
+              className="flex items-center gap-2 px-4 py-2 rounded-t-lg font-medium text-sm transition-all hover:cursor-pointer hover:scale-[1.05]"
               style={{
                 color: activeTab === tab.key ? colors.interactive.primary : colors.text.secondary,
                 borderBottom: activeTab === tab.key ? `2px solid ${colors.interactive.primary}` : '2px solid transparent',
@@ -543,7 +543,7 @@ export default function AnalysisPage() {
                             <button
                               id={`view-transactions-${cat.category.toLowerCase().replace(/\s+/g, '-')}`}
                               onClick={() => router.push(`/${locale}/transactions?category=${encodeURIComponent(cat.category)}`)}
-                              className="px-3 py-1.5 rounded-lg text-xs font-semibold transition hover:opacity-80"
+                              className="px-3 py-1.5 rounded-lg text-xs font-semibold transition hover:opacity-80 hover:cursor-pointer"
                               style={{
                                 backgroundColor: `${colors.interactive.primary}18`,
                                 color: colors.interactive.primary,

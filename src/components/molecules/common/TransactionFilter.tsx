@@ -118,14 +118,14 @@ export const TransactionFilter: React.FC<TransactionFilterProps> = ({
 
     // Combine date and time with format: dd/MM/yyyy HH:mm
     const filtersToApply = { ...modalFilters, search };
-    
+
     if (modalFilters.startDate) {
       filtersToApply.startDate = `${modalFilters.startDate} ${startTime}`;
     }
     if (modalFilters.endDate) {
       filtersToApply.endDate = `${modalFilters.endDate} ${endTime}`;
     }
-    
+
     onFilterChange(filtersToApply);
     setIsModalOpen(false);
   };
@@ -198,16 +198,16 @@ export const TransactionFilter: React.FC<TransactionFilterProps> = ({
           <div
             className="fixed inset-0 transition-opacity"
             style={{
-            backgroundColor: 'rgba(0, 0, 0, 0.3)',
-            pointerEvents: 'auto',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%',
-            zIndex: 999,
+              backgroundColor: 'rgba(0, 0, 0, 0.3)',
+              pointerEvents: 'auto',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              zIndex: 999,
             }}
             onClick={() => setIsModalOpen(false)}
-        />
+          />
 
           {/* Modal */}
           <div
@@ -260,11 +260,10 @@ export const TransactionFilter: React.FC<TransactionFilterProps> = ({
                           modalFilters.type === option.value
                             ? 'white'
                             : colors.text.primary,
-                        border: `1px solid ${
-                          modalFilters.type === option.value
+                        border: `1px solid ${modalFilters.type === option.value
                             ? colors.interactive.primary
                             : colors.border.light
-                        }`,
+                          }`,
                       }}
                     >
                       {option.label}
