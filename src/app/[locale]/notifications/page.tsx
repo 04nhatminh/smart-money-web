@@ -27,7 +27,7 @@ export default function NotificationsPage() {
     {
       id: '1',
       title: t('notifications.welcome') || 'Welcome',
-      message: 'Welcome to SmartMoney!',
+      message: t('notificationsPage.mockWelcome'),
       type: 'success',
       timestamp: new Date(Date.now() - 3600000).toISOString(),
       read: false,
@@ -35,7 +35,7 @@ export default function NotificationsPage() {
     {
       id: '2',
       title: t('notifications.accountUpdated') || 'Account Updated',
-      message: 'Your profile information has been updated successfully.',
+      message: t('notificationsPage.mockUpdated'),
       type: 'info',
       timestamp: new Date(Date.now() - 7200000).toISOString(),
       read: false,
@@ -43,7 +43,7 @@ export default function NotificationsPage() {
     {
       id: '3',
       title: t('notifications.transaction') || 'Transaction Confirmed',
-      message: 'Your recent transaction has been confirmed.',
+      message: t('notificationsPage.mockConfirmed'),
       type: 'success',
       timestamp: new Date(Date.now() - 86400000).toISOString(),
       read: true,
@@ -88,16 +88,16 @@ export default function NotificationsPage() {
     const diffHours = Math.floor(diffMs / 3600000);
     const diffDays = Math.floor(diffMs / 86400000);
 
-    if (diffMins < 1) return 'Just now';
-    if (diffMins < 60) return `${diffMins}m ago`;
-    if (diffHours < 24) return `${diffHours}h ago`;
-    if (diffDays < 7) return `${diffDays}d ago`;
+    if (diffMins < 1) return t('notificationsPage.justNow');
+    if (diffMins < 60) return t('notificationsPage.minsAgo', { mins: diffMins });
+    if (diffHours < 24) return t('notificationsPage.hoursAgo', { hours: diffHours });
+    if (diffDays < 7) return t('notificationsPage.daysAgo', { days: diffDays });
     return notifTime.toLocaleDateString();
   };
 
   return (
     <SidebarLayout>
-      <div className="space-y-8 max-w-4xl">
+      <div className="space-y-8 max-w-4xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
@@ -106,8 +106,10 @@ export default function NotificationsPage() {
             </Heading>
             <Text style={{ color: colors.text.secondary }}>
               {unreadCount > 0
-                ? `You have ${unreadCount} unread notification${unreadCount !== 1 ? 's' : ''}`
-                : 'You are all caught up!'}
+                ? unreadCount === 1
+                  ? t('notificationsPage.unreadCountOne', { count: unreadCount })
+                  : t('notificationsPage.unreadCount', { count: unreadCount })
+                : t('notificationsPage.allCaughtUp')}
             </Text>
           </div>
           {unreadCount > 0 && (
@@ -267,7 +269,7 @@ export default function NotificationsPage() {
                           backgroundColor: `${colors.interactive.primary}20`,
                           color: colors.interactive.primary,
                         }}
-                        title="Mark as read"
+                        title={t('notificationsPage.markAsRead')}
                       >
                         <svg
                           className="w-5 h-5"
@@ -285,7 +287,7 @@ export default function NotificationsPage() {
                         backgroundColor: `${colors.interactive.danger}20`,
                         color: colors.interactive.danger,
                       }}
-                      title="Delete"
+                      title={t('notificationsPage.delete')}
                     >
                       <svg
                         className="w-5 h-5"

@@ -2,7 +2,7 @@
 
 import React, { useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { VerifyEmailForm } from '@/components/molecules/auth';
 import { CenteredLayout } from '@/components/templates';
 import { Heading } from '@/components/atoms';
@@ -14,6 +14,7 @@ export const dynamic = 'force-dynamic';
 export default function VerifyEmailPage() {
   const router = useRouter();
   const locale = useLocale();
+  const t = useTranslations();
   const searchParams = useSearchParams();
   const email = searchParams.get('email') || '';
   const { isAuthenticated, isInitializing } = useAuth();
@@ -51,7 +52,7 @@ export default function VerifyEmailPage() {
   if (isInitializing) {
     return (
       <CenteredLayout hideHeader hideFooter showBackButton>
-        <Heading level={2}>Loading...</Heading>
+        <Heading level={2}>{t('common.loading')}</Heading>
       </CenteredLayout>
     );
   }
@@ -59,7 +60,7 @@ export default function VerifyEmailPage() {
   if (!email) {
     return (
       <CenteredLayout hideHeader hideFooter showBackButton>
-        <Heading level={2}>Redirecting...</Heading>
+        <Heading level={2}>{t('verifyEmail.redirecting')}</Heading>
       </CenteredLayout>
     );
   }

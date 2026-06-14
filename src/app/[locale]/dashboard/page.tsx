@@ -1,385 +1,450 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { useAuth } from '@/context/AuthContext';
 import { SidebarLayout } from '@/components/templates';
-import { Heading, Text, Button } from '@/components/atoms';
-import { Card, StatCard, TransactionRow, CreateTransactionModal, EditTransactionModal, TransactionMethodModal, ImageBillUploadModal, VoiceRecordModal, TransactionFilter, Pagination, type TransactionFilterState } from '@/components/molecules/common';
+import { Heading, Text } from '@/components/atoms';
+import { Card, StatCard } from '@/components/molecules/common';
 import { useTheme } from '@/context/ThemeContext';
-import { useTransactions, type TransactionFilters } from '@/hooks/useTransactions';
-import { transformAIResultToFormData } from '@/lib/ai-result-transformer';
-import { MdAdd } from 'react-icons/md';
-import { MdAccountBalanceWallet, MdTrendingUp, MdTrendingDown, MdRefresh, MdSort } from 'react-icons/md';
-import { formatVietnamsePrice } from '@/lib/format';
+import { useTransactions } from '@/hooks/useTransactions';
+import { useAnalytics } from '@/hooks/useAnalytics';
+import { useBudgets } from '@/hooks/useBudgets';
+import { useProjects } from '@/hooks/useProjects';
 
-interface Transaction {
-  id: string;
-  userId?: string;
-  title?: string;
-  category: string;
-  date: string;
-  amount: number;
-  type: 'INCOME' | 'EXPENSE';
-  description?: string;
-  createdAt?: string;
-  updatedAt?: string;
-}
+const PieTooltipCustom = ({ active, payload }: any) => {
+  const t = useTranslations();
+  const { colors } = useTheme();
+  
+  if (!active || !payload?.length) return null;
+  const d = payload[0].payload;
+  
+  return (
+    <div style={{
+      background: colors.surface.primary === '#ffffff' ? 'rgba(255, 255, 255, 0.96)' : 'rgba(6, 5, 21, 0.96)',
+      border: `1px solid ${colors.border.light}`,
+      borderRadius: 10,
+      padding: '10px 16px',
+      boxShadow: colors.surface.primary === '#ffffff' 
+        ? '0 4px 20px rgba(54, 41, 183, 0.15)' 
+        : '0 4px 20px rgba(0, 0, 0, 0.5)',
+    }}>
+      <p style={{ color: colors.text.primary, fontWeight: 700, fontSize: 13 }}>{t(`categories.${d.category}`)}</p>
+      <p style={{ color: colors.interactive.primary, fontSize: 12, fontWeight: 600 }}>{(d.percentage).toFixed(1)}%</p>
+      <p style={{ color: colors.text.secondary, fontSize: 12 }}>{d.count || 0} {t('analysis.table.transactions').toLowerCase()}</p>
+    </div>
+  );
+};
+import { formatVietnamsePrice } from '@/lib/format';
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
+import {
+  MdAccountBalanceWallet,
+  MdTrendingUp,
+  MdTrendingDown,
+  MdRefresh,
+  MdSwapHoriz,
+  MdPieChart,
+  MdFolderOpen,
+  MdInsights,
+  MdChevronRight
+} from 'react-icons/md';
+
+const CHART_COLORS = ['#5044d5', '#10B981', '#EF4444', '#F59E0B', '#8B5CF6', '#EC4899', '#06B6D4'];
 
 export default function DashboardPage() {
-  const { user, isInitializing } = useAuth();
+  const { user, isAuthenticated, isInitializing } = useAuth();
   const router = useRouter();
   const locale = useLocale();
+  const t = useTranslations();
   const { colors } = useTheme();
-  const { isLoading, listTransactions, deleteTransaction } = useTransactions();
-  const [filterState, setFilterState] = useState<TransactionFilterState>({});
-  const [sortBy, setSortBy] = useState<'date' | 'amount' | 'category' | 'type' | 'description'>('date');
-  const [sortOrder, setSortOrder] = useState<'ASC' | 'DESC'>('DESC');
-  const [isMethodModalOpen, setIsMethodModalOpen] = useState(false);
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
-  const [isVoiceModalOpen, setIsVoiceModalOpen] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [editingTransactionId, setEditingTransactionId] = useState<string | null>(null);
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [deleteLoading, setDeleteLoading] = useState(false);
-  const [aiFormData, setAiFormData] = useState<any>(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [totalElements, setTotalElements] = useState(0);
-  const ITEMS_PER_PAGE = 10;
 
-  // Load transactions after auth is initialized or filter/sort changes
+  const { listTransactions } = useTransactions();
+  const { fetchAnalytics } = useAnalytics();
+  const { listBudgets } = useBudgets();
+  const { listProjects } = useProjects();
+
+  const [transactions, setTransactions] = useState<any[]>([]);
+  const [analyticsData, setAnalyticsData] = useState<any>(null);
+  const [budgets, setBudgets] = useState<any[]>([]);
+  const [projects, setProjects] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const currentMonth = new Date().getMonth() + 1;
+  const currentYear = new Date().getFullYear();
+
+  // Check authentication
   useEffect(() => {
-    if (!isInitializing) {
-      setCurrentPage(1); // Reset to first page when filters change
-      loadTransactions(1);
+    if (!isInitializing && !isAuthenticated) {
+      router.push(`/${locale}/login`);
     }
-  }, [isInitializing, filterState, sortBy, sortOrder]);
+  }, [isAuthenticated, isInitializing, router, locale]);
 
-  const loadTransactions = async (page: number = currentPage) => {
-    const apiFilters: TransactionFilters = {
-      page: page - 1, // API uses 0-indexed pages
-      size: ITEMS_PER_PAGE,
-      sortBy,
-      sortOrder,
-      ...filterState,
-    };
-    
-    const result = await listTransactions(apiFilters);
-    if (result.success && result.data) {
-      setTransactions((result.data as any).items || (result.data as any).transactions || result.data.content || []);
-      setTotalPages((result.data as any).totalPages || 1);
-      setTotalElements((result.data as any).totalElements || 0);
-    } else {
-      setTransactions([]);
-      setTotalPages(1);
-      setTotalElements(0);
-    }
-  };
-
-  const handleEditClick = (id: string) => {
-    setEditingTransactionId(id);
-    setIsEditModalOpen(true);
-  };
-
-  const handleDeleteClick = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this transaction?')) {
-      return;
-    }
-
+  const loadDashboardData = async () => {
+    if (!isAuthenticated) return;
+    setIsLoading(true);
     try {
-      setDeleteLoading(true);
-      const result = await deleteTransaction(id);
-      if (result.success) {
-        setTransactions(transactions.filter(t => t.id !== id));
-      } else {
-        alert('Failed to delete transaction: ' + (result.error || 'Unknown error'));
+      // 1. Fetch recent transactions (top 5)
+      const txResult = await listTransactions({
+        page: 0,
+        size: 5,
+        sortBy: 'date',
+        sortOrder: 'DESC',
+      });
+      if (txResult.success && txResult.data) {
+        setTransactions((txResult.data as any).items || (txResult.data as any).transactions || txResult.data.content || []);
       }
+
+      // 2. Fetch current month analytics
+      const analyticsResult = await fetchAnalytics({
+        month: currentMonth,
+        year: currentYear
+      });
+      if (analyticsResult.success && analyticsResult.data) {
+        setAnalyticsData(analyticsResult.data);
+      }
+
+      // 3. Fetch budgets
+      const budgetsResult = await listBudgets(currentMonth, currentYear);
+      if (budgetsResult.success && budgetsResult.data) {
+        setBudgets(budgetsResult.data.items || budgetsResult.data.content || budgetsResult.data.budgets || []);
+      }
+
+      // 4. Fetch projects
+      const projectsResult = await listProjects();
+      if (projectsResult.success && projectsResult.data) {
+        setProjects(projectsResult.data.items || projectsResult.data.content || projectsResult.data || []);
+      }
+    } catch (error) {
+      console.error('Error loading dashboard data:', error);
     } finally {
-      setDeleteLoading(false);
+      setIsLoading(false);
     }
   };
 
-  const handleAIResultReceived = (aiResult: Record<string, any>, source: 'voice' | 'image' = 'voice') => {
-    // Transform AI result to form data
-    const formData = transformAIResultToFormData(aiResult, source);
-    setAiFormData(formData);
-    // Close the AI modal (voice/image) and open the create transaction modal
-    setIsVoiceModalOpen(false);
-    setIsImageModalOpen(false);
-    setIsCreateModalOpen(true);
+  useEffect(() => {
+    if (isAuthenticated) {
+      loadDashboardData();
+    }
+  }, [isAuthenticated]);
+
+  // Derived calculations for Financial Summary Card
+  const { totalIncome, totalExpenses, netSavings } = useMemo(() => {
+    if (!analyticsData) {
+      return { totalIncome: 0, totalExpenses: 0, netSavings: 0 };
+    }
+    const monthlyStats = analyticsData.monthlyStats ?? [];
+    const income = monthlyStats.reduce((sum: number, m: any) => sum + (m.income || 0), 0);
+    const expense = monthlyStats.reduce((sum: number, m: any) => sum + (m.expense || 0), 0);
+    return {
+      totalIncome: income,
+      totalExpenses: expense,
+      netSavings: income - expense
+    };
+  }, [analyticsData]);
+
+  const sortedCategoryProportions = useMemo(() => {
+    if (!analyticsData?.categoryProportions) return [];
+    return [...analyticsData.categoryProportions].sort((a, b) => b.percentage - a.percentage);
+  }, [analyticsData]);
+
+  if (isInitializing || (!isAuthenticated && isInitializing)) {
+    return (
+      <SidebarLayout>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <MdRefresh className="w-8 h-8 animate-spin" style={{ color: colors.interactive.primary }} />
+        </div>
+      </SidebarLayout>
+    );
+  }
+
+  const parseTransactionDate = (dateStr: string): Date => {
+    if (!dateStr) return new Date();
+    const match = dateStr.match(/^(\d{2})\/(\d{2})\/(\d{4})(?:\s(\d{2}):(\d{2}))?/);
+    if (match) {
+      const [, day, month, year, hour = '00', minute = '00'] = match;
+      return new Date(parseInt(year, 10), parseInt(month, 10) - 1, parseInt(day, 10), parseInt(hour, 10), parseInt(minute, 10));
+    }
+    return new Date(dateStr);
   };
-
-
-
-  // Format data for display
-  const displayTransactions = (transactions || []).map(t => ({
-    id: t.id,
-    title: t.description || t.category,
-    category: t.category,
-    date: t.date,
-    amount: t.amount,
-    type: t.type,
-  }));
-
-  // Client-side search filter (if needed for search term not handled by API)
-  const filteredTransactions = filterState.search
-    ? displayTransactions.filter((t) => {
-        const searchLower = filterState.search!.toLowerCase();
-        return (
-          t.title.toLowerCase().includes(searchLower) ||
-          t.category.toLowerCase().includes(searchLower)
-        );
-      })
-    : displayTransactions;
-
-  // Calculate stats
-  const totalBalance = displayTransactions.reduce((acc, t) => {
-    return t.type === 'INCOME' ? acc + t.amount : acc - t.amount;
-  }, 0);
-
-  const totalIncome = displayTransactions
-    .filter(t => t.type === 'INCOME')
-    .reduce((acc, t) => acc + t.amount, 0);
-
-  const totalExpenses = displayTransactions
-    .filter(t => t.type === 'EXPENSE')
-    .reduce((acc, t) => acc + t.amount, 0);
 
   return (
     <SidebarLayout>
-      <div className="space-y-5">
-        {/* Welcome Section */}
+      <div className="space-y-6">
+        {/* Header */}
         <div className="flex items-center justify-between">
           <div>
             <Heading level={2}>
-              Welcome back, {user?.fullName || user?.username || 'User'}!
+              {t('dashboard.welcome', { name: user?.fullName || user?.username || 'User' })}
             </Heading>
             <Text style={{ color: colors.text.secondary }} className="text-lg">
-              Here's your financial overview
+              {t('dashboard.overviewSubtitle')}
             </Text>
           </div>
-          <Button
-            variant="primary"
-            onClick={() => setIsMethodModalOpen(true)}
-            className="flex items-center gap-2"
+          <button
+            onClick={loadDashboardData}
+            className="p-2 rounded-full transition-colors hover:opacity-85"
+            style={{ backgroundColor: `${colors.interactive.primary}15`, color: colors.interactive.primary }}
           >
-            <MdAdd className="w-5 h-5" />
-            Add Transaction
-          </Button>
+            <MdRefresh className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`} />
+          </button>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <StatCard
-            label="Total Balance"
-            value={formatVietnamsePrice(totalBalance)}
-            icon={<MdAccountBalanceWallet className="w-6 h-6" style={{ color: colors.interactive.primary }} />}
-          />
-          <StatCard
-            label="Total Income"
-            value={formatVietnamsePrice(totalIncome)}
-            icon={<MdTrendingUp className="w-6 h-6" style={{ color: '#10B981' }} />}
-            trend={{ direction: 'up', percentage: 12 }}
-          />
-          <StatCard
-            label="Total Expenses"
-            value={formatVietnamsePrice(totalExpenses)}
-            icon={<MdTrendingDown className="w-6 h-6" style={{ color: '#EF4444' }} />}
-            trend={{ direction: 'down', percentage: 8 }}
-          />
-        </div>
+        {/* 2x2 Grid Layout for Overview Cards */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-        {/* Recent Transactions */}
-        <Card className="p-6">
-          <div className="mb-4">
-            <div className="mb-6">
-              <Heading level={3}>Recent Transactions</Heading>
-              <Text style={{ color: colors.text.secondary }} className="text-sm">
-                Track all your income and expenses
-              </Text>
-            </div>
-
-            {/* Transaction Filter Component */}
-            <TransactionFilter
-              onFilterChange={setFilterState}
-              initialFilters={filterState}
-            />
-
-            {/* Sort Options */}
-            <div className="mt-4 flex items-center gap-3">
+          {/* Card 1: Monthly Financial Overview & Category Chart */}
+          <Card
+            className="p-6 cursor-pointer hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 group relative overflow-hidden border"
+            style={{ borderColor: colors.border.light, backgroundColor: colors.surface.primary }}
+            onClick={() => router.push(`/${locale}/analysis`)}
+          >
+            <div className="flex items-center justify-between mb-4 border-b pb-3" style={{ borderColor: colors.border.light }}>
               <div className="flex items-center gap-2">
-                <MdSort className="w-5 h-5" style={{ color: colors.text.secondary }} />
-                <Text style={{ color: colors.text.secondary }} className="text-sm font-medium">
-                  Sort by:
-                </Text>
+                <MdInsights className="w-5 h-5" style={{ color: colors.interactive.primary }} />
+                <Heading level={3} className="text-lg font-bold">{t('dashboard.financialAnalysis')}</Heading>
               </div>
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as any)}
-                style={{
-                  backgroundColor: colors.background.secondary,
-                  color: colors.text.primary,
-                  borderColor: colors.border.light,
-                  padding: '0.5rem 0.75rem',
-                  borderRadius: '0.375rem',
-                  border: `1px solid ${colors.border.light}`,
-                  cursor: 'pointer',
-                  fontSize: '0.875rem',
-                }}
-                className="focus:outline-none focus:ring-2"
-              >
-                <option value="date">Date</option>
-                <option value="amount">Amount</option>
-                <option value="category">Category</option>
-                <option value="type">Type</option>
-                <option value="description">Description</option>
-              </select>
-              <select
-                value={sortOrder}
-                onChange={(e) => setSortOrder(e.target.value as any)}
-                style={{
-                  backgroundColor: colors.background.secondary,
-                  color: colors.text.primary,
-                  borderColor: colors.border.light,
-                  padding: '0.5rem 0.75rem',
-                  borderRadius: '0.375rem',
-                  border: `1px solid ${colors.border.light}`,
-                  cursor: 'pointer',
-                  fontSize: '0.875rem',
-                }}
-                className="focus:outline-none focus:ring-2"
-              >
-                <option value="DESC">Descending</option>
-                <option value="ASC">Ascending</option>
-              </select>
+              <div className="flex items-center text-sm font-semibold opacity-80 group-hover:translate-x-1 transition-transform" style={{ color: colors.interactive.primary }}>
+                {t('dashboard.detailedInsights')} <MdChevronRight className="w-5 h-5" />
+              </div>
             </div>
-          </div>
 
-          {/* Transaction List */}
-          <div className="space-y-3 mt-6">
-            {isLoading ? (
-              <div className="flex items-center justify-center py-12">
-                <div className="flex flex-col items-center gap-3">
-                  <MdRefresh 
-                    className="w-8 h-8 animate-spin" 
-                    style={{ color: colors.interactive.primary }}
-                  />
-                  <Text style={{ color: colors.text.secondary }} className="text-sm">
-                    Loading transactions...
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+              <div className="space-y-5">
+                <div>
+                  <Text className="text-xs font-semibold uppercase tracking-wider" style={{ color: colors.text.secondary }}>
+                    {t('dashboard.netSpendingSavings')}
+                  </Text>
+                  <Text className="text-3xl font-black mt-1" style={{ color: netSavings >= 0 ? '#10B981' : '#EF4444' }}>
+                    {formatVietnamsePrice(netSavings)}
                   </Text>
                 </div>
-              </div>
-            ) : filteredTransactions.length > 0 ? (
-              <>
-                {filteredTransactions.map((transaction) => (
-                  <TransactionRow
-                    key={transaction.id}
-                    id={transaction.id}
-                    title={transaction.title}
-                    category={transaction.category}
-                    date={transaction.date}
-                    amount={transaction.amount}
-                    type={transaction.type}
-                    onEdit={handleEditClick}
-                    onDelete={handleDeleteClick}
-                  />
-                ))}
-                {/* Pagination */}
-                <div className="mt-6 pt-4 border-t" style={{ borderColor: colors.text.secondary }}>
-                  <div className="space-y-3">
-                    <Pagination
-                      currentPage={currentPage}
-                      totalPages={totalPages}
-                      onPageChange={(page) => {
-                        setCurrentPage(page);
-                        loadTransactions(page);
-                      }}
-                    />
-                    <div className="flex items-center justify-center gap-4" style={{ color: colors.text.secondary }}>
-                      <Text variant="caption" className="text-sm">
-                        Showing {((currentPage - 1) * ITEMS_PER_PAGE) + 1} to {Math.min(currentPage * ITEMS_PER_PAGE, totalElements)} of {totalElements} transactions
-                      </Text>
-                      <Text variant="caption" className="text-sm">
-                        • {ITEMS_PER_PAGE} per page
-                      </Text>
-                    </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Text className="text-xs font-medium" style={{ color: colors.text.secondary }}>{t('dashboard.income')}</Text>
+                    <Text className="text-base font-bold mt-0.5" style={{ color: '#10B981' }}>
+                      {formatVietnamsePrice(totalIncome)}
+                    </Text>
+                  </div>
+                  <div>
+                    <Text className="text-xs font-medium" style={{ color: colors.text.secondary }}>{t('dashboard.expense')}</Text>
+                    <Text className="text-base font-bold mt-0.5" style={{ color: '#EF4444' }}>
+                      {formatVietnamsePrice(totalExpenses)}
+                    </Text>
                   </div>
                 </div>
-              </>
-            ) : (
-              <div className="text-center py-8">
-                <Text style={{ color: colors.text.secondary }}>
-                  No transactions found
-                </Text>
+
+                {sortedCategoryProportions && sortedCategoryProportions.length > 0 && (
+                  <div className="pt-3 border-t" style={{ borderColor: `${colors.border.light}80` }}>
+                    <Text className="text-xs font-bold uppercase tracking-wider mb-2 block" style={{ color: colors.text.secondary }}>
+                      {t('dashboard.topCategories')}
+                    </Text>
+                    <div className="space-y-2">
+                      {sortedCategoryProportions.slice(0, 5).map((item: any, idx: number) => (
+                        <div key={item.category} className="flex items-center justify-between text-xs">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: CHART_COLORS[idx % CHART_COLORS.length] }} />
+                            <span className="truncate font-medium" style={{ color: colors.text.primary }}>
+                              {t(`categories.${item.category}`)}
+                            </span>
+                          </div>
+                          <span className="font-semibold" style={{ color: colors.text.secondary }}>
+                            {(item.percentage).toFixed(0)}%
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
-            )}
-          </div>
-        </Card>
 
-        {/* Create Transaction Modal */}
-        <CreateTransactionModal
-          isOpen={isCreateModalOpen}
-          initialData={aiFormData}
-          onClose={() => {
-            setIsCreateModalOpen(false);
-            setAiFormData(null);
-          }}
-          onSuccess={() => {
-            // Refresh transaction list
-            loadTransactions();
-          }}
-        />
+              {/* Mini Donut Chart */}
+              <div className="h-48 md:h-56 w-full flex items-center justify-center">
+                {sortedCategoryProportions && sortedCategoryProportions.length > 0 ? (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={sortedCategoryProportions}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={60}
+                        outerRadius={100}
+                        dataKey="percentage"
+                        paddingAngle={1}
+                      >
+                        {sortedCategoryProportions.map((entry: any, index: number) => (
+                          <Cell key={entry.category} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <Tooltip content={<PieTooltipCustom />} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <Text className="text-xs" style={{ color: colors.text.secondary }}>
+                    {t('dashboard.noSpendingChart')}
+                  </Text>
+                )}
+              </div>
+            </div>
+          </Card>
 
-        {/* Edit Transaction Modal */}
-        <EditTransactionModal
-          isOpen={isEditModalOpen}
-          transactionId={editingTransactionId}
-          onClose={() => {
-            setIsEditModalOpen(false);
-            setEditingTransactionId(null);
-          }}
-          onSuccess={() => {
-            // Refresh transaction list
-            loadTransactions();
-          }}
-        />
+          {/* Card 2: Top 5 Recent Transactions */}
+          <Card
+            className="p-6 cursor-pointer hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 group border"
+            style={{ borderColor: colors.border.light, backgroundColor: colors.surface.primary }}
+            onClick={() => router.push(`/${locale}/transactions`)}
+          >
+            <div className="flex items-center justify-between mb-4 border-b pb-3" style={{ borderColor: colors.border.light }}>
+              <div className="flex items-center gap-2">
+                <MdSwapHoriz className="w-5 h-5" style={{ color: colors.interactive.primary }} />
+                <Heading level={3} className="text-lg font-bold">{t('dashboard.recentTransactions')}</Heading>
+              </div>
+              <div className="flex items-center text-sm font-semibold opacity-80 group-hover:translate-x-1 transition-transform" style={{ color: colors.interactive.primary }}>
+                {t('dashboard.viewAll')} <MdChevronRight className="w-5 h-5" />
+              </div>
+            </div>
 
-        {/* Transaction Method Selection Modal */}
-        <TransactionMethodModal
-          isOpen={isMethodModalOpen}
-          onClose={() => setIsMethodModalOpen(false)}
-          onSelectForm={() => {
-            setIsMethodModalOpen(false);
-            setIsCreateModalOpen(true);
-          }}
-          onSelectImage={() => {
-            setIsMethodModalOpen(false);
-            setIsImageModalOpen(true);
-          }}
-          onSelectVoice={() => {
-            setIsMethodModalOpen(false);
-            setIsVoiceModalOpen(true);
-          }}
-        />
+            <div className="space-y-3">
+              {transactions.length > 0 ? (
+                transactions.map((tx: any) => (
+                  <div key={tx.id} className="flex items-center justify-between p-2 rounded-lg transition-colors" style={{ backgroundColor: `${colors.background.secondary}60` }}>
+                    <div className="min-w-0 flex-1 pr-2">
+                      <Text className="font-bold truncate text-sm" style={{ color: colors.text.primary }}>
+                        {tx.description || (t.has(`categories.${tx.category}`) ? t(`categories.${tx.category}`) : tx.category)}
+                      </Text>
+                      <Text className="text-xs truncate block" style={{ color: colors.text.secondary }}>
+                        {(t.has(`categories.${tx.category}`) ? t(`categories.${tx.category}`) : tx.category)} • {parseTransactionDate(tx.date).toLocaleDateString(locale, { month: 'short', day: 'numeric' })}
+                      </Text>
+                    </div>
+                    <Text className="font-extrabold text-sm whitespace-nowrap" style={{ color: tx.type === 'INCOME' ? '#10B981' : '#EF4444' }}>
+                      {tx.type === 'INCOME' ? '+' : '-'}{formatVietnamsePrice(tx.amount)}
+                    </Text>
+                  </div>
+                ))
+              ) : (
+                <div className="text-center py-6">
+                  <Text style={{ color: colors.text.secondary }}>{t('dashboard.noRecentTransactions')}</Text>
+                </div>
+              )}
+            </div>
+          </Card>
 
-        {/* Image Bill Upload Modal */}
-        <ImageBillUploadModal
-          isOpen={isImageModalOpen}
-          onClose={() => setIsImageModalOpen(false)}
-          onSuccess={() => setIsImageModalOpen(false)}
-          onAIResultReceived={handleAIResultReceived}
-        />
+          {/* Card 3: Budgets Remaining Progress */}
+          <Card
+            className="p-6 cursor-pointer hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 group border"
+            style={{ borderColor: colors.border.light, backgroundColor: colors.surface.primary }}
+            onClick={() => router.push(`/${locale}/budgets`)}
+          >
+            <div className="flex items-center justify-between mb-4 border-b pb-3" style={{ borderColor: colors.border.light }}>
+              <div className="flex items-center gap-2">
+                <MdPieChart className="w-5 h-5" style={{ color: colors.interactive.primary }} />
+                <Heading level={3} className="text-lg font-bold">{t('dashboard.budgetsRemaining')}</Heading>
+              </div>
+              <div className="flex items-center text-sm font-semibold opacity-80 group-hover:translate-x-1 transition-transform" style={{ color: colors.interactive.primary }}>
+                {t('dashboard.manageBudgets')} <MdChevronRight className="w-5 h-5" />
+              </div>
+            </div>
 
-        {/* Voice Record Modal */}
-        <VoiceRecordModal
-          isOpen={isVoiceModalOpen}
-          onClose={() => setIsVoiceModalOpen(false)}
-          onSuccess={() => setIsVoiceModalOpen(false)}
-          onAIResultReceived={handleAIResultReceived}
-        />
+            <div className="space-y-4">
+              {budgets.length > 0 ? (
+                budgets.slice(0, 3).map((budget: any) => {
+                  const percent = Math.min((budget.spent / budget.amountLimit) * 100, 100);
+                  const isOver = budget.spent > budget.amountLimit;
+                  const remaining = budget.amountLimit - budget.spent;
+
+                  return (
+                    <div key={budget.budgetId} className="space-y-1">
+                      <div className="flex justify-between text-xs font-semibold">
+                        <Text style={{ color: colors.text.primary }}>{t.has(`categories.${budget.category}`) ? t(`categories.${budget.category}`) : budget.category}</Text>
+                        <Text style={{ color: isOver ? '#EF4444' : colors.text.secondary }}>
+                          {isOver
+                            ? t('dashboard.overBy', { amount: formatVietnamsePrice(Math.abs(remaining)) })
+                            : t('dashboard.left', { amount: formatVietnamsePrice(remaining) })
+                          }
+                        </Text>
+                      </div>
+
+                      {/* Custom Progress Bar */}
+                      <div className="w-full h-2 rounded-full overflow-hidden" style={{ backgroundColor: `${colors.border.light}70` }}>
+                        <div
+                          className="h-full rounded-full transition-all duration-500"
+                          style={{
+                            width: `${percent}%`,
+                            backgroundColor: isOver ? '#EF4444' : percent > 80 ? '#F59E0B' : colors.interactive.primary
+                          }}
+                        />
+                      </div>
+                      <div className="flex justify-between text-[10px]" style={{ color: colors.text.secondary }}>
+                        <span>{t('dashboard.spent', { amount: formatVietnamsePrice(budget.spent) })}</span>
+                        <span>{t('dashboard.limit', { amount: formatVietnamsePrice(budget.amountLimit) })}</span>
+                      </div>
+                    </div>
+                  );
+                })
+              ) : (
+                <div className="text-center py-8">
+                  <Text style={{ color: colors.text.secondary }}>{t('dashboard.noBudgets')}</Text>
+                </div>
+              )}
+            </div>
+          </Card>
+
+          {/* Card 4: Active Projects Overview */}
+          <Card
+            className="p-6 cursor-pointer hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 group border"
+            style={{ borderColor: colors.border.light, backgroundColor: colors.surface.primary }}
+            onClick={() => router.push(`/${locale}/projects`)}
+          >
+            <div className="flex items-center justify-between mb-4 border-b pb-3" style={{ borderColor: colors.border.light }}>
+              <div className="flex items-center gap-2">
+                <MdFolderOpen className="w-5 h-5" style={{ color: colors.interactive.primary }} />
+                <Heading level={3} className="text-lg font-bold">{t('dashboard.projectsOverview')}</Heading>
+              </div>
+              <div className="flex items-center text-sm font-semibold opacity-80 group-hover:translate-x-1 transition-transform" style={{ color: colors.interactive.primary }}>
+                {t('dashboard.viewProjects')} <MdChevronRight className="w-5 h-5" />
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              {projects.length > 0 ? (
+                projects.slice(0, 3).map((project: any) => {
+                  const currentSaved = project.currentAmount || 0;
+                  const target = project.targetAmount || 1;
+                  const percent = Math.min((currentSaved / target) * 100, 100);
+
+                  return (
+                    <div key={project.projectId} className="space-y-1">
+                      <div className="flex justify-between text-xs font-semibold">
+                        <Text style={{ color: colors.text.primary }}>{project.name}</Text>
+                        <Text style={{ color: colors.text.secondary }}>{t('dashboard.saved', { percent: percent.toFixed(0) })}</Text>
+                      </div>
+
+                      {/* Custom Progress Bar */}
+                      <div className="w-full h-2 rounded-full overflow-hidden" style={{ backgroundColor: `${colors.border.light}70` }}>
+                        <div
+                          className="h-full rounded-full transition-all duration-500"
+                          style={{
+                            width: `${percent}%`,
+                            backgroundColor: '#10B981'
+                          }}
+                        />
+                      </div>
+                      <div className="flex justify-between text-[10px]" style={{ color: colors.text.secondary }}>
+                        <span>{t('dashboard.savedLabel', { amount: formatVietnamsePrice(currentSaved) })}</span>
+                        <span>{t('dashboard.targetLabel', { amount: formatVietnamsePrice(target) })}</span>
+                      </div>
+                    </div>
+                  );
+                })
+              ) : (
+                <div className="text-center py-8">
+                  <Text style={{ color: colors.text.secondary }}>{t('dashboard.noProjects')}</Text>
+                </div>
+              )}
+            </div>
+          </Card>
+
+        </div>
       </div>
     </SidebarLayout>
   );

@@ -4,8 +4,9 @@ import React from 'react';
 import { Text, Button } from '@/components/atoms';
 import { useTheme } from '@/context/ThemeContext';
 import { ProjectListItem, ProjectStatus, ProjectPriority } from '@/types/project.api';
-import { formatVietnamsePrice, formatNumber } from '@/lib/format';
+import { formatVietnamsePrice } from '@/lib/format';
 import { MdEdit, MdDelete, MdCheckCircle } from 'react-icons/md';
+import { useTranslations } from 'next-intl';
 
 interface ProjectCardProps {
   project: ProjectListItem;
@@ -24,15 +25,6 @@ const getStatusColor = (status: ProjectStatus): string => {
   return colors[status] || '#6B7280';
 };
 
-const getStatusLabel = (status: ProjectStatus): string => {
-  const labels: { [key in ProjectStatus]: string } = {
-    ACTIVE: 'Active',
-    COMPLETED: 'Completed',
-    CANCELLED: 'Cancelled',
-  };
-  return labels[status] || status;
-};
-
 const getPriorityColor = (priority: ProjectPriority): string => {
   const colors: { [key in ProjectPriority]: string } = {
     LOW: '#3B82F6', // Blue
@@ -40,15 +32,6 @@ const getPriorityColor = (priority: ProjectPriority): string => {
     HIGH: '#EF4444', // Red
   };
   return colors[priority] || '#6B7280';
-};
-
-const getPriorityLabel = (priority: ProjectPriority): string => {
-  const labels: { [key in ProjectPriority]: string } = {
-    LOW: 'Low',
-    MEDIUM: 'Medium',
-    HIGH: 'High',
-  };
-  return labels[priority] || priority;
 };
 
 export const ProjectCard: React.FC<ProjectCardProps> = ({
@@ -59,6 +42,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
   onViewDetails,
 }) => {
   const { colors } = useTheme();
+  const t = useTranslations();
 
   const progressPercent = Math.min(project.progressPercent, 100);
   const statusColor = getStatusColor(project.status);
@@ -76,17 +60,17 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
       {/* Header with Title and Status */}
       <div className="flex items-start justify-between mb-3">
         <div className="flex-1">
-          <Text 
-            className="font-semibold text-base mb-1" 
+          <Text
+            className="font-semibold text-base mb-1"
             style={{ color: colors.text.primary }}
           >
             {project.name}
           </Text>
-          <Text 
-            className="text-xs" 
+          <Text
+            className="text-xs"
             style={{ color: colors.text.tertiary }}
           >
-            {project.type === 'PERSONAL' ? '👤 Personal' : '👥 Group'} • {project.currency}
+            {project.type === 'PERSONAL' ? t('projects.personal') : t('projects.group')} • {project.currency}
           </Text>
         </div>
         <div className="flex items-center gap-2">
@@ -94,13 +78,13 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
             className="px-2 py-1 rounded-full text-xs font-medium"
             style={{ backgroundColor: statusColor + '20', color: statusColor }}
           >
-            {getStatusLabel(project.status)}
+            {t(`projects.status.${project.status}`)}
           </div>
           <div
             className="px-2 py-1 rounded-full text-xs font-medium"
             style={{ backgroundColor: priorityColor + '20', color: priorityColor }}
           >
-            {getPriorityLabel(project.priority)}
+            {t(`projects.priority.${project.priority}`)}
           </div>
         </div>
       </div>
@@ -109,7 +93,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
       <div className="mb-3 pb-3 border-b" style={{ borderColor: colors.border.light }}>
         <div className="flex justify-between items-baseline mb-1">
           <Text className="text-sm" style={{ color: colors.text.secondary }}>
-            Target / Contributed
+            {t('projects.targetContributed')}
           </Text>
           <Text className="font-semibold text-sm" style={{ color: colors.text.primary }}>
             {formatVietnamsePrice(project.totalContributed)} / {formatVietnamsePrice(project.targetAmount)}
@@ -133,10 +117,10 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
         {/* Progress Info */}
         <div className="flex justify-between items-center mt-1">
           <Text className="text-xs" style={{ color: colors.text.tertiary }}>
-            {progressPercent.toFixed(1)}% reached
+            {t('projects.reached', { percent: progressPercent.toFixed(1) })}
           </Text>
           <Text className="text-xs font-medium" style={{ color: colors.text.primary }}>
-            {formatVietnamsePrice(project.targetAmount - project.totalContributed)} remaining
+            {t('projects.remaining', { amount: formatVietnamsePrice(project.targetAmount - project.totalContributed) })}
           </Text>
         </div>
       </div>
@@ -145,15 +129,15 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
       {project.deadline && (
         <div className="mb-3 flex items-center justify-between">
           <Text className="text-xs" style={{ color: colors.text.tertiary }}>
-            Deadline
+            {t('projects.deadline')}
           </Text>
-          <Text 
+          <Text
             className="text-xs font-medium"
-            style={{ 
+            style={{
               color: daysLeft < 7 ? '#EF4444' : daysLeft < 30 ? '#F59E0B' : colors.text.primary
             }}
           >
-            {daysLeft > 0 ? `${daysLeft} days left` : daysLeft === 0 ? 'Today' : 'Expired'}
+            {daysLeft > 0 ? t('projects.daysLeft', { days: daysLeft }) : daysLeft === 0 ? t('projects.today') : t('projects.expired')}
           </Text>
         </div>
       )}
@@ -175,7 +159,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
               e.currentTarget.style.backgroundColor = colors.background.primary + '20';
             }}
           >
-            <MdCheckCircle size={16} /> View
+            <MdCheckCircle size={16} /> {t('projects.viewBtn')}
           </button>
         )}
         {onContribute && project.status === 'ACTIVE' && (
@@ -193,7 +177,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
               e.currentTarget.style.opacity = '1';
             }}
           >
-            Contribute
+            {t('projects.contributeBtn')}
           </button>
         )}
         <button
@@ -209,7 +193,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
           onMouseLeave={e => {
             e.currentTarget.style.backgroundColor = colors.background.primary + '15';
           }}
-          title="Edit"
+          title={t('common.edit')}
         >
           <MdEdit size={18} />
         </button>
@@ -226,7 +210,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
           onMouseLeave={e => {
             e.currentTarget.style.backgroundColor = '#EF4444' + '15';
           }}
-          title="Delete"
+          title={t('common.delete')}
         >
           <MdDelete size={18} />
         </button>

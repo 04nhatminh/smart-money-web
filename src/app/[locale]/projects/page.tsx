@@ -2,14 +2,14 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { useAuth } from '@/context/AuthContext';
 import { SidebarLayout } from '@/components/templates';
 import { Heading, Text, Button } from '@/components/atoms';
-import { 
-  ProjectCard, 
-  CreateProjectModal, 
-  EditProjectModal, 
+import {
+  ProjectCard,
+  CreateProjectModal,
+  EditProjectModal,
   AddContributionModal,
   DeleteConfirmationModal,
   UserIncomeModal,
@@ -22,6 +22,7 @@ import { MdAdd, MdFilterList } from 'react-icons/md';
 export default function ProjectsPage() {
   const router = useRouter();
   const locale = useLocale();
+  const t = useTranslations();
   const { isAuthenticated, isInitializing } = useAuth();
   const { colors } = useTheme();
   const { listProjects, getProject, deleteProject, isLoading } = useProjects();
@@ -61,10 +62,10 @@ export default function ProjectsPage() {
         const projectList = result.data.items || result.data.content || result.data || [];
         setProjects(projectList);
       } else {
-        setError(result.error || 'Failed to load projects');
+        setError(result.error || t('projects.loadFailed'));
       }
     } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : 'Failed to load projects';
+      const errorMsg = err instanceof Error ? err.message : t('projects.loadFailed');
       setError(errorMsg);
     }
   };
@@ -77,10 +78,10 @@ export default function ProjectsPage() {
         setSelectedProject(result.data);
         setIsEditModalOpen(true);
       } else {
-        setError('Failed to load project details');
+        setError(t('projects.loadDetailsFailed'));
       }
     } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : 'Failed to load project';
+      const errorMsg = err instanceof Error ? err.message : t('projects.loadSingleFailed');
       setError(errorMsg);
     }
   };
@@ -98,10 +99,10 @@ export default function ProjectsPage() {
         // Navigate to project details page
         router.push(`/${locale}/projects/${projectId}`);
       } else {
-        setError('Failed to load project details');
+        setError(t('projects.loadDetailsFailed'));
       }
     } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : 'Failed to load project';
+      const errorMsg = err instanceof Error ? err.message : t('projects.loadSingleFailed');
       setError(errorMsg);
     }
   };
@@ -123,10 +124,10 @@ export default function ProjectsPage() {
         setIsDeleteModalOpen(false);
         setProjectToDelete(null);
       } else {
-        setError(result.error || 'Failed to delete project');
+        setError(result.error || t('projects.deleteFailed'));
       }
     } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : 'Failed to delete project';
+      const errorMsg = err instanceof Error ? err.message : t('projects.deleteFailed');
       setError(errorMsg);
     }
   };
@@ -137,8 +138,8 @@ export default function ProjectsPage() {
   };
 
   // Filter projects based on status
-  const filteredProjects = filterStatus === 'ALL' 
-    ? projects 
+  const filteredProjects = filterStatus === 'ALL'
+    ? projects
     : projects.filter(p => p.status === filterStatus);
 
   const getProjectStats = () => {
@@ -154,7 +155,7 @@ export default function ProjectsPage() {
 
   // Helper functions for project limits
   const canCreateProject = () => projects.length < 3;
-  
+
   const getPrioritiesUsed = () => {
     const used = new Set<string>();
     projects.forEach(p => used.add(p.priority));
@@ -170,7 +171,7 @@ export default function ProjectsPage() {
     return (
       <SidebarLayout>
         <div className="flex items-center justify-center min-h-screen">
-          <Text>Loading...</Text>
+          <Text>{t('common.loading')}</Text>
         </div>
       </SidebarLayout>
     );
@@ -182,11 +183,11 @@ export default function ProjectsPage() {
         {/* Header */}
         <div className="flex items-center justify-between flex-wrap gap-4">
           <div>
-            <Heading level={1} style={{ color: colors.text.primary }}>
-              Projects
+            <Heading level={2}>
+              {t('projects.title')}
             </Heading>
             <Text style={{ color: colors.text.secondary }} className="mt-1">
-              Manage your saving projects (Max 3, one per priority)
+              {t('projects.subtitle')}
             </Text>
           </div>
           <div className="flex items-center gap-3">
@@ -198,17 +199,17 @@ export default function ProjectsPage() {
                   color: '#F59E0B',
                 }}
               >
-                You've reached the limit of 3 projects
+                {t('projects.maxLimitReached')}
               </div>
             )}
-            <Button 
+            <Button
               variant="primary"
               onClick={() => setIsCreateModalOpen(true)}
               className="flex items-center gap-2"
               disabled={!canCreateProject()}
             >
               <MdAdd size={20} />
-              New Project
+              {t('projects.newProject')}
             </Button>
           </div>
         </div>
@@ -216,10 +217,10 @@ export default function ProjectsPage() {
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
-            { label: 'Total', value: stats.total, color: colors.interactive.primary },
-            { label: 'Active', value: stats.active, color: '#10B981' },
-            { label: 'Completed', value: stats.completed, color: '#6B7280' },
-            { label: 'Cancelled', value: stats.cancelled, color: '#EF4444' },
+            { label: t('projects.stats.total'), value: stats.total, color: colors.interactive.primary },
+            { label: t('projects.stats.active'), value: stats.active, color: '#10B981' },
+            { label: t('projects.stats.completed'), value: stats.completed, color: '#6B7280' },
+            { label: t('projects.stats.cancelled'), value: stats.cancelled, color: '#EF4444' },
           ].map((stat, idx) => (
             <div
               key={idx}
@@ -232,8 +233,8 @@ export default function ProjectsPage() {
               <Text className="text-sm" style={{ color: colors.text.secondary }}>
                 {stat.label}
               </Text>
-              <Heading 
-                level={2} 
+              <Heading
+                level={2}
                 className="mt-1"
                 style={{ color: stat.color }}
               >
@@ -267,7 +268,7 @@ export default function ProjectsPage() {
             }}
           >
             <MdFilterList size={16} />
-            All
+            {t('projects.filter.all')}
           </button>
           <button
             onClick={() => setFilterStatus('ACTIVE')}
@@ -277,7 +278,7 @@ export default function ProjectsPage() {
               color: filterStatus === 'ACTIVE' ? 'white' : colors.text.primary,
             }}
           >
-            Active
+            {t('projects.filter.active')}
           </button>
           <button
             onClick={() => setFilterStatus('COMPLETED')}
@@ -287,7 +288,7 @@ export default function ProjectsPage() {
               color: filterStatus === 'COMPLETED' ? 'white' : colors.text.primary,
             }}
           >
-            Completed
+            {t('projects.filter.completed')}
           </button>
           <button
             onClick={() => setFilterStatus('CANCELLED')}
@@ -297,7 +298,7 @@ export default function ProjectsPage() {
               color: filterStatus === 'CANCELLED' ? 'white' : colors.text.primary,
             }}
           >
-            Cancelled
+            {t('projects.filter.cancelled')}
           </button>
         </div>
 
@@ -311,17 +312,17 @@ export default function ProjectsPage() {
             }}
           >
             <Heading level={3} style={{ color: colors.text.secondary }} className="mb-2">
-              No projects found
+              {t('projects.noProjects')}
             </Heading>
             <Text style={{ color: colors.text.tertiary }} className="mb-4">
-              {projects.length === 0 ? "Create your first project to get started" : "No projects match the selected filter"}
+              {projects.length === 0 ? t('projects.createFirst') : t('projects.noProjectsMatch')}
             </Text>
             {projects.length === 0 && (
-              <Button 
+              <Button
                 variant="primary"
                 onClick={() => setIsCreateModalOpen(true)}
               >
-                Create First Project
+                {t('projects.createFirstBtn')}
               </Button>
             )}
           </div>
@@ -389,8 +390,8 @@ export default function ProjectsPage() {
 
         <DeleteConfirmationModal
           isOpen={isDeleteModalOpen}
-          title="Delete Project"
-          message="Are you sure you want to delete this project? This action cannot be undone."
+          title={t('projects.deleteProjectTitle')}
+          message={t('projects.deleteProjectConfirm')}
           onConfirm={handleDeleteConfirm}
           onCancel={handleDeleteCancel}
           isLoading={isLoading}

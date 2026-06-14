@@ -15,32 +15,32 @@ export default function About() {
             {t('common.about')}
           </Heading>
           <Text className="text-gray-600 text-lg">
-            This is a modern Next.js application built with Atomic Design principles, featuring a well-structured component hierarchy and clean code organization.
+            {t('aboutPage.subtitle')}
           </Text>
         </section>
 
         <section>
           <Heading level={2} className="mb-4">
-            Architecture
+            {t('aboutPage.architecture')}
           </Heading>
           <Text className="mb-4">
-            Our application follows the Atomic Design methodology, which organizes components into five levels:
+            {t('aboutPage.description')}
           </Text>
           <ul className="space-y-3 ml-4">
             <li className="list-disc list-inside">
-              <strong>Atoms:</strong> Basic building blocks like buttons, inputs, and text
+              {t('aboutPage.atoms')}
             </li>
             <li className="list-disc list-inside">
-              <strong>Molecules:</strong> Simple component combinations
+              {t('aboutPage.molecules')}
             </li>
             <li className="list-disc list-inside">
-              <strong>Organisms:</strong> Complex component combinations
+              {t('aboutPage.organisms')}
             </li>
             <li className="list-disc list-inside">
-              <strong>Templates:</strong> Page-level layouts
+              {t('aboutPage.templates')}
             </li>
             <li className="list-disc list-inside">
-              <strong>Pages:</strong> Full-featured views
+              {t('aboutPage.pages')}
             </li>
           </ul>
         </section>

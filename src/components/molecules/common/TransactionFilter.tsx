@@ -5,6 +5,7 @@ import { useTheme } from '@/context/ThemeContext';
 import { Text } from '@/components/atoms';
 import { MdClose, MdFilterList, MdSearch } from 'react-icons/md';
 import { formatAmountInput, parseFormattedNumber } from '@/lib/format';
+import { useTranslations } from 'next-intl';
 
 export interface TransactionFilterState {
   type?: 'INCOME' | 'EXPENSE';
@@ -38,6 +39,7 @@ export const TransactionFilter: React.FC<TransactionFilterProps> = ({
   initialFilters = {},
 }) => {
   const { colors } = useTheme();
+  const t = useTranslations();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [search, setSearch] = useState<string>(initialFilters.search || '');
   const [modalFilters, setModalFilters] = useState<Omit<TransactionFilterState, 'search'>>(
@@ -67,7 +69,7 @@ export const TransactionFilter: React.FC<TransactionFilterProps> = ({
     endDateTime.setHours(endHour, endMin, 0);
 
     if (endDateTime < startDateTime) {
-      setDateError('End date/time must be after start date/time');
+      setDateError(t('transactions.dateError'));
       return false;
     }
 
@@ -116,14 +118,14 @@ export const TransactionFilter: React.FC<TransactionFilterProps> = ({
 
     // Combine date and time with format: dd/MM/yyyy HH:mm
     const filtersToApply = { ...modalFilters, search };
-    
+
     if (modalFilters.startDate) {
       filtersToApply.startDate = `${modalFilters.startDate} ${startTime}`;
     }
     if (modalFilters.endDate) {
       filtersToApply.endDate = `${modalFilters.endDate} ${endTime}`;
     }
-    
+
     onFilterChange(filtersToApply);
     setIsModalOpen(false);
   };
@@ -157,7 +159,7 @@ export const TransactionFilter: React.FC<TransactionFilterProps> = ({
             <MdSearch className="w-5 h-5 mr-2" style={{ color: colors.text.secondary }} />
             <input
               type="text"
-              placeholder="Search description..."
+              placeholder={t('transactions.searchPlaceholder')}
               value={search}
               onChange={(e) => handleSearchChange(e.target.value)}
               className="flex-1 bg-transparent outline-none text-sm"
@@ -177,7 +179,7 @@ export const TransactionFilter: React.FC<TransactionFilterProps> = ({
           }}
         >
           <MdFilterList className="w-5 h-5" />
-          Filter
+          {t('transactions.filterBtn')}
           {hasActiveFilters && (
             <span className="ml-1 px-2 py-0.5 text-xs rounded-full font-semibold" style={{
               backgroundColor: 'rgba(0, 0, 0, 0.3)',
@@ -196,16 +198,16 @@ export const TransactionFilter: React.FC<TransactionFilterProps> = ({
           <div
             className="fixed inset-0 transition-opacity"
             style={{
-            backgroundColor: 'rgba(0, 0, 0, 0.3)',
-            pointerEvents: 'auto',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%',
-            zIndex: 999,
+              backgroundColor: 'rgba(0, 0, 0, 0.3)',
+              pointerEvents: 'auto',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              zIndex: 999,
             }}
             onClick={() => setIsModalOpen(false)}
-        />
+          />
 
           {/* Modal */}
           <div
@@ -218,7 +220,7 @@ export const TransactionFilter: React.FC<TransactionFilterProps> = ({
               style={{ borderColor: colors.border.light }}
             >
               <h2 className="text-lg font-semibold" style={{ color: colors.text.primary }}>
-                Filters
+                {t('transactions.filterModalTitle')}
               </h2>
               <button
                 onClick={() => {
@@ -237,13 +239,13 @@ export const TransactionFilter: React.FC<TransactionFilterProps> = ({
               {/* Transaction Type */}
               <div>
                 <label className="block text-sm font-semibold mb-3" style={{ color: colors.text.primary }}>
-                  Transaction Type
+                  {t('transactions.typeLabel')}
                 </label>
                 <div className="flex gap-2">
                   {[
-                    { value: undefined, label: 'All' },
-                    { value: 'INCOME', label: 'Income' },
-                    { value: 'EXPENSE', label: 'Expense' },
+                    { value: undefined, label: t('transactions.typeAll') },
+                    { value: 'INCOME', label: t('transactions.typeIncome') },
+                    { value: 'EXPENSE', label: t('transactions.typeExpense') },
                   ].map((option) => (
                     <button
                       key={option.value || 'all'}
@@ -258,11 +260,10 @@ export const TransactionFilter: React.FC<TransactionFilterProps> = ({
                           modalFilters.type === option.value
                             ? 'white'
                             : colors.text.primary,
-                        border: `1px solid ${
-                          modalFilters.type === option.value
+                        border: `1px solid ${modalFilters.type === option.value
                             ? colors.interactive.primary
                             : colors.border.light
-                        }`,
+                          }`,
                       }}
                     >
                       {option.label}
@@ -274,7 +275,7 @@ export const TransactionFilter: React.FC<TransactionFilterProps> = ({
               {/* Category */}
               <div>
                 <label className="block text-sm font-semibold mb-3" style={{ color: colors.text.primary }}>
-                  Category
+                  {t('transactions.categoryLabel')}
                 </label>
                 <select
                   value={modalFilters.category || ''}
@@ -286,10 +287,10 @@ export const TransactionFilter: React.FC<TransactionFilterProps> = ({
                     color: colors.text.primary,
                   }}
                 >
-                  <option value="">All Categories</option>
+                  <option value="">{t('transactions.allCategories')}</option>
                   {EXPENSE_CATEGORIES.map((cat) => (
                     <option key={cat} value={cat}>
-                      {cat.charAt(0).toUpperCase() + cat.slice(1).toLowerCase()}
+                      {t(`categories.${cat}`)}
                     </option>
                   ))}
                 </select>
@@ -298,12 +299,12 @@ export const TransactionFilter: React.FC<TransactionFilterProps> = ({
               {/* Amount Range */}
               <div>
                 <label className="block text-sm font-semibold mb-3" style={{ color: colors.text.primary }}>
-                  Amount Range
+                  {t('transactions.amountRange')}
                 </label>
                 <div className="space-y-2">
                   <div>
                     <label className="block text-xs mb-1" style={{ color: colors.text.secondary }}>
-                      Minimum Amount
+                      {t('transactions.minAmount')}
                     </label>
                     <input
                       type="text"
@@ -320,7 +321,7 @@ export const TransactionFilter: React.FC<TransactionFilterProps> = ({
                   </div>
                   <div>
                     <label className="block text-xs mb-1" style={{ color: colors.text.secondary }}>
-                      Maximum Amount
+                      {t('transactions.maxAmount')}
                     </label>
                     <input
                       type="text"
@@ -341,12 +342,12 @@ export const TransactionFilter: React.FC<TransactionFilterProps> = ({
               {/* Date Range */}
               <div>
                 <label className="block text-sm font-semibold mb-3" style={{ color: colors.text.primary }}>
-                  Date Range
+                  {t('transactions.dateRange')}
                 </label>
                 <div className="space-y-2">
                   <div>
                     <label className="block text-xs mb-1" style={{ color: colors.text.secondary }}>
-                      From Date & Time
+                      {t('transactions.fromDate')}
                     </label>
                     <div className="flex gap-2">
                       <input
@@ -390,7 +391,7 @@ export const TransactionFilter: React.FC<TransactionFilterProps> = ({
                   </div>
                   <div>
                     <label className="block text-xs mb-1" style={{ color: colors.text.secondary }}>
-                      To Date & Time
+                      {t('transactions.toDate')}
                     </label>
                     <div className="flex gap-2">
                       <input
@@ -465,7 +466,7 @@ export const TransactionFilter: React.FC<TransactionFilterProps> = ({
                   border: `1px solid ${colors.border.light}`,
                 }}
               >
-                Clear All
+                {t('transactions.clearAll')}
               </button>
               <button
                 onClick={handleApplyFilters}
@@ -473,7 +474,7 @@ export const TransactionFilter: React.FC<TransactionFilterProps> = ({
                 className="flex-1 px-4 py-2.5 rounded-lg font-medium text-white transition-all text-sm hover:opacity-90 hover:cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 style={{ backgroundColor: colors.interactive.primary }}
               >
-                Apply Filters
+                {t('transactions.applyFilters')}
               </button>
             </div>
           </div>

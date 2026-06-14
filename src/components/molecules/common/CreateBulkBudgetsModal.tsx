@@ -220,7 +220,7 @@ export const CreateBulkBudgetsModal: React.FC<CreateBulkBudgetsModalProps> = ({
         >
           {/* Header */}
           <div className="flex items-center justify-between p-6 border-b sticky top-0" style={{ borderColor: colors.border.light, backgroundColor: colors.background.primary }}>
-            <Heading level={3} className="m-0" style={{ color: colors.text.primary }}>
+            <Heading level={3} className="m-0">
               Create Multiple Budgets
             </Heading>
             <button

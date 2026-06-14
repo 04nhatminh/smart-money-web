@@ -39,7 +39,7 @@ export const TransactionMethodModal: React.FC<TransactionMethodModalProps> = ({
       >
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
-          <Heading level={2} style={{ color: colors.text.primary }}>
+          <Heading level={3}>
             Add Transaction
           </Heading>
           <button

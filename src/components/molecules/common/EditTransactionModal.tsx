@@ -208,7 +208,7 @@ export const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
       const result = await updateTransaction(transactionId, {
         amount: parseFormattedNumber(formData.amount),
         type: formData.type,
-        category: formData.category, // Always send category (API requires it)
+        category: formData.category || undefined, // Always send category (API requires it)
         description: formData.description || undefined,
         date: formData.date,
       });

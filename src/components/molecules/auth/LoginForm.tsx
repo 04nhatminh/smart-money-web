@@ -75,7 +75,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
     }
 
     const FB = (window as any).FB;
-    
+
     if (!FB) {
       setError('Facebook SDK not loaded yet. Please try again or refresh the page.');
       console.error('FB object is undefined');
@@ -93,7 +93,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
       FB.login(
         (response: any) => {
           console.log('FB.login callback received:', response);
-          
+
           if (!response) {
             setError('No response from Facebook');
             return;
@@ -132,7 +132,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
     script.src = 'https://accounts.google.com/gsi/client';
     script.async = true;
     script.defer = true;
-    
+
     script.onload = () => {
       if ((window as any).google) {
         (window as any).google.accounts.id.initialize({
@@ -142,7 +142,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
         console.log('Google Sign-In initialized');
       }
     };
-    
+
     document.body.appendChild(script);
 
     // Initialize Facebook SDK - Set fbAsyncInit BEFORE loading script
@@ -231,9 +231,9 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
     <form onSubmit={handleSubmit} className="space-y-6 w-full max-w-md">
       {/* Logo and Website Name - Clickable */}
       <div className="flex items-center justify-center mb-8 cursor-pointer group" onClick={handleLogoClick}>
-        <img 
-          src="/logo-nobg.png" 
-          alt="SmartMoney" 
+        <img
+          src="/logo-nobg.png"
+          alt="SmartMoney"
           className="h-12 w-12 object-contain mr-3 group-opacity-80 transition-opacity flex-shrink-0"
           style={{ filter: colorScheme === 'dark' ? 'brightness(0) invert(1)' : 'none' }}
         />
@@ -254,7 +254,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
           {error}
         </div>
       )}
-      
+
       <Input
         type="email"
         label="Email Address"
@@ -264,7 +264,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
         required
         disabled={isLoading || socialLoading}
       />
-      
+
       <div className="relative">
         <Input
           type={showPassword ? 'text' : 'password'}
@@ -290,7 +290,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
           )}
         </button>
       </div>
-      
+
       <div className="flex items-center justify-between pt-2">
         <div className="flex items-center gap-2">
           <input
@@ -314,10 +314,10 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
         </Link>
       </div>
 
-      <Button 
-        variant="primary" 
-        type="submit" 
-        className="w-full py-3 mt-6 text-lg font-semibold" 
+      <Button
+        variant="primary"
+        type="submit"
+        className="w-full py-3 mt-6 text-lg font-semibold"
         disabled={isLoading || socialLoading}
       >
         {isLoading ? 'Signing in...' : 'Sign In'}
@@ -343,7 +343,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
           onClick={() => {
             try {
               if (typeof window !== 'undefined' && (window as any).google) {
-                (window as any).google.accounts.id.prompt(handleGoogleLogin);
+                (window as any).google.accounts.id.prompt();
                 console.log('Google prompt opened');
               } else {
                 console.error('Google not loaded');
@@ -377,8 +377,8 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
 
       <p className="text-center text-sm" style={{ color: colors.text.secondary }}>
         Don't have an account?{' '}
-        <Link 
-          href={`/${locale}/register`} 
+        <Link
+          href={`/${locale}/register`}
           className="font-semibold hover:opacity-80 transition-opacity"
           style={{ color: colors.interactive.primary }}
         >

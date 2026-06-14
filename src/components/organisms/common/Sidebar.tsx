@@ -2,11 +2,11 @@
 
 import React, { useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
 import { LogoutButton } from '@/components/molecules/auth';
-import { MdDashboard, MdTrendingUp, MdPersonOutline, MdAccountBalanceWallet, MdPieChart, MdFolderOpen } from 'react-icons/md';
+import { MdDashboard, MdPersonOutline, MdPieChart, MdFolderOpen, MdInsights, MdSwapHoriz } from 'react-icons/md';
 
 interface NavItem {
   id: string;
@@ -19,6 +19,7 @@ export const Sidebar: React.FC = () => {
   const router = useRouter();
   const pathname = usePathname();
   const locale = useLocale();
+  const t = useTranslations();
   const { user } = useAuth();
   const { colors } = useTheme();
   const [hoveredId, setHoveredId] = useState<string | null>(null);
@@ -26,37 +27,37 @@ export const Sidebar: React.FC = () => {
   const navItems: NavItem[] = [
     {
       id: 'dashboard',
-      label: 'Dashboard',
+      label: t('sidebar.dashboard'),
       href: `/${locale}/dashboard`,
       icon: <MdDashboard className="w-5 h-5" />,
     },
     {
+      id: 'transactions',
+      label: t('sidebar.transactions'),
+      href: `/${locale}/transactions`,
+      icon: <MdSwapHoriz className="w-5 h-5" />,
+    },
+    {
       id: 'budgets',
-      label: 'Budgets',
+      label: t('sidebar.budgets'),
       href: `/${locale}/budgets`,
       icon: <MdPieChart className="w-5 h-5" />,
     },
     {
-      id: 'goals',
-      label: 'Saving Goals',
-      href: `/${locale}/goals`,
-      icon: <MdTrendingUp className="w-5 h-5" />,
-    },
-    {
-      id: 'spending',
-      label: 'Spending Plan',
-      href: `/${locale}/spending`,
-      icon: <MdAccountBalanceWallet className="w-5 h-5" />,
+      id: 'analysis',
+      label: t('sidebar.analysis'),
+      href: `/${locale}/analysis`,
+      icon: <MdInsights className="w-5 h-5" />,
     },
     {
       id: 'projects',
-      label: 'Projects',
+      label: t('sidebar.projects'),
       href: `/${locale}/projects`,
       icon: <MdFolderOpen className="w-5 h-5" />,
     },
     {
       id: 'profile',
-      label: 'Profile',
+      label: t('sidebar.profile'),
       href: `/${locale}/profile`,
       icon: <MdPersonOutline className="w-5 h-5" />,
     },
@@ -81,11 +82,11 @@ export const Sidebar: React.FC = () => {
               onMouseLeave={() => setHoveredId(null)}
               className="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 hover:cursor-pointer hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2"
               style={{
-                backgroundColor: active 
-                  ? colors.interactive.primary 
-                  : isHovered 
-                  ? `${colors.interactive.primary}20`
-                  : 'transparent',
+                backgroundColor: active
+                  ? colors.interactive.primary
+                  : isHovered
+                    ? `${colors.interactive.primary}20`
+                    : 'transparent',
                 color: active ? colors.text.inverse : colors.text.primary,
               }}
             >
