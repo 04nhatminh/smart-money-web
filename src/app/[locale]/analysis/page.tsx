@@ -17,6 +17,7 @@ import {
 import {
   MdTrendingUp, MdTrendingDown, MdAccountBalanceWallet, MdSavings,
   MdRefresh, MdAnalytics, MdTableChart, MdBarChart,
+  MdChevronLeft, MdChevronRight,
 } from 'react-icons/md';
 
 // ────────────────────────────────────────────────────────
@@ -157,6 +158,32 @@ export default function AnalysisPage() {
     }
   };
 
+  const handlePrevMonth = () => {
+    if (selectedMonth === 1) {
+      setSelectedMonth(12);
+      setSelectedYear((y) => y - 1);
+    } else {
+      setSelectedMonth((m) => m - 1);
+    }
+  };
+
+  const handleNextMonth = () => {
+    if (selectedMonth === 12) {
+      setSelectedMonth(1);
+      setSelectedYear((y) => y + 1);
+    } else {
+      setSelectedMonth((m) => m + 1);
+    }
+  };
+
+  const getFormattedDateLabel = () => {
+    if (locale === 'vi') {
+      return `Tháng ${selectedMonth} ${selectedYear}`;
+    }
+    const monthName = new Date(selectedYear, selectedMonth - 1).toLocaleString(locale, { month: 'long' });
+    return `${monthName} ${selectedYear}`;
+  };
+
   // ──── Derived metrics ────
   const kpis = useMemo(() => {
     if (!analyticsData) return null;
@@ -220,57 +247,46 @@ export default function AnalysisPage() {
             </Text>
           </div>
 
-          {/* Filter Controls (Month & Year) */}
+          {/* Filter Controls (Month & Year via Left/Right Arrows) */}
           <div className="flex items-center gap-3 flex-wrap">
-            <Text variant="caption" style={{ color: colors.text.secondary }} className="font-semibold">
-              {t('analysis.month')}
-            </Text>
-            <select
-              id="month-selector"
-              value={selectedMonth}
-              onChange={(e) => setSelectedMonth(Number(e.target.value))}
+            <div
+              className="flex items-center gap-4 px-3 py-1.5 rounded-xl border transition-all"
               style={{
                 backgroundColor: colors.background.secondary,
-                color: colors.text.primary,
-                border: `1px solid ${colors.border.medium}`,
-                borderRadius: '0.5rem',
-                padding: '0.5rem 1rem',
-                fontSize: '0.95rem',
-                fontWeight: 600,
-                cursor: 'pointer',
-                outline: 'none',
+                borderColor: colors.border.medium,
               }}
             >
-              {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
-                <option key={m} value={m}>
-                  {new Date(2024, m - 1).toLocaleString(locale, { month: 'short' })}
-                </option>
-              ))}
-            </select>
+              <button
+                id="prev-month-btn"
+                onClick={handlePrevMonth}
+                className="w-8 h-8 rounded-lg flex items-center justify-center transition hover:opacity-80 active:scale-95 hover:cursor-pointer"
+                style={{
+                  color: colors.interactive.primary,
+                  backgroundColor: `${colors.interactive.primary}10`,
+                }}
+                title={locale === 'vi' ? 'Tháng trước' : 'Previous month'}
+              >
+                <MdChevronLeft className="w-5 h-5" />
+              </button>
 
-            <Text variant="caption" style={{ color: colors.text.secondary }} className="font-semibold ml-2">
-              {t('analysis.year')}
-            </Text>
-            <select
-              id="year-selector"
-              value={selectedYear}
-              onChange={(e) => setSelectedYear(Number(e.target.value))}
-              style={{
-                backgroundColor: colors.background.secondary,
-                color: colors.text.primary,
-                border: `1px solid ${colors.border.medium}`,
-                borderRadius: '0.5rem',
-                padding: '0.5rem 1rem',
-                fontSize: '0.95rem',
-                fontWeight: 600,
-                cursor: 'pointer',
-                outline: 'none',
-              }}
-            >
-              {YEAR_OPTIONS.map((y) => (
-                <option key={y} value={y}>{y}</option>
-              ))}
-            </select>
+              <span className="text-base font-bold min-w-[120px] text-center select-none" style={{ color: colors.text.primary }}>
+                {getFormattedDateLabel()}
+              </span>
+
+              <button
+                id="next-month-btn"
+                onClick={handleNextMonth}
+                className="w-8 h-8 rounded-lg flex items-center justify-center transition hover:opacity-80 active:scale-95 hover:cursor-pointer"
+                style={{
+                  color: colors.interactive.primary,
+                  backgroundColor: `${colors.interactive.primary}10`,
+                }}
+                title={locale === 'vi' ? 'Tháng sau' : 'Next month'}
+              >
+                <MdChevronRight className="w-5 h-5" />
+              </button>
+            </div>
+
             <button
               id="refresh-analytics-btn"
               onClick={loadAnalytics}
