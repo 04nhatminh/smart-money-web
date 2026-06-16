@@ -6,11 +6,11 @@ import { useLocale, useTranslations } from 'next-intl';
 import { useAuth } from '@/context/AuthContext';
 import { SidebarLayout } from '@/components/templates';
 import { Heading, Text, Button } from '@/components/atoms';
-import { Card, StatCard, TransactionRow, CreateTransactionModal, EditTransactionModal, TransactionMethodModal, ImageBillUploadModal, VoiceRecordModal, TransactionFilter, Pagination, type TransactionFilterState } from '@/components/molecules/common';
+import { Card, StatCard, TransactionRow, CreateTransactionModal, EditTransactionModal, TransactionMethodModal, ImageBillUploadModal, VoiceRecordModal, TransactionFilter, Pagination, CsvImportModal, CsvExportModal, type TransactionFilterState } from '@/components/molecules/common';
 import { useTheme } from '@/context/ThemeContext';
 import { useTransactions, type TransactionFilters } from '@/hooks/useTransactions';
 import { transformAIResultToFormData } from '@/lib/ai-result-transformer';
-import { MdAdd } from 'react-icons/md';
+import { MdAdd, MdFileDownload } from 'react-icons/md';
 import { MdAccountBalanceWallet, MdTrendingUp, MdTrendingDown, MdRefresh, MdSort } from 'react-icons/md';
 import { formatVietnamsePrice } from '@/lib/format';
 
@@ -66,6 +66,8 @@ export default function TransactionsPage() {
   const [isVoiceModalOpen, setIsVoiceModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingTransactionId, setEditingTransactionId] = useState<string | null>(null);
+  const [isCsvImportOpen, setIsCsvImportOpen] = useState(false);
+  const [isCsvExportOpen, setIsCsvExportOpen] = useState(false);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [aiFormData, setAiFormData] = useState<any>(null);
@@ -243,14 +245,25 @@ export default function TransactionsPage() {
               {t('transactions.subtitle')}
             </Text>
           </div>
-          <Button
-            variant="primary"
-            onClick={() => setIsMethodModalOpen(true)}
-            className="flex items-center gap-2"
-          >
-            <MdAdd className="w-5 h-5" />
-            {t('transactions.addTransaction')}
-          </Button>
+          <div className="flex items-center gap-3">
+            <Button
+              variant="secondary"
+              onClick={() => setIsCsvExportOpen(true)}
+              className="flex items-center gap-2"
+              disabled={transactions.length === 0}
+            >
+              <MdFileDownload className="w-5 h-5" />
+              {t('transactions.exportCsv')}
+            </Button>
+            <Button
+              variant="primary"
+              onClick={() => setIsMethodModalOpen(true)}
+              className="flex items-center gap-2"
+            >
+              <MdAdd className="w-5 h-5" />
+              {t('transactions.addTransaction')}
+            </Button>
+          </div>
         </div>
 
         {/* Stats Cards */}
@@ -449,6 +462,10 @@ export default function TransactionsPage() {
             setIsMethodModalOpen(false);
             setIsVoiceModalOpen(true);
           }}
+          onSelectCsv={() => {
+            setIsMethodModalOpen(false);
+            setIsCsvImportOpen(true);
+          }}
         />
 
         {/* Image Bill Upload Modal */}
@@ -465,6 +482,30 @@ export default function TransactionsPage() {
           onClose={() => setIsVoiceModalOpen(false)}
           onSuccess={() => setIsVoiceModalOpen(false)}
           onAIResultReceived={handleAIResultReceived}
+        />
+
+        {/* CSV Import Modal */}
+        <CsvImportModal
+          isOpen={isCsvImportOpen}
+          onClose={() => setIsCsvImportOpen(false)}
+          onSuccess={() => {
+            loadTransactions();
+          }}
+        />
+
+        {/* CSV Export Modal */}
+        <CsvExportModal
+          isOpen={isCsvExportOpen}
+          onClose={() => setIsCsvExportOpen(false)}
+          totalPages={totalPages}
+          totalElements={totalElements}
+          currentPage={currentPage}
+          currentTransactions={transactions}
+          activeFilters={{
+            ...filterState,
+            sortBy,
+            sortOrder,
+          }}
         />
       </div>
     </SidebarLayout>
