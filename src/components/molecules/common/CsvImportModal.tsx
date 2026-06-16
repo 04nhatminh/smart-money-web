@@ -127,7 +127,7 @@ export const CsvImportModal: React.FC<CsvImportModalProps> = ({
     const descIdx = headers.indexOf('description');
 
     if (amountIdx === -1 || typeIdx === -1 || categoryIdx === -1 || dateIdx === -1) {
-      setGeneralError('CSV must contain headers: Amount, Type, Category, Date (Description is optional)');
+      setGeneralError(t('transactions.csvErrorHeaders'));
       return;
     }
 
@@ -144,29 +144,29 @@ export const CsvImportModal: React.FC<CsvImportModalProps> = ({
       // Validate Amount
       const amount = Number(rawAmount.replace(/,/g, ''));
       if (isNaN(amount) || amount <= 0) {
-        return { rowNum, amount: 0, type: 'EXPENSE', category: rawCategory, date: rawDate, description: rawDesc, isValid: false, error: 'Amount must be a number greater than 0' };
+        return { rowNum, amount: 0, type: 'EXPENSE', category: rawCategory, date: rawDate, description: rawDesc, isValid: false, error: t('transactions.csvErrorAmount') };
       }
 
       // Validate Type
       if (rawType !== 'INCOME' && rawType !== 'EXPENSE') {
-        return { rowNum, amount, type: 'EXPENSE', category: rawCategory, date: rawDate, description: rawDesc, isValid: false, error: 'Type must be INCOME or EXPENSE' };
+        return { rowNum, amount, type: 'EXPENSE', category: rawCategory, date: rawDate, description: rawDesc, isValid: false, error: t('transactions.csvErrorType') };
       }
 
       // Validate Category
       const validCategories = ['FOOD', 'TRANSPORTATION', 'CLOTHING', 'UTILITIES', 'ENTERTAINMENT', 'HEALTH', 'EDUCATION', 'SHOPPING', 'OTHER'];
       if (rawType === 'EXPENSE' && !validCategories.includes(rawCategory)) {
-        return { rowNum, amount, type: rawType, category: rawCategory, date: rawDate, description: rawDesc, isValid: false, error: `Expense category must be one of: ${validCategories.join(', ')}` };
+        return { rowNum, amount, type: rawType, category: rawCategory, date: rawDate, description: rawDesc, isValid: false, error: t('transactions.csvErrorCategory', { categories: validCategories.join(', ') }) };
       }
 
       // Validate Date format: dd/MM/yyyy HH:mm
       const dateRegex = /^\d{2}\/\d{2}\/\d{4} \d{2}:\d{2}$/;
       if (!rawDate || !dateRegex.test(rawDate.trim())) {
-        return { rowNum, amount, type: rawType, category: rawCategory, date: rawDate, description: rawDesc, isValid: false, error: 'Date must follow format dd/MM/yyyy HH:mm (e.g. 15/03/2024 14:30)' };
+        return { rowNum, amount, type: rawType, category: rawCategory, date: rawDate, description: rawDesc, isValid: false, error: t('transactions.csvErrorDate') };
       }
 
       // Description length check
       if (rawDesc.length > 500) {
-        return { rowNum, amount, type: rawType, category: rawCategory, date: rawDate, description: rawDesc, isValid: false, error: 'Description must be 500 characters or less' };
+        return { rowNum, amount, type: rawType, category: rawCategory, date: rawDate, description: rawDesc, isValid: false, error: t('transactions.csvErrorDesc') };
       }
 
       return {
@@ -330,14 +330,14 @@ export const CsvImportModal: React.FC<CsvImportModalProps> = ({
                   className="p-4 rounded-lg space-y-2 border text-sm"
                   style={{ backgroundColor: colors.background.secondary, borderColor: colors.border.light }}
                 >
-                  <p className="font-semibold" style={{ color: colors.text.primary }}>CSV Format Guidelines</p>
+                  <p className="font-semibold" style={{ color: colors.text.primary }}>{t('transactions.csvGuidelineTitle')}</p>
                   <ul className="list-disc pl-5 space-y-1" style={{ color: colors.text.secondary }}>
-                    <li>Columns: <strong>Amount</strong>, <strong>Type</strong>, <strong>Category</strong>, <strong>Date</strong>, <strong>Description</strong>.</li>
-                    <li><strong>Amount</strong>: Positive numbers only (e.g., 50000).</li>
-                    <li><strong>Type</strong>: <code>INCOME</code> or <code>EXPENSE</code>.</li>
-                    <li><strong>Category</strong>: Required for expenses. Use: <code>FOOD</code>, <code>TRANSPORTATION</code>, <code>CLOTHING</code>, <code>UTILITIES</code>, <code>ENTERTAINMENT</code>, <code>HEALTH</code>, <code>EDUCATION</code>, <code>SHOPPING</code>, <code>OTHER</code>.</li>
-                    <li><strong>Date</strong>: Must be in <code>dd/MM/yyyy HH:mm</code> format (e.g., <code>16/06/2026 14:30</code>).</li>
-                    <li><strong>Description</strong>: Optional text describing the transaction (max 500 characters).</li>
+                    <li><strong>{t('transactions.csvLabelColumns')}</strong>: {t('transactions.csvGuidelineColumnsDesc')}</li>
+                    <li><strong>Amount</strong>: {t('transactions.csvGuidelineAmountDesc')}</li>
+                    <li><strong>Type</strong>: {t('transactions.csvGuidelineTypeDesc')}</li>
+                    <li><strong>Category</strong>: {t('transactions.csvGuidelineCategoryDesc')}</li>
+                    <li><strong>Date</strong>: {t('transactions.csvGuidelineDateDesc')}</li>
+                    <li><strong>Description</strong>: {t('transactions.csvGuidelineDescDesc')}</li>
                   </ul>
 
                   {/* CSV Template Preview Table */}
@@ -345,11 +345,11 @@ export const CsvImportModal: React.FC<CsvImportModalProps> = ({
                     <table className="min-w-full text-xs text-left border-collapse">
                       <thead>
                         <tr style={{ backgroundColor: colors.background.primary, borderBottom: `1px solid ${colors.border.light}` }}>
-                          <th className="p-2 font-bold" style={{ color: colors.text.primary }}>Amount</th>
-                          <th className="p-2 font-bold" style={{ color: colors.text.primary }}>Type</th>
-                          <th className="p-2 font-bold" style={{ color: colors.text.primary }}>Category</th>
-                          <th className="p-2 font-bold" style={{ color: colors.text.primary }}>Date</th>
-                          <th className="p-2 font-bold" style={{ color: colors.text.primary }}>Description</th>
+                          <th className="p-2 font-bold" style={{ color: colors.text.primary }}>{t('transactions.csvHeaderAmount')}</th>
+                          <th className="p-2 font-bold" style={{ color: colors.text.primary }}>{t('transactions.csvHeaderType')}</th>
+                          <th className="p-2 font-bold" style={{ color: colors.text.primary }}>{t('transactions.csvHeaderCategory')}</th>
+                          <th className="p-2 font-bold" style={{ color: colors.text.primary }}>{t('transactions.csvHeaderDate')}</th>
+                          <th className="p-2 font-bold" style={{ color: colors.text.primary }}>{t('transactions.csvHeaderDescription')}</th>
                         </tr>
                       </thead>
                       <tbody style={{ color: colors.text.secondary }}>
@@ -409,7 +409,7 @@ export const CsvImportModal: React.FC<CsvImportModalProps> = ({
                     {t('transactions.dropCsvHere')}
                   </Text>
                   <Text className="text-xs" style={{ color: colors.text.tertiary }}>
-                    Only .csv files are supported
+                    {t('transactions.csvOnlySupported')}
                   </Text>
                 </div>
 
@@ -491,7 +491,7 @@ export const CsvImportModal: React.FC<CsvImportModalProps> = ({
                     className="p-3 rounded-lg border text-xs"
                     style={{ backgroundColor: `${colors.interactive.warning}10`, borderColor: colors.interactive.warning, color: colors.text.primary }}
                   >
-                    Note: Transactions with validation errors will be skipped. Please fix them in your CSV if they are important.
+                    {t('transactions.csvValidationWarning')}
                   </div>
                 )}
               </div>
@@ -578,7 +578,7 @@ export const CsvImportModal: React.FC<CsvImportModalProps> = ({
                   onClick={handleStartImport}
                   disabled={parsedData.filter(r => r.isValid).length === 0 || isProcessing}
                 >
-                  Import {parsedData.filter(r => r.isValid).length} Rows
+                  {t('transactions.csvImportRowsBtn', { count: parsedData.filter(r => r.isValid).length })}
                 </Button>
               </>
             )}

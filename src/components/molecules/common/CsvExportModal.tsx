@@ -170,7 +170,7 @@ export const CsvExportModal: React.FC<CsvExportModalProps> = ({
             ) : (
               <div className="space-y-4">
                 <Text style={{ color: colors.text.secondary }} className="text-sm">
-                  Choose export option. This will apply your active search, sorting and category filters.
+                  {t('transactions.chooseExportOption')}
                 </Text>
 
                 <div className="space-y-3">
@@ -188,7 +188,7 @@ export const CsvExportModal: React.FC<CsvExportModalProps> = ({
                         {t('transactions.exportOptionCurrent', { count: currentTransactions.length })}
                       </p>
                       <p className="text-xs" style={{ color: colors.text.secondary }}>
-                        Export current page {currentPage} only
+                        {t('transactions.exportCurrentDesc', { page: currentPage })}
                       </p>
                     </div>
                     <MdFileDownload className="w-5 h-5" style={{ color: colors.interactive.primary }} />
@@ -209,7 +209,7 @@ export const CsvExportModal: React.FC<CsvExportModalProps> = ({
                           {t('transactions.exportOptionAll', { count: totalElements })}
                         </p>
                         <p className="text-xs" style={{ color: colors.text.secondary }}>
-                          Export all {totalPages} pages of transactions
+                          {t('transactions.exportAllDesc', { pages: totalPages })}
                         </p>
                       </div>
                       <MdFileDownload className="w-5 h-5" style={{ color: colors.interactive.primary }} />

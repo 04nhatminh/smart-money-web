@@ -57,7 +57,7 @@ export const TransactionMethodModal: React.FC<TransactionMethodModalProps> = ({
 
         {/* Description */}
         <Text style={{ color: colors.text.secondary }} className="text-sm mb-6">
-          Choose how you want to add a transaction
+          {t('transactions.chooseHowToAdd')}
         </Text>
 
         {/* Options */}
