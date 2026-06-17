@@ -3,7 +3,8 @@
 import React from 'react';
 import { useTheme } from '@/context/ThemeContext';
 import { Heading, Text } from '@/components/atoms';
-import { MdClose, MdNoteAdd, MdImageSearch, MdMic } from 'react-icons/md';
+import { MdClose, MdNoteAdd, MdImageSearch, MdMic, MdUploadFile } from 'react-icons/md';
+import { useTranslations } from 'next-intl';
 
 interface TransactionMethodModalProps {
   isOpen: boolean;
@@ -11,6 +12,7 @@ interface TransactionMethodModalProps {
   onSelectForm: () => void;
   onSelectImage: () => void;
   onSelectVoice: () => void;
+  onSelectCsv: () => void;
 }
 
 export const TransactionMethodModal: React.FC<TransactionMethodModalProps> = ({
@@ -19,8 +21,10 @@ export const TransactionMethodModal: React.FC<TransactionMethodModalProps> = ({
   onSelectForm,
   onSelectImage,
   onSelectVoice,
+  onSelectCsv,
 }) => {
   const { colors } = useTheme();
+  const t = useTranslations();
 
   if (!isOpen) return null;
 
@@ -40,7 +44,7 @@ export const TransactionMethodModal: React.FC<TransactionMethodModalProps> = ({
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <Heading level={3}>
-            Add Transaction
+            {t('transactions.addTransaction')}
           </Heading>
           <button
             onClick={onClose}
@@ -53,7 +57,7 @@ export const TransactionMethodModal: React.FC<TransactionMethodModalProps> = ({
 
         {/* Description */}
         <Text style={{ color: colors.text.secondary }} className="text-sm mb-6">
-          Choose how you want to add a transaction
+          {t('transactions.chooseHowToAdd')}
         </Text>
 
         {/* Options */}
@@ -74,10 +78,10 @@ export const TransactionMethodModal: React.FC<TransactionMethodModalProps> = ({
               <MdNoteAdd className="w-6 h-6 mt-1 flex-shrink-0" style={{ color: colors.interactive.primary }} />
               <div>
                 <p className="font-semibold" style={{ color: colors.text.primary }}>
-                  Form
+                  {t('transactions.methodForm')}
                 </p>
                 <p className="text-sm" style={{ color: colors.text.secondary }}>
-                  Enter details manually
+                  {t('transactions.methodFormDesc')}
                 </p>
               </div>
             </div>
@@ -99,10 +103,10 @@ export const TransactionMethodModal: React.FC<TransactionMethodModalProps> = ({
               <MdImageSearch className="w-6 h-6 mt-1 flex-shrink-0" style={{ color: colors.interactive.primary }} />
               <div>
                 <p className="font-semibold" style={{ color: colors.text.primary }}>
-                  Image (Bill)
+                  {t('transactions.methodImage')}
                 </p>
                 <p className="text-sm" style={{ color: colors.text.secondary }}>
-                  Upload receipt/invoice
+                  {t('transactions.methodImageDesc')}
                 </p>
               </div>
             </div>
@@ -124,10 +128,35 @@ export const TransactionMethodModal: React.FC<TransactionMethodModalProps> = ({
               <MdMic className="w-6 h-6 mt-1 flex-shrink-0" style={{ color: colors.interactive.primary }} />
               <div>
                 <p className="font-semibold" style={{ color: colors.text.primary }}>
-                  Voice
+                  {t('transactions.methodVoice')}
                 </p>
                 <p className="text-sm" style={{ color: colors.text.secondary }}>
-                  Record transaction details
+                  {t('transactions.methodVoiceDesc')}
+                </p>
+              </div>
+            </div>
+          </button>
+
+          {/* CSV Option */}
+          <button
+            onClick={() => {
+              onSelectCsv();
+              onClose();
+            }}
+            className="w-full p-4 rounded-lg border-2 transition-all text-left hover:opacity-80 hover:cursor-pointer"
+            style={{
+              borderColor: colors.border.light,
+              backgroundColor: colors.surface.secondary,
+            }}
+          >
+            <div className="flex items-start gap-3">
+              <MdUploadFile className="w-6 h-6 mt-1 flex-shrink-0" style={{ color: colors.interactive.primary }} />
+              <div>
+                <p className="font-semibold" style={{ color: colors.text.primary }}>
+                  {t('transactions.methodCsv')}
+                </p>
+                <p className="text-sm" style={{ color: colors.text.secondary }}>
+                  {t('transactions.methodCsvDesc')}
                 </p>
               </div>
             </div>
