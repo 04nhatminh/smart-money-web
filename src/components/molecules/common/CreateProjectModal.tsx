@@ -330,12 +330,12 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
       {/* Modal */}
       <div className="fixed inset-0 flex items-center justify-center p-4 pointer-events-none overflow-y-auto" style={{ zIndex: 1000 }}>
         <div
-          className="bg-white rounded-lg shadow-2xl max-w-md w-full pointer-events-auto my-8"
+          className="bg-white rounded-2xl shadow-2xl max-w-md w-full pointer-events-auto my-8 overflow-hidden"
           style={{ backgroundColor: colors.background.primary }}
           onClick={e => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b sticky top-0" style={{ borderColor: colors.border.light, backgroundColor: colors.background.primary }}>
+          <div className="flex items-center justify-between p-6 border-b sticky top-0 rounded-t-2xl" style={{ borderColor: colors.border.light, backgroundColor: colors.background.primary }}>
             <Heading level={3} className="m-0" style={{ color: colors.text.primary }}>Create Project</Heading>
             <button
               onClick={onClose}
@@ -417,57 +417,92 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
               />
             </div>
 
-            {/* Type and Priority */}
-            <div className="grid grid-cols-2 gap-4">
+            {/* Type and Priority Card Selection */}
+            <div className="space-y-4">
+              {/* Type Selection */}
               <div>
                 <label className="block text-sm font-medium mb-2" style={{ color: colors.text.primary }}>
                   Type <span style={{ color: colors.interactive.danger }}>*</span>
                 </label>
-                <select
-                  name="type"
-                  value={formData.type}
-                  onChange={handleInputChange}
-                  disabled={isLoading}
-                  className="w-full px-3 py-2 rounded-lg border transition-colors focus:outline-none focus:ring-2"
-                  style={{
-                    borderColor: colors.border.light,
-                    backgroundColor: colors.background.secondary,
-                    color: colors.text.primary,
-                  }}
-                >
-                  <option value="PERSONAL">Personal</option>
-                  <option value="GROUP">Group</option>
-                </select>
+                <div className="grid grid-cols-2 gap-3">
+                  {(['PERSONAL', 'GROUP'] as const).map((tVal) => {
+                    const isSelected = formData.type === tVal;
+                    return (
+                      <button
+                        key={tVal}
+                        type="button"
+                        disabled={isLoading}
+                        onClick={() => setFormData(prev => ({ ...prev, type: tVal }))}
+                        className="p-3 rounded-xl border text-center transition-all flex flex-col items-center justify-center gap-1 hover:cursor-pointer"
+                        style={{
+                          backgroundColor: isSelected ? `${colors.interactive.primary}10` : colors.background.secondary,
+                          borderColor: isSelected ? colors.interactive.primary : colors.border.light,
+                          borderWidth: isSelected ? '2.5px' : '1px',
+                          color: colors.text.primary,
+                        }}
+                      >
+                        <span className="font-semibold text-sm">
+                          {tVal === 'PERSONAL' ? 'Personal' : 'Group'}
+                        </span>
+                        <span className="text-[11px]" style={{ color: colors.text.secondary }}>
+                          {tVal === 'PERSONAL' ? 'Individual goal' : 'Shared project'}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
+
+              {/* Priority Selection */}
               <div>
                 <label className="block text-sm font-medium mb-2" style={{ color: colors.text.primary }}>
                   Priority <span style={{ color: colors.interactive.danger }}>*</span>
                 </label>
-                <select
-                  name="priority"
-                  value={formData.priority}
-                  onChange={handleInputChange}
-                  disabled={isLoading}
-                  className="w-full px-3 py-2 rounded-lg border transition-colors focus:outline-none focus:ring-2"
-                  style={{
-                    borderColor: colors.border.light,
-                    backgroundColor: colors.background.secondary,
-                    color: colors.text.primary,
-                  }}
-                >
-                  <option value="LOW" disabled={usedPriorities.includes('LOW')}>
-                    Low {usedPriorities.includes('LOW') ? '(Already used)' : ''}
-                  </option>
-                  <option value="MEDIUM" disabled={usedPriorities.includes('MEDIUM')}>
-                    Medium {usedPriorities.includes('MEDIUM') ? '(Already used)' : ''}
-                  </option>
-                  <option value="HIGH" disabled={usedPriorities.includes('HIGH')}>
-                    High {usedPriorities.includes('HIGH') ? '(Already used)' : ''}
-                  </option>
-                </select>
+                <div className="grid grid-cols-3 gap-2">
+                  {(['LOW', 'MEDIUM', 'HIGH'] as const).map((pVal) => {
+                    const isUsed = usedPriorities.includes(pVal);
+                    const isSelected = formData.priority === pVal;
+                    return (
+                      <button
+                        key={pVal}
+                        type="button"
+                        disabled={isLoading || isUsed}
+                        onClick={() => {
+                          if (!isUsed) {
+                            setFormData(prev => ({ ...prev, priority: pVal }));
+                          }
+                        }}
+                        className={`p-3 rounded-xl border text-center transition-all flex flex-col items-center justify-center gap-1 relative ${
+                          isUsed ? 'opacity-40 cursor-not-allowed' : 'hover:cursor-pointer'
+                        }`}
+                        style={{
+                          backgroundColor: isSelected
+                            ? `${colors.interactive.primary}10`
+                            : colors.background.secondary,
+                          borderColor: isSelected
+                            ? colors.interactive.primary
+                            : colors.border.light,
+                          borderWidth: isSelected ? '2.5px' : '1px',
+                          color: colors.text.primary,
+                        }}
+                      >
+                        <span className="font-semibold text-xs">{pVal}</span>
+                        {isUsed ? (
+                          <span className="text-[9px] font-semibold text-red-500 leading-tight">
+                            Already used
+                          </span>
+                        ) : (
+                          <span className="text-[10px]" style={{ color: colors.text.secondary }}>
+                            Available
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
                 {usedPriorities.length > 0 && (
-                  <Text className="text-xs mt-1" style={{ color: colors.text.tertiary }}>
-                    Available priorities: {['LOW', 'MEDIUM', 'HIGH'].filter(p => !usedPriorities.includes(p)).join(', ')}
+                  <Text className="text-[11px] mt-1" style={{ color: colors.interactive.danger }}>
+                    * Priorities that have already been allocated to existing projects cannot be selected.
                   </Text>
                 )}
               </div>

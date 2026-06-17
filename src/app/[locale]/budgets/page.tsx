@@ -6,7 +6,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { useAuth } from '@/context/AuthContext';
 import { SidebarLayout } from '@/components/templates';
 import { Heading, Text, Button } from '@/components/atoms';
-import { BudgetProgressCard, CreateBudgetModal, CreateBulkBudgetsModal, EditBudgetModal, DeleteConfirmationModal } from '@/components/molecules/common';
+import { BudgetProgressCard, CreateBudgetModal, CreateBulkBudgetsModal, EditBudgetModal, DeleteConfirmationModal, DatePeriodSelector } from '@/components/molecules/common';
 import { useTheme } from '@/context/ThemeContext';
 import { useBudgets } from '@/hooks/useBudgets';
 import { Budget } from '@/types/budget.api';
@@ -161,44 +161,18 @@ export default function BudgetsPage() {
 
         {/* Month and Year Selector */}
         <div className="flex gap-4 items-center">
-          <div className="flex-1 max-w-xs">
+          <div>
             <label className="block text-sm font-medium mb-2" style={{ color: colors.text.primary }}>
               {t('budgets.selectMonthYear')}
             </label>
-            <div className="flex gap-2">
-              <select
-                value={currentMonth}
-                onChange={handleMonthChange}
-                className="flex-1 px-3 py-2 rounded-lg border"
-                style={{
-                  borderColor: colors.border.light,
-                  backgroundColor: colors.surface.secondary,
-                  color: colors.text.primary,
-                }}
-              >
-                {Array.from({ length: 12 }, (_, i) => i + 1).map(month => (
-                  <option key={month} value={month}>
-                    {new Date(2024, month - 1).toLocaleString('default', { month: 'short' })}
-                  </option>
-                ))}
-              </select>
-              <select
-                value={currentYear}
-                onChange={handleYearChange}
-                className="flex-1 px-3 py-2 rounded-lg border"
-                style={{
-                  borderColor: colors.border.light,
-                  backgroundColor: colors.surface.secondary,
-                  color: colors.text.primary,
-                }}
-              >
-                {Array.from({ length: 10 }, (_, i) => new Date().getFullYear() - 5 + i).map(year => (
-                  <option key={year} value={year}>
-                    {year}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <DatePeriodSelector
+              currentMonth={currentMonth}
+              currentYear={currentYear}
+              onChange={(month, year) => {
+                setCurrentMonth(month);
+                setCurrentYear(year);
+              }}
+            />
           </div>
         </div>
 
