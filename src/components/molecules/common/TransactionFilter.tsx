@@ -42,11 +42,31 @@ export const TransactionFilter: React.FC<TransactionFilterProps> = ({
   const t = useTranslations();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [search, setSearch] = useState<string>(initialFilters.search || '');
-  const [modalFilters, setModalFilters] = useState<Omit<TransactionFilterState, 'search'>>(
-    initialFilters
-  );
-  const [startTime, setStartTime] = useState<string>('00:00');
-  const [endTime, setEndTime] = useState<string>('23:59');
+
+  // Helper to split "dd/MM/yyyy HH:mm" into separate date and time
+  const parseDateTimeParam = (dateTimeStr?: string, defaultTime: string = '00:00') => {
+    if (!dateTimeStr) return { date: undefined, time: defaultTime };
+    const parts = dateTimeStr.trim().split(/\s+/);
+    const date = parts[0];
+    const time = parts[1] || defaultTime;
+    return { date, time };
+  };
+
+  const [modalFilters, setModalFilters] = useState<Omit<TransactionFilterState, 'search'>>(() => {
+    const start = parseDateTimeParam(initialFilters.startDate, '00:00');
+    const end = parseDateTimeParam(initialFilters.endDate, '23:59');
+    const filters = { ...initialFilters };
+    if (start.date) filters.startDate = start.date;
+    if (end.date) filters.endDate = end.date;
+    return filters;
+  });
+
+  const [startTime, setStartTime] = useState<string>(() => {
+    return parseDateTimeParam(initialFilters.startDate, '00:00').time;
+  });
+  const [endTime, setEndTime] = useState<string>(() => {
+    return parseDateTimeParam(initialFilters.endDate, '23:59').time;
+  });
   const [dateError, setDateError] = useState<string>('');
 
   const isDateTimeValid = (): boolean => {
@@ -170,7 +190,18 @@ export const TransactionFilter: React.FC<TransactionFilterProps> = ({
 
         {/* Filter Button */}
         <button
-          onClick={() => setIsModalOpen(true)}
+          onClick={() => {
+            const start = parseDateTimeParam(initialFilters.startDate, '00:00');
+            const end = parseDateTimeParam(initialFilters.endDate, '23:59');
+            setModalFilters({
+              ...initialFilters,
+              startDate: start.date,
+              endDate: end.date,
+            });
+            setStartTime(start.time);
+            setEndTime(end.time);
+            setIsModalOpen(true);
+          }}
           className="flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium transition-all whitespace-nowrap hover:opacity-90 hover:cursor-pointer"
           style={{
             backgroundColor: colors.interactive.primary,
