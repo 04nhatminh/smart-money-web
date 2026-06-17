@@ -17,6 +17,7 @@ export interface CategoryProportionItem {
 export interface AnalyticsData {
   monthlyStats: MonthlyStatItem[];
   categoryProportions: CategoryProportionItem[];
+  dailyStats?: { day: number; income: number; expense: number; }[];
   monthlyTotalTransactions?: number;
   monthlyTotalExpense?: number;
   monthlyTotalIncome?: number;
@@ -25,6 +26,8 @@ export interface AnalyticsData {
 export interface AnalyticsRequest {
   year?: number;
   month?: number;
+  type?: string;
+  day?: number;
 }
 
 export const useAnalytics = () => {

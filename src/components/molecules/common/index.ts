@@ -26,3 +26,5 @@ export { ProjectAdvisorModeModal } from './ProjectAdvisorModeModal';
 export { ProjectAdvisorResultModal } from './ProjectAdvisorResultModal';
 export { CsvImportModal } from './CsvImportModal';
 export { CsvExportModal } from './CsvExportModal';
+export { DatePeriodSelector } from './DatePeriodSelector';
+
