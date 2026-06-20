@@ -68,6 +68,8 @@ export const Button: React.FC<ButtonProps> = ({
     active:shadow-lg
   `;
 
+  const { style, ...restProps } = props;
+
   return (
     <button
       style={{
@@ -75,11 +77,12 @@ export const Button: React.FC<ButtonProps> = ({
         borderRadius: BORDER_RADIUS.xl,
         boxShadow: shadowStyles[elevation],
         transition: TRANSITIONS.base,
+        ...(style || {}),
       }}
       className={`${baseStyles} ${sizeStyles[size]} ${className}`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      {...props}
+      {...restProps}
     />
   );
 };

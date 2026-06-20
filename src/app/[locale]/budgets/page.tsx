@@ -6,12 +6,12 @@ import { useLocale, useTranslations } from 'next-intl';
 import { useAuth } from '@/context/AuthContext';
 import { SidebarLayout } from '@/components/templates';
 import { Heading, Text, Button } from '@/components/atoms';
-import { BudgetProgressCard, CreateBudgetModal, CreateBulkBudgetsModal, EditBudgetModal, DeleteConfirmationModal, DatePeriodSelector } from '@/components/molecules/common';
+import { BudgetProgressCard, CreateBudgetModal, CreateBulkBudgetsModal, EditBudgetModal, DeleteConfirmationModal, DatePeriodSelector, GenerateBudgetModal } from '@/components/molecules/common';
 import { useTheme } from '@/context/ThemeContext';
 import { useBudgets } from '@/hooks/useBudgets';
 import { Budget } from '@/types/budget.api';
 import { formatVietnamsePrice } from '@/lib/format';
-import { MdAdd } from 'react-icons/md';
+import { MdAdd, MdAutoAwesome } from 'react-icons/md';
 
 export default function BudgetsPage() {
   const router = useRouter();
@@ -26,6 +26,7 @@ export default function BudgetsPage() {
   const [isCreateBulkModalOpen, setIsCreateBulkModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isGenerateBudgetModalOpen, setIsGenerateBudgetModalOpen] = useState(false);
   const [budgetToDelete, setBudgetToDelete] = useState<string | null>(null);
   const [selectedBudgetId, setSelectedBudgetId] = useState<string | null>(null);
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth() + 1);
@@ -129,7 +130,21 @@ export default function BudgetsPage() {
               {t('budgets.subtitle')}
             </Text>
           </div>
-          <div className="flex gap-2">
+           <div className="flex gap-2">
+            <Button
+              variant="secondary"
+              onClick={() => setIsGenerateBudgetModalOpen(true)}
+              className="flex items-center gap-2"
+              style={{
+                border: `2px solid ${colors.interactive.primary}`,
+                color: colors.interactive.primary,
+                backgroundColor: 'transparent',
+                borderRadius: '0.75rem',
+              }}
+            >
+              <MdAutoAwesome className="w-5 h-5" />
+              Generate Budget
+            </Button>
             <Button
               variant="secondary"
               onClick={() => setIsCreateBulkModalOpen(true)}
@@ -294,6 +309,12 @@ export default function BudgetsPage() {
         isLoading={isLoading}
         onConfirm={handleDeleteConfirm}
         onCancel={handleDeleteCancel}
+      />
+
+      <GenerateBudgetModal
+        isOpen={isGenerateBudgetModalOpen}
+        onClose={() => setIsGenerateBudgetModalOpen(false)}
+        onSuccess={loadBudgets}
       />
     </SidebarLayout>
   );

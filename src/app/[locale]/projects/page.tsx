@@ -13,6 +13,7 @@ import {
   AddContributionModal,
   DeleteConfirmationModal,
   UserIncomeModal,
+  GenerateBudgetModal,
 } from '@/components/molecules/common';
 import { useTheme } from '@/context/ThemeContext';
 import { useProjects } from '@/hooks/useProjects';
@@ -33,6 +34,7 @@ export default function ProjectsPage() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isContributeModalOpen, setIsContributeModalOpen] = useState(false);
   const [isUserIncomeModalOpen, setIsUserIncomeModalOpen] = useState(false);
+  const [isGenerateBudgetModalOpen, setIsGenerateBudgetModalOpen] = useState(false);
   const [selectedProject, setSelectedProject] = useState<ProjectDetail | null>(null);
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [projectToDelete, setProjectToDelete] = useState<string | null>(null);
@@ -345,7 +347,10 @@ export default function ProjectsPage() {
         <CreateProjectModal
           isOpen={isCreateModalOpen}
           onClose={() => setIsCreateModalOpen(false)}
-          onSuccess={loadProjects}
+          onSuccess={() => {
+            loadProjects();
+            setIsGenerateBudgetModalOpen(true);
+          }}
           onOpenUserIncomeModal={() => {
             setIsCreateModalOpen(false);
             setIsUserIncomeModalOpen(true);
@@ -395,6 +400,12 @@ export default function ProjectsPage() {
           onConfirm={handleDeleteConfirm}
           onCancel={handleDeleteCancel}
           isLoading={isLoading}
+        />
+
+        <GenerateBudgetModal
+          isOpen={isGenerateBudgetModalOpen}
+          onClose={() => setIsGenerateBudgetModalOpen(false)}
+          onSuccess={loadProjects}
         />
       </div>
     </SidebarLayout>
