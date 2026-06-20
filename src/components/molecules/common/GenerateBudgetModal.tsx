@@ -91,11 +91,11 @@ export const GenerateBudgetModal: React.FC<GenerateBudgetModalProps> = ({
     const unsubscribe = subscribe(jobId, (data) => {
       console.log('[GenerateBudgetModal] WS data received:', data);
 
-      if (data.status === 'SUCCESS' && data.result) {
+      if ((data.status === 'SUCCESS' || data.status === 'COMPLETED') && data.result) {
         setTotalBudget(data.result.totalBudget || 0);
         setSuggestions(data.result.categories || []);
         setStep('SUGGESTION');
-      } else if (data.status === 'FAILED') {
+      } else if (data.status === 'FAILED' || data.status === 'ERROR') {
         setErrorMsg(data.error || 'AI budget allocation failed. Please try again.');
         setStep('ERROR');
       } else {
@@ -125,7 +125,7 @@ export const GenerateBudgetModal: React.FC<GenerateBudgetModalProps> = ({
 
     try {
       const response = await apiClient.post<any>(API_ENDPOINTS.ai.generateBudget, {});
-      
+
       const payload = response.data || response;
       if (payload && payload.jobId) {
         setJobId(payload.jobId);
@@ -209,7 +209,7 @@ export const GenerateBudgetModal: React.FC<GenerateBudgetModalProps> = ({
           <div className="flex items-center justify-between p-6 border-b sticky top-0 rounded-t-2xl" style={{ borderColor: colors.border.light, backgroundColor: colors.background.primary }}>
             <div className="flex items-center gap-2">
               <MdAutoAwesome className="w-6 h-6" style={{ color: colors.interactive.primary }} />
-              <Heading level={3} className="m-0" style={{ color: colors.text.primary }}>
+              <Heading level={3} className="m-0">
                 AI Budget Generation
               </Heading>
             </div>
@@ -364,7 +364,7 @@ export const GenerateBudgetModal: React.FC<GenerateBudgetModalProps> = ({
                 </div>
 
                 <div className="p-3 rounded-lg text-xs" style={{ backgroundColor: colors.background.secondary, color: colors.text.tertiary }}>
-                  ℹ️ Confirming will bulk update your budget categories for {selectedMonth}/{selectedYear}.
+                  Confirming will bulk update your budget categories for {selectedMonth}/{selectedYear}.
                 </div>
 
                 <div className="flex gap-3 pt-4">
