@@ -66,6 +66,8 @@ export const Button: React.FC<ButtonProps> = ({
     disabled:cursor-not-allowed
     hover:shadow-2xl
     active:shadow-lg
+    whitespace-nowrap
+    shrink-0
   `;
 
   const { style, ...restProps } = props;
