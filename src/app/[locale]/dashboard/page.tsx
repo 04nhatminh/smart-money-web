@@ -5,13 +5,14 @@ import { useRouter } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { useAuth } from '@/context/AuthContext';
 import { SidebarLayout } from '@/components/templates';
-import { Heading, Text } from '@/components/atoms';
-import { Card, StatCard } from '@/components/molecules/common';
+import { Heading, Text, Button } from '@/components/atoms';
+import { Card, StatCard, UserIncomeModal, UserFinancialModal, GenerateBudgetModal } from '@/components/molecules/common';
 import { useTheme } from '@/context/ThemeContext';
 import { useTransactions } from '@/hooks/useTransactions';
 import { useAnalytics } from '@/hooks/useAnalytics';
 import { useBudgets } from '@/hooks/useBudgets';
 import { useProjects } from '@/hooks/useProjects';
+import { getCookie } from '@/lib/auth';
 
 const PieTooltipCustom = ({ active, payload }: any) => {
   const t = useTranslations();
@@ -47,7 +48,8 @@ import {
   MdPieChart,
   MdFolderOpen,
   MdInsights,
-  MdChevronRight
+  MdChevronRight,
+  MdAutoAwesome
 } from 'react-icons/md';
 
 const CHART_COLORS = ['#5044d5', '#10B981', '#EF4444', '#F59E0B', '#8B5CF6', '#EC4899', '#06B6D4'];
@@ -69,6 +71,13 @@ export default function DashboardPage() {
   const [budgets, setBudgets] = useState<any[]>([]);
   const [projects, setProjects] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Onboarding states
+  const [showIncomePrompt, setShowIncomePrompt] = useState(false);
+  const [showFinancialPrompt, setShowFinancialPrompt] = useState(false);
+  const [isIncomeModalOpen, setIsIncomeModalOpen] = useState(false);
+  const [isFinancialModalOpen, setIsFinancialModalOpen] = useState(false);
+  const [isGenerateBudgetModalOpen, setIsGenerateBudgetModalOpen] = useState(false);
 
   const currentMonth = new Date().getMonth() + 1;
   const currentYear = new Date().getFullYear();
@@ -127,6 +136,20 @@ export default function DashboardPage() {
       loadDashboardData();
     }
   }, [isAuthenticated]);
+
+  // Check onboarding status
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      const incomeDone = user.incomeSetupCompleted ?? true;
+      const financialDone = user.financialSetupCompleted ?? true;
+      
+      if (!incomeDone) {
+        setShowIncomePrompt(true);
+      } else if (!financialDone) {
+        setShowFinancialPrompt(true);
+      }
+    }
+  }, [isAuthenticated, user]);
 
   // Derived calculations for Financial Summary Card
   const { totalIncome, totalExpenses, netSavings } = useMemo(() => {
@@ -382,8 +405,21 @@ export default function DashboardPage() {
                   );
                 })
               ) : (
-                <div className="text-center py-8">
+                <div className="text-center py-6 space-y-4">
                   <Text style={{ color: colors.text.secondary }}>{t('dashboard.noBudgets')}</Text>
+                  <div>
+                    <Button
+                      variant="primary"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setIsGenerateBudgetModalOpen(true);
+                      }}
+                      className="inline-flex items-center gap-1.5 text-xs py-2 px-4 font-semibold"
+                    >
+                      <MdAutoAwesome className="w-4 h-4" />
+                      <span>Generate Budget</span>
+                    </Button>
+                  </div>
                 </div>
               )}
             </div>
@@ -446,6 +482,82 @@ export default function DashboardPage() {
 
         </div>
       </div>
+
+      {/* Onboarding Income Prompt */}
+      {showIncomePrompt && (
+        <>
+          <div className="fixed inset-0" style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 999 }} />
+          <div className="fixed inset-0 flex items-center justify-center p-4" style={{ zIndex: 1000 }}>
+            <div className="max-w-md w-full p-6 rounded-2xl shadow-2xl space-y-4" style={{ backgroundColor: colors.background.primary }}>
+              <Heading level={3}>Setup Monthly Income</Heading>
+              <Text style={{ color: colors.text.secondary }}>
+                You haven't set up your monthly income details yet. Building an accurate budget or tracking savings requires your income info.
+              </Text>
+              <div className="flex gap-3 pt-2">
+                <Button variant="secondary" className="flex-1" onClick={() => setShowIncomePrompt(false)}>
+                  Skip for now
+                </Button>
+                <Button variant="primary" className="flex-1" onClick={() => {
+                  setShowIncomePrompt(false);
+                  setIsIncomeModalOpen(true);
+                }}>
+                  Setup Now
+                </Button>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* Onboarding Financial Profile Prompt */}
+      {!showIncomePrompt && showFinancialPrompt && (
+        <>
+          <div className="fixed inset-0" style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 999 }} />
+          <div className="fixed inset-0 flex items-center justify-center p-4" style={{ zIndex: 1000 }}>
+            <div className="max-w-md w-full p-6 rounded-2xl shadow-2xl space-y-4" style={{ backgroundColor: colors.background.primary }}>
+              <Heading level={3}>Setup Financial Profile</Heading>
+              <Text style={{ color: colors.text.secondary }}>
+                You haven't set up your financial profile. Defining your role, spending style, and living status helps AI generate personalized recommendations.
+              </Text>
+              <div className="flex gap-3 pt-2">
+                <Button variant="secondary" className="flex-1" onClick={() => setShowFinancialPrompt(false)}>
+                  Skip for now
+                </Button>
+                <Button variant="primary" className="flex-1" onClick={() => {
+                  setShowFinancialPrompt(false);
+                  setIsFinancialModalOpen(true);
+                }}>
+                  Setup Now
+                </Button>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* Core Modals */}
+      <UserIncomeModal
+        isOpen={isIncomeModalOpen}
+        onClose={() => setIsIncomeModalOpen(false)}
+        onSuccess={() => {
+          const financialCookie = getCookie('financial_setup_completed');
+          const financialDone = user?.financialSetupCompleted || financialCookie === 'true';
+          if (!financialDone) {
+            setShowFinancialPrompt(true);
+          }
+        }}
+      />
+
+      <UserFinancialModal
+        isOpen={isFinancialModalOpen}
+        onClose={() => setIsFinancialModalOpen(false)}
+      />
+
+      <GenerateBudgetModal
+        isOpen={isGenerateBudgetModalOpen}
+        onClose={() => setIsGenerateBudgetModalOpen(false)}
+        onSuccess={loadDashboardData}
+      />
     </SidebarLayout>
   );
 }

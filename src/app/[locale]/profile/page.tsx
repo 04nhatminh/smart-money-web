@@ -7,10 +7,12 @@ import { useAuth } from '@/context/AuthContext';
 import { SidebarLayout } from '@/components/templates';
 import { Heading, Text, Button } from '@/components/atoms';
 import { LogoutButton } from '@/components/molecules/auth';
-import { Card, UserIncomeModal } from '@/components/molecules/common';
+import { Card, UserIncomeModal, UserFinancialModal } from '@/components/molecules/common';
 import { useTheme } from '@/context/ThemeContext';
 import { useUserIncome } from '@/hooks/useUserIncome';
+import { useUserFinancial } from '@/hooks/useUserFinancial';
 import { UserIncomeResponse } from '@/types/user-income.api';
+import { UserFinancialProfileResponse } from '@/types/user-financial.api';
 import { formatAmountInput } from '@/lib/format';
 
 export default function ProfilePage() {
@@ -20,9 +22,13 @@ export default function ProfilePage() {
   const t = useTranslations();
   const { colors } = useTheme();
   const { getUserIncome } = useUserIncome();
+  const { getUserFinancial } = useUserFinancial();
   const [userIncome, setUserIncome] = useState<UserIncomeResponse | null>(null);
+  const [userFinancial, setUserFinancial] = useState<UserFinancialProfileResponse | null>(null);
   const [isUserIncomeModalOpen, setIsUserIncomeModalOpen] = useState(false);
+  const [isUserFinancialModalOpen, setIsUserFinancialModalOpen] = useState(false);
   const [isLoadingIncome, setIsLoadingIncome] = useState(false);
+  const [isLoadingFinancial, setIsLoadingFinancial] = useState(false);
 
   const formatDate = (dateString?: string) => {
     if (!dateString) return 'N/A';
@@ -56,9 +62,10 @@ export default function ProfilePage() {
     return dateString;
   };
 
-  // Load user income on component mount
+  // Load user info on component mount
   useEffect(() => {
     loadUserIncome();
+    loadUserFinancialProfile();
   }, []);
 
   const loadUserIncome = async () => {
@@ -75,27 +82,58 @@ export default function ProfilePage() {
     }
   };
 
+  const loadUserFinancialProfile = async () => {
+    setIsLoadingFinancial(true);
+    try {
+      const result = await getUserFinancial();
+      if (result.success && result.data) {
+        setUserFinancial(result.data);
+      }
+    } catch (err) {
+      console.error('Failed to load user financial profile:', err);
+    } finally {
+      setIsLoadingFinancial(false);
+    }
+  };
+
   const handleUserIncomeSuccess = () => {
     loadUserIncome();
+  };
+
+  const handleUserFinancialSuccess = () => {
+    loadUserFinancialProfile();
   };
 
   return (
     <SidebarLayout>
       <div className="space-y-8">
         {/* Welcome Section */}
-        <div className="mb-8">
-          <Heading level={2}>
-            {t('common.profile')}
-          </Heading>
-          <Text style={{ color: colors.text.secondary }}>
-            {t('profile.editProfileDescription')}
-          </Text>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+          <div>
+            <Heading level={2}>
+              {t('common.profile')}
+            </Heading>
+            <Text style={{ color: colors.text.secondary }}>
+              {t('profile.editProfileDescription')}
+            </Text>
+          </div>
+          <div className="flex gap-3 shrink-0">
+            <Button
+              variant="primary"
+              onClick={() => router.push(`/${locale}/profile/edit`)}
+            >
+              {t('profile.editProfile')}
+            </Button>
+            <LogoutButton variant="secondary">
+              {t('profile.logout')}
+            </LogoutButton>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* User Profile Card */}
           <div className="md:col-span-1">
-            <Card className="p-6 h-full">
+            <Card className="p-6 h-full flex flex-col justify-center">
               <div className="text-center">
                 {user?.avatar ? (
                   <img
@@ -120,19 +158,6 @@ export default function ProfilePage() {
                 >
                   {user?.email}
                 </p>
-                {user?.coin !== undefined && (
-                  <div
-                    className="p-3 rounded-lg mb-4"
-                    style={{ backgroundColor: colors.surface.secondary }}
-                  >
-                    <p className="text-xs" style={{ color: colors.text.secondary }}>
-                      {t('profile.coinsBalance')}
-                    </p>
-                    <p className="text-2xl font-bold" style={{ color: colors.interactive.primary }}>
-                      {user.coin}
-                    </p>
-                  </div>
-                )}
               </div>
             </Card>
           </div>
@@ -140,7 +165,7 @@ export default function ProfilePage() {
           {/* Account Information Card */}
           <div className="md:col-span-2">
             <Card className="p-6">
-              <Heading level={3} className="mb-6">{t('profile.accountInfo')}</Heading>
+              <Heading level={3} className="pb-3">{t('profile.accountInfo')}</Heading>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <p className="text-sm font-medium mb-2" style={{ color: colors.text.secondary }}>
@@ -247,26 +272,120 @@ export default function ProfilePage() {
           )}
         </Card>
 
-        {/* Action Buttons */}
-        <div className="flex gap-4 pt-4">
-          <Button
-            variant="primary"
-            onClick={() => router.push(`/${locale}/profile/edit`)}
-          >
-            {t('profile.editProfile')}
-          </Button>
-          <LogoutButton
-            variant="secondary"
-          >
-            {t('profile.logout')}
-          </LogoutButton>
-        </div>
+        {/* User Financial Card */}
+        <Card className="p-6">
+          <div className="flex items-center justify-between mb-6">
+            <Heading level={3} className="m-0">Financial Profile</Heading>
+            <Button
+              variant="secondary"
+              onClick={() => setIsUserFinancialModalOpen(true)}
+              disabled={isLoadingFinancial}
+            >
+              {userFinancial ? t('common.edit') : t('profile.setUp')}
+            </Button>
+          </div>
+
+          {userFinancial ? (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div>
+                <p className="text-sm font-medium mb-2" style={{ color: colors.text.secondary }}>
+                  Role
+                </p>
+                <p className="text-lg font-semibold capitalize">
+                  {userFinancial.role?.replace('_', ' ').toLowerCase()}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm font-medium mb-2" style={{ color: colors.text.secondary }}>
+                  Living Status
+                </p>
+                <p className="text-lg font-semibold capitalize">
+                  {userFinancial.living_status?.replace('_', ' ').toLowerCase()}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm font-medium mb-2" style={{ color: colors.text.secondary }}>
+                  Income Level
+                </p>
+                <p className="text-lg font-semibold capitalize">
+                  {userFinancial.income_level?.toLowerCase()}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm font-medium mb-2" style={{ color: colors.text.secondary }}>
+                  Transport Mode
+                </p>
+                <p className="text-lg font-semibold capitalize">
+                  {userFinancial.transport_mode?.replace('_', ' ').toLowerCase()}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm font-medium mb-2" style={{ color: colors.text.secondary }}>
+                  Spending Style
+                </p>
+                <p className="text-lg font-semibold capitalize">
+                  {userFinancial.spending_style?.toLowerCase()}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm font-medium mb-2" style={{ color: colors.text.secondary }}>
+                  Work Style
+                </p>
+                <p className="text-lg font-semibold capitalize">
+                  {userFinancial.work_style?.replace('_', ' ').toLowerCase()}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm font-medium mb-2" style={{ color: colors.text.secondary }}>
+                  Family Status
+                </p>
+                <p className="text-lg font-semibold capitalize">
+                  {userFinancial.family_status?.toLowerCase()}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm font-medium mb-2" style={{ color: colors.text.secondary }}>
+                  Study Intensity
+                </p>
+                <p className="text-lg font-semibold capitalize">
+                  {userFinancial.study_intensity?.replace('_', ' ').toLowerCase()}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm font-medium mb-2" style={{ color: colors.text.secondary }}>
+                  Health Need
+                </p>
+                <p className="text-lg font-semibold capitalize">
+                  {userFinancial.health_need?.toLowerCase()}
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div
+              className="p-4 rounded-lg text-center"
+              style={{ backgroundColor: colors.background.secondary }}
+            >
+              <Text style={{ color: colors.text.secondary }}>
+                No financial profile information set up yet.
+              </Text>
+            </div>
+          )}
+        </Card>
+
+
 
         {/* User Income Modal */}
         <UserIncomeModal
           isOpen={isUserIncomeModalOpen}
           onClose={() => setIsUserIncomeModalOpen(false)}
           onSuccess={handleUserIncomeSuccess}
+        />
+
+        {/* User Financial Modal */}
+        <UserFinancialModal
+          isOpen={isUserFinancialModalOpen}
+          onClose={() => setIsUserFinancialModalOpen(false)}
+          onSuccess={handleUserFinancialSuccess}
         />
       </div>
     </SidebarLayout>

@@ -66,7 +66,11 @@ export const Button: React.FC<ButtonProps> = ({
     disabled:cursor-not-allowed
     hover:shadow-2xl
     active:shadow-lg
+    whitespace-nowrap
+    shrink-0
   `;
+
+  const { style, ...restProps } = props;
 
   return (
     <button
@@ -75,11 +79,12 @@ export const Button: React.FC<ButtonProps> = ({
         borderRadius: BORDER_RADIUS.xl,
         boxShadow: shadowStyles[elevation],
         transition: TRANSITIONS.base,
+        ...(style || {}),
       }}
       className={`${baseStyles} ${sizeStyles[size]} ${className}`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      {...props}
+      {...restProps}
     />
   );
 };

@@ -53,6 +53,7 @@ export const API_ENDPOINTS = {
   // AI
   ai: {
     submit: '/api/v1/ai',
+    generateBudget: '/api/v1/ai/budget/generate',
   },
 
   // Users
@@ -71,6 +72,14 @@ export const API_ENDPOINTS = {
     create: '/api/v1/user-income/me',
     update: '/api/v1/user-income/me',
     delete: '/api/v1/user-income/me',
+  },
+
+  // User Financial Profile
+  userFinancial: {
+    get: '/api/v1/user-financial-profile',
+    create: '/api/v1/user-financial-profile',
+    update: '/api/v1/user-financial-profile',
+    delete: '/api/v1/user-financial-profile',
   },
 
   // Projects

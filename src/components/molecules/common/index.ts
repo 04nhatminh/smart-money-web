@@ -22,9 +22,11 @@ export { CreateProjectModal } from './CreateProjectModal';
 export { EditProjectModal } from './EditProjectModal';
 export { AddContributionModal } from './AddContributionModal';
 export { UserIncomeModal } from './UserIncomeModal';
+export { UserFinancialModal } from './UserFinancialModal';
 export { ProjectAdvisorModeModal } from './ProjectAdvisorModeModal';
 export { ProjectAdvisorResultModal } from './ProjectAdvisorResultModal';
 export { CsvImportModal } from './CsvImportModal';
 export { CsvExportModal } from './CsvExportModal';
 export { DatePeriodSelector } from './DatePeriodSelector';
+export { GenerateBudgetModal } from './GenerateBudgetModal';
 

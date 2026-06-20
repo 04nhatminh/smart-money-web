@@ -205,7 +205,7 @@ export const ProjectAdvisorResultModal: React.FC<ProjectAdvisorResultModalProps>
               }}
             >
               <Text className="text-xs" style={{ color: colors.text.tertiary }}>
-                ℹ️ If you agree, your project will be created with these suggested parameters.
+                If you agree, your project will be created with these suggested parameters.
               </Text>
             </div>
 

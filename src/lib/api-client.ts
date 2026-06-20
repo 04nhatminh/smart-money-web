@@ -53,7 +53,17 @@ export const apiClient = {
         credentials: 'include',
       });
 
-      const data = await response.json();
+      // Handle empty response body
+      let data: any;
+      const contentType = response.headers.get('content-type');
+      const contentLength = response.headers.get('content-length');
+      
+      if (contentLength === '0' || !contentType?.includes('application/json')) {
+        // Empty response or non-JSON response
+        data = {};
+      } else {
+        data = await response.json();
+      }
 
       if (!response.ok) {
         const errorMessage = extractErrorMessage(data);
