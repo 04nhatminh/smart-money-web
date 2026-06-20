@@ -9,4 +9,5 @@ export { useUserFinancial } from './useUserFinancial';
 export { useAnalytics } from './useAnalytics';
 export { useScrollAnimation } from './useScrollAnimation';
 export type { ScrollAnimationVariant } from './useScrollAnimation';
+export { useGroups } from './useGroups';
 

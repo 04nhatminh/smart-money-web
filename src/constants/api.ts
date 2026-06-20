@@ -99,4 +99,25 @@ export const API_ENDPOINTS = {
     getContributionsSummary: (id: string) => `/api/v1/projects/${id}/contributions/summary`,
     projectAdvisor: '/api/v1/projects/project-advisor',
   },
+
+  // Groups
+  groups: {
+    list: '/api/v1/groups',
+    create: '/api/v1/groups',
+    getById: (id: string) => `/api/v1/groups/${id}`,
+    lock: (id: string) => `/api/v1/groups/${id}/lock`,
+    invite: (id: string) => `/api/v1/groups/${id}/members/invite`,
+    acceptInvite: '/api/v1/groups/invites/accept',
+    declineInvite: '/api/v1/groups/invites/decline',
+    removeMember: (groupId: string, userId: string) => `/api/v1/groups/${groupId}/members/${userId}`,
+  },
+
+  // Group Projects
+  groupProjects: {
+    create: '/api/v1/group-projects',
+    getById: (id: string) => `/api/v1/group-projects/${id}`,
+    suggestions: '/api/v1/group-projects/suggestions',
+    join: (id: string) => `/api/v1/group-projects/${id}/join`,
+    dissolve: (id: string) => `/api/v1/group-projects/${id}/dissolve`,
+  },
 } as const;

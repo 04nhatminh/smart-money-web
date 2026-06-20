@@ -14,11 +14,15 @@ import {
   DeleteConfirmationModal,
   UserIncomeModal,
   GenerateBudgetModal,
+  CreateGroupModal,
+  GroupDetailModal,
 } from '@/components/molecules/common';
 import { useTheme } from '@/context/ThemeContext';
 import { useProjects } from '@/hooks/useProjects';
+import { useGroups } from '@/hooks/useGroups';
 import { ProjectListItem, ProjectDetail } from '@/types/project.api';
-import { MdAdd, MdFilterList } from 'react-icons/md';
+import { GroupSummaryResponse } from '@/types/group.api';
+import { MdAdd, MdFilterList, MdGroup, MdAssignment, MdLock, MdLockOpen } from 'react-icons/md';
 
 export default function ProjectsPage() {
   const router = useRouter();
@@ -26,8 +30,12 @@ export default function ProjectsPage() {
   const t = useTranslations();
   const { isAuthenticated, isInitializing } = useAuth();
   const { colors } = useTheme();
-  const { listProjects, getProject, deleteProject, isLoading } = useProjects();
+  const { listProjects, getProject, deleteProject, isLoading: projectsLoading } = useProjects();
+  const { listGroups, isLoading: groupsLoading } = useGroups();
 
+  const [activeTab, setActiveTab] = useState<'projects' | 'groups'>('projects');
+  
+  // Projects State
   const [projects, setProjects] = useState<ProjectListItem[]>([]);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -41,6 +49,14 @@ export default function ProjectsPage() {
   const [error, setError] = useState<string | null>(null);
   const [filterStatus, setFilterStatus] = useState<'ALL' | 'ACTIVE' | 'COMPLETED' | 'CANCELLED'>('ALL');
 
+  // Groups State
+  const [groups, setGroups] = useState<GroupSummaryResponse[]>([]);
+  const [isCreateGroupModalOpen, setIsCreateGroupModalOpen] = useState(false);
+  const [isGroupDetailModalOpen, setIsGroupDetailModalOpen] = useState(false);
+  const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
+  const [defaultCreateType, setDefaultCreateType] = useState<'PERSONAL' | 'GROUP'>('PERSONAL');
+  const [defaultCreateGroupId, setDefaultCreateGroupId] = useState<string | undefined>(undefined);
+
   // Check authentication
   useEffect(() => {
     if (!isInitializing && !isAuthenticated) {
@@ -48,10 +64,11 @@ export default function ProjectsPage() {
     }
   }, [isAuthenticated, isInitializing, router, locale]);
 
-  // Load projects
+  // Load projects & groups
   useEffect(() => {
     if (isAuthenticated) {
       loadProjects();
+      loadGroups();
     }
   }, [isAuthenticated]);
 
@@ -69,6 +86,17 @@ export default function ProjectsPage() {
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : t('projects.loadFailed');
       setError(errorMsg);
+    }
+  };
+
+  const loadGroups = async () => {
+    try {
+      const result = await listGroups();
+      if (result.success && result.data) {
+        setGroups(result.data);
+      }
+    } catch (err) {
+      console.error('Failed to load groups:', err);
     }
   };
 
@@ -98,7 +126,6 @@ export default function ProjectsPage() {
       setError(null);
       const result = await getProject(projectId);
       if (result.success && result.data) {
-        // Navigate to project details page
         router.push(`/${locale}/projects/${projectId}`);
       } else {
         setError(t('projects.loadDetailsFailed'));
@@ -139,6 +166,17 @@ export default function ProjectsPage() {
     setProjectToDelete(null);
   };
 
+  const handleGroupClick = (groupId: string) => {
+    setSelectedGroupId(groupId);
+    setIsGroupDetailModalOpen(true);
+  };
+
+  const handleCreateGroupProject = (groupId: string) => {
+    setDefaultCreateType('GROUP');
+    setDefaultCreateGroupId(groupId);
+    setIsCreateModalOpen(true);
+  };
+
   // Filter projects based on status
   const filteredProjects = filterStatus === 'ALL'
     ? projects
@@ -155,18 +193,12 @@ export default function ProjectsPage() {
 
   const stats = getProjectStats();
 
-  // Helper functions for project limits
   const canCreateProject = () => projects.length < 3;
 
   const getPrioritiesUsed = () => {
     const used = new Set<string>();
     projects.forEach(p => used.add(p.priority));
     return used;
-  };
-
-  const getAvailablePriorities = () => {
-    const used = getPrioritiesUsed();
-    return ['LOW', 'MEDIUM', 'HIGH'].filter(p => !used.has(p));
   };
 
   if (isInitializing) {
@@ -179,6 +211,8 @@ export default function ProjectsPage() {
     );
   }
 
+  const isLoading = projectsLoading || groupsLoading;
+
   return (
     <SidebarLayout>
       <div className="space-y-6">
@@ -189,61 +223,74 @@ export default function ProjectsPage() {
               {t('projects.title')}
             </Heading>
             <Text style={{ color: colors.text.secondary }} className="mt-1">
-              {t('projects.subtitle')}
+              Manage your personal savings projects and collaborative group projects.
             </Text>
           </div>
           <div className="flex items-center gap-3">
-            {!canCreateProject() && (
-              <div
-                className="px-4 py-2 rounded-lg text-sm"
-                style={{
-                  backgroundColor: '#F59E0B20',
-                  color: '#F59E0B',
-                }}
+            {activeTab === 'projects' ? (
+              <>
+                {!canCreateProject() && (
+                  <div
+                    className="px-4 py-2 rounded-lg text-sm"
+                    style={{
+                      backgroundColor: '#F59E0B20',
+                      color: '#F59E0B',
+                    }}
+                  >
+                    {t('projects.maxLimitReached')}
+                  </div>
+                )}
+                <Button
+                  variant="primary"
+                  onClick={() => {
+                    setDefaultCreateType('PERSONAL');
+                    setDefaultCreateGroupId(undefined);
+                    setIsCreateModalOpen(true);
+                  }}
+                  className="flex items-center gap-2"
+                  disabled={!canCreateProject()}
+                >
+                  <MdAdd size={20} />
+                  {t('projects.newProject')}
+                </Button>
+              </>
+            ) : (
+              <Button
+                variant="primary"
+                onClick={() => setIsCreateGroupModalOpen(true)}
+                className="flex items-center gap-2"
               >
-                {t('projects.maxLimitReached')}
-              </div>
+                <MdAdd size={20} />
+                New Group
+              </Button>
             )}
-            <Button
-              variant="primary"
-              onClick={() => setIsCreateModalOpen(true)}
-              className="flex items-center gap-2"
-              disabled={!canCreateProject()}
-            >
-              <MdAdd size={20} />
-              {t('projects.newProject')}
-            </Button>
           </div>
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {[
-            { label: t('projects.stats.total'), value: stats.total, color: colors.interactive.primary },
-            { label: t('projects.stats.active'), value: stats.active, color: '#10B981' },
-            { label: t('projects.stats.completed'), value: stats.completed, color: '#6B7280' },
-            { label: t('projects.stats.cancelled'), value: stats.cancelled, color: '#EF4444' },
-          ].map((stat, idx) => (
-            <div
-              key={idx}
-              className="p-4 rounded-lg border"
-              style={{
-                borderColor: colors.border.light,
-                backgroundColor: colors.surface.primary,
-              }}
-            >
-              <Text className="text-sm" style={{ color: colors.text.secondary }}>
-                {stat.label}
-              </Text>
-              <Heading
-                level={2}
-                className="mt-1"
-                style={{ color: stat.color }}
-              >
-                {stat.value}
-              </Heading>
-            </div>
-          ))}
+        {/* Tab Headers */}
+        <div className="flex border-b" style={{ borderColor: colors.border.light }}>
+          <button
+            onClick={() => setActiveTab('projects')}
+            className="px-6 py-3 font-semibold text-sm transition-all flex items-center gap-2 relative border-b-2"
+            style={{
+              borderColor: activeTab === 'projects' ? colors.interactive.primary : 'transparent',
+              color: activeTab === 'projects' ? colors.interactive.primary : colors.text.secondary,
+            }}
+          >
+            <MdAssignment size={18} />
+            Projects
+          </button>
+          <button
+            onClick={() => setActiveTab('groups')}
+            className="px-6 py-3 font-semibold text-sm transition-all flex items-center gap-2 relative border-b-2"
+            style={{
+              borderColor: activeTab === 'groups' ? colors.interactive.primary : 'transparent',
+              color: activeTab === 'groups' ? colors.interactive.primary : colors.text.secondary,
+            }}
+          >
+            <MdGroup size={18} />
+            Groups
+          </button>
         </div>
 
         {/* Error Message */}
@@ -259,87 +306,192 @@ export default function ProjectsPage() {
           </div>
         )}
 
-        {/* Filter */}
-        <div className="flex gap-2 flex-wrap">
-          <button
-            onClick={() => setFilterStatus('ALL')}
-            className="px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
-            style={{
-              backgroundColor: filterStatus === 'ALL' ? colors.interactive.primary : colors.background.secondary,
-              color: filterStatus === 'ALL' ? 'white' : colors.text.primary,
-            }}
-          >
-            <MdFilterList size={16} />
-            {t('projects.filter.all')}
-          </button>
-          <button
-            onClick={() => setFilterStatus('ACTIVE')}
-            className="px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-            style={{
-              backgroundColor: filterStatus === 'ACTIVE' ? '#10B981' : colors.background.secondary,
-              color: filterStatus === 'ACTIVE' ? 'white' : colors.text.primary,
-            }}
-          >
-            {t('projects.filter.active')}
-          </button>
-          <button
-            onClick={() => setFilterStatus('COMPLETED')}
-            className="px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-            style={{
-              backgroundColor: filterStatus === 'COMPLETED' ? '#6B7280' : colors.background.secondary,
-              color: filterStatus === 'COMPLETED' ? 'white' : colors.text.primary,
-            }}
-          >
-            {t('projects.filter.completed')}
-          </button>
-          <button
-            onClick={() => setFilterStatus('CANCELLED')}
-            className="px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-            style={{
-              backgroundColor: filterStatus === 'CANCELLED' ? '#EF4444' : colors.background.secondary,
-              color: filterStatus === 'CANCELLED' ? 'white' : colors.text.primary,
-            }}
-          >
-            {t('projects.filter.cancelled')}
-          </button>
-        </div>
+        {/* Projects Tab */}
+        {activeTab === 'projects' && (
+          <div className="space-y-6">
+            {/* Stats */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {[
+                { label: t('projects.stats.total'), value: stats.total, color: colors.interactive.primary },
+                { label: t('projects.stats.active'), value: stats.active, color: '#10B981' },
+                { label: t('projects.stats.completed'), value: stats.completed, color: '#6B7280' },
+                { label: t('projects.stats.cancelled'), value: stats.cancelled, color: '#EF4444' },
+              ].map((stat, idx) => (
+                <div
+                  key={idx}
+                  className="p-4 rounded-lg border bg-white"
+                  style={{
+                    borderColor: colors.border.light,
+                  }}
+                >
+                  <Text className="text-sm" style={{ color: colors.text.secondary }}>
+                    {stat.label}
+                  </Text>
+                  <Heading
+                    level={2}
+                    className="mt-1"
+                    style={{ color: stat.color }}
+                  >
+                    {stat.value}
+                  </Heading>
+                </div>
+              ))}
+            </div>
 
-        {/* Projects Grid */}
-        {filteredProjects.length === 0 ? (
-          <div
-            className="rounded-lg p-12 text-center border"
-            style={{
-              borderColor: colors.border.light,
-              backgroundColor: colors.surface.primary,
-            }}
-          >
-            <Heading level={3} style={{ color: colors.text.secondary }} className="mb-2">
-              {t('projects.noProjects')}
-            </Heading>
-            <Text style={{ color: colors.text.tertiary }} className="mb-4">
-              {projects.length === 0 ? t('projects.createFirst') : t('projects.noProjectsMatch')}
-            </Text>
-            {projects.length === 0 && (
-              <Button
-                variant="primary"
-                onClick={() => setIsCreateModalOpen(true)}
+            {/* Filter */}
+            <div className="flex gap-2 flex-wrap">
+              <button
+                onClick={() => setFilterStatus('ALL')}
+                className="px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+                style={{
+                  backgroundColor: filterStatus === 'ALL' ? colors.interactive.primary : colors.background.secondary,
+                  color: filterStatus === 'ALL' ? 'white' : colors.text.primary,
+                }}
               >
-                {t('projects.createFirstBtn')}
-              </Button>
+                <MdFilterList size={16} />
+                {t('projects.filter.all')}
+              </button>
+              <button
+                onClick={() => setFilterStatus('ACTIVE')}
+                className="px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                style={{
+                  backgroundColor: filterStatus === 'ACTIVE' ? '#10B981' : colors.background.secondary,
+                  color: filterStatus === 'ACTIVE' ? 'white' : colors.text.primary,
+                }}
+              >
+                {t('projects.filter.active')}
+              </button>
+              <button
+                onClick={() => setFilterStatus('COMPLETED')}
+                className="px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                style={{
+                  backgroundColor: filterStatus === 'COMPLETED' ? '#6B7280' : colors.background.secondary,
+                  color: filterStatus === 'COMPLETED' ? 'white' : colors.text.primary,
+                }}
+              >
+                {t('projects.filter.completed')}
+              </button>
+              <button
+                onClick={() => setFilterStatus('CANCELLED')}
+                className="px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                style={{
+                  backgroundColor: filterStatus === 'CANCELLED' ? '#EF4444' : colors.background.secondary,
+                  color: filterStatus === 'CANCELLED' ? 'white' : colors.text.primary,
+                }}
+              >
+                {t('projects.filter.cancelled')}
+              </button>
+            </div>
+
+            {/* Projects Grid */}
+            {filteredProjects.length === 0 ? (
+              <div
+                className="rounded-lg p-12 text-center border bg-white"
+                style={{
+                  borderColor: colors.border.light,
+                }}
+              >
+                <Heading level={3} style={{ color: colors.text.secondary }} className="mb-2">
+                  {t('projects.noProjects')}
+                </Heading>
+                <Text style={{ color: colors.text.tertiary }} className="mb-4">
+                  {projects.length === 0 ? t('projects.createFirst') : t('projects.noProjectsMatch')}
+                </Text>
+                {projects.length === 0 && (
+                  <Button
+                    variant="primary"
+                    onClick={() => {
+                      setDefaultCreateType('PERSONAL');
+                      setDefaultCreateGroupId(undefined);
+                      setIsCreateModalOpen(true);
+                    }}
+                  >
+                    {t('projects.createFirstBtn')}
+                  </Button>
+                )}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {filteredProjects.map((project) => (
+                  <ProjectCard
+                    key={project.projectId}
+                    project={project}
+                    onEdit={handleEditClick}
+                    onDelete={handleDeleteClick}
+                    onContribute={handleContributeClick}
+                    onViewDetails={handleViewDetails}
+                  />
+                ))}
+              </div>
             )}
           </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredProjects.map((project) => (
-              <ProjectCard
-                key={project.projectId}
-                project={project}
-                onEdit={handleEditClick}
-                onDelete={handleDeleteClick}
-                onContribute={handleContributeClick}
-                onViewDetails={handleViewDetails}
-              />
-            ))}
+        )}
+
+        {/* Groups Tab */}
+        {activeTab === 'groups' && (
+          <div className="space-y-6">
+            {groups.length === 0 ? (
+              <div
+                className="rounded-lg p-12 text-center border bg-white"
+                style={{ borderColor: colors.border.light }}
+              >
+                <Heading level={3} style={{ color: colors.text.secondary }} className="mb-2">
+                  No groups found
+                </Heading>
+                <Text style={{ color: colors.text.tertiary }} className="mb-4">
+                  You are not a member of any active forming groups. Create one now to start saving together!
+                </Text>
+                <Button
+                  variant="primary"
+                  onClick={() => setIsCreateGroupModalOpen(true)}
+                >
+                  Create Your First Group
+                </Button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {groups.map((group) => {
+                  const isAdmin = group.adminId === group.groupId; // Wait, checking role instead
+                  const isUserAdmin = group.myRole === 'ADMIN';
+                  return (
+                    <div
+                      key={group.groupId}
+                      onClick={() => handleGroupClick(group.groupId)}
+                      className="border rounded-2xl p-5 bg-white shadow-sm hover:shadow-md transition-all cursor-pointer flex flex-col justify-between h-[180px]"
+                      style={{ borderColor: colors.border.light }}
+                    >
+                      <div>
+                        <div className="flex justify-between items-start gap-2">
+                          <Heading level={4} className="m-0 line-clamp-1" style={{ color: colors.text.primary }}>
+                            {group.name}
+                          </Heading>
+                          <span className={`text-[10px] uppercase font-extrabold px-2 py-0.5 rounded-full shrink-0 flex items-center gap-1 border`} style={{
+                            backgroundColor: group.status === 'LOCKED' ? '#F59E0B15' : '#10B98115',
+                            borderColor: group.status === 'LOCKED' ? '#F59E0B20' : '#10B98120',
+                            color: group.status === 'LOCKED' ? '#F59E0B' : '#10B981',
+                          }}>
+                            {group.status === 'LOCKED' ? <MdLock size={10} /> : <MdLockOpen size={10} />}
+                            {group.status}
+                          </span>
+                        </div>
+                        <Text style={{ color: colors.text.secondary }} className="text-xs mt-1.5 line-clamp-2">
+                          {group.description || 'No description provided.'}
+                        </Text>
+                      </div>
+
+                      <div className="flex items-center justify-between border-t pt-3 mt-4" style={{ borderColor: colors.border.light }}>
+                        <span className="text-xs px-2.5 py-1 rounded bg-gray-100 font-bold text-gray-600">
+                          {group.memberCount} Joined
+                        </span>
+                        <span className={`text-xs font-bold uppercase ${isUserAdmin ? 'text-indigo-600' : 'text-gray-500'}`}>
+                          {group.myRole}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         )}
 
@@ -357,7 +509,33 @@ export default function ProjectsPage() {
           }}
           usedPriorities={Array.from(getPrioritiesUsed())}
           maxProjectsReached={!canCreateProject()}
+          defaultType={defaultCreateType}
+          defaultGroupId={defaultCreateGroupId}
         />
+
+        <CreateGroupModal
+          isOpen={isCreateGroupModalOpen}
+          onClose={() => setIsCreateGroupModalOpen(false)}
+          onSuccess={() => {
+            loadGroups();
+          }}
+        />
+
+        {selectedGroupId && (
+          <GroupDetailModal
+            isOpen={isGroupDetailModalOpen}
+            groupId={selectedGroupId}
+            onClose={() => {
+              setIsGroupDetailModalOpen(false);
+              setSelectedGroupId(null);
+            }}
+            onSuccess={() => {
+              loadGroups();
+              loadProjects();
+            }}
+            onCreateProject={handleCreateGroupProject}
+          />
+        )}
 
         <UserIncomeModal
           isOpen={isUserIncomeModalOpen}
