@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useLocale } from 'next-intl';
 import { Button, Heading, Text } from '@/components/atoms';
+import { ThemeToggle, LanguageToggle } from '@/components/molecules';
 import { useTheme } from '@/context';
 import { useAuth } from '@/context/AuthContext';
 import { useTranslations } from 'next-intl';
@@ -94,6 +95,8 @@ export const Header: React.FC<HeaderProps> = ({
 
           {/* Actions - Right */}
           <div className="flex gap-4 items-center">
+            <ThemeToggle />
+            <LanguageToggle />
             {showAuthActions && (
               <>
                 <Button variant="secondary" size="md" className="hidden sm:block" onClick={handleLoginClick}>

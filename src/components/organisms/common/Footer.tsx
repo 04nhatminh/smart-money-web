@@ -2,7 +2,6 @@
 
 import React from 'react';
 import { Button, Text, Heading } from '@/components/atoms';
-import { ThemeToggle, LanguageToggle } from '@/components/molecules';
 import { useTheme } from '@/context';
 import { useTranslations } from 'next-intl';
 
@@ -126,17 +125,6 @@ export const Footer: React.FC<FooterProps> = ({
               <Text variant="caption" style={{ color: colors.text.secondary }} className="text-center md:text-left">
                 © {year} {appName}. {t('page.copyright')}
               </Text>
-              <div className="flex flex-wrap gap-6 items-center justify-center md:justify-end">
-                <div className="flex items-center gap-2 flex-shrink-0">
-                  <Text variant="caption" style={{ color: colors.text.secondary }}>
-                    {t('common.theme')}:
-                  </Text>
-                  <ThemeToggle />
-                </div>
-                <div className="flex-shrink-0">
-                  <LanguageToggle />
-                </div>
-              </div>
             </div>
           </div>
         </div>

@@ -184,14 +184,14 @@ export const UserFinancialModal: React.FC<UserFinancialModalProps> = ({
 
       {/* Modal */}
       <div className="fixed inset-0 flex items-center justify-center p-4 pointer-events-none" style={{ zIndex: 1000 }}>
-        <div
-          className="bg-white rounded-lg shadow-2xl max-w-md w-full pointer-events-auto overflow-y-auto max-h-[90vh]"
+         <div
+          className="bg-white rounded-lg shadow-2xl max-w-md w-full pointer-events-auto overflow-hidden flex flex-col max-h-[90vh]"
           style={{ backgroundColor: colors.background.primary }}
           onClick={e => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b sticky top-0" style={{ borderColor: colors.border.light, backgroundColor: colors.background.primary }}>
-            <Heading level={3} className="m-0" style={{ color: colors.text.primary }}>
+          <div className="flex items-center justify-between p-6 border-b" style={{ borderColor: colors.border.light, backgroundColor: colors.background.primary }}>
+            <Heading level={3} className="m-0">
               {isEditMode ? 'Edit Financial Profile' : 'Create Financial Profile'}
             </Heading>
             <button
@@ -204,7 +204,7 @@ export const UserFinancialModal: React.FC<UserFinancialModalProps> = ({
           </div>
 
           {/* Content */}
-          <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          <form onSubmit={handleSubmit} className="p-6 space-y-4 overflow-y-auto flex-1">
             {/* Success Message */}
             {success && (
               <div

@@ -108,19 +108,32 @@ export default function ProfilePage() {
     <SidebarLayout>
       <div className="space-y-8">
         {/* Welcome Section */}
-        <div className="mb-8">
-          <Heading level={2}>
-            {t('common.profile')}
-          </Heading>
-          <Text style={{ color: colors.text.secondary }}>
-            {t('profile.editProfileDescription')}
-          </Text>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+          <div>
+            <Heading level={2}>
+              {t('common.profile')}
+            </Heading>
+            <Text style={{ color: colors.text.secondary }}>
+              {t('profile.editProfileDescription')}
+            </Text>
+          </div>
+          <div className="flex gap-3 shrink-0">
+            <Button
+              variant="primary"
+              onClick={() => router.push(`/${locale}/profile/edit`)}
+            >
+              {t('profile.editProfile')}
+            </Button>
+            <LogoutButton variant="secondary">
+              {t('profile.logout')}
+            </LogoutButton>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* User Profile Card */}
           <div className="md:col-span-1">
-            <Card className="p-6 h-full">
+            <Card className="p-6 h-full flex flex-col justify-center">
               <div className="text-center">
                 {user?.avatar ? (
                   <img
@@ -145,19 +158,6 @@ export default function ProfilePage() {
                 >
                   {user?.email}
                 </p>
-                {user?.coin !== undefined && (
-                  <div
-                    className="p-3 rounded-lg mb-4"
-                    style={{ backgroundColor: colors.surface.secondary }}
-                  >
-                    <p className="text-xs" style={{ color: colors.text.secondary }}>
-                      {t('profile.coinsBalance')}
-                    </p>
-                    <p className="text-2xl font-bold" style={{ color: colors.interactive.primary }}>
-                      {user.coin}
-                    </p>
-                  </div>
-                )}
               </div>
             </Card>
           </div>
@@ -165,7 +165,7 @@ export default function ProfilePage() {
           {/* Account Information Card */}
           <div className="md:col-span-2">
             <Card className="p-6">
-              <Heading level={3} className="mb-6">{t('profile.accountInfo')}</Heading>
+              <Heading level={3} className="pb-3">{t('profile.accountInfo')}</Heading>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <p className="text-sm font-medium mb-2" style={{ color: colors.text.secondary }}>
@@ -372,20 +372,7 @@ export default function ProfilePage() {
           )}
         </Card>
 
-        {/* Action Buttons */}
-        <div className="flex gap-4 pt-4">
-          <Button
-            variant="primary"
-            onClick={() => router.push(`/${locale}/profile/edit`)}
-          >
-            {t('profile.editProfile')}
-          </Button>
-          <LogoutButton
-            variant="secondary"
-          >
-            {t('profile.logout')}
-          </LogoutButton>
-        </div>
+
 
         {/* User Income Modal */}
         <UserIncomeModal
