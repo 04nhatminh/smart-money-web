@@ -8,6 +8,7 @@ export type GroupProjectStatus = 'ACTIVE' | 'COMPLETED' | 'DISSOLVED';
 export interface GroupMemberResponse {
   userId: string;
   username: string;
+  email: string;
   role: GroupMemberRole;
   inviteStatus: GroupMemberInviteStatus;
   capacitySnapshot: number;

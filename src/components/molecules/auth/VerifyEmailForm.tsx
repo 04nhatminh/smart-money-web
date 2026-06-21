@@ -73,7 +73,7 @@ export const VerifyEmailForm: React.FC<VerifyEmailFormProps> = ({ email }) => {
       // apiClient.post returns response data directly (not wrapped in .data)
       // API response format: { success: boolean, message: string }
       console.log('[VerifyEmailForm] Verify response:', response);
-      
+
       if (response && response.success === true) {
         setSuccess('Email verified successfully! Redirecting to login...');
         setTimeout(() => {
@@ -119,9 +119,9 @@ export const VerifyEmailForm: React.FC<VerifyEmailFormProps> = ({ email }) => {
     <form onSubmit={handleSubmit} className="space-y-6 w-full max-w-md">
       {/* Logo and Website Name */}
       <div className="flex items-center justify-center mb-8">
-        <img 
-          src="/logo-nobg.png" 
-          alt="SmartMoney" 
+        <img
+          src="/logo.png"
+          alt="SmartMoney"
           className="h-12 w-12 object-contain mr-3 flex-shrink-0"
           style={{ filter: colorScheme === 'dark' ? 'brightness(0) invert(1)' : 'none' }}
         />
@@ -180,10 +180,10 @@ export const VerifyEmailForm: React.FC<VerifyEmailFormProps> = ({ email }) => {
       </div>
 
       {/* Submit Button */}
-      <Button 
-        variant="primary" 
-        type="submit" 
-        className="w-full py-3 mt-6 text-lg font-semibold" 
+      <Button
+        variant="primary"
+        type="submit"
+        className="w-full py-3 mt-6 text-lg font-semibold"
         disabled={isLoading || otp.length !== 6}
       >
         {isLoading ? 'Verifying...' : 'Verify Email'}
@@ -212,8 +212,8 @@ export const VerifyEmailForm: React.FC<VerifyEmailFormProps> = ({ email }) => {
 
       {/* Back to Login */}
       <p className="text-center text-sm" style={{ color: colors.text.secondary }}>
-        <Link 
-          href={`/${locale}/login`} 
+        <Link
+          href={`/${locale}/login`}
           className="font-semibold hover:opacity-80 transition-opacity"
           style={{ color: colors.interactive.primary }}
         >

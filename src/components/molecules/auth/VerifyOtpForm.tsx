@@ -121,9 +121,9 @@ export const VerifyOtpForm: React.FC<VerifyOtpFormProps> = ({
     <form onSubmit={handleSubmit} className="space-y-6 w-full max-w-md">
       {/* Logo and Website Name - Clickable */}
       <div className="flex items-center justify-center mb-8 cursor-pointer group" onClick={() => router.push(`/${locale}`)}>
-        <img 
-          src="/logo-nobg.png" 
-          alt="SmartMoney" 
+        <img
+          src="/logo.png"
+          alt="SmartMoney"
           className="h-12 w-12 object-contain mr-3 group-opacity-80 transition-opacity flex-shrink-0"
           style={{ filter: colorScheme === 'dark' ? 'brightness(0) invert(1)' : 'none' }}
         />
@@ -188,10 +188,10 @@ export const VerifyOtpForm: React.FC<VerifyOtpFormProps> = ({
         </div>
       </div>
 
-      <Button 
-        variant="primary" 
-        type="submit" 
-        className="w-full py-3 mt-6 text-lg font-semibold" 
+      <Button
+        variant="primary"
+        type="submit"
+        className="w-full py-3 mt-6 text-lg font-semibold"
         disabled={isLoading}
       >
         {isLoading ? 'Verifying...' : 'Verify Code'}
@@ -199,7 +199,7 @@ export const VerifyOtpForm: React.FC<VerifyOtpFormProps> = ({
 
       <p className="text-center text-sm" style={{ color: colors.text.secondary }}>
         Remember your password?{' '}
-        <Link 
+        <Link
           href={`/${locale}/login`}
           className="font-semibold hover:opacity-80 transition-opacity"
           style={{ color: colors.interactive.primary }}

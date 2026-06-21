@@ -7,8 +7,8 @@ import { useGroups } from '@/hooks/useGroups';
 import { useAuth } from '@/context/AuthContext';
 import { useProjects } from '@/hooks/useProjects';
 import { GroupDetailResponse, GroupProjectDetailResponse, GroupMemberResponse } from '@/types/group.api';
-import { formatAmountInput, parseFormattedNumber } from '@/lib/format';
-import { MdClose, MdLock, MdPersonAdd, MdDelete, MdAddCircle, MdCheckCircle, MdCancel } from 'react-icons/md';
+import { formatAmountInput, parseFormattedNumber, formatNumber, formatPrice } from '@/lib/format';
+import { MdClose, MdLock, MdPersonAdd, MdDelete, MdAddCircle, MdCheckCircle, MdCancel, MdRefresh } from 'react-icons/md';
 
 interface GroupDetailModalProps {
   isOpen: boolean;
@@ -146,6 +146,26 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
     }
   };
 
+  const handleResendInvite = async (email: string) => {
+    if (!group || !email) return;
+    setError(null);
+    setSuccess(null);
+    setLocalLoading(true);
+    try {
+      const res = await inviteGroupMember(group.groupId, { email });
+      if (res.success) {
+        setSuccess(`Invitation resent to ${email}!`);
+      } else {
+        setError(res.error || 'Failed to resend invitation');
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+    } finally {
+      setLocalLoading(false);
+    }
+  };
+
+
   const handleLockGroup = async () => {
     if (!group) return;
     setError(null);
@@ -244,11 +264,11 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
           {/* Header */}
           <div className="flex items-center justify-between p-6 border-b shrink-0" style={{ borderColor: colors.border.light }}>
             <div>
-              <Heading level={3} className="m-0" style={{ color: colors.text.primary }}>
+              <Heading level={3}>
                 {group?.name || 'Loading group...'}
               </Heading>
               {group?.description && (
-                <Text style={{ color: colors.text.secondary }} className="text-sm mt-1">
+                <Text className="text-sm mt-1">
                   {group.description}
                 </Text>
               )}
@@ -326,7 +346,7 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
                       <div className="flex justify-between text-sm">
                         <Text style={{ color: colors.text.secondary }}>Total Saved</Text>
                         <Text className="font-semibold">
-                          {projectDetail.aggregateMoneySaved.toLocaleString()} / {projectDetail.targetAmount.toLocaleString()} {projectDetail.currency}
+                          {formatNumber(projectDetail.aggregateMoneySaved ?? 0)} / {formatNumber(projectDetail.targetAmount ?? 0)} {projectDetail.currency}
                         </Text>
                       </div>
                       <div className="w-full bg-gray-100 rounded-full h-3.5 overflow-hidden flex" style={{ backgroundColor: colors.background.secondary }}>
@@ -339,15 +359,15 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
                         />
                       </div>
                       <Text className="text-right text-xs font-semibold" style={{ color: colors.interactive.primary }}>
-                        {projectDetail.progressPercent.toFixed(1)}% Completed
+                        {(projectDetail.progressPercent ?? 0).toFixed(1)}% Completed
                       </Text>
                     </div>
 
                     {/* Join flow for current user */}
                     {!hasJoinedProject() && (
                       <div className="p-4 border rounded-xl space-y-3" style={{ borderColor: colors.border.light, backgroundColor: `${colors.interactive.primary}05` }}>
-                        <Heading level={4} style={{ color: colors.interactive.primary }} className="text-sm">Join Group Project</Heading>
-                        <Text style={{ color: colors.text.secondary }} className="text-xs">
+                        <Heading level={4} className='pb-2'>Join Group Project</Heading>
+                        <Text className="text-xs">
                           Select priority to create your personal sub-project and contribute to the group goal.
                         </Text>
                         <div className="flex gap-2">
@@ -403,7 +423,7 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
 
                 {/* Member lineup & individual progress */}
                 <div className="space-y-3">
-                  <Heading level={4} style={{ color: colors.text.primary }}>Members</Heading>
+                  <Heading level={4} className='pb-2'>Members</Heading>
                   <div className="divide-y border rounded-xl overflow-hidden" style={{ borderColor: colors.border.light }}>
                     {group.members.map((member) => {
                       const prog = projectDetail?.members.find(m => m.userId === member.userId);
@@ -426,7 +446,7 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
                                 {member.inviteStatus === 'DECLINED' && <MdCancel className="text-red-500" />}
                                 {member.inviteStatus}
                               </span>
-                              <span>&bull; Snap: {member.capacitySnapshot.toLocaleString()} VND</span>
+                              {member.capacitySnapshot != null && <span>&bull; Snap: {formatPrice(member.capacitySnapshot)}</span>}
                             </div>
                           </div>
 
@@ -434,22 +454,35 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
                           {prog && prog.personalProjectId ? (
                             <div className="text-right">
                               <Text className="text-xs font-semibold" style={{ color: colors.text.secondary }}>
-                                Net: {prog.netSaved.toLocaleString()} / {prog.targetAmount.toLocaleString()}
+                                Net: {formatNumber(prog.netSaved ?? 0)} / {formatNumber(prog.targetAmount ?? 0)}
                               </Text>
                               <div className="text-[11px] font-bold mt-0.5" style={{ color: colors.interactive.primary }}>
-                                {prog.progressPercent.toFixed(0)}% Progress
+                                {(prog.progressPercent ?? 0).toFixed(0)}% Progress
                               </div>
                             </div>
                           ) : (
-                            isAdmin && member.inviteStatus === 'DECLINED' && (
-                              <button
-                                onClick={() => handleRemoveMember(member.userId)}
-                                className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                                title="Remove declined invitation"
-                              >
-                                <MdDelete size={18} />
-                              </button>
-                            )
+                            <div className="flex items-center gap-1">
+                              {isAdmin && member.inviteStatus === 'INVITED' && (
+                                <button
+                                  onClick={() => handleResendInvite(member.email)}
+                                  disabled={isLoading}
+                                  className="p-2 rounded-lg transition-colors hover:bg-yellow-50 disabled:opacity-50"
+                                  style={{ color: '#F59E0B' }}
+                                  title={`Resend invitation to ${member.email}`}
+                                >
+                                  <MdRefresh size={18} />
+                                </button>
+                              )}
+                              {isAdmin && member.inviteStatus === 'DECLINED' && (
+                                <button
+                                  onClick={() => handleRemoveMember(member.userId)}
+                                  className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                  title="Remove declined invitation"
+                                >
+                                  <MdDelete size={18} />
+                                </button>
+                              )}
+                            </div>
                           )}
                         </div>
                       );

@@ -85,9 +85,9 @@ export const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({
       <form className="space-y-6 w-full max-w-md">
         {/* Logo and Website Name */}
         <div className="flex items-center justify-center mb-8 cursor-pointer group" onClick={() => router.push(`/${locale}`)}>
-          <img 
-            src="/logo-nobg.png" 
-            alt="SmartMoney" 
+          <img
+            src="/logo.png"
+            alt="SmartMoney"
             className="h-12 w-12 object-contain mr-3 group-opacity-80 transition-opacity flex-shrink-0"
             style={{ filter: colorScheme === 'dark' ? 'brightness(0) invert(1)' : 'none' }}
           />
@@ -108,7 +108,7 @@ export const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({
         <div className="p-4 bg-green-100 text-green-700 rounded-lg border border-green-400">
           <h3 className="font-semibold mb-2">Code Sent</h3>
           <p className="text-sm">
-            We've sent a 6-digit verification code to <span className="font-semibold">{email}</span>. 
+            We've sent a 6-digit verification code to <span className="font-semibold">{email}</span>.
             Please check your email and enter the code.
           </p>
         </div>
@@ -136,9 +136,9 @@ export const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({
     <form onSubmit={handleSubmit} className="space-y-6 w-full max-w-md">
       {/* Logo and Website Name - Clickable */}
       <div className="flex items-center justify-center mb-8 cursor-pointer group" onClick={() => router.push(`/${locale}`)}>
-        <img 
-          src="/logo-nobg.png" 
-          alt="SmartMoney" 
+        <img
+          src="/logo.png"
+          alt="SmartMoney"
           className="h-12 w-12 object-contain mr-3 group-opacity-80 transition-opacity flex-shrink-0"
           style={{ filter: colorScheme === 'dark' ? 'brightness(0) invert(1)' : 'none' }}
         />
@@ -183,7 +183,7 @@ export const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({
 
       <p className="text-center text-sm" style={{ color: colors.text.secondary }}>
         Remember your password?{' '}
-        <Link 
+        <Link
           href={`/${locale}/login`}
           className="font-semibold hover:opacity-80 transition-opacity"
           style={{ color: colors.interactive.primary }}

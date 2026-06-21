@@ -34,7 +34,7 @@ export default function ProjectsPage() {
   const { listGroups, isLoading: groupsLoading } = useGroups();
 
   const [activeTab, setActiveTab] = useState<'projects' | 'groups'>('projects');
-  
+
   // Projects State
   const [projects, setProjects] = useState<ProjectListItem[]>([]);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -271,7 +271,7 @@ export default function ProjectsPage() {
         <div className="flex border-b" style={{ borderColor: colors.border.light }}>
           <button
             onClick={() => setActiveTab('projects')}
-            className="px-6 py-3 font-semibold text-sm transition-all flex items-center gap-2 relative border-b-2"
+            className="px-6 py-3 font-semibold text-sm transition-all flex items-center gap-2 relative border-b-2 hover:cursor-pointer"
             style={{
               borderColor: activeTab === 'projects' ? colors.interactive.primary : 'transparent',
               color: activeTab === 'projects' ? colors.interactive.primary : colors.text.secondary,
@@ -282,7 +282,7 @@ export default function ProjectsPage() {
           </button>
           <button
             onClick={() => setActiveTab('groups')}
-            className="px-6 py-3 font-semibold text-sm transition-all flex items-center gap-2 relative border-b-2"
+            className="px-6 py-3 font-semibold text-sm transition-all flex items-center gap-2 relative border-b-2 hover:cursor-pointer"
             style={{
               borderColor: activeTab === 'groups' ? colors.interactive.primary : 'transparent',
               color: activeTab === 'groups' ? colors.interactive.primary : colors.text.secondary,
@@ -324,13 +324,11 @@ export default function ProjectsPage() {
                     borderColor: colors.border.light,
                   }}
                 >
-                  <Text className="text-sm" style={{ color: colors.text.secondary }}>
+                  <Text className="text-sm">
                     {stat.label}
                   </Text>
                   <Heading
                     level={2}
-                    className="mt-1"
-                    style={{ color: stat.color }}
                   >
                     {stat.value}
                   </Heading>
@@ -462,7 +460,7 @@ export default function ProjectsPage() {
                     >
                       <div>
                         <div className="flex justify-between items-start gap-2">
-                          <Heading level={4} className="m-0 line-clamp-1" style={{ color: colors.text.primary }}>
+                          <Heading level={4} className="m-0 line-clamp-1">
                             {group.name}
                           </Heading>
                           <span className={`text-[10px] uppercase font-extrabold px-2 py-0.5 rounded-full shrink-0 flex items-center gap-1 border`} style={{
@@ -474,7 +472,7 @@ export default function ProjectsPage() {
                             {group.status}
                           </span>
                         </div>
-                        <Text style={{ color: colors.text.secondary }} className="text-xs mt-1.5 line-clamp-2">
+                        <Text className="text-xs mt-1.5 line-clamp-2">
                           {group.description || 'No description provided.'}
                         </Text>
                       </div>

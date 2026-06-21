@@ -232,7 +232,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
       {/* Logo and Website Name - Clickable */}
       <div className="flex items-center justify-center mb-8 cursor-pointer group" onClick={handleLogoClick}>
         <img
-          src="/logo-nobg.png"
+          src="/logo.png"
           alt="SmartMoney"
           className="h-12 w-12 object-contain mr-3 group-opacity-80 transition-opacity flex-shrink-0"
           style={{ filter: colorScheme === 'dark' ? 'brightness(0) invert(1)' : 'none' }}
