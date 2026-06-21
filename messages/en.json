@@ -14,6 +14,8 @@
     "search": "Search",
     "filter": "Filter",
     "loading": "Loading...",
+    "accept": "Accept",
+    "decline": "Decline",
     "error": "Error",
     "success": "Success",
     "warning": "Warning",
@@ -154,13 +156,23 @@
     "maxLength": "Maximum {max} characters allowed",
     "passwordMatch": "Passwords do not match"
   },
+  "errors": {
+    "failedToFetch": "Failed to connect to the server. Please check your internet connection.",
+    "noProjectsMatchingFilters": "No projects found matching the given filters."
+  },
   "notifications": {
     "welcome": "Welcome",
     "accountUpdated": "Account Updated",
     "transaction": "Transaction Confirmed",
     "markAllAsRead": "Mark All as Read",
     "noNotifications": "No Notifications",
-    "noNotificationsDesc": "You don't have any notifications yet."
+    "noNotificationsDesc": "You don't have any notifications yet.",
+    "notification_done": "{type} {amount} VND in {category}",
+    "expense": "Expense",
+    "income": "Income",
+    "inviteDescription": "You've been invited to join group \"{groupName}\". Tap to accept.",
+    "groupInvitation": "Group Invitation",
+    "notificationTitle": "Notification"
   },
   "profile": {
     "editProfile": "Edit Profile",

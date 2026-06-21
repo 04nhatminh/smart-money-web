@@ -49,6 +49,39 @@ export default function NotificationsPage() {
     }
   }, [isAuthenticated]);
 
+  const parseNotificationContent = (content: string) => {
+    if (content.startsWith('notification.notification_done|')) {
+      const parts = content.split('|');
+      if (parts.length >= 4) {
+        const typeKey = parts[1];
+        const amount = parts[2];
+        const category = parts[3];
+
+        const typeTranslated = typeKey === 'notification.expense'
+          ? (t('notifications.expense') || 'Expense')
+          : (t('notifications.income') || 'Income');
+
+        const categoryTranslated = t(`categories.${category}`) || category;
+        const formattedAmount = Number(amount).toLocaleString(locale === 'vi' ? 'vi-VN' : 'en-US');
+
+        return t('notifications.notification_done', {
+          type: typeTranslated,
+          amount: formattedAmount,
+          category: categoryTranslated,
+        }) || `${typeTranslated} ${formattedAmount} VND in ${categoryTranslated}`;
+      }
+    }
+
+    const inviteRegex = /You've been invited to join group "(.*)"\. Tap to accept\./;
+    const match = content.match(inviteRegex);
+    if (match) {
+      const groupName = match[1];
+      return t('notifications.inviteDescription', { groupName }) || `You've been invited to join group "${groupName}". Tap to accept.`;
+    }
+
+    return content;
+  };
+
   const loadNotifications = async () => {
     try {
       setIsLoading(true);
@@ -62,7 +95,12 @@ export default function NotificationsPage() {
       }
     } catch (err) {
       console.error('Failed to fetch notifications:', err);
-      setError('Could not load notifications from server.');
+      const errMessage = err instanceof Error ? err.message : '';
+      if (errMessage.toLowerCase().includes('failed to fetch') || errMessage.toLowerCase().includes('load notifications')) {
+        setError(t('errors.failedToFetch') || 'Could not load notifications from server.');
+      } else {
+        setError(errMessage || t('errors.failedToFetch') || 'Could not load notifications from server.');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -144,13 +182,13 @@ export default function NotificationsPage() {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <Heading level={1} style={{ color: colors.interactive.primary }}>
+            <Heading level={1}>
               {t('common.notifications') || 'Notifications'}
             </Heading>
             <Text style={{ color: colors.text.secondary }}>
               {notifications.length > 0
-                ? `You have ${notifications.length} notifications.`
-                : 'All caught up!'}
+                ? t('notificationsPage.unreadCount', { count: notifications.length }) || `You have ${notifications.length} notifications.`
+                : t('notificationsPage.allCaughtUp') || 'All caught up!'}
             </Text>
           </div>
           {notifications.length > 0 && (
@@ -159,7 +197,7 @@ export default function NotificationsPage() {
               size="sm"
               onClick={loadNotifications}
             >
-              Refresh
+              {t('analysis.refresh') || 'Refresh'}
             </Button>
           )}
         </div>
@@ -181,7 +219,7 @@ export default function NotificationsPage() {
           {notifications.length === 0 ? (
             <Card className="p-12 text-center">
               <MdNotifications className="w-16 h-16 mx-auto mb-4 opacity-50" style={{ color: colors.text.secondary }} />
-              <Heading level={3} style={{ color: colors.text.primary }}>
+              <Heading level={3}>
                 {t('notifications.noNotifications') || 'No Notifications'}
               </Heading>
               <Text style={{ color: colors.text.secondary }}>
@@ -192,7 +230,7 @@ export default function NotificationsPage() {
             notifications.map(notification => {
               const token = getInviteToken(notification.deepLink);
               const isInvite = token !== null;
-              
+
               return (
                 <div
                   key={notification.id}
@@ -207,14 +245,14 @@ export default function NotificationsPage() {
                     <div className="flex items-center gap-2">
                       <Heading
                         level={4}
-                        className="m-0"
-                        style={{ color: colors.text.primary }}
                       >
-                        {isInvite ? 'Group Invitation' : 'Notification'}
+                        {isInvite 
+                          ? (t('notifications.groupInvitation') || 'Group Invitation')
+                          : (t('notifications.notificationTitle') || 'Notification')}
                       </Heading>
                     </div>
                     <Text style={{ color: colors.text.secondary }}>
-                      {notification.content}
+                      {parseNotificationContent(notification.content)}
                     </Text>
                     <Text
                       className="text-xs"
@@ -235,7 +273,7 @@ export default function NotificationsPage() {
                         className="flex items-center gap-1.5"
                       >
                         <MdCheck size={16} />
-                        Accept
+                        {t('common.accept') || 'Accept'}
                       </Button>
                       <Button
                         variant="secondary"
@@ -243,10 +281,9 @@ export default function NotificationsPage() {
                         onClick={() => handleDeclineInvite(notification.id, token)}
                         disabled={actionLoading !== null}
                         className="flex items-center gap-1.5"
-                        style={{ color: '#EF4444', borderColor: '#EF444420' }}
                       >
                         <MdClose size={16} />
-                        Decline
+                        {t('common.decline') || 'Decline'}
                       </Button>
                     </div>
                   ) : null}

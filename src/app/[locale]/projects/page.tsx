@@ -81,11 +81,20 @@ export default function ProjectsPage() {
         const projectList = result.data.items || result.data.content || result.data || [];
         setProjects(projectList);
       } else {
-        setError(result.error || t('projects.loadFailed'));
+        const errorMsg = result.error || '';
+        if (errorMsg.toLowerCase().includes('failed to fetch')) {
+          setError(t('errors.failedToFetch'));
+        } else {
+          setError(errorMsg || t('projects.loadFailed'));
+        }
       }
     } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : t('projects.loadFailed');
-      setError(errorMsg);
+      const errorMsg = err instanceof Error ? err.message : '';
+      if (errorMsg.toLowerCase().includes('failed to fetch')) {
+        setError(t('errors.failedToFetch'));
+      } else {
+        setError(errorMsg || t('projects.loadFailed'));
+      }
     }
   };
 
@@ -393,7 +402,7 @@ export default function ProjectsPage() {
                   {t('projects.noProjects')}
                 </Heading>
                 <Text style={{ color: colors.text.tertiary }} className="mb-4">
-                  {projects.length === 0 ? t('projects.createFirst') : t('projects.noProjectsMatch')}
+                  {projects.length === 0 ? t('projects.createFirst') : (t('errors.noProjectsMatchingFilters') || t('projects.noProjectsMatch'))}
                 </Text>
                 {projects.length === 0 && (
                   <Button
