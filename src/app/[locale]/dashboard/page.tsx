@@ -17,18 +17,18 @@ import { getCookie } from '@/lib/auth';
 const PieTooltipCustom = ({ active, payload }: any) => {
   const t = useTranslations();
   const { colors } = useTheme();
-  
+
   if (!active || !payload?.length) return null;
   const d = payload[0].payload;
-  
+
   return (
     <div style={{
       background: colors.surface.primary === '#ffffff' ? 'rgba(255, 255, 255, 0.96)' : 'rgba(6, 5, 21, 0.96)',
       border: `1px solid ${colors.border.light}`,
       borderRadius: 10,
       padding: '10px 16px',
-      boxShadow: colors.surface.primary === '#ffffff' 
-        ? '0 4px 20px rgba(54, 41, 183, 0.15)' 
+      boxShadow: colors.surface.primary === '#ffffff'
+        ? '0 4px 20px rgba(54, 41, 183, 0.15)'
         : '0 4px 20px rgba(0, 0, 0, 0.5)',
     }}>
       <p style={{ color: colors.text.primary, fontWeight: 700, fontSize: 13 }}>{t(`categories.${d.category}`)}</p>
@@ -142,7 +142,7 @@ export default function DashboardPage() {
     if (isAuthenticated && user) {
       const incomeDone = user.incomeSetupCompleted ?? true;
       const financialDone = user.financialSetupCompleted ?? true;
-      
+
       if (!incomeDone) {
         setShowIncomePrompt(true);
       } else if (!financialDone) {

@@ -349,7 +349,7 @@ export default function ProjectsPage() {
             <div className="flex gap-2 flex-wrap">
               <button
                 onClick={() => setFilterStatus('ALL')}
-                className="px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+                className="px-4 py-2 rounded-lg text-sm font-medium hover:cursor-pointer flex items-center gap-2"
                 style={{
                   backgroundColor: filterStatus === 'ALL' ? colors.interactive.primary : colors.background.secondary,
                   color: filterStatus === 'ALL' ? 'white' : colors.text.primary,
@@ -360,7 +360,7 @@ export default function ProjectsPage() {
               </button>
               <button
                 onClick={() => setFilterStatus('ACTIVE')}
-                className="px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                className="px-4 py-2 rounded-lg text-sm font-medium hover:cursor-pointer"
                 style={{
                   backgroundColor: filterStatus === 'ACTIVE' ? '#10B981' : colors.background.secondary,
                   color: filterStatus === 'ACTIVE' ? 'white' : colors.text.primary,
@@ -370,7 +370,7 @@ export default function ProjectsPage() {
               </button>
               <button
                 onClick={() => setFilterStatus('COMPLETED')}
-                className="px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                className="px-4 py-2 rounded-lg text-sm font-medium hover:cursor-pointer"
                 style={{
                   backgroundColor: filterStatus === 'COMPLETED' ? '#6B7280' : colors.background.secondary,
                   color: filterStatus === 'COMPLETED' ? 'white' : colors.text.primary,
@@ -380,7 +380,7 @@ export default function ProjectsPage() {
               </button>
               <button
                 onClick={() => setFilterStatus('CANCELLED')}
-                className="px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                className="px-4 py-2 rounded-lg text-sm font-medium hover:cursor-pointer"
                 style={{
                   backgroundColor: filterStatus === 'CANCELLED' ? '#EF4444' : colors.background.secondary,
                   color: filterStatus === 'CANCELLED' ? 'white' : colors.text.primary,
@@ -398,7 +398,7 @@ export default function ProjectsPage() {
                   borderColor: colors.border.light,
                 }}
               >
-                <Heading level={3} style={{ color: colors.text.secondary }} className="mb-2">
+                <Heading level={3} className="mb-2">
                   {t('projects.noProjects')}
                 </Heading>
                 <Text style={{ color: colors.text.tertiary }} className="mb-4">
