@@ -158,7 +158,7 @@
   },
   "errors": {
     "failedToFetch": "Không thể kết nối đến máy chủ. Vui lòng kiểm tra lại kết nối mạng.",
-    "noProjectsMatchingFilters": "Không tìm thấy dự án nào khớp với bộ lọc đã chọn."
+    "noProjectsMatchingFilters": "Không tìm thấy kế hoạch tiết kiệm nào khớp với bộ lọc đã chọn."
   },
   "notifications": {
     "welcome": "Chào mừng",
@@ -342,18 +342,18 @@
     "spent": "Đã tiêu: {amount}",
     "limit": "Hạn mức: {amount}",
     "noBudgets": "Không có ngân sách hoạt động trong tháng này",
-    "projectsOverview": "Tổng Quan Dự Án",
-    "viewProjects": "Xem Dự Án",
+    "projectsOverview": "Tổng Quan Kế Hoạch",
+    "viewProjects": "Xem Kế Hoạch",
     "saved": "Đã tiết kiệm {percent}%",
     "savedLabel": "Đã tích lũy: {amount}",
     "targetLabel": "Mục tiêu: {amount}",
-    "noProjects": "Không có dự án tiết kiệm nào đang hoạt động"
+    "noProjects": "Không có kế hoạch tiết kiệm nào đang hoạt động"
   },
   "projects": {
-    "title": "Dự Án",
-    "subtitle": "Quản lý các dự án tiết kiệm của bạn (Tối đa 3, một dự án cho mỗi mức độ ưu tiên)",
-    "maxLimitReached": "Bạn đã đạt giới hạn 3 dự án",
-    "newProject": "Dự Án Mới",
+    "title": "Kế Hoạch Tiết Kiệm",
+    "subtitle": "Quản lý các kế hoạch tiết kiệm của bạn (Tối đa 3, một kế hoạch cho mỗi mức độ ưu tiên)",
+    "maxLimitReached": "Bạn đã đạt giới hạn 3 kế hoạch",
+    "newProject": "Kế Hoạch Tiết Kiệm Mới",
     "stats": {
       "total": "Tổng số",
       "active": "Đang hoạt động",
@@ -366,16 +366,16 @@
       "completed": "Đã hoàn thành",
       "cancelled": "Đã hủy"
     },
-    "noProjects": "Không tìm thấy dự án nào",
-    "createFirst": "Tạo dự án đầu tiên của bạn để bắt đầu",
-    "noProjectsMatch": "Không có dự án nào khớp với bộ lọc đã chọn",
-    "createFirstBtn": "Tạo Dự Án Đầu Tiên",
-    "deleteProjectTitle": "Xóa Dự Án",
-    "deleteProjectConfirm": "Bạn có chắc chắn muốn xóa dự án này? Hành động này không thể hoàn tác.",
-    "loadFailed": "Không thể tải danh sách dự án",
-    "loadDetailsFailed": "Không thể tải chi tiết dự án",
-    "loadSingleFailed": "Không thể tải dự án",
-    "deleteFailed": "Không thể xóa dự án",
+    "noProjects": "Không tìm thấy kế hoạch tiết kiệm nào",
+    "createFirst": "Tạo kế hoạch tiết kiệm đầu tiên của bạn để bắt đầu",
+    "noProjectsMatch": "Không có kế hoạch tiết kiệm nào khớp với bộ lọc đã chọn",
+    "createFirstBtn": "Tạo Kế Hoạch Tiết Kiệm Đầu Tiên",
+    "deleteProjectTitle": "Xóa Kế Hoạch Tiết Kiệm",
+    "deleteProjectConfirm": "Bạn có chắc chắn muốn xóa kế hoạch tiết kiệm này? Hành động này không thể hoàn tác.",
+    "loadFailed": "Không thể tải danh sách kế hoạch",
+    "loadDetailsFailed": "Không thể tải chi tiết kế hoạch",
+    "loadSingleFailed": "Không thể tải kế hoạch",
+    "deleteFailed": "Không thể xóa kế hoạch",
     "personal": "Cá nhân",
     "group": "Nhóm",
     "status": {
@@ -496,7 +496,7 @@
     "transactions": "Giao dịch",
     "budgets": "Ngân sách",
     "analysis": "Phân tích",
-    "projects": "Dự án",
+    "projects": "Kế Hoạch Tiết Kiệm",
     "profile": "Hồ sơ"
   },
   "categories": {
