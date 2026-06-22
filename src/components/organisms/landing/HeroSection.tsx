@@ -39,7 +39,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   const finalSecondaryCTA = secondaryCTA || t('finance.hero.login');
 
   return (
-    <section className="py-16 md:py-24 transition-colors" style={{ backgroundColor: colors.background.primary }}>
+    <section className="py-16 md:py-24 transition-colors" style={{ background: `linear-gradient(135deg, ${colors.background.secondary} 0%, ${colors.background.primary} 100%)` }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-3xl mx-auto">
           {/* Title */}

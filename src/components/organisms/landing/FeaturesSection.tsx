@@ -49,7 +49,7 @@ export const FeaturesSection: React.FC<FeaturesProps> = ({
   ];
 
   return (
-    <section id="features" className="py-16 md:py-24 transition-colors" style={{ backgroundColor: colors.background.primary }}>
+    <section id="features" className="py-16 md:py-24 transition-colors" style={{ backgroundColor: colors.background.secondary }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <ScrollReveal variant="fade-down">
