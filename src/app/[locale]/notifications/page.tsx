@@ -143,6 +143,8 @@ export default function NotificationsPage() {
         setSuccess('Successfully joined the group!');
         // Remove or reload notifications
         setNotifications(prev => prev.filter(n => n.id !== notifId));
+        // Redirect to groups tab in projects page
+        router.push(`/${locale}/projects?tab=groups`);
       } else {
         setError(res.error || 'Failed to accept invitation');
       }

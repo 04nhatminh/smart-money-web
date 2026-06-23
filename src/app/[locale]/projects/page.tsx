@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { useAuth } from '@/context/AuthContext';
 import { SidebarLayout } from '@/components/templates';
@@ -26,6 +26,7 @@ import { MdAdd, MdFilterList, MdGroup, MdAssignment, MdLock, MdLockOpen } from '
 
 export default function ProjectsPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const locale = useLocale();
   const t = useTranslations();
   const { isAuthenticated, isInitializing } = useAuth();
@@ -33,7 +34,20 @@ export default function ProjectsPage() {
   const { listProjects, getProject, deleteProject, isLoading: projectsLoading } = useProjects();
   const { listGroups, isLoading: groupsLoading } = useGroups();
 
-  const [activeTab, setActiveTab] = useState<'projects' | 'groups'>('projects');
+  const tabParam = searchParams.get('tab');
+  const [activeTab, setActiveTab] = useState<'projects' | 'groups'>(
+    tabParam === 'groups' ? 'groups' : 'projects'
+  );
+
+  // Sync tab param if it changes
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab === 'groups') {
+      setActiveTab('groups');
+    } else if (tab === 'projects') {
+      setActiveTab('projects');
+    }
+  }, [searchParams]);
 
   // Projects State
   const [projects, setProjects] = useState<ProjectListItem[]>([]);
@@ -47,7 +61,7 @@ export default function ProjectsPage() {
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [projectToDelete, setProjectToDelete] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [filterStatus, setFilterStatus] = useState<'ALL' | 'ACTIVE' | 'COMPLETED' | 'CANCELLED'>('ALL');
+  const [filterStatus, setFilterStatus] = useState<'ALL' | 'ACTIVE' | 'COMPLETED' | 'CANCELLED'>('ACTIVE');
 
   // Groups State
   const [groups, setGroups] = useState<GroupSummaryResponse[]>([]);
@@ -328,16 +342,19 @@ export default function ProjectsPage() {
               ].map((stat, idx) => (
                 <div
                   key={idx}
-                  className="p-4 rounded-lg border bg-white"
+                  className="p-4 rounded-xl border bg-white shadow-sm flex flex-col justify-between transition-all hover:shadow-md"
                   style={{
                     borderColor: colors.border.light,
+                    borderLeft: `4px solid ${stat.color}`,
                   }}
                 >
-                  <Text className="text-sm">
+                  <Text className="text-xs font-semibold uppercase tracking-wider" style={{ color: colors.text.tertiary }}>
                     {stat.label}
                   </Text>
                   <Heading
                     level={2}
+                    className="mt-2 font-bold"
+                    style={{ color: stat.color }}
                   >
                     {stat.value}
                   </Heading>

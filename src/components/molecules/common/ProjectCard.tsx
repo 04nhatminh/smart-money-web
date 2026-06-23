@@ -182,7 +182,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
         )}
         <button
           onClick={() => onEdit(project.projectId)}
-          className="px-3 py-2 rounded-lg text-sm font-medium transition-colors"
+          className="px-3 py-2 rounded-lg text-sm font-medium transition-colors hover:cursor-pointer"
           style={{
             backgroundColor: colors.background.primary + '15',
             color: colors.text.primary,
@@ -199,7 +199,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
         </button>
         <button
           onClick={() => onDelete(project.projectId)}
-          className="px-3 py-2 rounded-lg text-sm font-medium transition-colors"
+          className="px-3 py-2 rounded-lg text-sm font-medium transition-colors hover:cursor-pointer"
           style={{
             backgroundColor: '#EF4444' + '15',
             color: '#EF4444',
