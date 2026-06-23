@@ -291,20 +291,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
         </button>
       </div>
 
-      <div className="flex items-center justify-between pt-2">
-        <div className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            id="remember"
-            checked={rememberMe}
-            onChange={(e) => setRememberMe(e.target.checked)}
-            disabled={isLoading || socialLoading}
-            className="w-4 h-4 rounded"
-          />
-          <label htmlFor="remember" className="text-sm" style={{ color: colors.text.secondary }}>
-            Remember me
-          </label>
-        </div>
+      <div className="flex items-center justify-end pt-2">
         <Link
           href={`/${locale}/forgot-password`}
           className="text-sm hover:opacity-80 transition-opacity"

@@ -32,7 +32,7 @@ export default function RegisterPage() {
 
   return (
     <CenteredLayout hideHeader hideFooter>
-      <div className="w-full max-w-[520px] rounded-2xl shadow-xl p-10" style={{ backgroundColor: colors.surface.primary }}>
+      <div className="w-full max-w-[520px] rounded-2xl p-10 auth-glass-card">
         {/* Form */}
         <RegisterForm
           onSuccess={() => {

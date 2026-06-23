@@ -230,7 +230,7 @@ export const VoiceRecordModal: React.FC<VoiceRecordModalProps> = ({ isOpen, onCl
                 onClose();
               }
             }}
-            className="p-1 rounded-lg transition-colors hover:bg-opacity-80"
+            className="p-1 rounded-lg transition-colors hover:bg-opacity-80 hover:cursor-pointer"
             style={{ color: colors.text.secondary }}
           >
             <MdClose className="w-6 h-6" />
