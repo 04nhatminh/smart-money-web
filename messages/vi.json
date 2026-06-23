@@ -347,7 +347,8 @@
     "saved": "Đã tiết kiệm {percent}%",
     "savedLabel": "Đã tích lũy: {amount}",
     "targetLabel": "Mục tiêu: {amount}",
-    "noProjects": "Không có kế hoạch tiết kiệm nào đang hoạt động"
+    "noProjects": "Không có kế hoạch tiết kiệm nào đang hoạt động",
+    "createProject": "Tạo Kế Hoạch Tiết Kiệm"
   },
   "projects": {
     "title": "Kế Hoạch Tiết Kiệm",

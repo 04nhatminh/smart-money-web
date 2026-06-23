@@ -275,7 +275,7 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
             </div>
             <button
               onClick={onClose}
-              className="p-1 rounded-lg transition-colors hover:opacity-75"
+              className="p-1 rounded-lg transition-colors hover:opacity-75 hover:cursor-pointer"
               style={{ color: colors.text.secondary }}
             >
               <MdClose className="w-5 h-5" />

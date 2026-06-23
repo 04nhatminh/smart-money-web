@@ -347,7 +347,8 @@
     "saved": "{percent}% Saved",
     "savedLabel": "Saved: {amount}",
     "targetLabel": "Target: {amount}",
-    "noProjects": "No saving projects active"
+    "noProjects": "No saving projects active",
+    "createProject": "Create Project"
   },
   "projects": {
     "title": "Projects",
