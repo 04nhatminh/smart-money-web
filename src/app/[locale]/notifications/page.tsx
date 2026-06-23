@@ -12,6 +12,7 @@ import { useGroups } from '@/hooks/useGroups';
 import { useRouter } from 'next/navigation';
 import { useLocale } from 'next-intl';
 import { MdCheck, MdClose, MdNotifications } from 'react-icons/md';
+import { getReadNotificationIds, markNotificationsAsRead } from '@/lib/notifications';
 
 interface NotificationData {
   id: string;
@@ -22,7 +23,7 @@ interface NotificationData {
 }
 
 export default function NotificationsPage() {
-  const { isAuthenticated, isInitializing } = useAuth();
+  const { isAuthenticated, isInitializing, user } = useAuth();
   const { colors } = useTheme();
   const t = useTranslations();
   const router = useRouter();
@@ -30,6 +31,7 @@ export default function NotificationsPage() {
   const { acceptGroupInvite, declineGroupInvite } = useGroups();
 
   const [notifications, setNotifications] = useState<NotificationData[]>([]);
+  const [readIds, setReadIds] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -42,12 +44,14 @@ export default function NotificationsPage() {
     }
   }, [isAuthenticated, isInitializing, router, locale]);
 
-  // Load notifications
+  // Load notifications and initial read status
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated && user) {
+      const savedReadIds = getReadNotificationIds(user.id);
+      setReadIds(new Set(savedReadIds));
       loadNotifications();
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, user]);
 
   const parseNotificationContent = (content: string) => {
     if (content.startsWith('notification.notification_done|')) {
@@ -87,11 +91,20 @@ export default function NotificationsPage() {
       setIsLoading(true);
       setError(null);
       const res = await apiClient.get<any>('/api/v1/notifications');
+      let loadedNotifications: NotificationData[] = [];
       // Backend returns CheckResponse<List<Notification>>
       if (res && res.success && res.data) {
-        setNotifications(res.data);
+        loadedNotifications = res.data;
       } else if (res && Array.isArray(res)) {
-        setNotifications(res);
+        loadedNotifications = res;
+      }
+      setNotifications(loadedNotifications);
+
+      // Automatically mark fetched notifications as read in localStorage,
+      // so next time user sees the header or reloads the page, they are read.
+      if (user && loadedNotifications.length > 0) {
+        const ids = loadedNotifications.map(n => n.id);
+        markNotificationsAsRead(user.id, ids);
       }
     } catch (err) {
       console.error('Failed to fetch notifications:', err);
@@ -103,6 +116,14 @@ export default function NotificationsPage() {
       }
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleMarkAllAsRead = () => {
+    if (user && notifications.length > 0) {
+      const ids = notifications.map(n => n.id);
+      markNotificationsAsRead(user.id, ids);
+      setReadIds(new Set(ids));
     }
   };
 
@@ -166,6 +187,8 @@ export default function NotificationsPage() {
     return notifTime.toLocaleDateString();
   };
 
+  const unreadNotificationsCount = notifications.filter(n => !readIds.has(n.id)).length;
+
   if (isInitializing || isLoading) {
     return (
       <SidebarLayout>
@@ -186,20 +209,31 @@ export default function NotificationsPage() {
               {t('common.notifications') || 'Notifications'}
             </Heading>
             <Text style={{ color: colors.text.secondary }}>
-              {notifications.length > 0
-                ? t('notificationsPage.unreadCount', { count: notifications.length }) || `You have ${notifications.length} notifications.`
+              {unreadNotificationsCount > 0
+                ? t('notificationsPage.unreadCount', { count: unreadNotificationsCount }) || `You have ${unreadNotificationsCount} unread notifications.`
                 : t('notificationsPage.allCaughtUp') || 'All caught up!'}
             </Text>
           </div>
-          {notifications.length > 0 && (
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={loadNotifications}
-            >
-              {t('analysis.refresh') || 'Refresh'}
-            </Button>
-          )}
+          <div className="flex items-center gap-2">
+            {unreadNotificationsCount > 0 && (
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={handleMarkAllAsRead}
+              >
+                {t('notifications.markAllAsRead') || 'Mark all as read'}
+              </Button>
+            )}
+            {notifications.length > 0 && (
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={loadNotifications}
+              >
+                {t('analysis.refresh') || 'Refresh'}
+              </Button>
+            )}
+          </div>
         </div>
 
         {error && (
@@ -230,28 +264,39 @@ export default function NotificationsPage() {
             notifications.map(notification => {
               const token = getInviteToken(notification.deepLink);
               const isInvite = token !== null;
+              const isUnread = !readIds.has(notification.id);
 
               return (
                 <div
                   key={notification.id}
-                  className="p-5 transition-all duration-200 border-l-4 rounded-lg bg-white flex flex-col md:flex-row md:items-center justify-between gap-4"
+                  className="p-5 transition-all duration-200 border-l-4 rounded-lg flex flex-col md:flex-row md:items-center justify-between gap-4"
                   style={{
+                    backgroundColor: isUnread ? `${colors.interactive.primary}0c` : colors.background.primary,
                     borderLeftColor: isInvite ? '#F59E0B' : colors.interactive.primary,
-                    border: `1px solid ${colors.border.light}`,
+                    border: `1px solid ${isUnread ? colors.interactive.primary : colors.border.light}`,
+                    boxShadow: isUnread ? `0 0 8px ${colors.interactive.primary}20` : 'none',
                   }}
                 >
                   {/* Content */}
                   <div className="flex-1 space-y-1">
                     <div className="flex items-center gap-2">
+                      {isUnread && (
+                        <span 
+                          className="w-2.5 h-2.5 rounded-full flex-shrink-0" 
+                          style={{ backgroundColor: colors.interactive.primary }} 
+                          title="Unread"
+                        />
+                      )}
                       <Heading
                         level={4}
+                        style={{ fontWeight: isUnread ? 'bold' : 'normal' }}
                       >
                         {isInvite 
                           ? (t('notifications.groupInvitation') || 'Group Invitation')
                           : (t('notifications.notificationTitle') || 'Notification')}
                       </Heading>
                     </div>
-                    <Text style={{ color: colors.text.secondary }}>
+                    <Text style={{ color: colors.text.secondary, fontWeight: isUnread ? '500' : 'normal' }}>
                       {parseNotificationContent(notification.content)}
                     </Text>
                     <Text

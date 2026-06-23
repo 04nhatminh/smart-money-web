@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useLocale } from 'next-intl';
 import { Button, Heading, Text } from '@/components/atoms';
@@ -11,6 +11,7 @@ import { useTranslations } from 'next-intl';
 import { apiClient } from '@/lib/api-client';
 import { HealthCheckResponse } from '@/types/api';
 import { API_ENDPOINTS } from '@/constants/api';
+import { getReadNotificationIds } from '@/lib/notifications';
 
 interface NavItem {
   label: string;
@@ -32,6 +33,31 @@ export const Header: React.FC<HeaderProps> = ({
   const t = useTranslations();
   const { token, isInitializing, user, logout } = useAuth();
   const [openUserMenu, setOpenUserMenu] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    if (token && user) {
+      const fetchUnreadCount = async () => {
+        try {
+          const res = await apiClient.get<any>('/api/v1/notifications');
+          let notifs = [];
+          if (res && res.success && res.data) {
+            notifs = res.data;
+          } else if (res && Array.isArray(res)) {
+            notifs = res;
+          }
+          const readIds = new Set(getReadNotificationIds(user.id));
+          const count = notifs.filter((n: any) => !readIds.has(n.id)).length;
+          setUnreadCount(count);
+        } catch (err) {
+          console.error('Failed to fetch unread notifications count:', err);
+        }
+      };
+      fetchUnreadCount();
+    } else {
+      setUnreadCount(0);
+    }
+  }, [token, user]);
 
   const handleLoginClick = () => {
     router.push(`/${locale}/login`);
@@ -135,6 +161,14 @@ export const Header: React.FC<HeaderProps> = ({
                       d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
                     />
                   </svg>
+                  {unreadCount > 0 && (
+                    <span 
+                      className="absolute -top-1 -right-1 min-w-[20px] h-5 px-1.5 rounded-full text-[10px] font-bold flex items-center justify-center text-white"
+                      style={{ backgroundColor: colors.interactive.danger }}
+                    >
+                      {unreadCount > 99 ? '99+' : unreadCount}
+                    </span>
+                  )}
                 </button>
 
                 {/* User Avatar - Dropdown */}
