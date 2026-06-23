@@ -50,12 +50,12 @@ export const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = (
       {/* Modal */}
       <div className="fixed inset-0 flex items-center justify-center p-4 pointer-events-none" style={{ zIndex: 1000 }}>
         <div
-          className="bg-white rounded-lg shadow-2xl max-w-sm w-full pointer-events-auto"
+          className="bg-white rounded-2xl shadow-2xl max-w-sm w-full pointer-events-auto overflow-hidden"
           style={{ backgroundColor: colors.background.primary }}
           onClick={e => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b" style={{ borderColor: colors.border.light, backgroundColor: colors.background.primary }}>
+          <div className="flex items-center justify-between p-6 border-b rounded-t-2xl" style={{ borderColor: colors.border.light, backgroundColor: colors.background.primary }}>
             <Heading level={3} className="m-0" style={{ color: colors.text.primary }}>
               {title}
             </Heading>
