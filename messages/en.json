@@ -357,13 +357,13 @@
       "total": "Total",
       "active": "Active",
       "completed": "Completed",
-      "cancelled": "Cancelled"
+      "abandoned": "Abandoned"
     },
     "filter": {
       "all": "All",
       "active": "Active",
       "completed": "Completed",
-      "cancelled": "Cancelled"
+      "abandoned": "Abandoned"
     },
     "noProjects": "No projects found",
     "createFirst": "Create your first project to get started",
@@ -380,7 +380,7 @@
     "status": {
       "ACTIVE": "Active",
       "COMPLETED": "Completed",
-      "CANCELLED": "Cancelled"
+      "ABANDONED": "Abandoned"
     },
     "priority": {
       "LOW": "Low",
@@ -428,7 +428,7 @@
       "successTitle": "Project created successfully!",
       "successWithBudget": "Your project has been created. Do you want to use AI to recalculate the optimal spending budget based on this new savings goal?",
       "successWithoutBudget": "Your project has been successfully created and will start accumulating on the 1st of next month.",
-      "recalcBudget": "✨ Recalculate Budget",
+      "recalcBudget": "Recalculate Budget",
       "later": "Maybe later",
       "confirm": "Confirm",
       "dateGateTitle": "Project Start Date",

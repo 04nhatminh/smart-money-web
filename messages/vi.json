@@ -357,13 +357,13 @@
       "total": "Tổng số",
       "active": "Đang hoạt động",
       "completed": "Đã hoàn thành",
-      "cancelled": "Đã hủy"
+      "abandoned": "Bị bỏ dở"
     },
     "filter": {
       "all": "Tất cả",
       "active": "Đang hoạt động",
       "completed": "Đã hoàn thành",
-      "cancelled": "Đã hủy"
+      "abandoned": "Bị bỏ dở"
     },
     "noProjects": "Không tìm thấy kế hoạch tiết kiệm nào",
     "createFirst": "Tạo kế hoạch tiết kiệm đầu tiên của bạn để bắt đầu",
@@ -380,7 +380,7 @@
     "status": {
       "ACTIVE": "Đang hoạt động",
       "COMPLETED": "Đã hoàn thành",
-      "CANCELLED": "Đã hủy"
+      "ABANDONED": "Bị bỏ dở"
     },
     "priority": {
       "LOW": "Thấp",
@@ -428,7 +428,7 @@
       "successTitle": "Tạo dự án thành công!",
       "successWithBudget": "Dự án của bạn đã được khởi tạo. Bạn có muốn sử dụng AI để tính toán lại ngân sách chi tiêu (budget) tối ưu dựa trên mục tiêu tích lũy mới này không?",
       "successWithoutBudget": "Dự án của bạn đã được khởi tạo thành công và sẽ bắt đầu tích lũy từ ngày 1 của tháng sau.",
-      "recalcBudget": "✨ Tính lại ngân sách",
+      "recalcBudget": "Tính lại ngân sách",
       "later": "Để sau",
       "confirm": "Xác nhận",
       "dateGateTitle": "Thời gian bắt đầu dự án",

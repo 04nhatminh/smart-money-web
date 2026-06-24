@@ -20,7 +20,7 @@ const getStatusColor = (status: ProjectStatus): string => {
   const colors: { [key in ProjectStatus]: string } = {
     ACTIVE: '#10B981', // Green
     COMPLETED: '#6B7280', // Gray
-    CANCELLED: '#EF4444', // Red
+    ABANDONED: '#EF4444', // Red
   };
   return colors[status] || '#6B7280';
 };

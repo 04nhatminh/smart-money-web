@@ -305,8 +305,9 @@ export const GenerateBudgetModal: React.FC<GenerateBudgetModalProps> = ({
                   <Button variant="secondary" className="flex-1" onClick={onClose}>
                     Cancel
                   </Button>
-                  <Button variant="primary" className="flex-1" onClick={handleGenerateClick}>
-                    ✨ Generate Now
+                  <Button variant="primary" className="flex-1 flex items-center justify-center gap-2" onClick={handleGenerateClick}>
+                    <MdAutoAwesome className="w-5 h-5" style={{ color: colors.text.inverse }} />
+                    <span>Generate Now</span>
                   </Button>
                 </div>
               </div>

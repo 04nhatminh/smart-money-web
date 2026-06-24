@@ -17,7 +17,7 @@ interface EditProjectModalProps {
 }
 
 type ProjectPriority = 'LOW' | 'MEDIUM' | 'HIGH';
-type ProjectStatus = 'ACTIVE' | 'COMPLETED' | 'CANCELLED';
+type ProjectStatus = 'ACTIVE' | 'COMPLETED' | 'ABANDONED';
 const CURRENCY = 'VND'; // Fixed currency
 
 interface FormData {
@@ -316,7 +316,7 @@ export const EditProjectModal: React.FC<EditProjectModalProps> = ({
                 >
                   <option value="ACTIVE">Active</option>
                   <option value="COMPLETED">Completed</option>
-                  <option value="CANCELLED">Cancelled</option>
+                  <option value="ABANDONED">Abandoned</option>
                 </select>
               </div>
             </div>

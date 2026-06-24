@@ -12,7 +12,7 @@ import { GenerateBudgetModal } from './GenerateBudgetModal';
 import { CreateProjectRequest, ProjectAdvisorResponse } from '@/types/project.api';
 import { GroupSummaryResponse } from '@/types/group.api';
 import { formatAmountInput, parseFormattedNumber } from '@/lib/format';
-import { MdClose, MdLightbulb } from 'react-icons/md';
+import { MdClose, MdLightbulb, MdAutoAwesome } from 'react-icons/md';
 import { useTranslations } from 'next-intl';
 
 interface CreateProjectModalProps {
@@ -897,6 +897,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
                       }}
                       className="w-full font-bold flex items-center justify-center gap-2"
                     >
+                      <MdAutoAwesome className="w-5 h-5" style={{ color: colors.text.inverse }} />
                       <span>{t('projects.createModal.recalcBudget')}</span>
                     </Button>
                     <Button

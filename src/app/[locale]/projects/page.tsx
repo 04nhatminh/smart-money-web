@@ -61,7 +61,7 @@ export default function ProjectsPage() {
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [projectToDelete, setProjectToDelete] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [filterStatus, setFilterStatus] = useState<'ALL' | 'ACTIVE' | 'COMPLETED' | 'CANCELLED'>('ACTIVE');
+  const [filterStatus, setFilterStatus] = useState<'ALL' | 'ACTIVE' | 'COMPLETED' | 'ABANDONED'>('ACTIVE');
 
   // Groups State
   const [groups, setGroups] = useState<GroupSummaryResponse[]>([]);
@@ -210,7 +210,7 @@ export default function ProjectsPage() {
       total: projects.length,
       active: projects.filter(p => p.status === 'ACTIVE').length,
       completed: projects.filter(p => p.status === 'COMPLETED').length,
-      cancelled: projects.filter(p => p.status === 'CANCELLED').length,
+      abandoned: projects.filter(p => p.status === 'ABANDONED').length,
     };
   };
 
@@ -334,7 +334,7 @@ export default function ProjectsPage() {
                 { label: t('projects.stats.total'), value: stats.total, color: colors.interactive.primary },
                 { label: t('projects.stats.active'), value: stats.active, color: '#10B981' },
                 { label: t('projects.stats.completed'), value: stats.completed, color: '#6B7280' },
-                { label: t('projects.stats.cancelled'), value: stats.cancelled, color: '#EF4444' },
+                { label: t('projects.stats.abandoned'), value: stats.abandoned, color: '#EF4444' },
               ].map((stat, idx) => (
                 <div
                   key={idx}
@@ -392,14 +392,14 @@ export default function ProjectsPage() {
                 {t('projects.filter.completed')}
               </button>
               <button
-                onClick={() => setFilterStatus('CANCELLED')}
+                onClick={() => setFilterStatus('ABANDONED')}
                 className="px-4 py-2 rounded-lg text-sm font-medium hover:cursor-pointer"
                 style={{
-                  backgroundColor: filterStatus === 'CANCELLED' ? '#EF4444' : colors.background.secondary,
-                  color: filterStatus === 'CANCELLED' ? 'white' : colors.text.primary,
+                  backgroundColor: filterStatus === 'ABANDONED' ? '#EF4444' : colors.background.secondary,
+                  color: filterStatus === 'ABANDONED' ? 'white' : colors.text.primary,
                 }}
               >
-                {t('projects.filter.cancelled')}
+                {t('projects.filter.abandoned')}
               </button>
             </div>
 
