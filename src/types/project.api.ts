@@ -2,7 +2,7 @@ import type { ApiResponse } from './base.api';
 
 // ============ Project ============
 export type ProjectType = 'PERSONAL' | 'GROUP';
-export type ProjectStatus = 'ACTIVE' | 'COMPLETED' | 'CANCELLED';
+export type ProjectStatus = 'ACTIVE' | 'COMPLETED' | 'ABANDONED';
 export type ProjectPriority = 'LOW' | 'MEDIUM' | 'HIGH';
 
 export interface ProjectListItem {
@@ -32,6 +32,8 @@ export interface CreateProjectRequest {
   targetAmount: number;
   currency: string;
   deadline: string;
+  startDate: string;
+  bypassDateGate?: boolean;
 }
 
 export interface UpdateProjectRequest {

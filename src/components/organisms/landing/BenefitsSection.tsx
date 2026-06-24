@@ -51,7 +51,7 @@ export const BenefitsSection: React.FC<BenefitsProps> = ({
   ];
 
   return (
-    <section id="about" className="py-16 md:py-24 transition-colors" style={{ backgroundColor: colors.background.secondary }}>
+    <section id="about" className="py-16 md:py-24 transition-colors" style={{ backgroundColor: colors.background.primary }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           {/* Left: Benefits List — slides in from the left */}
@@ -75,7 +75,7 @@ export const BenefitsSection: React.FC<BenefitsProps> = ({
             <div
               className="rounded-lg p-8 shadow-lg"
               style={{
-                backgroundColor: colors.surface.primary,
+                backgroundColor: colors.surface.secondary,
                 borderColor: colors.border.light,
                 borderWidth: '1px',
               }}

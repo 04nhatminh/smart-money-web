@@ -6,13 +6,14 @@ import { useTranslations } from 'next-intl';
 import { Header, Footer, HeroSection, DashboardPreview, FeaturesSection, BenefitsSection, CTASection } from '@/components/organisms';
 import { useAuth } from '@/context/AuthContext';
 import { useLocale } from 'next-intl';
-import { PRIMARY_COLORS } from '@/constants/colors';
+import { useTheme } from '@/context';
 
 export default function Home() {
   const t = useTranslations();
   const router = useRouter();
   const locale = useLocale();
   const { token, isInitializing } = useAuth();
+  const { colors } = useTheme();
 
   useEffect(() => {
     if (!isInitializing && token) {
@@ -28,7 +29,7 @@ export default function Home() {
     <>
       <Header appName={t('finance.appName')} />
       
-      <main style={{ backgroundColor: PRIMARY_COLORS.background.primary }}>
+      <main style={{ backgroundColor: colors.background.primary }}>
         {/* Hero Section */}
         <HeroSection />
 

@@ -44,9 +44,9 @@ export const Footer: React.FC<FooterProps> = ({
             {/* Company Info */}
             <div>
               <div className="flex items-center gap-3 mb-4">
-                <img src="/logo-nobg.png" alt={appName} className="h-12 w-12 object-contain flex-shrink-0" style={{ filter: colorScheme === 'dark' ? 'brightness(0) invert(1)' : 'none' }} />
-                <Heading 
-                  level={2} 
+                <img src="/logo.png" alt={appName} className="h-12 w-12 object-contain flex-shrink-0" style={{ filter: colorScheme === 'dark' ? 'brightness(0) invert(1)' : 'none' }} />
+                <Heading
+                  level={2}
                   className="text-xl m-0 font-bold flex items-center"
                 >
                   <span style={{ color: colorScheme === 'dark' ? colors.palette.white : colors.interactive.primary }}>Smart</span>

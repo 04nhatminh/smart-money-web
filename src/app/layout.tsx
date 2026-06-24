@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   title: "SmartMoney",
   description: "Your financial companion",
   icons: {
-    icon: "/logo-nobg.png",
+    icon: "/logo.png",
   },
 };
 

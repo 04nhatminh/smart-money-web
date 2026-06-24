@@ -35,12 +35,12 @@ export const CTASection: React.FC<CTASectionProps> = ({
   return (
     <section
       className="py-16 md:py-24 transition-colors"
-      style={{ backgroundColor: colors.background.primary }}
+      style={{ background: `linear-gradient(135deg, ${colors.palette.base} 0%, ${colors.palette[700]} 100%)` }}
     >
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         {/* Title */}
         <ScrollReveal variant="fade-up" delay={0}>
-          <Heading level={2}>
+          <Heading level={2} style={{ color: colors.palette.white }}>
             {finalTitle}
           </Heading>
         </ScrollReveal>
@@ -50,7 +50,7 @@ export const CTASection: React.FC<CTASectionProps> = ({
           <Text
             variant="body"
             className="mb-8 text-lg"
-            style={{ color: colors.text.secondary }}
+            style={{ color: colors.palette[150] }}
           >
             {finalSubtitle}
           </Text>
@@ -59,10 +59,14 @@ export const CTASection: React.FC<CTASectionProps> = ({
         {/* Button */}
         <ScrollReveal variant="zoom-in" delay={250}>
           <Button
-            variant="secondary"
+            variant="primary"
             size="lg"
             onClick={handleClick}
-            className="font-semibold inline-flex items-center justify-center gap-2"
+            className="font-semibold inline-flex items-center justify-center gap-2 hover:opacity-90 transition-opacity"
+            style={{
+              backgroundColor: colors.palette.white,
+              color: colors.palette.base,
+            }}
           >
             {finalButtonText} <FiArrowRight className="w-5 h-5" />
           </Button>

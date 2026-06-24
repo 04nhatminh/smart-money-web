@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Button, Heading, Text, Input } from '@/components/atoms';
+import { Button, Heading, Text, Input, Alert } from '@/components/atoms';
 import { useTheme } from '@/context/ThemeContext';
 import { useTranslations } from 'next-intl';
 import { apiClient } from '@/lib/api-client';
@@ -318,15 +318,7 @@ export const CreateTransactionModal: React.FC<CreateTransactionModalProps> = ({
 
             {/* Error Message */}
             {error && (
-              <div
-                className="p-4 rounded-lg text-center"
-                style={{
-                  backgroundColor: `${colors.interactive.danger}20`,
-                  color: colors.interactive.danger,
-                }}
-              >
-                <Text className="font-semibold">{error}</Text>
-              </div>
+              <Alert message={error} type="error" onClose={() => setError(null)} />
             )}
 
             {/* Amount */}

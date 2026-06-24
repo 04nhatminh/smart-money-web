@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useParams } from 'next/navigation';
 import { MdVisibility, MdVisibilityOff } from 'react-icons/md';
-import { Button, Input, Heading, Text } from '@/components/atoms';
+import { Button, Input, Heading, Text, Alert } from '@/components/atoms';
 import { useTheme } from '@/context/ThemeContext';
 import { apiClient } from '@/lib/api-client';
 import { API_ENDPOINTS } from '@/constants/api';
@@ -113,9 +113,9 @@ export const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({
       <form className="space-y-6 w-full max-w-md">
         {/* Logo and Website Name */}
         <div className="flex items-center justify-center mb-8 cursor-pointer group" onClick={() => router.push(`/${locale}`)}>
-          <img 
-            src="/logo-nobg.png" 
-            alt="SmartMoney" 
+          <img
+            src="/logo.png"
+            alt="SmartMoney"
             className="h-12 w-12 object-contain mr-3 group-opacity-80 transition-opacity flex-shrink-0"
             style={{ filter: colorScheme === 'dark' ? 'brightness(0) invert(1)' : 'none' }}
           />
@@ -157,9 +157,9 @@ export const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({
     <form onSubmit={handleSubmit} className="space-y-6 w-full max-w-md">
       {/* Logo and Website Name - Clickable */}
       <div className="flex items-center justify-center mb-8 cursor-pointer group" onClick={() => router.push(`/${locale}`)}>
-        <img 
-          src="/logo-nobg.png" 
-          alt="SmartMoney" 
+        <img
+          src="/logo.png"
+          alt="SmartMoney"
           className="h-12 w-12 object-contain mr-3 group-opacity-80 transition-opacity flex-shrink-0"
           style={{ filter: colorScheme === 'dark' ? 'brightness(0) invert(1)' : 'none' }}
         />
@@ -178,9 +178,7 @@ export const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({
       </div>
 
       {error && (
-        <div className="p-4 bg-red-100 text-red-700 rounded-lg border border-red-400">
-          {error}
-        </div>
+        <Alert message={error} type="error" onClose={() => setError(null)} />
       )}
 
       {/* Email Display (Read-only) */}
@@ -255,7 +253,7 @@ export const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({
 
       <p className="text-center text-sm" style={{ color: colors.text.secondary }}>
         Remember your password?{' '}
-        <Link 
+        <Link
           href={`/${locale}/login`}
           className="font-semibold hover:opacity-80 transition-opacity"
           style={{ color: colors.interactive.primary }}

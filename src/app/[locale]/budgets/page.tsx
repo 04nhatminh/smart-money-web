@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { useAuth } from '@/context/AuthContext';
 import { SidebarLayout } from '@/components/templates';
-import { Heading, Text, Button } from '@/components/atoms';
+import { Heading, Text, Button, Alert } from '@/components/atoms';
 import { BudgetProgressCard, CreateBudgetModal, CreateBulkBudgetsModal, EditBudgetModal, DeleteConfirmationModal, DatePeriodSelector, GenerateBudgetModal } from '@/components/molecules/common';
 import { useTheme } from '@/context/ThemeContext';
 import { useBudgets } from '@/hooks/useBudgets';
@@ -166,12 +166,7 @@ export default function BudgetsPage() {
 
         {/* Error Message */}
         {error && (
-          <div
-            className="p-4 rounded-lg"
-            style={{ backgroundColor: '#FEE2E2', color: '#991B1B' }}
-          >
-            <Text className="text-sm font-medium">{error}</Text>
-          </div>
+          <Alert message={error} type="error" onClose={() => setError(null)} />
         )}
 
         {/* Month and Year Selector */}

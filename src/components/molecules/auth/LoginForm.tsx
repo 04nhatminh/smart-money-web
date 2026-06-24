@@ -7,7 +7,7 @@ import { useLocale } from 'next-intl';
 import { FcGoogle } from 'react-icons/fc';
 import { FaFacebook } from 'react-icons/fa';
 import { MdVisibility, MdVisibilityOff } from 'react-icons/md';
-import { Button, Input, Heading, Text } from '@/components/atoms';
+import { Button, Input, Heading, Text, Alert } from '@/components/atoms';
 import { useAuth } from '@/context/AuthContext';
 import { useAuthForm } from '@/hooks/useAuthForm';
 import { useTheme } from '@/context/ThemeContext';
@@ -232,7 +232,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
       {/* Logo and Website Name - Clickable */}
       <div className="flex items-center justify-center mb-8 cursor-pointer group" onClick={handleLogoClick}>
         <img
-          src="/logo-nobg.png"
+          src="/logo.png"
           alt="SmartMoney"
           className="h-12 w-12 object-contain mr-3 group-opacity-80 transition-opacity flex-shrink-0"
           style={{ filter: colorScheme === 'dark' ? 'brightness(0) invert(1)' : 'none' }}
@@ -250,9 +250,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
       </div>
 
       {error && (
-        <div className="p-4 bg-red-100 text-red-700 rounded-lg border border-red-400">
-          {error}
-        </div>
+        <Alert message={error} type="error" onClose={() => setError(null)} />
       )}
 
       <Input
@@ -291,20 +289,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
         </button>
       </div>
 
-      <div className="flex items-center justify-between pt-2">
-        <div className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            id="remember"
-            checked={rememberMe}
-            onChange={(e) => setRememberMe(e.target.checked)}
-            disabled={isLoading || socialLoading}
-            className="w-4 h-4 rounded"
-          />
-          <label htmlFor="remember" className="text-sm" style={{ color: colors.text.secondary }}>
-            Remember me
-          </label>
-        </div>
+      <div className="flex items-center justify-end pt-2">
         <Link
           href={`/${locale}/forgot-password`}
           className="text-sm hover:opacity-80 transition-opacity"

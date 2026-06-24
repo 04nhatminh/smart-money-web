@@ -85,7 +85,7 @@ export const DashboardPreview: React.FC = () => {
   };
 
   return (
-    <section className="py-16 md:py-24 transition-colors" style={{ backgroundColor: colors.background.secondary }}>
+    <section className="py-16 md:py-24 transition-colors" style={{ backgroundColor: colors.background.tertiary }}>
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <ScrollReveal variant="fade-down">
@@ -208,7 +208,7 @@ export const DashboardPreview: React.FC = () => {
                 style={{
                   filter: 'blur(4px)',
                   pointerEvents: 'none',
-                  backgroundColor: colors.background.secondary,
+                  backgroundColor: colors.background.primary,
                 }}
               >
                 <div className="grid grid-cols-3 gap-4">

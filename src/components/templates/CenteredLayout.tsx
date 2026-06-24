@@ -30,10 +30,38 @@ export const CenteredLayout: React.FC<CenteredLayoutProps> = ({
   };
 
   return (
-    <div className="flex flex-col min-h-screen" style={{ backgroundColor: colors.background.primary }}>
+    <div className="flex flex-col min-h-screen relative overflow-hidden transition-colors" style={{ backgroundColor: colors.background.primary }}>
+      {/* Dynamic Background Blobs */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+        <div 
+          className="absolute w-[300px] sm:w-[500px] h-[300px] sm:h-[500px] rounded-full filter blur-[80px] sm:blur-[120px] opacity-[0.15] dark:opacity-[0.22] animate-blob-1" 
+          style={{ 
+            backgroundColor: colors.interactive.primary,
+            top: '-10%',
+            left: '-10%',
+          }} 
+        />
+        <div 
+          className="absolute w-[350px] sm:w-[600px] h-[350px] sm:h-[600px] rounded-full filter blur-[90px] sm:blur-[140px] opacity-[0.15] dark:opacity-[0.22] animate-blob-2" 
+          style={{ 
+            backgroundColor: colors.interactive.secondary,
+            bottom: '-10%',
+            right: '-10%',
+          }} 
+        />
+        <div 
+          className="absolute w-[250px] sm:w-[400px] h-[250px] sm:h-[400px] rounded-full filter blur-[70px] sm:blur-[100px] opacity-[0.08] dark:opacity-[0.14] animate-blob-3" 
+          style={{ 
+            backgroundColor: colors.interactive.info || '#0288D1',
+            top: '30%',
+            left: '35%',
+          }} 
+        />
+      </div>
+
       {/* Header - always visible when showBackButton is true, or when hideHeader is false */}
       {(!hideHeader || showBackButton) && (
-        <header className="shadow-md sticky top-0 z-50" style={{ backgroundColor: colors.surface.primary, borderBottomColor: colors.border.light, borderBottomWidth: '1px' }}>
+        <header className="shadow-md sticky top-0 z-50 relative" style={{ backgroundColor: colors.surface.primary, borderBottomColor: colors.border.light, borderBottomWidth: '1px' }}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center relative">
             {showBackButton && (
               <button
@@ -55,10 +83,10 @@ export const CenteredLayout: React.FC<CenteredLayoutProps> = ({
           </div>
         </header>
       )}
-      <main className="flex-1 flex items-center justify-center px-4 py-8">
+      <main className="flex-1 flex items-center justify-center px-4 py-8 relative z-10 w-full">
         {children}
       </main>
-      {!hideFooter && <Footer />}
+      {!hideFooter && <div className="relative z-10"><Footer /></div>}
     </div>
   );
 };

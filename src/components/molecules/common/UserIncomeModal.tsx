@@ -1,12 +1,13 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Button, Heading, Text, Input } from '@/components/atoms';
+import { Button, Heading, Text, Input, Alert } from '@/components/atoms';
 import { useTheme } from '@/context/ThemeContext';
 import { useUserIncome } from '@/hooks/useUserIncome';
 import { formatAmountInput, parseFormattedNumber } from '@/lib/format';
 import { useTranslations } from 'next-intl';
 import { MdClose } from 'react-icons/md';
+import { useAuth } from '@/context/AuthContext';
 
 interface UserIncomeModalProps {
   isOpen: boolean;
@@ -29,6 +30,7 @@ export const UserIncomeModal: React.FC<UserIncomeModalProps> = ({
 }) => {
   const { colors } = useTheme();
   const t = useTranslations();
+  const { updateUser } = useAuth();
   const { isLoading, createUserIncome, updateUserIncome, getUserIncome } = useUserIncome();
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -147,6 +149,7 @@ export const UserIncomeModal: React.FC<UserIncomeModalProps> = ({
       }
 
       if (result.success) {
+        updateUser({ incomeSetupCompleted: true });
         setSuccess(true);
         setTimeout(() => {
           setSuccess(false);
@@ -175,13 +178,13 @@ export const UserIncomeModal: React.FC<UserIncomeModalProps> = ({
           left: 0,
           width: '100%',
           height: '100%',
-          zIndex: 999,
+          zIndex: 10001,
         }}
         onClick={onClose}
       />
 
       {/* Modal */}
-      <div className="fixed inset-0 flex items-center justify-center p-4 pointer-events-none" style={{ zIndex: 1000 }}>
+      <div className="fixed inset-0 flex items-center justify-center p-4 pointer-events-none" style={{ zIndex: 10002 }}>
         <div
           className="bg-white rounded-lg shadow-2xl max-w-md w-full pointer-events-auto overflow-hidden flex flex-col max-h-[90vh]"
           style={{ backgroundColor: colors.background.primary }}
@@ -220,15 +223,7 @@ export const UserIncomeModal: React.FC<UserIncomeModalProps> = ({
 
             {/* Error Message */}
             {error && (
-              <div
-                className="p-3 rounded-lg text-center"
-                style={{
-                  backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                  color: '#ef4444',
-                }}
-              >
-                <Text className="font-semibold">{error}</Text>
-              </div>
+              <Alert message={error} type="error" onClose={() => setError(null)} />
             )}
 
             {/* Net Income */}
@@ -252,7 +247,7 @@ export const UserIncomeModal: React.FC<UserIncomeModalProps> = ({
             {/* Usable Income */}
             <div className="space-y-2">
               <label style={{ color: colors.text.primary }} className="block text-sm font-semibold">
-                Usable Income *
+                Client Usable Income *
               </label>
               <Input
                 type="text"

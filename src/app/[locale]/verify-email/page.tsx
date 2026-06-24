@@ -52,7 +52,9 @@ export default function VerifyEmailPage() {
   if (isInitializing) {
     return (
       <CenteredLayout hideHeader hideFooter showBackButton>
-        <Heading level={2}>{t('common.loading')}</Heading>
+        <div className="w-full max-w-[520px] rounded-2xl p-10 auth-glass-card text-center">
+          <Heading level={2}>{t('common.loading')}</Heading>
+        </div>
       </CenteredLayout>
     );
   }
@@ -60,14 +62,18 @@ export default function VerifyEmailPage() {
   if (!email) {
     return (
       <CenteredLayout hideHeader hideFooter showBackButton>
-        <Heading level={2}>{t('verifyEmail.redirecting')}</Heading>
+        <div className="w-full max-w-[520px] rounded-2xl p-10 auth-glass-card text-center">
+          <Heading level={2}>{t('verifyEmail.redirecting')}</Heading>
+        </div>
       </CenteredLayout>
     );
   }
 
   return (
     <CenteredLayout hideHeader hideFooter showBackButton>
-      <VerifyEmailForm email={email} />
+      <div className="w-full max-w-[520px] rounded-2xl p-10 auth-glass-card">
+        <VerifyEmailForm email={email} />
+      </div>
     </CenteredLayout>
   );
 }

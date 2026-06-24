@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useLocale } from 'next-intl';
 import { MdVisibility, MdVisibilityOff } from 'react-icons/md';
-import { Button, Input, Heading, Text } from '@/components/atoms';
+import { Button, Input, Heading, Text, Alert } from '@/components/atoms';
 import { useAuth } from '@/context/AuthContext';
 import { useAuthForm } from '@/hooks/useAuthForm';
 import { useTheme } from '@/context/ThemeContext';
@@ -42,7 +42,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
     // If value is in yyyy-MM-dd format (from date picker)
     if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
       setDateOfBirth(value);
-    } 
+    }
     // If value is in dd/mm/yyyy format (manual input)
     else if (/^\d{2}\/\d{2}\/\d{4}$/.test(value)) {
       const parts = value.split('/');
@@ -116,14 +116,14 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
 
     try {
       setIsSubmitting(true);
-      
+
       // Format dateOfBirth to dd/mm/yyyy
       let formattedDate = dateOfBirth;
       if (/^\d{4}-\d{2}-\d{2}$/.test(dateOfBirth)) {
         const [year, month, day] = dateOfBirth.split('-');
         formattedDate = `${day}/${month}/${year}`;
       }
-      
+
       console.log('[RegisterForm] Calling register API...');
       // Call register through auth context
       await register(username, fullName, email, password, phone, formattedDate);
@@ -133,13 +133,13 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
       // Don't use setTimeout to avoid navigation interruption
       const redirectUrl = `/${locale}/verify-email?email=${encodeURIComponent(email)}`;
       console.log('[RegisterForm] Redirecting to URL:', redirectUrl);
-      
+
       // Use router.push with options to ensure navigation
       router.push(redirectUrl);
     } catch (err) {
       // API returned error or network error - display to user
       let errorMessage = 'Registration failed';
-      
+
       // Extract error message from different possible locations
       if (err instanceof Error) {
         errorMessage = err.message;
@@ -147,10 +147,10 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
         const errorObj = err as any;
         errorMessage = errorObj.message || errorObj.data?.message || JSON.stringify(err);
       }
-      
+
       console.error('[RegisterForm] Registration error:', errorMessage, err);
       setError(errorMessage);
-      
+
       // Scroll to top to show error
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } finally {
@@ -162,9 +162,9 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
     <form onSubmit={handleSubmit} className="space-y-6 w-full">
       {/* Logo and Website Name - Clickable */}
       <div className="flex items-center justify-center mb-8 cursor-pointer group" onClick={handleLogoClick}>
-        <img 
-          src="/logo-nobg.png" 
-          alt="SmartMoney" 
+        <img
+          src="/logo.png"
+          alt="SmartMoney"
           className="h-12 w-12 object-contain mr-3 group-opacity-80 transition-opacity flex-shrink-0"
           style={{ filter: colorScheme === 'dark' ? 'brightness(0) invert(1)' : 'none' }}
         />
@@ -181,17 +181,9 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
       </div>
 
       {error && (
-        <div className="p-4 bg-red-50 text-red-800 rounded-lg border-l-4 border-red-500 mb-4 animate-pulse">
-          <div className="flex items-start gap-3">
-            <div className="text-xl font-bold">⚠️</div>
-            <div>
-              <h3 className="font-semibold mb-1">Registration Error</h3>
-              <p className="text-sm">{error}</p>
-            </div>
-          </div>
-        </div>
+        <Alert message={error} type="error" onClose={() => setError(null)} />
       )}
-      
+
       <Input
         type="text"
         label="Full Name"
@@ -240,7 +232,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
         required
         disabled={isSubmitting}
       />
-      
+
       <div className="relative">
         <Input
           type={showPassword ? 'text' : 'password'}
@@ -314,10 +306,10 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
         </label>
       </div>
 
-      <Button 
-        variant="primary" 
-        type="submit" 
-        className="w-full py-3 mt-6 text-lg font-semibold" 
+      <Button
+        variant="primary"
+        type="submit"
+        className="w-full py-3 mt-6 text-lg font-semibold"
         disabled={isSubmitting}
       >
         {isSubmitting ? 'Creating account...' : 'Create Account'}
@@ -325,8 +317,8 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
 
       <p className="text-center text-sm" style={{ color: colors.text.secondary }}>
         Already have an account?{' '}
-        <Link 
-          href={`/${locale}/login`} 
+        <Link
+          href={`/${locale}/login`}
           className="font-semibold hover:opacity-80 transition-opacity"
           style={{ color: colors.interactive.primary }}
         >

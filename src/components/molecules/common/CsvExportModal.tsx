@@ -138,7 +138,7 @@ export const CsvExportModal: React.FC<CsvExportModalProps> = ({
             <button
               onClick={onClose}
               disabled={isExporting}
-              className="p-1 rounded-lg transition-colors hover:bg-black/5 disabled:opacity-50"
+              className="p-1 rounded-lg transition-colors hover:bg-black/5 disabled:opacity-50 hover:cursor-pointer"
               style={{ color: colors.text.secondary }}
             >
               <MdClose className="w-5 h-5" />

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Button, Heading, Text, Input } from '@/components/atoms';
+import { Button, Heading, Text, Input, Alert } from '@/components/atoms';
 import { useTheme } from '@/context/ThemeContext';
 import { useProjects } from '@/hooks/useProjects';
 import { UpdateProjectRequest, ProjectDetail } from '@/types/project.api';
@@ -17,7 +17,7 @@ interface EditProjectModalProps {
 }
 
 type ProjectPriority = 'LOW' | 'MEDIUM' | 'HIGH';
-type ProjectStatus = 'ACTIVE' | 'COMPLETED' | 'CANCELLED';
+type ProjectStatus = 'ACTIVE' | 'COMPLETED' | 'ABANDONED';
 const CURRENCY = 'VND'; // Fixed currency
 
 interface FormData {
@@ -122,13 +122,13 @@ export const EditProjectModal: React.FC<EditProjectModalProps> = ({
       setError('Project name is required');
       return;
     }
-// Check if changing to a priority that's already used by another project
+    // Check if changing to a priority that's already used by another project
     if (formData.priority !== project.priority && usedPriorities.includes(formData.priority)) {
       setError(`This priority is already used by another project. Each priority can only be used once.`);
       return;
     }
 
-    
+
     if (!formData.targetAmount || parseFloat(formData.targetAmount) <= 0) {
       setError('Please enter a valid target amount');
       return;
@@ -190,12 +190,12 @@ export const EditProjectModal: React.FC<EditProjectModalProps> = ({
       {/* Modal */}
       <div className="fixed inset-0 flex items-center justify-center p-4 pointer-events-none overflow-y-auto" style={{ zIndex: 1000 }}>
         <div
-          className="bg-white rounded-lg shadow-2xl max-w-md w-full pointer-events-auto my-8"
+          className="bg-white rounded-2xl shadow-2xl max-w-md w-full pointer-events-auto my-8 overflow-hidden"
           style={{ backgroundColor: colors.background.primary }}
           onClick={e => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b sticky top-0" style={{ borderColor: colors.border.light, backgroundColor: colors.background.primary }}>
+          <div className="flex items-center justify-between p-6 border-b sticky top-0 rounded-t-2xl" style={{ borderColor: colors.border.light, backgroundColor: colors.background.primary }}>
             <Heading level={3} className="m-0" style={{ color: colors.text.primary }}>Edit Project</Heading>
             <button
               onClick={onClose}
@@ -228,15 +228,7 @@ export const EditProjectModal: React.FC<EditProjectModalProps> = ({
 
             {/* Error Message */}
             {error && (
-              <div
-                className="p-4 rounded-lg text-center"
-                style={{
-                  backgroundColor: `${colors.interactive.danger}20`,
-                  color: colors.interactive.danger,
-                }}
-              >
-                <Text className="font-semibold text-sm">{error}</Text>
-              </div>
+              <Alert message={error} type="error" onClose={() => setError(null)} />
             )}
 
             {/* Project Name */}
@@ -324,7 +316,7 @@ export const EditProjectModal: React.FC<EditProjectModalProps> = ({
                 >
                   <option value="ACTIVE">Active</option>
                   <option value="COMPLETED">Completed</option>
-                  <option value="CANCELLED">Cancelled</option>
+                  <option value="ABANDONED">Abandoned</option>
                 </select>
               </div>
             </div>

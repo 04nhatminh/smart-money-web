@@ -6,7 +6,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { useAuth } from '@/context/AuthContext';
 import { SidebarLayout } from '@/components/templates';
 import { Heading, Text, Button } from '@/components/atoms';
-import { Card, StatCard, UserIncomeModal, UserFinancialModal, GenerateBudgetModal } from '@/components/molecules/common';
+import { Card, StatCard, UserIncomeModal, UserFinancialModal, GenerateBudgetModal, CreateProjectModal } from '@/components/molecules/common';
 import { useTheme } from '@/context/ThemeContext';
 import { useTransactions } from '@/hooks/useTransactions';
 import { useAnalytics } from '@/hooks/useAnalytics';
@@ -17,18 +17,18 @@ import { getCookie } from '@/lib/auth';
 const PieTooltipCustom = ({ active, payload }: any) => {
   const t = useTranslations();
   const { colors } = useTheme();
-  
+
   if (!active || !payload?.length) return null;
   const d = payload[0].payload;
-  
+
   return (
     <div style={{
       background: colors.surface.primary === '#ffffff' ? 'rgba(255, 255, 255, 0.96)' : 'rgba(6, 5, 21, 0.96)',
       border: `1px solid ${colors.border.light}`,
       borderRadius: 10,
       padding: '10px 16px',
-      boxShadow: colors.surface.primary === '#ffffff' 
-        ? '0 4px 20px rgba(54, 41, 183, 0.15)' 
+      boxShadow: colors.surface.primary === '#ffffff'
+        ? '0 4px 20px rgba(54, 41, 183, 0.15)'
         : '0 4px 20px rgba(0, 0, 0, 0.5)',
     }}>
       <p style={{ color: colors.text.primary, fontWeight: 700, fontSize: 13 }}>{t(`categories.${d.category}`)}</p>
@@ -78,6 +78,7 @@ export default function DashboardPage() {
   const [isIncomeModalOpen, setIsIncomeModalOpen] = useState(false);
   const [isFinancialModalOpen, setIsFinancialModalOpen] = useState(false);
   const [isGenerateBudgetModalOpen, setIsGenerateBudgetModalOpen] = useState(false);
+  const [isCreateProjectModalOpen, setIsCreateProjectModalOpen] = useState(false);
 
   const currentMonth = new Date().getMonth() + 1;
   const currentYear = new Date().getFullYear();
@@ -142,7 +143,7 @@ export default function DashboardPage() {
     if (isAuthenticated && user) {
       const incomeDone = user.incomeSetupCompleted ?? true;
       const financialDone = user.financialSetupCompleted ?? true;
-      
+
       if (!incomeDone) {
         setShowIncomePrompt(true);
       } else if (!financialDone) {
@@ -170,6 +171,12 @@ export default function DashboardPage() {
     if (!analyticsData?.categoryProportions) return [];
     return [...analyticsData.categoryProportions].sort((a, b) => b.percentage - a.percentage);
   }, [analyticsData]);
+
+  const usedPriorities = useMemo(() => {
+    return projects
+      .filter((p: any) => p.type === 'PERSONAL' && p.priority && p.status === 'ACTIVE')
+      .map((p: any) => p.priority);
+  }, [projects]);
 
   if (isInitializing || (!isAuthenticated && isInitializing)) {
     return (
@@ -473,8 +480,21 @@ export default function DashboardPage() {
                   );
                 })
               ) : (
-                <div className="text-center py-8">
+                <div className="text-center py-8 space-y-4">
                   <Text style={{ color: colors.text.secondary }}>{t('dashboard.noProjects')}</Text>
+                  <div>
+                    <Button
+                      variant="primary"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setIsCreateProjectModalOpen(true);
+                      }}
+                      className="inline-flex items-center gap-1.5 text-xs py-2 px-4 font-semibold"
+                    >
+                      <MdFolderOpen className="w-4 h-4" />
+                      <span>{t('dashboard.createProject')}</span>
+                    </Button>
+                  </div>
                 </div>
               )}
             </div>
@@ -557,6 +577,17 @@ export default function DashboardPage() {
         isOpen={isGenerateBudgetModalOpen}
         onClose={() => setIsGenerateBudgetModalOpen(false)}
         onSuccess={loadDashboardData}
+      />
+
+      <CreateProjectModal
+        isOpen={isCreateProjectModalOpen}
+        onClose={() => setIsCreateProjectModalOpen(false)}
+        onSuccess={loadDashboardData}
+        usedPriorities={usedPriorities}
+        onOpenUserIncomeModal={() => {
+          setIsCreateProjectModalOpen(false);
+          setIsIncomeModalOpen(true);
+        }}
       />
     </SidebarLayout>
   );

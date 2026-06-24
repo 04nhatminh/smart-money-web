@@ -20,7 +20,7 @@ const getStatusColor = (status: ProjectStatus): string => {
   const colors: { [key in ProjectStatus]: string } = {
     ACTIVE: '#10B981', // Green
     COMPLETED: '#6B7280', // Gray
-    CANCELLED: '#EF4444', // Red
+    ABANDONED: '#EF4444', // Red
   };
   return colors[status] || '#6B7280';
 };
@@ -182,7 +182,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
         )}
         <button
           onClick={() => onEdit(project.projectId)}
-          className="px-3 py-2 rounded-lg text-sm font-medium transition-colors"
+          className="px-3 py-2 rounded-lg text-sm font-medium transition-colors hover:cursor-pointer"
           style={{
             backgroundColor: colors.background.primary + '15',
             color: colors.text.primary,
@@ -199,7 +199,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
         </button>
         <button
           onClick={() => onDelete(project.projectId)}
-          className="px-3 py-2 rounded-lg text-sm font-medium transition-colors"
+          className="px-3 py-2 rounded-lg text-sm font-medium transition-colors hover:cursor-pointer"
           style={{
             backgroundColor: '#EF4444' + '15',
             color: '#EF4444',

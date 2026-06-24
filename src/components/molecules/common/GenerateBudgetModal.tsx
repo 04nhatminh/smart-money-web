@@ -11,6 +11,7 @@ import { formatVietnamsePrice } from '@/lib/format';
 import { getCookie } from '@/lib/auth';
 import { MdClose, MdAutoAwesome, MdCheck, MdError, MdRefresh } from 'react-icons/md';
 import { UserIncomeModal, UserFinancialModal } from '.';
+import { useUserIncome, useUserFinancial } from '@/hooks';
 
 interface GenerateBudgetModalProps {
   isOpen: boolean;
@@ -30,8 +31,10 @@ export const GenerateBudgetModal: React.FC<GenerateBudgetModalProps> = ({
   onSuccess,
 }) => {
   const { colors } = useTheme();
-  const { user } = useAuth();
+  const { user, updateUser } = useAuth();
   const { subscribe } = useWebSocket();
+  const { getUserIncome } = useUserIncome();
+  const { getUserFinancial } = useUserFinancial();
 
   // Onboarding sub-modals
   const [isIncomeModalOpen, setIsIncomeModalOpen] = useState(false);
@@ -48,13 +51,37 @@ export const GenerateBudgetModal: React.FC<GenerateBudgetModalProps> = ({
   const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
 
   // Check setup flags saved in cookies or user object
-  const checkSetupStatus = () => {
+  const checkSetupStatus = async () => {
     // Check locally saved user state first, fallback to cookies
     const incomeCookie = getCookie('income_setup_completed');
     const financialCookie = getCookie('financial_setup_completed');
 
-    const incomeSetupCompleted = user?.incomeSetupCompleted || incomeCookie === 'true';
-    const financialSetupCompleted = user?.financialSetupCompleted || financialCookie === 'true';
+    let incomeSetupCompleted = user?.incomeSetupCompleted || incomeCookie === 'true';
+    let financialSetupCompleted = user?.financialSetupCompleted || financialCookie === 'true';
+
+    // If not completed according to local state, verify with backend directly
+    if (!incomeSetupCompleted || !financialSetupCompleted) {
+      setStep('CHECKING');
+      try {
+        const [incomeRes, financialRes] = await Promise.all([
+          getUserIncome(),
+          getUserFinancial()
+        ]);
+        
+        if (incomeRes.success && incomeRes.data) {
+          incomeSetupCompleted = true;
+          // Sync with local state
+          updateUser({ incomeSetupCompleted: true });
+        }
+        if (financialRes.success && financialRes.data) {
+          financialSetupCompleted = true;
+          // Sync with local state
+          updateUser({ financialSetupCompleted: true });
+        }
+      } catch (err) {
+        console.error('Failed to verify setup status with backend:', err);
+      }
+    }
 
     if (!incomeSetupCompleted || !financialSetupCompleted) {
       setErrorMsg(
@@ -305,8 +332,9 @@ export const GenerateBudgetModal: React.FC<GenerateBudgetModalProps> = ({
                   <Button variant="secondary" className="flex-1" onClick={onClose}>
                     Cancel
                   </Button>
-                  <Button variant="primary" className="flex-1" onClick={handleGenerateClick}>
-                    ✨ Generate Now
+                  <Button variant="primary" className="flex-1 flex items-center justify-center gap-2" onClick={handleGenerateClick}>
+                    <MdAutoAwesome className="w-5 h-5" style={{ color: colors.text.inverse }} />
+                    <span>Generate Now</span>
                   </Button>
                 </div>
               </div>

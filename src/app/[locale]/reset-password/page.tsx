@@ -17,7 +17,7 @@ function ResetPasswordContent() {
   if (!email) {
     return (
       <CenteredLayout hideHeader hideFooter showBackButton>
-        <div className="text-center">
+        <div className="w-full max-w-[520px] rounded-2xl p-10 auth-glass-card text-center">
           <h1 className="text-2xl font-bold mb-2">{t('resetPassword.invalidRequest')}</h1>
           <p>{t('resetPassword.pleaseGoBack')}</p>
         </div>
@@ -28,26 +28,30 @@ function ResetPasswordContent() {
   if (isOtpVerified && resetToken) {
     return (
       <CenteredLayout hideHeader hideFooter showBackButton>
-        <ResetPasswordForm
-          email={email}
-          resetToken={resetToken}
-          onSuccess={() => {
-            // Redirect will be handled in the form
-          }}
-        />
+        <div className="w-full max-w-[520px] rounded-2xl p-10 auth-glass-card">
+          <ResetPasswordForm
+            email={email}
+            resetToken={resetToken}
+            onSuccess={() => {
+              // Redirect will be handled in the form
+            }}
+          />
+        </div>
       </CenteredLayout>
     );
   }
 
   return (
     <CenteredLayout hideHeader hideFooter showBackButton>
-      <VerifyOtpForm
-        email={email}
-        onSuccess={(token) => {
-          setResetToken(token);
-          setIsOtpVerified(true);
-        }}
-      />
+      <div className="w-full max-w-[520px] rounded-2xl p-10 auth-glass-card">
+        <VerifyOtpForm
+          email={email}
+          onSuccess={(token) => {
+            setResetToken(token);
+            setIsOtpVerified(true);
+          }}
+        />
+      </div>
     </CenteredLayout>
   );
 }
