@@ -32,6 +32,8 @@ export interface CreateProjectRequest {
   targetAmount: number;
   currency: string;
   deadline: string;
+  startDate: string;
+  bypassDateGate?: boolean;
 }
 
 export interface UpdateProjectRequest {

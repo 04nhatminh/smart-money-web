@@ -8,6 +8,7 @@ import { useGroups } from '@/hooks/useGroups';
 import { useUserIncome } from '@/hooks/useUserIncome';
 import { ProjectAdvisorModeModal, ProjectAdvisorResultModal } from '.';
 import { CreateGroupModal } from './CreateGroupModal';
+import { GenerateBudgetModal } from './GenerateBudgetModal';
 import { CreateProjectRequest, ProjectAdvisorResponse } from '@/types/project.api';
 import { GroupSummaryResponse } from '@/types/group.api';
 import { formatAmountInput, parseFormattedNumber } from '@/lib/format';
@@ -57,6 +58,12 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
   const [success, setSuccess] = useState(false);
   const today = new Date().toISOString().split('T')[0];
 
+  const minDeadlineStr = (() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 30);
+    return d.toISOString().split('T')[0];
+  })();
+
   // Advisor flow states
   const [isModeModalOpen, setIsModeModalOpen] = useState(false);
   const [isAdvisorResultModalOpen, setIsAdvisorResultModalOpen] = useState(false);
@@ -70,6 +77,12 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
   const [suggestType, setSuggestType] = useState<'amount' | 'months'>('amount');
   const [isCreateGroupModalOpen, setIsCreateGroupModalOpen] = useState(false);
 
+  // Future options and success modal states
+  const [showDateGateOptions, setShowDateGateOptions] = useState(false);
+  const [creationOption, setCreationOption] = useState<'SAVE_NOW' | 'START_NEXT_MONTH' | null>(null);
+  const [successMode, setSuccessMode] = useState<'WITH_BUDGET' | 'WITHOUT_BUDGET'>('WITH_BUDGET');
+  const [isGenerateBudgetOpen, setIsGenerateBudgetOpen] = useState(false);
+
   const [formData, setFormData] = useState<FormData>({
     name: '',
     description: '',
@@ -77,7 +90,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
     priority: 'MEDIUM',
     targetAmount: '',
     currency: 'VND',
-    deadline: today,
+    deadline: minDeadlineStr,
   });
 
   const isLoading = projectsLoading || groupsLoading;
@@ -99,14 +112,14 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
         priority: 'MEDIUM',
         targetAmount: '',
         currency: 'VND',
-        deadline: today,
+        deadline: minDeadlineStr,
       });
       setSelectedGroupId(defaultGroupId || '');
       setTotalMonths('1');
       setError(null);
       setSuccess(false);
     }
-  }, [isOpen, defaultType, defaultGroupId]);
+  }, [isOpen, defaultType, defaultGroupId, minDeadlineStr]);
 
   const loadGroups = async () => {
     try {
@@ -167,6 +180,25 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
         [name]: value,
       }));
     }
+  };
+
+  const getFirstOfNextMonth = () => {
+    const d = new Date();
+    d.setMonth(d.getMonth() + 1);
+    d.setDate(1);
+    return d.toISOString().split('T')[0];
+  };
+
+  const handleConfirmOption = (option: 'SAVE_NOW' | 'START_NEXT_MONTH') => {
+    setCreationOption(option);
+    setShowDateGateOptions(false);
+    setIsModeModalOpen(true);
+  };
+
+  const handleSuccessClose = () => {
+    setSuccess(false);
+    onClose();
+    onSuccess?.();
   };
 
   const handleSuggest = async () => {
@@ -278,8 +310,14 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
     }
 
     const deadlineDate = new Date(formData.deadline);
-    if (deadlineDate <= new Date(today)) {
-      setError('Deadline must be in the future');
+    const minDeadlineDate = new Date();
+    minDeadlineDate.setDate(minDeadlineDate.getDate() + 30);
+    minDeadlineDate.setHours(0, 0, 0, 0);
+    const checkDate = new Date(deadlineDate);
+    checkDate.setHours(0, 0, 0, 0);
+
+    if (checkDate < minDeadlineDate) {
+      setError('Hạn chót của dự án phải cách ngày hiện tại ít nhất 30 ngày');
       return;
     }
 
@@ -302,8 +340,14 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
       return;
     }
 
-    // All validations passed, open mode modal
-    setIsModeModalOpen(true);
+    // Date gate check for days 8-31
+    const dayOfMonth = new Date().getDate();
+    if (dayOfMonth > 7) {
+      setShowDateGateOptions(true);
+    } else {
+      setCreationOption('SAVE_NOW');
+      setIsModeModalOpen(true);
+    }
   };
 
   const handleModeSelected = async (mode: ProjectMode) => {
@@ -337,6 +381,11 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
     if (!advisorData) return;
 
     try {
+      const dayOfMonth = new Date().getDate();
+      const isStartNextMonth = creationOption === 'START_NEXT_MONTH';
+      const startDateVal = isStartNextMonth ? getFirstOfNextMonth() : today;
+      const bypassVal = (creationOption === 'SAVE_NOW' && dayOfMonth > 7);
+
       const createData: CreateProjectRequest = {
         name: formData.name.trim(),
         description: formData.description.trim(),
@@ -345,18 +394,16 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
         targetAmount: parseFormattedNumber(formData.targetAmount),
         currency: formData.currency.trim(),
         deadline: formData.deadline,
+        startDate: startDateVal,
+        bypassDateGate: bypassVal,
       };
 
       const result = await createProject(createData);
 
       if (result.success) {
+        setSuccessMode(isStartNextMonth ? 'WITHOUT_BUDGET' : 'WITH_BUDGET');
         setSuccess(true);
-        setTimeout(() => {
-          setSuccess(false);
-          setIsAdvisorResultModalOpen(false);
-          onClose();
-          onSuccess?.();
-        }, 1500);
+        setIsAdvisorResultModalOpen(false);
       } else {
         setError(result.error || 'Failed to create project');
       }
@@ -370,6 +417,11 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
     setError(null);
 
     try {
+      const dayOfMonth = new Date().getDate();
+      const isStartNextMonth = creationOption === 'START_NEXT_MONTH';
+      const startDateVal = isStartNextMonth ? getFirstOfNextMonth() : today;
+      const bypassVal = (creationOption === 'SAVE_NOW' && dayOfMonth > 7);
+
       const createData: CreateProjectRequest = {
         name: formData.name.trim(),
         description: formData.description.trim(),
@@ -378,17 +430,15 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
         targetAmount: parseFormattedNumber(formData.targetAmount),
         currency: formData.currency.trim(),
         deadline: formData.deadline,
+        startDate: startDateVal,
+        bypassDateGate: bypassVal,
       };
 
       const result = await createProject(createData);
 
       if (result.success) {
+        setSuccessMode(isStartNextMonth ? 'WITHOUT_BUDGET' : 'WITH_BUDGET');
         setSuccess(true);
-        setTimeout(() => {
-          setSuccess(false);
-          onClose();
-          onSuccess?.();
-        }, 1500);
       } else {
         setError(result.error || 'Failed to create project');
       }
@@ -399,7 +449,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
 
   if (!isOpen) return null;
 
-  const showFormModal = !isModeModalOpen && !isAdvisorResultModalOpen;
+  const showFormModal = !isModeModalOpen && !isAdvisorResultModalOpen && !showDateGateOptions && !success;
 
   return (
     <>
@@ -701,7 +751,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
                       value={formData.deadline}
                       onChange={handleInputChange}
                       disabled={isLoading}
-                      min={today}
+                      min={minDeadlineStr}
                       required
                     />
                   </div>
@@ -798,6 +848,190 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
           </div>
         </>
       )}
+
+      {/* Success Modal */}
+      {success && (
+        <>
+          <div
+            className="fixed inset-0 transition-opacity"
+            style={{
+              backgroundColor: 'rgba(0, 0, 0, 0.3)',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              zIndex: 999,
+            }}
+            onClick={handleSuccessClose}
+          />
+          <div className="fixed inset-0 flex items-center justify-center p-4 overflow-y-auto" style={{ zIndex: 1000 }}>
+            <div
+              className="bg-white rounded-2xl shadow-2xl max-w-md w-full my-8 p-8 text-center space-y-6 pointer-events-auto"
+              style={{ backgroundColor: colors.background.primary }}
+              onClick={e => e.stopPropagation()}
+            >
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto text-green-500">
+                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path>
+                </svg>
+              </div>
+
+              <div className="space-y-2">
+                <Heading level={3} style={{ color: colors.text.primary }} className="m-0">
+                  Tạo dự án thành công!
+                </Heading>
+                {successMode === 'WITH_BUDGET' ? (
+                  <Text style={{ color: colors.text.secondary }} className="text-sm">
+                    Dự án của bạn đã được khởi tạo. Bạn có muốn sử dụng AI để tính toán lại ngân sách chi tiêu (budget) tối ưu dựa trên mục tiêu tích lũy mới này không?
+                  </Text>
+                ) : (
+                  <Text style={{ color: colors.text.secondary }} className="text-sm">
+                    Dự án của bạn đã được khởi tạo thành công và sẽ bắt đầu tích lũy từ ngày 1 của tháng sau.
+                  </Text>
+                )}
+              </div>
+
+              <div className="flex flex-col gap-2 pt-2">
+                {successMode === 'WITH_BUDGET' ? (
+                  <>
+                    <Button
+                      variant="primary"
+                      onClick={() => {
+                        setSuccess(false);
+                        setIsGenerateBudgetOpen(true);
+                      }}
+                      className="w-full font-bold flex items-center justify-center gap-2"
+                    >
+                      <span>✨ Tính lại ngân sách</span>
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      onClick={handleSuccessClose}
+                      className="w-full"
+                    >
+                      Để sau
+                    </Button>
+                  </>
+                ) : (
+                  <Button
+                    variant="primary"
+                    onClick={handleSuccessClose}
+                    className="w-full font-bold"
+                  >
+                    Xác nhận
+                  </Button>
+                )}
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* Date Gate Options Modal */}
+      {showDateGateOptions && (
+        <>
+          <div
+            className="fixed inset-0 transition-opacity"
+            style={{
+              backgroundColor: 'rgba(0, 0, 0, 0.3)',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              zIndex: 999,
+            }}
+            onClick={() => setShowDateGateOptions(false)}
+          />
+          <div className="fixed inset-0 flex items-center justify-center p-4 overflow-y-auto" style={{ zIndex: 1000 }}>
+            <div
+              className="bg-white rounded-2xl shadow-2xl max-w-md w-full my-8 overflow-hidden pointer-events-auto"
+              style={{ backgroundColor: colors.background.primary }}
+              onClick={e => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between p-6 border-b" style={{ borderColor: colors.border.light }}>
+                <Heading level={3} className="m-0" style={{ color: colors.text.primary }}>
+                  Thời gian bắt đầu dự án
+                </Heading>
+                <button
+                  onClick={() => setShowDateGateOptions(false)}
+                  className="p-1 rounded-lg transition-colors hover:opacity-75 hover:cursor-pointer"
+                  style={{ color: colors.text.secondary }}
+                >
+                  <MdClose className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="p-6 space-y-6">
+                <Text className="text-sm" style={{ color: colors.text.secondary }}>
+                  Hiện tại đã qua thời gian đăng ký dự án tích lũy trong tháng (ngày 1 đến ngày 7). Vui lòng chọn một phương án bắt đầu:
+                </Text>
+
+                <div className="space-y-4">
+                  <button
+                    type="button"
+                    onClick={() => handleConfirmOption('SAVE_NOW')}
+                    className="w-full p-4 rounded-xl border text-left transition-all hover:bg-gray-50 flex flex-col gap-1 hover:cursor-pointer"
+                    style={{
+                      borderColor: colors.border.light,
+                      backgroundColor: colors.background.secondary,
+                    }}
+                  >
+                    <span className="font-bold text-sm" style={{ color: colors.interactive.primary }}>
+                      Tiết kiệm ngay
+                    </span>
+                    <span className="text-xs" style={{ color: colors.text.secondary }}>
+                      Tạo dự án với thông tin hiện tại và bắt đầu tích lũy/gen ngân sách ngay trong tháng này.
+                    </span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleConfirmOption('START_NEXT_MONTH')}
+                    className="w-full p-4 rounded-xl border text-left transition-all hover:bg-gray-50 flex flex-col gap-1 hover:cursor-pointer"
+                    style={{
+                      borderColor: colors.border.light,
+                      backgroundColor: colors.background.secondary,
+                    }}
+                  >
+                    <span className="font-bold text-sm" style={{ color: colors.text.primary }}>
+                      Bắt đầu từ tháng sau
+                    </span>
+                    <span className="text-xs" style={{ color: colors.text.secondary }}>
+                      Đẩy ngày bắt đầu dự án sang ngày 1 của tháng sau. Chỉ thông báo thành công mà không hỏi thiết lập ngân sách.
+                    </span>
+                  </button>
+                </div>
+
+                <div className="flex gap-3 pt-2">
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={() => setShowDateGateOptions(false)}
+                    className="w-full"
+                  >
+                    Quay lại
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* Generate Budget Modal */}
+      <GenerateBudgetModal
+        isOpen={isGenerateBudgetOpen}
+        onClose={() => {
+          setIsGenerateBudgetOpen(false);
+          onClose();
+          onSuccess?.();
+        }}
+        onSuccess={() => {
+          setIsGenerateBudgetOpen(false);
+          onClose();
+          onSuccess?.();
+        }}
+      />
     </>
   );
 };
