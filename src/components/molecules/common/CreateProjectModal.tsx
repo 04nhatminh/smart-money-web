@@ -13,6 +13,7 @@ import { CreateProjectRequest, ProjectAdvisorResponse } from '@/types/project.ap
 import { GroupSummaryResponse } from '@/types/group.api';
 import { formatAmountInput, parseFormattedNumber } from '@/lib/format';
 import { MdClose, MdLightbulb } from 'react-icons/md';
+import { useTranslations } from 'next-intl';
 
 interface CreateProjectModalProps {
   isOpen: boolean;
@@ -51,6 +52,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
   defaultGroupId,
 }) => {
   const { colors } = useTheme();
+  const t = useTranslations();
   const { isLoading: projectsLoading, createProject, projectAdvisor } = useProjects();
   const { listGroups, getGroupProjectSuggestions, createGroupProject, isLoading: groupsLoading } = useGroups();
   const { getUserIncome } = useUserIncome();
@@ -204,7 +206,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
   const handleSuggest = async () => {
     setError(null);
     if (!selectedGroupId) {
-      setError('Please select a group first');
+      setError(t('projects.createModal.errors.selectGroup'));
       return;
     }
 
@@ -212,14 +214,14 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
     if (suggestType === 'amount') {
       const amountVal = parseFormattedNumber(formData.targetAmount);
       if (!amountVal || amountVal <= 0) {
-        setError('Please enter a target amount to suggest months');
+        setError(t('projects.createModal.errors.enterAmount'));
         return;
       }
       payload.inputAmount = amountVal;
     } else {
       const monthsVal = parseInt(totalMonths);
       if (!monthsVal || monthsVal <= 0) {
-        setError('Please enter months to suggest target amount');
+        setError(t('projects.createModal.errors.enterMonths'));
         return;
       }
       payload.inputMonths = monthsVal;
@@ -237,7 +239,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
           }));
         }
       } else {
-        setError(res.error || 'Failed to get suggestions');
+        setError(res.error || t('projects.createModal.errors.failedSuggestions'));
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
@@ -250,24 +252,24 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
 
     // Validation
     if (!formData.name.trim()) {
-      setError('Project name is required');
+      setError(t('projects.createModal.errors.nameRequired'));
       return;
     }
 
     const numericAmount = parseFormattedNumber(formData.targetAmount);
     if (!numericAmount || numericAmount <= 0) {
-      setError('Please enter a valid target amount');
+      setError(t('projects.createModal.errors.validAmount'));
       return;
     }
 
     if (formData.type === 'GROUP') {
       if (!selectedGroupId) {
-        setError('Please select a group for this project');
+        setError(t('projects.createModal.errors.selectGroupProject'));
         return;
       }
       const months = parseInt(totalMonths);
       if (!months || months < 1 || months > 60) {
-        setError('Total months must be between 1 and 60');
+        setError(t('projects.createModal.errors.monthsRange'));
         return;
       }
 
@@ -300,12 +302,12 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
 
     // Personal Project Logic
     if (usedPriorities.includes(formData.priority)) {
-      setError(`You already have a project with ${formData.priority} priority. Each priority can only be used once.`);
+      setError(t('projects.createModal.errors.priorityUsed', { priority: t(`projects.priority.${formData.priority}`) }));
       return;
     }
 
     if (!formData.deadline) {
-      setError('Deadline is required');
+      setError(t('projects.createModal.errors.deadlineRequired'));
       return;
     }
 
@@ -317,7 +319,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
     checkDate.setHours(0, 0, 0, 0);
 
     if (checkDate < minDeadlineDate) {
-      setError('Hạn chót của dự án phải cách ngày hiện tại ít nhất 30 ngày');
+      setError(t('projects.createModal.errors.deadlineMin'));
       return;
     }
 
@@ -325,7 +327,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
     try {
       const incomeResult = await getUserIncome();
       if (!incomeResult.success || !incomeResult.data) {
-        setError('Please set up your user income information first');
+        setError(t('projects.createModal.errors.setupIncome'));
         setTimeout(() => {
           onOpenUserIncomeModal?.();
         }, 500);
@@ -333,7 +335,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
       }
     } catch (err) {
       console.error('Error checking user income:', err);
-      setError('Please set up your user income information first');
+      setError(t('projects.createModal.errors.setupIncome'));
       setTimeout(() => {
         onOpenUserIncomeModal?.();
       }, 500);
@@ -506,7 +508,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
               {/* Header */}
               <div className="flex items-center justify-between p-6 border-b sticky top-0 rounded-t-2xl" style={{ borderColor: colors.border.light, backgroundColor: colors.background.primary }}>
                 <Heading level={3} className="m-0">
-                  Create {formData.type === 'PERSONAL' ? 'Personal' : 'Group'} Project
+                  {formData.type === 'PERSONAL' ? t('projects.createModal.titlePersonal') : t('projects.createModal.titleGroup')}
                 </Heading>
                 <button
                   onClick={onClose}
@@ -527,7 +529,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
                       color: colors.interactive.success,
                     }}
                   >
-                    <Text className="font-semibold">Project created successfully!</Text>
+                    <Text className="font-semibold">{t('projects.createModal.successMessage')}</Text>
                   </div>
                 )}
 
@@ -546,7 +548,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
                 {/* Project Type */}
                 <div>
                   <label className="block text-sm font-medium mb-2" style={{ color: colors.text.primary }}>
-                    Type <span style={{ color: colors.interactive.danger }}>*</span>
+                    {t('projects.createModal.typeLabel')} <span style={{ color: colors.interactive.danger }}>*</span>
                   </label>
                   <div className="grid grid-cols-2 gap-3">
                     {(['PERSONAL', 'GROUP'] as const).map((tVal) => {
@@ -566,10 +568,10 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
                           }}
                         >
                           <span className="font-semibold text-sm">
-                            {tVal === 'PERSONAL' ? 'Personal' : 'Group'}
+                            {tVal === 'PERSONAL' ? t('projects.createModal.personalType') : t('projects.createModal.groupType')}
                           </span>
                           <span className="text-[11px]" style={{ color: colors.text.secondary }}>
-                            {tVal === 'PERSONAL' ? 'Individual goal' : 'Shared project'}
+                            {tVal === 'PERSONAL' ? t('projects.createModal.personalDesc') : t('projects.createModal.groupDesc')}
                           </span>
                         </button>
                       );
@@ -582,7 +584,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
                   <div className="space-y-2">
                     <div className="flex justify-between items-center">
                       <label className="block text-sm font-medium" style={{ color: colors.text.primary }}>
-                        Select Group <span style={{ color: colors.interactive.danger }}>*</span>
+                        {t('projects.createModal.selectGroup')} <span style={{ color: colors.interactive.danger }}>*</span>
                       </label>
                       <button
                         type="button"
@@ -590,14 +592,14 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
                         className="text-xs font-semibold hover:underline"
                         style={{ color: colors.interactive.primary }}
                       >
-                        + Create Group
+                        {t('projects.createModal.createGroup')}
                       </button>
                     </div>
 
                     {groups.length === 0 ? (
                       <div className="p-3 text-center border border-dashed rounded-lg" style={{ borderColor: colors.border.light }}>
                         <Text style={{ color: colors.text.secondary }} className="text-xs">
-                          No locked admin groups available.
+                          {t('projects.createModal.noGroups')}
                         </Text>
                       </div>
                     ) : (
@@ -624,14 +626,14 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
                 {/* Project Name */}
                 <div>
                   <label className="block text-sm font-medium mb-2" style={{ color: colors.text.primary }}>
-                    Project Name <span style={{ color: colors.interactive.danger }}>*</span>
+                    {t('projects.createModal.projectName')} <span style={{ color: colors.interactive.danger }}>*</span>
                   </label>
                   <Input
                     type="text"
                     name="name"
                     value={formData.name}
                     onChange={handleInputChange}
-                    placeholder="e.g., Summer Vacation Savings"
+                    placeholder={t('projects.createModal.projectNamePlaceholder')}
                     disabled={isLoading}
                     required
                   />
@@ -640,13 +642,13 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
                 {/* Description */}
                 <div>
                   <label className="block text-sm font-medium mb-2" style={{ color: colors.text.primary }}>
-                    Description
+                    {t('projects.createModal.description')}
                   </label>
                   <textarea
                     name="description"
                     value={formData.description}
                     onChange={handleInputChange}
-                    placeholder="Add any additional details..."
+                    placeholder={t('projects.createModal.descriptionPlaceholder')}
                     disabled={isLoading}
                     rows={3}
                     className="w-full px-3 py-2 rounded-lg border transition-colors focus:outline-none focus:ring-2 resize-none"
@@ -663,7 +665,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
                 {formData.type === 'PERSONAL' && (
                   <div>
                     <label className="block text-sm font-medium mb-2" style={{ color: colors.text.primary }}>
-                      Priority <span style={{ color: colors.interactive.danger }}>*</span>
+                      {t('projects.createModal.priority')} <span style={{ color: colors.interactive.danger }}>*</span>
                     </label>
                     <div className="grid grid-cols-3 gap-2">
                       {(['LOW', 'MEDIUM', 'HIGH'] as const).map((pVal) => {
@@ -692,14 +694,14 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
                               color: colors.text.primary,
                             }}
                           >
-                            <span className="font-semibold text-xs">{pVal}</span>
+                            <span className="font-semibold text-xs">{t(`projects.priority.${pVal}`)}</span>
                             {isUsed ? (
                               <span className="text-[9px] font-semibold text-red-500 leading-tight">
-                                Already used
+                                {t('projects.createModal.alreadyUsed')}
                               </span>
                             ) : (
                               <span className="text-[10px]" style={{ color: colors.text.secondary }}>
-                                Available
+                                {t('projects.createModal.available')}
                               </span>
                             )}
                           </button>
@@ -712,7 +714,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
                 {/* Target Amount */}
                 <div>
                   <label className="block text-sm font-medium mb-2" style={{ color: colors.text.primary }}>
-                    Target Amount <span style={{ color: colors.interactive.danger }}>*</span>
+                    {t('projects.createModal.targetAmount')} <span style={{ color: colors.interactive.danger }}>*</span>
                   </label>
                   <div className="flex gap-2">
                     <Input
@@ -743,7 +745,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
                 {formData.type === 'PERSONAL' ? (
                   <div>
                     <label className="block text-sm font-medium mb-2" style={{ color: colors.text.primary }}>
-                      Deadline <span style={{ color: colors.interactive.danger }}>*</span>
+                      {t('projects.deadline')} <span style={{ color: colors.interactive.danger }}>*</span>
                     </label>
                     <Input
                       type="date"
@@ -758,7 +760,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
                 ) : (
                   <div>
                     <label className="block text-sm font-medium mb-2" style={{ color: colors.text.primary }}>
-                      Total Months <span style={{ color: colors.interactive.danger }}>*</span>
+                      {t('projects.createModal.totalMonths')} <span style={{ color: colors.interactive.danger }}>*</span>
                     </label>
                     <Input
                       type="number"
@@ -779,11 +781,11 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
                     <div className="flex items-center gap-1.5">
                       <MdLightbulb className="text-yellow-500" size={18} />
                       <Heading level={4} className="text-xs font-bold uppercase" style={{ color: colors.text.primary }}>
-                        Budget Suggestion
+                        {t('projects.createModal.budgetSuggestion')}
                       </Heading>
                     </div>
                     <Text className="text-xs" style={{ color: colors.text.secondary }}>
-                      Get capacity-based suggestions for total amount or months based on active group members snapshots.
+                      {t('projects.createModal.suggestionDesc')}
                     </Text>
                     <div className="flex gap-2">
                       <button
@@ -796,7 +798,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
                           color: suggestType === 'amount' ? colors.interactive.primary : colors.text.secondary,
                         }}
                       >
-                        By target amount
+                        {t('projects.createModal.byAmount')}
                       </button>
                       <button
                         type="button"
@@ -808,7 +810,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
                           color: suggestType === 'months' ? colors.interactive.primary : colors.text.secondary,
                         }}
                       >
-                        By months
+                        {t('projects.createModal.byMonths')}
                       </button>
                     </div>
                     <Button
@@ -818,7 +820,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
                       onClick={handleSuggest}
                       disabled={isLoading}
                     >
-                      Suggest
+                      {t('projects.createModal.suggest')}
                     </Button>
                   </div>
                 )}
@@ -832,7 +834,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
                     disabled={isLoading}
                     className="flex-1"
                   >
-                    Cancel
+                    {t('common.cancel')}
                   </Button>
                   <Button
                     type="submit"
@@ -840,7 +842,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
                     disabled={isLoading}
                     className="flex-1"
                   >
-                    {isLoading ? 'Creating...' : 'Create'}
+                    {isLoading ? t('projects.createModal.creating') : t('projects.createModal.create')}
                   </Button>
                 </div>
               </form>
@@ -878,15 +880,15 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
 
               <div className="space-y-2">
                 <Heading level={3} style={{ color: colors.text.primary }} className="m-0">
-                  Tạo dự án thành công!
+                  {t('projects.createModal.successTitle')}
                 </Heading>
                 {successMode === 'WITH_BUDGET' ? (
                   <Text style={{ color: colors.text.secondary }} className="text-sm">
-                    Dự án của bạn đã được khởi tạo. Bạn có muốn sử dụng AI để tính toán lại ngân sách chi tiêu (budget) tối ưu dựa trên mục tiêu tích lũy mới này không?
+                    {t('projects.createModal.successWithBudget')}
                   </Text>
                 ) : (
                   <Text style={{ color: colors.text.secondary }} className="text-sm">
-                    Dự án của bạn đã được khởi tạo thành công và sẽ bắt đầu tích lũy từ ngày 1 của tháng sau.
+                    {t('projects.createModal.successWithoutBudget')}
                   </Text>
                 )}
               </div>
@@ -902,14 +904,14 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
                       }}
                       className="w-full font-bold flex items-center justify-center gap-2"
                     >
-                      <span>✨ Tính lại ngân sách</span>
+                      <span>{t('projects.createModal.recalcBudget')}</span>
                     </Button>
                     <Button
                       variant="secondary"
                       onClick={handleSuccessClose}
                       className="w-full"
                     >
-                      Để sau
+                      {t('projects.createModal.later')}
                     </Button>
                   </>
                 ) : (
@@ -918,7 +920,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
                     onClick={handleSuccessClose}
                     className="w-full font-bold"
                   >
-                    Xác nhận
+                    {t('projects.createModal.confirm')}
                   </Button>
                 )}
               </div>
@@ -950,7 +952,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
             >
               <div className="flex items-center justify-between p-6 border-b" style={{ borderColor: colors.border.light }}>
                 <Heading level={3} className="m-0" style={{ color: colors.text.primary }}>
-                  Thời gian bắt đầu dự án
+                  {t('projects.createModal.dateGateTitle')}
                 </Heading>
                 <button
                   onClick={() => setShowDateGateOptions(false)}
@@ -963,7 +965,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
 
               <div className="p-6 space-y-6">
                 <Text className="text-sm" style={{ color: colors.text.secondary }}>
-                  Hiện tại đã qua thời gian đăng ký dự án tích lũy trong tháng (ngày 1 đến ngày 7). Vui lòng chọn một phương án bắt đầu:
+                  {t('projects.createModal.dateGateDesc')}
                 </Text>
 
                 <div className="space-y-4">
@@ -977,10 +979,10 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
                     }}
                   >
                     <span className="font-bold text-sm" style={{ color: colors.interactive.primary }}>
-                      Tiết kiệm ngay
+                      {t('projects.createModal.saveNowTitle')}
                     </span>
                     <span className="text-xs" style={{ color: colors.text.secondary }}>
-                      Tạo dự án với thông tin hiện tại và bắt đầu tích lũy/gen ngân sách ngay trong tháng này.
+                      {t('projects.createModal.saveNowDesc')}
                     </span>
                   </button>
 
@@ -994,10 +996,10 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
                     }}
                   >
                     <span className="font-bold text-sm" style={{ color: colors.text.primary }}>
-                      Bắt đầu từ tháng sau
+                      {t('projects.createModal.startNextMonthTitle')}
                     </span>
                     <span className="text-xs" style={{ color: colors.text.secondary }}>
-                      Đẩy ngày bắt đầu dự án sang ngày 1 của tháng sau. Chỉ thông báo thành công mà không hỏi thiết lập ngân sách.
+                      {t('projects.createModal.startNextMonthDesc')}
                     </span>
                   </button>
                 </div>
@@ -1009,7 +1011,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
                     onClick={() => setShowDateGateOptions(false)}
                     className="w-full"
                   >
-                    Quay lại
+                    {t('projects.createModal.back')}
                   </Button>
                 </div>
               </div>
