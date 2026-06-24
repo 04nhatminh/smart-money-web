@@ -174,7 +174,7 @@ export default function DashboardPage() {
 
   const usedPriorities = useMemo(() => {
     return projects
-      .filter((p: any) => p.type === 'PERSONAL' && p.priority)
+      .filter((p: any) => p.type === 'PERSONAL' && p.priority && p.status === 'ACTIVE')
       .map((p: any) => p.priority);
   }, [projects]);
 

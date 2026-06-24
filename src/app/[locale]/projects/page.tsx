@@ -220,7 +220,11 @@ export default function ProjectsPage() {
 
   const getPrioritiesUsed = () => {
     const used = new Set<string>();
-    projects.forEach(p => used.add(p.priority));
+    projects.forEach(p => {
+      if (p.status === 'ACTIVE') {
+        used.add(p.priority);
+      }
+    });
     return used;
   };
 

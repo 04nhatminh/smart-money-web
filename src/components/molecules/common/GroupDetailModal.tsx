@@ -72,7 +72,11 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
       const res = await listProjects();
       if (res.success && res.data) {
         const list = res.data.items || res.data.content || res.data || [];
-        setUsedPriorities(list.map((p: any) => p.priority));
+        setUsedPriorities(
+          list
+            .filter((p: any) => p.status === 'ACTIVE')
+            .map((p: any) => p.priority)
+        );
       }
     } catch (e) {
       console.error(e);
