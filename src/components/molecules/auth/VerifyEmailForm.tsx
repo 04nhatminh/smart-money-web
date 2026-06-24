@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useLocale } from 'next-intl';
-import { Button, Input, Heading, Text } from '@/components/atoms';
+import { Button, Input, Heading, Text, Alert } from '@/components/atoms';
 import { useTheme } from '@/context/ThemeContext';
 import { apiClient } from '@/lib/api-client';
 import { API_ENDPOINTS } from '@/constants/api';
@@ -140,15 +140,11 @@ export const VerifyEmailForm: React.FC<VerifyEmailFormProps> = ({ email }) => {
       </div>
 
       {error && (
-        <div className="p-4 bg-red-100 text-red-700 rounded-lg border border-red-400">
-          {error}
-        </div>
+        <Alert message={error} type="error" onClose={() => setError(null)} />
       )}
 
       {success && (
-        <div className="p-4 bg-green-100 text-green-700 rounded-lg border border-green-400">
-          {success}
-        </div>
+        <Alert message={success} type="success" onClose={() => setSuccess(null)} />
       )}
 
       {/* OTP Input */}

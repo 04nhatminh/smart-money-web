@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Button, Heading, Text, Input } from '@/components/atoms';
+import { Button, Heading, Text, Input, Alert } from '@/components/atoms';
 import { useTheme } from '@/context/ThemeContext';
 import { useProjects } from '@/hooks/useProjects';
 import { useGroups } from '@/hooks/useGroups';
@@ -475,6 +475,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
         advisorData={advisorData}
         isLoading={isLoading}
         error={error}
+        onClearError={() => setError(null)}
       />
 
       {/* Create Group Modal nested fallback */}
@@ -534,15 +535,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
                 )}
 
                 {error && (
-                  <div
-                    className="p-4 rounded-lg text-center"
-                    style={{
-                      backgroundColor: `${colors.interactive.danger}20`,
-                      color: colors.interactive.danger,
-                    }}
-                  >
-                    <Text className="font-semibold text-sm">{error}</Text>
-                  </div>
+                  <Alert message={error} type="error" onClose={() => setError(null)} />
                 )}
 
                 {/* Project Type */}

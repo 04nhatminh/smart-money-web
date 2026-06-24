@@ -3,4 +3,6 @@ export { Text } from './Text';
 export { Heading } from './Heading';
 export { Input } from './Input';
 export { ScrollReveal } from './ScrollReveal';
+export { Alert } from './Alert';
+
 

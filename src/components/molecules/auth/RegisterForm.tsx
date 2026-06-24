@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useLocale } from 'next-intl';
 import { MdVisibility, MdVisibilityOff } from 'react-icons/md';
-import { Button, Input, Heading, Text } from '@/components/atoms';
+import { Button, Input, Heading, Text, Alert } from '@/components/atoms';
 import { useAuth } from '@/context/AuthContext';
 import { useAuthForm } from '@/hooks/useAuthForm';
 import { useTheme } from '@/context/ThemeContext';
@@ -181,15 +181,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
       </div>
 
       {error && (
-        <div className="p-4 bg-red-50 text-red-800 rounded-lg border-l-4 border-red-500 mb-4 animate-pulse">
-          <div className="flex items-start gap-3">
-            <div className="text-xl font-bold">⚠️</div>
-            <div>
-              <h3 className="font-semibold mb-1">Registration Error</h3>
-              <p className="text-sm">{error}</p>
-            </div>
-          </div>
-        </div>
+        <Alert message={error} type="error" onClose={() => setError(null)} />
       )}
 
       <Input

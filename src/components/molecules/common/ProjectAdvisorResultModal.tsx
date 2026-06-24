@@ -1,10 +1,10 @@
 'use client';
 
 import React, { useEffect } from 'react';
-import { Button, Heading, Text } from '@/components/atoms';
+import { Button, Heading, Text, Alert } from '@/components/atoms';
 import { useTheme } from '@/context/ThemeContext';
 import { ProjectAdvisorResponse } from '@/types/project.api';
-import { MdClose, MdCheckCircle, MdError } from 'react-icons/md';
+import { MdClose, MdCheckCircle } from 'react-icons/md';
 
 interface ProjectAdvisorResultModalProps {
   isOpen: boolean;
@@ -14,6 +14,7 @@ interface ProjectAdvisorResultModalProps {
   advisorData: ProjectAdvisorResponse | null;
   isLoading?: boolean;
   error?: string | null;
+  onClearError?: () => void;
 }
 
 export const ProjectAdvisorResultModal: React.FC<ProjectAdvisorResultModalProps> = ({
@@ -24,6 +25,7 @@ export const ProjectAdvisorResultModal: React.FC<ProjectAdvisorResultModalProps>
   advisorData,
   isLoading = false,
   error = null,
+  onClearError,
 }) => {
   const { colors } = useTheme();
 
@@ -122,18 +124,7 @@ export const ProjectAdvisorResultModal: React.FC<ProjectAdvisorResultModalProps>
           <div className="p-6 space-y-6">
             {/* Error Box */}
             {error && (
-              <div
-                className="p-4 rounded-lg border flex gap-3"
-                style={{
-                  borderColor: '#EF4444',
-                  backgroundColor: '#FEE2E2',
-                }}
-              >
-                <MdError className="w-5 h-5 flex-shrink-0" style={{ color: '#DC2626' }} />
-                <Text className="text-sm" style={{ color: '#7F1D1D' }}>
-                  {error}
-                </Text>
-              </div>
+              <Alert message={error} type="error" onClose={onClearError} />
             )}
 
             {/* Success Icon */}

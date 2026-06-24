@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Button, Heading, Text, Input } from '@/components/atoms';
+import { Button, Heading, Text, Input, Alert } from '@/components/atoms';
 import { useTheme } from '@/context/ThemeContext';
 import { useGroups } from '@/hooks/useGroups';
 import { useAuth } from '@/context/AuthContext';
@@ -213,9 +213,10 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
     }
   };
 
+  const [isConfirmDissolveOpen, setIsConfirmDissolveOpen] = useState(false);
+
   const handleDissolveProject = async () => {
     if (!projectDetail) return;
-    if (!confirm('Are you sure you want to dissolve this group project? This will dissolve the group and abandon all sub-personal projects.')) return;
     setError(null);
     setSuccess(null);
     setLocalLoading(true);
@@ -232,6 +233,7 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
       setLocalLoading(false);
+      setIsConfirmDissolveOpen(false);
     }
   };
 
@@ -285,14 +287,10 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
           {/* Scrollable Content */}
           <div className="p-6 overflow-y-auto space-y-6 flex-1">
             {error && (
-              <div className="p-4 rounded-lg" style={{ backgroundColor: '#EF444420', color: '#EF4444' }}>
-                <Text className="font-semibold text-sm">{error}</Text>
-              </div>
+              <Alert message={error} type="error" onClose={() => setError(null)} />
             )}
             {success && (
-              <div className="p-4 rounded-lg" style={{ backgroundColor: '#10B98120', color: '#10B981' }}>
-                <Text className="font-semibold text-sm">{success}</Text>
-              </div>
+              <Alert message={success} type="success" onClose={() => setSuccess(null)} />
             )}
 
             {group && (
@@ -328,11 +326,11 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
                         <Heading level={4} style={{ color: colors.text.primary }}>Group Project: {projectDetail.name}</Heading>
                         <Text style={{ color: colors.text.secondary }} className="text-xs mt-0.5">{projectDetail.description}</Text>
                       </div>
-                      {isAdmin && (
+                      {isAdmin && group?.status !== 'DISSOLVED' && (
                         <Button
                           variant="secondary"
                           size="sm"
-                          onClick={handleDissolveProject}
+                          onClick={() => setIsConfirmDissolveOpen(true)}
                           disabled={isLoading}
                           style={{ color: '#EF4444', borderColor: '#EF444420', backgroundColor: '#EF444405' }}
                         >
@@ -364,7 +362,7 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
                     </div>
 
                     {/* Join flow for current user */}
-                    {!hasJoinedProject() && (
+                    {!hasJoinedProject() && group?.status !== 'DISSOLVED' && (
                       <div className="p-4 border rounded-xl space-y-3" style={{ borderColor: colors.border.light, backgroundColor: `${colors.interactive.primary}05` }}>
                         <Heading level={4} className='pb-2'>Join Group Project</Heading>
                         <Text className="text-xs">
@@ -520,6 +518,51 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
           </div>
         </div>
       </div>
+      {isConfirmDissolveOpen && (
+        <>
+          <div
+            className="fixed inset-0 transition-opacity"
+            style={{
+              backgroundColor: 'rgba(0, 0, 0, 0.5)',
+              zIndex: 1010,
+              backdropFilter: 'blur(4px)',
+            }}
+            onClick={() => setIsConfirmDissolveOpen(false)}
+          />
+          <div className="fixed inset-0 flex items-center justify-center p-4 overflow-y-auto" style={{ zIndex: 1011 }}>
+            <div
+              className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 space-y-6 transition-all transform flex flex-col"
+              style={{ backgroundColor: colors.background.primary }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center gap-3 text-red-500">
+                <MdCancel className="w-8 h-8" style={{ color: '#EF4444' }} />
+                <Heading level={4} style={{ color: colors.text.primary }}>Dissolve Group Project</Heading>
+              </div>
+              <Text style={{ color: colors.text.secondary }} className="text-sm">
+                Are you sure you want to dissolve this group project? This will dissolve the group and abandon all sub-personal projects. This action cannot be undone.
+              </Text>
+              <div className="flex gap-3 justify-end pt-2">
+                <Button
+                  variant="secondary"
+                  onClick={() => setIsConfirmDissolveOpen(false)}
+                  disabled={isLoading}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="primary"
+                  onClick={handleDissolveProject}
+                  disabled={isLoading}
+                  style={{ backgroundColor: '#EF4444', borderColor: '#EF4444', color: 'white' }}
+                >
+                  Confirm Dissolve
+                </Button>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
     </>
   );
 };

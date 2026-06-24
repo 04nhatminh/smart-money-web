@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useLocale } from 'next-intl';
-import { Button, Input, Heading, Text } from '@/components/atoms';
+import { Button, Input, Heading, Text, Alert } from '@/components/atoms';
 import { useTheme } from '@/context/ThemeContext';
 import { apiClient } from '@/lib/api-client';
 import { API_ENDPOINTS } from '@/constants/api';
@@ -142,9 +142,7 @@ export const VerifyOtpForm: React.FC<VerifyOtpFormProps> = ({
       </div>
 
       {error && (
-        <div className="p-4 bg-red-100 text-red-700 rounded-lg border border-red-400">
-          {error}
-        </div>
+        <Alert message={error} type="error" onClose={() => setError(null)} />
       )}
 
       {/* Email Display (Read-only) */}

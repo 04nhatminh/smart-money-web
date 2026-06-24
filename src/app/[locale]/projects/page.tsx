@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { useAuth } from '@/context/AuthContext';
 import { SidebarLayout } from '@/components/templates';
-import { Heading, Text, Button } from '@/components/atoms';
+import { Heading, Text, Button, Alert } from '@/components/atoms';
 import {
   ProjectCard,
   CreateProjectModal,
@@ -318,15 +318,7 @@ export default function ProjectsPage() {
 
         {/* Error Message */}
         {error && (
-          <div
-            className="p-4 rounded-lg"
-            style={{
-              backgroundColor: '#EF444420',
-              color: '#EF4444',
-            }}
-          >
-            <Text className="font-semibold">{error}</Text>
-          </div>
+          <Alert message={error} type="error" onClose={() => setError(null)} />
         )}
 
         {/* Projects Tab */}

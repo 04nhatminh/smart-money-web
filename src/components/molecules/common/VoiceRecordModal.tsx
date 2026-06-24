@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { useTheme } from '@/context/ThemeContext';
-import { Button, Heading, Text } from '@/components/atoms';
+import { Button, Heading, Text, Alert } from '@/components/atoms';
 import { MdClose, MdFiberManualRecord, MdStopCircle, MdPlayArrow, MdCheckCircle } from 'react-icons/md';
 import { uploadAudioToCloudinary } from '@/lib/cloudinary';
 import { apiClient } from '@/lib/api-client';
@@ -239,16 +239,7 @@ export const VoiceRecordModal: React.FC<VoiceRecordModalProps> = ({ isOpen, onCl
 
         {/* Error Message */}
         {error && (
-          <div
-            className="mb-4 p-3 rounded-lg"
-            style={{
-              backgroundColor: '#FEE2E2',
-              color: '#991B1B',
-              borderLeft: '4px solid #DC2626',
-            }}
-          >
-            <Text className="text-sm">{error}</Text>
-          </div>
+          <Alert message={error} type="error" onClose={() => setError(null)} className="mb-4" />
         )}
 
         {/* Recording Section */}

@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { useTheme } from '@/context/ThemeContext';
-import { Button, Heading, Text } from '@/components/atoms';
+import { Button, Heading, Text, Alert } from '@/components/atoms';
 import { MdClose, MdUploadFile, MdCheckCircle, MdContentCopy } from 'react-icons/md';
 import { uploadImageToCloudinary } from '@/lib/cloudinary';
 import { apiClient } from '@/lib/api-client';
@@ -209,16 +209,7 @@ export const ImageBillUploadModal: React.FC<ImageBillUploadModalProps> = ({ isOp
 
         {/* Error Message */}
         {error && (
-          <div
-            className="mb-4 p-3 rounded-lg"
-            style={{
-              backgroundColor: '#FEE2E2',
-              color: '#991B1B',
-              borderLeft: '4px solid #DC2626',
-            }}
-          >
-            <Text className="text-sm">{error}</Text>
-          </div>
+          <Alert message={error} type="error" onClose={() => setError(null)} className="mb-4" />
         )}
 
         {/* Upload Preview Section */}

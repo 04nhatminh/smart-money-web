@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Button, Heading, Text, Input } from '@/components/atoms';
+import { Button, Heading, Text, Input, Alert } from '@/components/atoms';
 import { useTheme } from '@/context/ThemeContext';
 import { useUserIncome } from '@/hooks/useUserIncome';
 import { formatAmountInput, parseFormattedNumber } from '@/lib/format';
@@ -220,15 +220,7 @@ export const UserIncomeModal: React.FC<UserIncomeModalProps> = ({
 
             {/* Error Message */}
             {error && (
-              <div
-                className="p-3 rounded-lg text-center"
-                style={{
-                  backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                  color: '#ef4444',
-                }}
-              >
-                <Text className="font-semibold">{error}</Text>
-              </div>
+              <Alert message={error} type="error" onClose={() => setError(null)} />
             )}
 
             {/* Net Income */}

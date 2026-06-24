@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { SidebarLayout } from '@/components/templates';
-import { Heading, Text, Button } from '@/components/atoms';
+import { Heading, Text, Button, Alert } from '@/components/atoms';
 import { Card } from '@/components/molecules/common';
 import { useTheme } from '@/context/ThemeContext';
 import { useTranslations } from 'next-intl';
@@ -239,15 +239,11 @@ export default function NotificationsPage() {
         </div>
 
         {error && (
-          <div className="p-4 rounded-lg" style={{ backgroundColor: '#EF444420', color: '#EF4444' }}>
-            <Text className="font-semibold text-sm">{error}</Text>
-          </div>
+          <Alert message={error} type="error" onClose={() => setError(null)} />
         )}
 
         {success && (
-          <div className="p-4 rounded-lg" style={{ backgroundColor: '#10B98120', color: '#10B981' }}>
-            <Text className="font-semibold text-sm">{success}</Text>
-          </div>
+          <Alert message={success} type="success" onClose={() => setSuccess(null)} />
         )}
 
         {/* Notifications List */}

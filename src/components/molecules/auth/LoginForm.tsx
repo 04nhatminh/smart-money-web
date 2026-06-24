@@ -7,7 +7,7 @@ import { useLocale } from 'next-intl';
 import { FcGoogle } from 'react-icons/fc';
 import { FaFacebook } from 'react-icons/fa';
 import { MdVisibility, MdVisibilityOff } from 'react-icons/md';
-import { Button, Input, Heading, Text } from '@/components/atoms';
+import { Button, Input, Heading, Text, Alert } from '@/components/atoms';
 import { useAuth } from '@/context/AuthContext';
 import { useAuthForm } from '@/hooks/useAuthForm';
 import { useTheme } from '@/context/ThemeContext';
@@ -250,9 +250,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
       </div>
 
       {error && (
-        <div className="p-4 bg-red-100 text-red-700 rounded-lg border border-red-400">
-          {error}
-        </div>
+        <Alert message={error} type="error" onClose={() => setError(null)} />
       )}
 
       <Input

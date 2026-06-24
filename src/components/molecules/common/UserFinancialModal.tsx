@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Button, Heading, Text } from '@/components/atoms';
+import { Button, Heading, Text, Alert } from '@/components/atoms';
 import { useTheme } from '@/context/ThemeContext';
 import { useUserFinancial } from '@/hooks/useUserFinancial';
 import { useAuth } from '@/context/AuthContext';
@@ -222,15 +222,7 @@ export const UserFinancialModal: React.FC<UserFinancialModalProps> = ({
 
             {/* Error Message */}
             {error && (
-              <div
-                className="p-3 rounded-lg text-center"
-                style={{
-                  backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                  color: '#ef4444',
-                }}
-              >
-                <Text className="font-semibold">{error}</Text>
-              </div>
+              <Alert message={error} type="error" onClose={() => setError(null)} />
             )}
 
             {/* Role */}
