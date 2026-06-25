@@ -90,6 +90,14 @@ export const ImageBillUploadModal: React.FC<ImageBillUploadModalProps> = ({ isOp
       }
 
       const unsubscribeFn = subscribe(id, (result) => {
+        if (result.status === 'FAILED' || result.status === 'ERROR' || result.error) {
+          setError(result.error || 'Failed to analyze receipt. Please try again.');
+          setUploadState('idle');
+          unsubscribeFn();
+          unsubscribeRef.current = null;
+          return;
+        }
+
         if (onAIResultReceived) {
           // Call the callback with the AI result and source type
           onAIResultReceived(result, 'image');

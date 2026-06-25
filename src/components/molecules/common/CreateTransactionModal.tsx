@@ -275,13 +275,13 @@ export const CreateTransactionModal: React.FC<CreateTransactionModalProps> = ({
       {/* Modal */}
       <div className="fixed inset-0 flex items-center justify-center p-4 pointer-events-none" style={{ zIndex: 1000 }}>
         <div
-          className="bg-white rounded-lg shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto pointer-events-auto"
+          className="bg-white rounded-lg shadow-2xl max-w-md w-full max-h-[90vh] flex flex-col overflow-hidden pointer-events-auto"
           style={{ backgroundColor: colors.background.primary }}
           onClick={e => e.stopPropagation()}
         >
           {/* Header */}
           <div
-            className="flex items-center justify-between p-6 border-b sticky top-0"
+            className="flex items-center justify-between p-6 border-b"
             style={{ borderColor: colors.border.light, backgroundColor: colors.background.primary }}
           >
             <Heading level={3} className="m-0" style={{ color: colors.text.primary }}>
@@ -302,7 +302,7 @@ export const CreateTransactionModal: React.FC<CreateTransactionModalProps> = ({
           </div>
 
           {/* Content */}
-          <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          <form onSubmit={handleSubmit} className="p-6 space-y-4 overflow-y-auto flex-1">
             {/* Success Message */}
             {success && (
               <div

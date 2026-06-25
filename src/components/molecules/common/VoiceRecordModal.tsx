@@ -144,6 +144,14 @@ export const VoiceRecordModal: React.FC<VoiceRecordModalProps> = ({ isOpen, onCl
       unsubscribeRef.current?.();
 
       const unsubscribeFn = subscribe(id, (result) => {
+        if (result.status === 'FAILED' || result.status === 'ERROR' || result.error) {
+          setError(result.error || 'Failed to analyze voice. Please try again.');
+          setState('recorded');
+          unsubscribeFn();
+          unsubscribeRef.current = null;
+          return;
+        }
+
         if (onAIResultReceived) {
           // Call the callback with the AI result and source type
           onAIResultReceived(result, 'voice');
