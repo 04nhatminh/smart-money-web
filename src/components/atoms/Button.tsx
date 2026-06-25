@@ -17,7 +17,7 @@ export const Button: React.FC<ButtonProps> = ({
   className = '',
   ...props
 }) => {
-  const { colors } = useTheme();
+  const { colors, colorScheme } = useTheme();
   const [isHovered, setIsHovered] = useState(false);
 
   const sizeStyles = {
@@ -32,27 +32,21 @@ export const Button: React.FC<ButtonProps> = ({
     lg: SHADOWS.lg,
   };
 
-  const getHoverColor = (v: string) => {
-    if (v === 'primary') return colors.interactive.secondary;
-    if (v === 'secondary') return colors.interactive.primary;
-    return colors.interactive[v as 'danger' | 'success']; // danger and success stay the same
-  };
-
   const variantStyles = {
     primary: {
-      backgroundColor: isHovered ? getHoverColor('primary') : colors.interactive.primary,
+      backgroundColor: colors.interactive.primary,
       color: colors.palette.white,
     } as React.CSSProperties,
     secondary: {
-      backgroundColor: isHovered ? getHoverColor('secondary') : colors.interactive.secondary,
+      backgroundColor: colors.interactive.secondary,
       color: colors.palette.white,
     } as React.CSSProperties,
     danger: {
-      backgroundColor: isHovered ? getHoverColor('danger') : colors.interactive.danger,
+      backgroundColor: colors.interactive.danger,
       color: colors.palette.white,
     } as React.CSSProperties,
     success: {
-      backgroundColor: isHovered ? getHoverColor('success') : colors.interactive.success,
+      backgroundColor: colors.interactive.success,
       color: colors.palette.white,
     } as React.CSSProperties,
   };
@@ -79,6 +73,7 @@ export const Button: React.FC<ButtonProps> = ({
         borderRadius: BORDER_RADIUS.xl,
         boxShadow: shadowStyles[elevation],
         transition: TRANSITIONS.base,
+        filter: isHovered ? (colorScheme === 'dark' ? 'brightness(1.15)' : 'brightness(0.9)') : 'none',
         ...(style || {}),
       }}
       className={`${baseStyles} ${sizeStyles[size]} ${className}`}
