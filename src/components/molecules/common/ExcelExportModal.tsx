@@ -6,8 +6,9 @@ import { useTheme } from '@/context/ThemeContext';
 import { useTranslations } from 'next-intl';
 import { useTransactions, type TransactionFilters } from '@/hooks/useTransactions';
 import { MdClose, MdFileDownload, MdRefresh } from 'react-icons/md';
+import * as XLSX from 'xlsx-js-style';
 
-interface CsvExportModalProps {
+interface ExcelExportModalProps {
   isOpen: boolean;
   onClose: () => void;
   totalPages: number;
@@ -17,7 +18,7 @@ interface CsvExportModalProps {
   activeFilters: TransactionFilters;
 }
 
-export const CsvExportModal: React.FC<CsvExportModalProps> = ({
+export const ExcelExportModal: React.FC<ExcelExportModalProps> = ({
   isOpen,
   onClose,
   totalPages,
@@ -34,40 +35,105 @@ export const CsvExportModal: React.FC<CsvExportModalProps> = ({
 
   if (!isOpen) return null;
 
-  // Convert array of transactions to CSV string and trigger download
-  const downloadCsv = (data: any[], filename: string) => {
-    // CSV Headers
+  // Convert array of transactions to Excel file and trigger download
+  const downloadExcel = (data: any[], filename: string) => {
     const headers = ['Amount', 'Type', 'Category', 'Date', 'Description'];
-    const csvRows = [headers.join(',')];
+    const rows = [headers];
 
     data.forEach(item => {
       const amount = item.amount || 0;
       const type = item.type || 'EXPENSE';
       const category = item.category || 'OTHER';
       const date = item.date || '';
-      // Escape description if it contains commas or double quotes
-      let description = item.description || '';
-      if (description.includes(',') || description.includes('"') || description.includes('\n')) {
-        description = `"${description.replace(/"/g, '""')}"`;
-      }
+      const description = item.description || '';
 
-      csvRows.push([amount, type, category, date, description].join(','));
+      rows.push([amount, type, category, date, description]);
     });
 
-    const csvContent = "data:text/csv;charset=utf-8,\uFEFF" + csvRows.join('\n');
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", filename);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    const worksheet = XLSX.utils.aoa_to_sheet(rows);
+
+    // Apply custom column widths
+    worksheet['!cols'] = [
+      { wch: 18 }, // Column A (Amount)
+      { wch: 12 }, // Column B (Type)
+      { wch: 18 }, // Column C (Category)
+      { wch: 20 }, // Column D (Date)
+      { wch: 35 }  // Column E (Description)
+    ];
+
+    // Apply custom row heights
+    worksheet['!rows'] = [
+      { hpt: 26 }, // Header row
+      ...data.map(() => ({ hpt: 20 })) // Data rows
+    ];
+
+    // Apply styles to cells
+    const range = XLSX.utils.decode_range(worksheet['!ref'] || 'A1:A1');
+    for (let R = range.s.r; R <= range.e.r; ++R) {
+      for (let C = range.s.c; C <= range.e.c; ++C) {
+        const cellRef = XLSX.utils.encode_cell({ r: R, c: C });
+        const cell = worksheet[cellRef];
+        if (!cell) continue;
+
+        const topStyle = R === range.s.r ? 'medium' : 'thin';
+        const bottomStyle = R === range.e.r ? 'medium' : 'thin';
+        const leftStyle = C === range.s.c ? 'medium' : 'thin';
+        const rightStyle = C === range.e.c ? 'medium' : 'thin';
+        const borderColor = colors.border.dark;
+
+        if (R === 0) {
+          // Header Row Style
+          cell.s = {
+            fill: { fgColor: { rgb: '3629B7' } }, // Indigo background
+            font: { name: 'Segoe UI', sz: 11, bold: true, color: { rgb: 'FFFFFF' } },
+            alignment: { horizontal: 'center', vertical: 'center' },
+            border: {
+              top: { style: topStyle, color: { rgb: borderColor } },
+              bottom: { style: bottomStyle, color: { rgb: borderColor } },
+              left: { style: leftStyle, color: { rgb: borderColor } },
+              right: { style: rightStyle, color: { rgb: borderColor } }
+            }
+          };
+        } else {
+          // Data Row Style
+          const item = data[R - 1];
+          const isIncome = item && (item.type || 'EXPENSE') === 'INCOME';
+
+          // Soft background and text colors
+          const rowBgColor = isIncome ? 'E6F4EA' : 'FCE8E6';
+          const rowTextColor = isIncome ? '137333' : 'C5221F';
+
+          cell.s = {
+            fill: { fgColor: { rgb: rowBgColor } },
+            font: { name: 'Segoe UI', sz: 10, color: { rgb: rowTextColor } },
+            border: {
+              top: { style: topStyle, color: { rgb: borderColor } },
+              bottom: { style: bottomStyle, color: { rgb: borderColor } },
+              left: { style: leftStyle, color: { rgb: borderColor } },
+              right: { style: rightStyle, color: { rgb: borderColor } }
+            },
+            alignment: {
+              vertical: 'center',
+              horizontal: C === 0 ? 'right' : (C === 1 || C === 3 ? 'center' : 'left')
+            }
+          };
+
+          if (C === 0) {
+            cell.z = '#,##0'; // Numeric currency format
+          }
+        }
+      }
+    }
+
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Transactions');
+    XLSX.writeFile(workbook, filename);
   };
 
   const handleExportCurrent = () => {
     setIsExporting(true);
     try {
-      downloadCsv(currentTransactions, `smartmoney_transactions_page_${currentPage}.csv`);
+      downloadExcel(currentTransactions, `smartmoney_transactions_page_${currentPage}.xlsx`);
       onClose();
     } catch (error) {
       console.error('Failed to export current page:', error);
@@ -98,7 +164,7 @@ export const CsvExportModal: React.FC<CsvExportModalProps> = ({
         }
       }
       setExportProgress(100);
-      downloadCsv(allTransactions, 'smartmoney_all_transactions.csv');
+      downloadExcel(allTransactions, 'smartmoney_all_transactions.xlsx');
       onClose();
     } catch (error) {
       console.error('Failed to export all pages:', error);
