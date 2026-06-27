@@ -7,7 +7,7 @@ import { useTranslations } from 'next-intl';
 import { apiClient } from '@/lib/api-client';
 import { API_ENDPOINTS } from '@/constants/api';
 import { MdClose, MdCloudUpload, MdFileDownload, MdCheckCircle, MdError, MdRefresh } from 'react-icons/md';
-import * as XLSX from 'xlsx';
+import * as XLSX from 'xlsx-js-style';
 
 interface ExcelImportModalProps {
   isOpen: boolean;
@@ -230,6 +230,75 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
       [120000, 'EXPENSE', 'TRANSPORTATION', '15/06/2026 18:45', 'Taxi ride home']
     ];
     const worksheet = XLSX.utils.aoa_to_sheet(data);
+
+    // Apply custom column widths
+    worksheet['!cols'] = [
+      { wch: 18 }, // Column A (Amount)
+      { wch: 12 }, // Column B (Type)
+      { wch: 18 }, // Column C (Category)
+      { wch: 20 }, // Column D (Date)
+      { wch: 35 }  // Column E (Description)
+    ];
+
+    // Apply custom row heights
+    worksheet['!rows'] = [
+      { hpt: 26 }, // Header row
+      { hpt: 20 }, // Data row 1
+      { hpt: 20 }, // Data row 2
+      { hpt: 20 }  // Data row 3
+    ];
+
+    // Apply styles to cells
+    const range = XLSX.utils.decode_range(worksheet['!ref'] || 'A1:A1');
+    for (let R = range.s.r; R <= range.e.r; ++R) {
+      for (let C = range.s.c; C <= range.e.c; ++C) {
+        const cellRef = XLSX.utils.encode_cell({ r: R, c: C });
+        const cell = worksheet[cellRef];
+        if (!cell) continue;
+
+        if (R === 0) {
+          // Header Row Style
+          cell.s = {
+            fill: { fgColor: { rgb: '3629B7' } }, // Indigo background
+            font: { name: 'Segoe UI', sz: 11, bold: true, color: { rgb: 'FFFFFF' } },
+            alignment: { horizontal: 'center', vertical: 'center' },
+            border: {
+              top: { style: 'thin', color: { rgb: 'B1ACEC' } },
+              bottom: { style: 'medium', color: { rgb: '3026A6' } },
+              left: { style: 'thin', color: { rgb: 'B1ACEC' } },
+              right: { style: 'thin', color: { rgb: 'B1ACEC' } }
+            }
+          };
+        } else {
+          // Data Row Style (Row 1: EXPENSE, Row 2: INCOME, Row 3: EXPENSE)
+          const isIncome = R === 2; // Row 2 is INCOME (15,000,000)
+
+          // Soft background and text colors
+          const rowBgColor = isIncome ? 'E6F4EA' : 'FCE8E6';
+          const rowTextColor = isIncome ? '137333' : 'C5221F';
+
+          cell.s = {
+            fill: { fgColor: { rgb: rowBgColor } },
+            font: { name: 'Segoe UI', sz: 10, color: { rgb: rowTextColor } },
+            border: {
+              top: { style: 'thin', color: { rgb: 'C5C1F1' } },
+              bottom: { style: 'thin', color: { rgb: 'C5C1F1' } },
+              left: { style: 'thin', color: { rgb: 'C5C1F1' } },
+              right: { style: 'thin', color: { rgb: 'C5C1F1' } }
+            },
+            alignment: {
+              vertical: 'center',
+              horizontal: C === 0 ? 'right' : (C === 1 || C === 3 ? 'center' : 'left')
+            }
+          };
+
+          if (C === 0) {
+            cell.z = '#,##0'; // Numeric currency format
+          }
+        }
+      }
+    }
+
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Template');
     XLSX.writeFile(workbook, 'smartmoney_transaction_template.xlsx');

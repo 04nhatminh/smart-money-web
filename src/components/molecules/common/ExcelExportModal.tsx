@@ -6,7 +6,7 @@ import { useTheme } from '@/context/ThemeContext';
 import { useTranslations } from 'next-intl';
 import { useTransactions, type TransactionFilters } from '@/hooks/useTransactions';
 import { MdClose, MdFileDownload, MdRefresh } from 'react-icons/md';
-import * as XLSX from 'xlsx';
+import * as XLSX from 'xlsx-js-style';
 
 interface ExcelExportModalProps {
   isOpen: boolean;
@@ -51,6 +51,74 @@ export const ExcelExportModal: React.FC<ExcelExportModalProps> = ({
     });
 
     const worksheet = XLSX.utils.aoa_to_sheet(rows);
+
+    // Apply custom column widths
+    worksheet['!cols'] = [
+      { wch: 18 }, // Column A (Amount)
+      { wch: 12 }, // Column B (Type)
+      { wch: 18 }, // Column C (Category)
+      { wch: 20 }, // Column D (Date)
+      { wch: 35 }  // Column E (Description)
+    ];
+
+    // Apply custom row heights
+    worksheet['!rows'] = [
+      { hpt: 26 }, // Header row
+      ...data.map(() => ({ hpt: 20 })) // Data rows
+    ];
+
+    // Apply styles to cells
+    const range = XLSX.utils.decode_range(worksheet['!ref'] || 'A1:A1');
+    for (let R = range.s.r; R <= range.e.r; ++R) {
+      for (let C = range.s.c; C <= range.e.c; ++C) {
+        const cellRef = XLSX.utils.encode_cell({ r: R, c: C });
+        const cell = worksheet[cellRef];
+        if (!cell) continue;
+
+        if (R === 0) {
+          // Header Row Style
+          cell.s = {
+            fill: { fgColor: { rgb: '3629B7' } }, // Indigo background
+            font: { name: 'Segoe UI', sz: 11, bold: true, color: { rgb: 'FFFFFF' } },
+            alignment: { horizontal: 'center', vertical: 'center' },
+            border: {
+              top: { style: 'thin', color: { rgb: 'B1ACEC' } },
+              bottom: { style: 'medium', color: { rgb: '3026A6' } },
+              left: { style: 'thin', color: { rgb: 'B1ACEC' } },
+              right: { style: 'thin', color: { rgb: 'B1ACEC' } }
+            }
+          };
+        } else {
+          // Data Row Style
+          const item = data[R - 1];
+          const isIncome = item && (item.type || 'EXPENSE') === 'INCOME';
+
+          // Soft background and text colors
+          const rowBgColor = isIncome ? 'E6F4EA' : 'FCE8E6';
+          const rowTextColor = isIncome ? '137333' : 'C5221F';
+
+          cell.s = {
+            fill: { fgColor: { rgb: rowBgColor } },
+            font: { name: 'Segoe UI', sz: 10, color: { rgb: rowTextColor } },
+            border: {
+              top: { style: 'thin', color: { rgb: 'C5C1F1' } },
+              bottom: { style: 'thin', color: { rgb: 'C5C1F1' } },
+              left: { style: 'thin', color: { rgb: 'C5C1F1' } },
+              right: { style: 'thin', color: { rgb: 'C5C1F1' } }
+            },
+            alignment: {
+              vertical: 'center',
+              horizontal: C === 0 ? 'right' : (C === 1 || C === 3 ? 'center' : 'left')
+            }
+          };
+
+          if (C === 0) {
+            cell.z = '#,##0'; // Numeric currency format
+          }
+        }
+      }
+    }
+
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Transactions');
     XLSX.writeFile(workbook, filename);
