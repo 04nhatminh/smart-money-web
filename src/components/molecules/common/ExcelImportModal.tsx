@@ -7,8 +7,9 @@ import { useTranslations } from 'next-intl';
 import { apiClient } from '@/lib/api-client';
 import { API_ENDPOINTS } from '@/constants/api';
 import { MdClose, MdCloudUpload, MdFileDownload, MdCheckCircle, MdError, MdRefresh } from 'react-icons/md';
+import * as XLSX from 'xlsx';
 
-interface CsvImportModalProps {
+interface ExcelImportModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: () => void;
@@ -25,7 +26,7 @@ interface ParsedTransaction {
   error?: string;
 }
 
-export const CsvImportModal: React.FC<CsvImportModalProps> = ({
+export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
   isOpen,
   onClose,
   onSuccess,
@@ -57,48 +58,6 @@ export const CsvImportModal: React.FC<CsvImportModalProps> = ({
 
   if (!isOpen) return null;
 
-  // CSV Parser supporting quotes and linebreaks
-  const parseCSV = (text: string): string[][] => {
-    const lines: string[][] = [];
-    let row: string[] = [];
-    let inQuotes = false;
-    let entry = '';
-
-    for (let i = 0; i < text.length; i++) {
-      const char = text[i];
-      const nextChar = text[i + 1];
-
-      if (char === '"') {
-        if (inQuotes && nextChar === '"') {
-          entry += '"';
-          i++; // skip next quote
-        } else {
-          inQuotes = !inQuotes;
-        }
-      } else if (char === ',' && !inQuotes) {
-        row.push(entry.trim());
-        entry = '';
-      } else if ((char === '\r' || char === '\n') && !inQuotes) {
-        row.push(entry.trim());
-        entry = '';
-        if (row.length > 1 || (row.length === 1 && row[0] !== '')) {
-          lines.push(row);
-        }
-        row = [];
-        if (char === '\r' && nextChar === '\n') {
-          i++; // skip \n
-        }
-      } else {
-        entry += char;
-      }
-    }
-    if (entry || row.length > 0) {
-      row.push(entry.trim());
-      lines.push(row);
-    }
-    return lines;
-  };
-
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -109,17 +68,34 @@ export const CsvImportModal: React.FC<CsvImportModalProps> = ({
     }
   };
 
-  const validateAndSetCSV = (text: string) => {
+  const parseExcelDate = (val: any): string => {
+    if (val instanceof Date) {
+      const pad = (n: number) => n.toString().padStart(2, '0');
+      return `${pad(val.getDate())}/${pad(val.getMonth() + 1)}/${val.getFullYear()} ${pad(val.getHours())}:${pad(val.getMinutes())}`;
+    }
+    if (typeof val === 'number') {
+      try {
+        const dateObj = XLSX.SSF.parse_date_code(val);
+        const pad = (n: number) => n.toString().padStart(2, '0');
+        return `${pad(dateObj.d)}/${pad(dateObj.m)}/${dateObj.y} ${pad(dateObj.H)}:${pad(dateObj.M)}`;
+      } catch (err) {
+        // Fallback if parsing fails
+      }
+    }
+    return String(val || '').trim();
+  };
+
+  const validateAndSetExcel = (rows: any[][]) => {
     setGeneralError(null);
     setImportErrors([]);
-    const rows = parseCSV(text);
+    
     if (rows.length < 2) {
       setGeneralError(t('transactions.invalidFile'));
       return;
     }
 
     // Match headers (case-insensitive)
-    const headers = rows[0].map(h => h.toLowerCase().trim());
+    const headers = rows[0].map(h => String(h || '').toLowerCase().trim());
     const amountIdx = headers.indexOf('amount');
     const typeIdx = headers.indexOf('type');
     const categoryIdx = headers.indexOf('category');
@@ -127,61 +103,101 @@ export const CsvImportModal: React.FC<CsvImportModalProps> = ({
     const descIdx = headers.indexOf('description');
 
     if (amountIdx === -1 || typeIdx === -1 || categoryIdx === -1 || dateIdx === -1) {
-      setGeneralError(t('transactions.csvErrorHeaders'));
+      setGeneralError(t('transactions.excelErrorHeaders'));
       return;
     }
 
     const dataRows = rows.slice(1);
-    const validated: ParsedTransaction[] = dataRows.map((row, index) => {
+    const validated: ParsedTransaction[] = [];
+
+    for (let index = 0; index < dataRows.length; index++) {
+      const row = dataRows[index];
+      // Skip completely empty rows
+      if (row.length === 0 || row.every(val => val === null || val === undefined || val === '')) {
+        continue;
+      }
+
       const rowNum = index + 2; // 1-based index + header offset
 
-      const rawAmount = row[amountIdx] || '';
-      const rawType = (row[typeIdx] || '').toUpperCase().trim();
-      const rawCategory = (row[categoryIdx] || '').toUpperCase().trim();
-      const rawDate = row[dateIdx] || '';
-      const rawDesc = descIdx !== -1 ? row[descIdx] || '' : '';
+      const rawAmount = row[amountIdx];
+      const rawType = String(row[typeIdx] || '').toUpperCase().trim();
+      const rawCategory = String(row[categoryIdx] || '').toUpperCase().trim();
+      const rawDateVal = row[dateIdx];
+      const rawDesc = descIdx !== -1 ? String(row[descIdx] || '') : '';
 
       // Validate Amount
-      const amount = Number(rawAmount.replace(/,/g, ''));
+      let amount = 0;
+      if (typeof rawAmount === 'number') {
+        amount = rawAmount;
+      } else {
+        amount = Number(String(rawAmount || '').replace(/,/g, ''));
+      }
+
       if (isNaN(amount) || amount <= 0) {
-        return { rowNum, amount: 0, type: 'EXPENSE', category: rawCategory, date: rawDate, description: rawDesc, isValid: false, error: t('transactions.csvErrorAmount') };
+        validated.push({ rowNum, amount: 0, type: 'EXPENSE', category: rawCategory, date: String(rawDateVal || ''), description: rawDesc, isValid: false, error: t('transactions.excelErrorAmount') });
+        continue;
       }
 
       // Validate Type
       if (rawType !== 'INCOME' && rawType !== 'EXPENSE') {
-        return { rowNum, amount, type: 'EXPENSE', category: rawCategory, date: rawDate, description: rawDesc, isValid: false, error: t('transactions.csvErrorType') };
+        validated.push({ rowNum, amount, type: 'EXPENSE', category: rawCategory, date: String(rawDateVal || ''), description: rawDesc, isValid: false, error: t('transactions.excelErrorType') });
+        continue;
       }
 
       // Validate Category
       const validCategories = ['FOOD', 'TRANSPORTATION', 'CLOTHING', 'UTILITIES', 'ENTERTAINMENT', 'HEALTH', 'EDUCATION', 'SHOPPING', 'OTHER'];
       if (rawType === 'EXPENSE' && !validCategories.includes(rawCategory)) {
-        return { rowNum, amount, type: rawType, category: rawCategory, date: rawDate, description: rawDesc, isValid: false, error: t('transactions.csvErrorCategory', { categories: validCategories.join(', ') }) };
+        validated.push({ rowNum, amount, type: rawType, category: rawCategory, date: String(rawDateVal || ''), description: rawDesc, isValid: false, error: t('transactions.excelErrorCategory', { categories: validCategories.join(', ') }) });
+        continue;
       }
 
-      // Validate Date format: dd/MM/yyyy HH:mm
+      // Parse and Validate Date
+      const dateStr = parseExcelDate(rawDateVal);
       const dateRegex = /^\d{2}\/\d{2}\/\d{4} \d{2}:\d{2}$/;
-      if (!rawDate || !dateRegex.test(rawDate.trim())) {
-        return { rowNum, amount, type: rawType, category: rawCategory, date: rawDate, description: rawDesc, isValid: false, error: t('transactions.csvErrorDate') };
+      if (!dateStr || !dateRegex.test(dateStr.trim())) {
+        validated.push({ rowNum, amount, type: rawType, category: rawCategory, date: dateStr, description: rawDesc, isValid: false, error: t('transactions.excelErrorDate') });
+        continue;
       }
 
       // Description length check
       if (rawDesc.length > 500) {
-        return { rowNum, amount, type: rawType, category: rawCategory, date: rawDate, description: rawDesc, isValid: false, error: t('transactions.csvErrorDesc') };
+        validated.push({ rowNum, amount, type: rawType, category: rawCategory, date: dateStr, description: rawDesc, isValid: false, error: t('transactions.excelErrorDesc') });
+        continue;
       }
 
-      return {
+      validated.push({
         rowNum,
         amount,
         type: rawType as 'INCOME' | 'EXPENSE',
         category: rawType === 'INCOME' ? 'OTHER' : rawCategory,
-        date: rawDate.trim(),
+        date: dateStr.trim(),
         description: rawDesc,
         isValid: true
-      };
-    });
+      });
+    }
 
     setParsedData(validated);
     setImportStatus('parsed');
+  };
+
+  const handleFile = (file: File) => {
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        if (event.target?.result) {
+          const data = new Uint8Array(event.target.result as ArrayBuffer);
+          const workbook = XLSX.read(data, { type: 'array', cellDates: true });
+          const sheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[sheetName];
+          const rows = XLSX.utils.sheet_to_json<any[]>(worksheet, { header: 1 });
+          validateAndSetExcel(rows);
+        }
+      } catch (err) {
+        console.error(err);
+        setGeneralError(t('transactions.invalidFile'));
+      }
+    };
+    reader.readAsArrayBuffer(file);
   };
 
   const handleDrop = (e: React.DragEvent) => {
@@ -191,14 +207,9 @@ export const CsvImportModal: React.FC<CsvImportModalProps> = ({
 
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       const file = e.dataTransfer.files[0];
-      if (file.name.endsWith('.csv')) {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          if (event.target?.result) {
-            validateAndSetCSV(event.target.result as string);
-          }
-        };
-        reader.readAsText(file);
+      const isExcel = file.name.endsWith('.xlsx') || file.name.endsWith('.xls');
+      if (isExcel) {
+        handleFile(file);
       } else {
         setGeneralError(t('transactions.invalidFile'));
       }
@@ -207,30 +218,21 @@ export const CsvImportModal: React.FC<CsvImportModalProps> = ({
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        if (event.target?.result) {
-          validateAndSetCSV(event.target.result as string);
-        }
-      };
-      reader.readAsText(file);
+      handleFile(e.target.files[0]);
     }
   };
 
   const handleDownloadTemplate = () => {
-    const csvContent = "data:text/csv;charset=utf-8,"
-      + "Amount,Type,Category,Date,Description\n"
-      + "50000,EXPENSE,FOOD,16/06/2026 12:30,Lunch with coworkers\n"
-      + "15000000,INCOME,OTHER,10/06/2026 09:00,Monthly salary payment\n"
-      + "120000,EXPENSE,TRANSPORTATION,15/06/2026 18:45,Taxi ride home\n";
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", "smartmoney_transaction_template.csv");
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    const data = [
+      ['Amount', 'Type', 'Category', 'Date', 'Description'],
+      [50000, 'EXPENSE', 'FOOD', '16/06/2026 12:30', 'Lunch with coworkers'],
+      [15000000, 'INCOME', 'OTHER', '10/06/2026 09:00', 'Monthly salary payment'],
+      [120000, 'EXPENSE', 'TRANSPORTATION', '15/06/2026 18:45', 'Taxi ride home']
+    ];
+    const worksheet = XLSX.utils.aoa_to_sheet(data);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Template');
+    XLSX.writeFile(workbook, 'smartmoney_transaction_template.xlsx');
   };
 
   const handleStartImport = async () => {
@@ -309,7 +311,7 @@ export const CsvImportModal: React.FC<CsvImportModalProps> = ({
             style={{ borderColor: colors.border.light }}
           >
             <Heading level={3} className="m-0">
-              {t('transactions.csvModalTitle')}
+              {t('transactions.excelModalTitle')}
             </Heading>
             <button
               onClick={onClose}
@@ -330,26 +332,26 @@ export const CsvImportModal: React.FC<CsvImportModalProps> = ({
                   className="p-4 rounded-lg space-y-2 border text-sm"
                   style={{ backgroundColor: colors.background.secondary, borderColor: colors.border.light }}
                 >
-                  <p className="font-semibold" style={{ color: colors.text.primary }}>{t('transactions.csvGuidelineTitle')}</p>
+                  <p className="font-semibold" style={{ color: colors.text.primary }}>{t('transactions.excelGuidelineTitle')}</p>
                   <ul className="list-disc pl-5 space-y-1" style={{ color: colors.text.secondary }}>
-                    <li><strong>{t('transactions.csvLabelColumns')}</strong>: {t('transactions.csvGuidelineColumnsDesc')}</li>
-                    <li><strong>Amount</strong>: {t('transactions.csvGuidelineAmountDesc')}</li>
-                    <li><strong>Type</strong>: {t('transactions.csvGuidelineTypeDesc')}</li>
-                    <li><strong>Category</strong>: {t('transactions.csvGuidelineCategoryDesc')}</li>
-                    <li><strong>Date</strong>: {t('transactions.csvGuidelineDateDesc')}</li>
-                    <li><strong>Description</strong>: {t('transactions.csvGuidelineDescDesc')}</li>
+                    <li><strong>{t('transactions.excelLabelColumns')}</strong>: {t('transactions.excelGuidelineColumnsDesc')}</li>
+                    <li><strong>Amount</strong>: {t('transactions.excelGuidelineAmountDesc')}</li>
+                    <li><strong>Type</strong>: {t('transactions.excelGuidelineTypeDesc')}</li>
+                    <li><strong>Category</strong>: {t('transactions.excelGuidelineCategoryDesc')}</li>
+                    <li><strong>Date</strong>: {t('transactions.excelGuidelineDateDesc')}</li>
+                    <li><strong>Description</strong>: {t('transactions.excelGuidelineDescDesc')}</li>
                   </ul>
 
-                  {/* CSV Template Preview Table */}
+                  {/* Excel Template Preview Table */}
                   <div className="overflow-x-auto my-3 border rounded-lg" style={{ borderColor: colors.border.light }}>
                     <table className="min-w-full text-xs text-left border-collapse">
                       <thead>
                         <tr style={{ backgroundColor: colors.background.primary, borderBottom: `1px solid ${colors.border.light}` }}>
-                          <th className="p-2 font-bold" style={{ color: colors.text.primary }}>{t('transactions.csvHeaderAmount')}</th>
-                          <th className="p-2 font-bold" style={{ color: colors.text.primary }}>{t('transactions.csvHeaderType')}</th>
-                          <th className="p-2 font-bold" style={{ color: colors.text.primary }}>{t('transactions.csvHeaderCategory')}</th>
-                          <th className="p-2 font-bold" style={{ color: colors.text.primary }}>{t('transactions.csvHeaderDate')}</th>
-                          <th className="p-2 font-bold" style={{ color: colors.text.primary }}>{t('transactions.csvHeaderDescription')}</th>
+                          <th className="p-2 font-bold" style={{ color: colors.text.primary }}>{t('transactions.excelHeaderAmount')}</th>
+                          <th className="p-2 font-bold" style={{ color: colors.text.primary }}>{t('transactions.excelHeaderType')}</th>
+                          <th className="p-2 font-bold" style={{ color: colors.text.primary }}>{t('transactions.excelHeaderCategory')}</th>
+                          <th className="p-2 font-bold" style={{ color: colors.text.primary }}>{t('transactions.excelHeaderDate')}</th>
+                          <th className="p-2 font-bold" style={{ color: colors.text.primary }}>{t('transactions.excelHeaderDescription')}</th>
                         </tr>
                       </thead>
                       <tbody style={{ color: colors.text.secondary }}>
@@ -400,16 +402,16 @@ export const CsvImportModal: React.FC<CsvImportModalProps> = ({
                   <input
                     ref={fileInputRef}
                     type="file"
-                    accept=".csv"
+                    accept=".xlsx,.xls"
                     onChange={handleFileChange}
                     className="hidden"
                   />
                   <MdCloudUpload className="w-12 h-12 mb-3" style={{ color: colors.interactive.primary }} />
                   <Text className="font-medium mb-1" style={{ color: colors.text.primary }}>
-                    {t('transactions.dropCsvHere')}
+                    {t('transactions.dropExcelHere')}
                   </Text>
                   <Text className="text-xs" style={{ color: colors.text.tertiary }}>
-                    {t('transactions.csvOnlySupported')}
+                    {t('transactions.excelOnlySupported')}
                   </Text>
                 </div>
 
@@ -491,7 +493,7 @@ export const CsvImportModal: React.FC<CsvImportModalProps> = ({
                     className="p-3 rounded-lg border text-xs"
                     style={{ backgroundColor: `${colors.interactive.warning}10`, borderColor: colors.interactive.warning, color: colors.text.primary }}
                   >
-                    {t('transactions.csvValidationWarning')}
+                    {t('transactions.excelValidationWarning')}
                   </div>
                 )}
               </div>
@@ -578,7 +580,7 @@ export const CsvImportModal: React.FC<CsvImportModalProps> = ({
                   onClick={handleStartImport}
                   disabled={parsedData.filter(r => r.isValid).length === 0 || isProcessing}
                 >
-                  {t('transactions.csvImportRowsBtn', { count: parsedData.filter(r => r.isValid).length })}
+                  {t('transactions.excelImportRowsBtn', { count: parsedData.filter(r => r.isValid).length })}
                 </Button>
               </>
             )}

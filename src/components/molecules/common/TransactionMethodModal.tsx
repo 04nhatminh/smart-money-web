@@ -12,7 +12,7 @@ interface TransactionMethodModalProps {
   onSelectForm: () => void;
   onSelectImage: () => void;
   onSelectVoice: () => void;
-  onSelectCsv: () => void;
+  onSelectExcel: () => void;
 }
 
 export const TransactionMethodModal: React.FC<TransactionMethodModalProps> = ({
@@ -21,7 +21,7 @@ export const TransactionMethodModal: React.FC<TransactionMethodModalProps> = ({
   onSelectForm,
   onSelectImage,
   onSelectVoice,
-  onSelectCsv,
+  onSelectExcel,
 }) => {
   const { colors } = useTheme();
   const t = useTranslations();
@@ -137,10 +137,10 @@ export const TransactionMethodModal: React.FC<TransactionMethodModalProps> = ({
             </div>
           </button>
 
-          {/* CSV Option */}
+          {/* Excel Option */}
           <button
             onClick={() => {
-              onSelectCsv();
+              onSelectExcel();
               onClose();
             }}
             className="w-full p-4 rounded-lg border-2 transition-all text-left hover:opacity-80 hover:cursor-pointer"
@@ -153,10 +153,10 @@ export const TransactionMethodModal: React.FC<TransactionMethodModalProps> = ({
               <MdUploadFile className="w-6 h-6 mt-1 flex-shrink-0" style={{ color: colors.interactive.primary }} />
               <div>
                 <p className="font-semibold" style={{ color: colors.text.primary }}>
-                  {t('transactions.methodCsv')}
+                  {t('transactions.methodExcel')}
                 </p>
                 <p className="text-sm" style={{ color: colors.text.secondary }}>
-                  {t('transactions.methodCsvDesc')}
+                  {t('transactions.methodExcelDesc')}
                 </p>
               </div>
             </div>

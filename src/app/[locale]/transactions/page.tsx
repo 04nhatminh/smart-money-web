@@ -6,7 +6,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { useAuth } from '@/context/AuthContext';
 import { SidebarLayout } from '@/components/templates';
 import { Heading, Text, Button } from '@/components/atoms';
-import { Card, StatCard, TransactionRow, CreateTransactionModal, EditTransactionModal, TransactionMethodModal, ImageBillUploadModal, VoiceRecordModal, TransactionFilter, Pagination, CsvImportModal, CsvExportModal, type TransactionFilterState } from '@/components/molecules/common';
+import { Card, StatCard, TransactionRow, CreateTransactionModal, EditTransactionModal, TransactionMethodModal, ImageBillUploadModal, VoiceRecordModal, TransactionFilter, Pagination, ExcelImportModal, ExcelExportModal, type TransactionFilterState } from '@/components/molecules/common';
 import { useTheme } from '@/context/ThemeContext';
 import { useTransactions, type TransactionFilters } from '@/hooks/useTransactions';
 import { transformAIResultToFormData } from '@/lib/ai-result-transformer';
@@ -66,8 +66,8 @@ export default function TransactionsPage() {
   const [isVoiceModalOpen, setIsVoiceModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingTransactionId, setEditingTransactionId] = useState<string | null>(null);
-  const [isCsvImportOpen, setIsCsvImportOpen] = useState(false);
-  const [isCsvExportOpen, setIsCsvExportOpen] = useState(false);
+  const [isExcelImportOpen, setIsExcelImportOpen] = useState(false);
+  const [isExcelExportOpen, setIsExcelExportOpen] = useState(false);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [aiFormData, setAiFormData] = useState<any>(null);
@@ -248,12 +248,12 @@ export default function TransactionsPage() {
           <div className="flex items-center gap-3">
             <Button
               variant="secondary"
-              onClick={() => setIsCsvExportOpen(true)}
+              onClick={() => setIsExcelExportOpen(true)}
               className="flex items-center gap-2"
               disabled={transactions.length === 0}
             >
               <MdFileDownload className="w-5 h-5" />
-              {t('transactions.exportCsv')}
+              {t('transactions.exportExcel')}
             </Button>
             <Button
               variant="primary"
@@ -462,9 +462,9 @@ export default function TransactionsPage() {
             setIsMethodModalOpen(false);
             setIsVoiceModalOpen(true);
           }}
-          onSelectCsv={() => {
+          onSelectExcel={() => {
             setIsMethodModalOpen(false);
-            setIsCsvImportOpen(true);
+            setIsExcelImportOpen(true);
           }}
         />
 
@@ -484,19 +484,19 @@ export default function TransactionsPage() {
           onAIResultReceived={handleAIResultReceived}
         />
 
-        {/* CSV Import Modal */}
-        <CsvImportModal
-          isOpen={isCsvImportOpen}
-          onClose={() => setIsCsvImportOpen(false)}
+        {/* Excel Import Modal */}
+        <ExcelImportModal
+          isOpen={isExcelImportOpen}
+          onClose={() => setIsExcelImportOpen(false)}
           onSuccess={() => {
             loadTransactions();
           }}
         />
 
-        {/* CSV Export Modal */}
-        <CsvExportModal
-          isOpen={isCsvExportOpen}
-          onClose={() => setIsCsvExportOpen(false)}
+        {/* Excel Export Modal */}
+        <ExcelExportModal
+          isOpen={isExcelExportOpen}
+          onClose={() => setIsExcelExportOpen(false)}
           totalPages={totalPages}
           totalElements={totalElements}
           currentPage={currentPage}

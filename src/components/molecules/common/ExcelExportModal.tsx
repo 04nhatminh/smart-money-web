@@ -6,8 +6,9 @@ import { useTheme } from '@/context/ThemeContext';
 import { useTranslations } from 'next-intl';
 import { useTransactions, type TransactionFilters } from '@/hooks/useTransactions';
 import { MdClose, MdFileDownload, MdRefresh } from 'react-icons/md';
+import * as XLSX from 'xlsx';
 
-interface CsvExportModalProps {
+interface ExcelExportModalProps {
   isOpen: boolean;
   onClose: () => void;
   totalPages: number;
@@ -17,7 +18,7 @@ interface CsvExportModalProps {
   activeFilters: TransactionFilters;
 }
 
-export const CsvExportModal: React.FC<CsvExportModalProps> = ({
+export const ExcelExportModal: React.FC<ExcelExportModalProps> = ({
   isOpen,
   onClose,
   totalPages,
@@ -34,40 +35,31 @@ export const CsvExportModal: React.FC<CsvExportModalProps> = ({
 
   if (!isOpen) return null;
 
-  // Convert array of transactions to CSV string and trigger download
-  const downloadCsv = (data: any[], filename: string) => {
-    // CSV Headers
+  // Convert array of transactions to Excel file and trigger download
+  const downloadExcel = (data: any[], filename: string) => {
     const headers = ['Amount', 'Type', 'Category', 'Date', 'Description'];
-    const csvRows = [headers.join(',')];
+    const rows = [headers];
 
     data.forEach(item => {
       const amount = item.amount || 0;
       const type = item.type || 'EXPENSE';
       const category = item.category || 'OTHER';
       const date = item.date || '';
-      // Escape description if it contains commas or double quotes
-      let description = item.description || '';
-      if (description.includes(',') || description.includes('"') || description.includes('\n')) {
-        description = `"${description.replace(/"/g, '""')}"`;
-      }
+      const description = item.description || '';
 
-      csvRows.push([amount, type, category, date, description].join(','));
+      rows.push([amount, type, category, date, description]);
     });
 
-    const csvContent = "data:text/csv;charset=utf-8,\uFEFF" + csvRows.join('\n');
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", filename);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    const worksheet = XLSX.utils.aoa_to_sheet(rows);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Transactions');
+    XLSX.writeFile(workbook, filename);
   };
 
   const handleExportCurrent = () => {
     setIsExporting(true);
     try {
-      downloadCsv(currentTransactions, `smartmoney_transactions_page_${currentPage}.csv`);
+      downloadExcel(currentTransactions, `smartmoney_transactions_page_${currentPage}.xlsx`);
       onClose();
     } catch (error) {
       console.error('Failed to export current page:', error);
@@ -98,7 +90,7 @@ export const CsvExportModal: React.FC<CsvExportModalProps> = ({
         }
       }
       setExportProgress(100);
-      downloadCsv(allTransactions, 'smartmoney_all_transactions.csv');
+      downloadExcel(allTransactions, 'smartmoney_all_transactions.xlsx');
       onClose();
     } catch (error) {
       console.error('Failed to export all pages:', error);
