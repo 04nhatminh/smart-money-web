@@ -412,31 +412,46 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
                   </ul>
 
                   {/* Excel Template Preview Table */}
-                  <div className="overflow-x-auto my-3 border rounded-lg" style={{ borderColor: colors.border.light }}>
-                    <table className="min-w-full text-xs text-left border-collapse">
+                  <div className="overflow-x-auto my-3 border rounded-lg shadow-sm" style={{ borderColor: colors.border.light }}>
+                    <table className="min-w-full text-xs text-left border-collapse" style={{ border: `1px solid ${colors.border.light}` }}>
                       <thead>
-                        <tr style={{ backgroundColor: colors.background.primary, borderBottom: `1px solid ${colors.border.light}` }}>
-                          <th className="p-2 font-bold" style={{ color: colors.text.primary }}>{t('transactions.excelHeaderAmount')}</th>
-                          <th className="p-2 font-bold" style={{ color: colors.text.primary }}>{t('transactions.excelHeaderType')}</th>
-                          <th className="p-2 font-bold" style={{ color: colors.text.primary }}>{t('transactions.excelHeaderCategory')}</th>
-                          <th className="p-2 font-bold" style={{ color: colors.text.primary }}>{t('transactions.excelHeaderDate')}</th>
-                          <th className="p-2 font-bold" style={{ color: colors.text.primary }}>{t('transactions.excelHeaderDescription')}</th>
+                        {/* Excel-style Column Indicators A, B, C, D, E */}
+                        <tr style={{ backgroundColor: '#F3F4F6', borderBottom: `1px solid ${colors.border.light}` }}>
+                          <th className="p-1 text-center font-semibold text-[10px]" style={{ color: colors.text.tertiary, borderRight: `1px solid ${colors.border.light}`, width: '5%' }}></th>
+                          <th className="p-1 text-center font-semibold text-[10px]" style={{ color: colors.text.tertiary, borderRight: `1px solid ${colors.border.light}` }}>A</th>
+                          <th className="p-1 text-center font-semibold text-[10px]" style={{ color: colors.text.tertiary, borderRight: `1px solid ${colors.border.light}` }}>B</th>
+                          <th className="p-1 text-center font-semibold text-[10px]" style={{ color: colors.text.tertiary, borderRight: `1px solid ${colors.border.light}` }}>C</th>
+                          <th className="p-1 text-center font-semibold text-[10px]" style={{ color: colors.text.tertiary, borderRight: `1px solid ${colors.border.light}` }}>D</th>
+                          <th className="p-1 text-center font-semibold text-[10px]" style={{ color: colors.text.tertiary }}>E</th>
+                        </tr>
+                        {/* Styled Header Row */}
+                        <tr style={{ backgroundColor: '#3629B7', borderBottom: `1px solid #3026A6` }}>
+                          <td className="p-2 text-center font-bold text-[10px]" style={{ backgroundColor: '#F3F4F6', color: colors.text.tertiary, borderRight: `1px solid ${colors.border.light}` }}>1</td>
+                          <th className="p-2 font-bold text-center" style={{ color: '#FFFFFF', borderRight: `1px solid #B1ACEC` }}>{t('transactions.excelHeaderAmount')}</th>
+                          <th className="p-2 font-bold text-center" style={{ color: '#FFFFFF', borderRight: `1px solid #B1ACEC` }}>{t('transactions.excelHeaderType')}</th>
+                          <th className="p-2 font-bold text-center" style={{ color: '#FFFFFF', borderRight: `1px solid #B1ACEC` }}>{t('transactions.excelHeaderCategory')}</th>
+                          <th className="p-2 font-bold text-center" style={{ color: '#FFFFFF', borderRight: `1px solid #B1ACEC` }}>{t('transactions.excelHeaderDate')}</th>
+                          <th className="p-2 font-bold text-center" style={{ color: '#FFFFFF' }}>{t('transactions.excelHeaderDescription')}</th>
                         </tr>
                       </thead>
-                      <tbody style={{ color: colors.text.secondary }}>
-                        <tr style={{ borderBottom: `1px solid ${colors.border.light}` }}>
-                          <td className="p-2">50000</td>
-                          <td className="p-2">EXPENSE</td>
-                          <td className="p-2">FOOD</td>
-                          <td className="p-2 font-mono">16/06/2026 12:30</td>
-                          <td className="p-2 italic">Lunch</td>
+                      <tbody>
+                        {/* Row 2: EXPENSE */}
+                        <tr style={{ backgroundColor: '#FCE8E6', borderBottom: `1px solid ${colors.border.light}` }}>
+                          <td className="p-2 text-center font-semibold text-[10px]" style={{ backgroundColor: '#F3F4F6', color: colors.text.tertiary, borderRight: `1px solid ${colors.border.light}` }}>2</td>
+                          <td className="p-2 text-right font-medium" style={{ color: '#C5221F', borderRight: `1px solid #C5C1F1` }}>50,000</td>
+                          <td className="p-2 text-center font-semibold" style={{ color: '#C5221F', borderRight: `1px solid #C5C1F1` }}>EXPENSE</td>
+                          <td className="p-2 text-center" style={{ color: '#C5221F', borderRight: `1px solid #C5C1F1` }}>FOOD</td>
+                          <td className="p-2 text-center font-mono" style={{ color: '#C5221F', borderRight: `1px solid #C5C1F1` }}>16/06/2026 12:30</td>
+                          <td className="p-2 italic" style={{ color: '#C5221F' }}>Lunch with coworkers</td>
                         </tr>
-                        <tr>
-                          <td className="p-2">15000000</td>
-                          <td className="p-2">INCOME</td>
-                          <td className="p-2">OTHER</td>
-                          <td className="p-2 font-mono">10/06/2026 09:00</td>
-                          <td className="p-2 italic">Salary</td>
+                        {/* Row 3: INCOME */}
+                        <tr style={{ backgroundColor: '#E6F4EA' }}>
+                          <td className="p-2 text-center font-semibold text-[10px]" style={{ backgroundColor: '#F3F4F6', color: colors.text.tertiary, borderRight: `1px solid ${colors.border.light}` }}>3</td>
+                          <td className="p-2 text-right font-medium" style={{ color: '#137333', borderRight: `1px solid #C5C1F1` }}>15,000,000</td>
+                          <td className="p-2 text-center font-semibold" style={{ color: '#137333', borderRight: `1px solid #C5C1F1` }}>INCOME</td>
+                          <td className="p-2 text-center" style={{ color: '#137333', borderRight: `1px solid #C5C1F1` }}>OTHER</td>
+                          <td className="p-2 text-center font-mono" style={{ color: '#137333', borderRight: `1px solid #C5C1F1` }}>10/06/2026 09:00</td>
+                          <td className="p-2 italic" style={{ color: '#137333' }}>Monthly salary payment</td>
                         </tr>
                       </tbody>
                     </table>
