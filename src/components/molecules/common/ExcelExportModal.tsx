@@ -75,6 +75,12 @@ export const ExcelExportModal: React.FC<ExcelExportModalProps> = ({
         const cell = worksheet[cellRef];
         if (!cell) continue;
 
+        const topStyle = R === range.s.r ? 'medium' : 'thin';
+        const bottomStyle = R === range.e.r ? 'medium' : 'thin';
+        const leftStyle = C === range.s.c ? 'medium' : 'thin';
+        const rightStyle = C === range.e.c ? 'medium' : 'thin';
+        const borderColor = colors.border.dark;
+
         if (R === 0) {
           // Header Row Style
           cell.s = {
@@ -82,10 +88,10 @@ export const ExcelExportModal: React.FC<ExcelExportModalProps> = ({
             font: { name: 'Segoe UI', sz: 11, bold: true, color: { rgb: 'FFFFFF' } },
             alignment: { horizontal: 'center', vertical: 'center' },
             border: {
-              top: { style: 'thin', color: { rgb: 'B1ACEC' } },
-              bottom: { style: 'medium', color: { rgb: '3026A6' } },
-              left: { style: 'thin', color: { rgb: 'B1ACEC' } },
-              right: { style: 'thin', color: { rgb: 'B1ACEC' } }
+              top: { style: topStyle, color: { rgb: borderColor } },
+              bottom: { style: bottomStyle, color: { rgb: borderColor } },
+              left: { style: leftStyle, color: { rgb: borderColor } },
+              right: { style: rightStyle, color: { rgb: borderColor } }
             }
           };
         } else {
@@ -101,10 +107,10 @@ export const ExcelExportModal: React.FC<ExcelExportModalProps> = ({
             fill: { fgColor: { rgb: rowBgColor } },
             font: { name: 'Segoe UI', sz: 10, color: { rgb: rowTextColor } },
             border: {
-              top: { style: 'thin', color: { rgb: 'C5C1F1' } },
-              bottom: { style: 'thin', color: { rgb: 'C5C1F1' } },
-              left: { style: 'thin', color: { rgb: 'C5C1F1' } },
-              right: { style: 'thin', color: { rgb: 'C5C1F1' } }
+              top: { style: topStyle, color: { rgb: borderColor } },
+              bottom: { style: bottomStyle, color: { rgb: borderColor } },
+              left: { style: leftStyle, color: { rgb: borderColor } },
+              right: { style: rightStyle, color: { rgb: borderColor } }
             },
             alignment: {
               vertical: 'center',
