@@ -11,7 +11,6 @@ import { useTranslations } from 'next-intl';
 import { apiClient } from '@/lib/api-client';
 import { HealthCheckResponse } from '@/types/api';
 import { API_ENDPOINTS } from '@/constants/api';
-import { getReadNotificationIds } from '@/lib/notifications';
 
 interface NavItem {
   label: string;
@@ -35,28 +34,37 @@ export const Header: React.FC<HeaderProps> = ({
   const [openUserMenu, setOpenUserMenu] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
 
-  useEffect(() => {
-    if (token && user) {
-      const fetchUnreadCount = async () => {
-        try {
-          const res = await apiClient.get<any>('/api/v1/notifications');
-          let notifs = [];
-          if (res && res.success && res.data) {
-            notifs = res.data;
-          } else if (res && Array.isArray(res)) {
-            notifs = res;
-          }
-          const readIds = new Set(getReadNotificationIds(user.id));
-          const count = notifs.filter((n: any) => !readIds.has(n.id)).length;
-          setUnreadCount(count);
-        } catch (err) {
-          console.error('Failed to fetch unread notifications count:', err);
-        }
-      };
-      fetchUnreadCount();
-    } else {
+  const fetchUnreadCount = async () => {
+    if (!token || !user) {
       setUnreadCount(0);
+      return;
     }
+    try {
+      const res = await apiClient.get<any>('/api/v1/notifications');
+      let notifs = [];
+      if (res && res.success && res.data) {
+        notifs = res.data;
+      } else if (res && Array.isArray(res)) {
+        notifs = res;
+      }
+      const count = notifs.filter((n: any) => !n.read).length;
+      setUnreadCount(count);
+    } catch (err) {
+      console.error('Failed to fetch unread notifications count:', err);
+    }
+  };
+
+  useEffect(() => {
+    fetchUnreadCount();
+
+    const handleNotificationsChanged = () => {
+      fetchUnreadCount();
+    };
+
+    window.addEventListener('notifications-changed', handleNotificationsChanged);
+    return () => {
+      window.removeEventListener('notifications-changed', handleNotificationsChanged);
+    };
   }, [token, user]);
 
   const handleLoginClick = () => {

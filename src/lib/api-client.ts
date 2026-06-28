@@ -200,6 +200,50 @@ export const apiClient = {
     }
   },
 
+  async patch<T>(endpoint: string, body: unknown): Promise<T> {
+    try {
+      const response = await fetch(`${API_URL}${endpoint}`, {
+        method: 'PATCH',
+        headers: getHeaders(),
+        body: JSON.stringify(body),
+        credentials: 'include',
+      });
+
+      // Handle empty response body
+      let data: any;
+      const contentType = response.headers.get('content-type');
+      const contentLength = response.headers.get('content-length');
+      
+      if (contentLength === '0' || !contentType?.includes('application/json')) {
+        // Empty response or non-JSON response
+        data = {};
+      } else {
+        data = await response.json();
+      }
+
+      if (!response.ok) {
+        const errorMessage = extractErrorMessage(data);
+        const error = new Error(errorMessage);
+        (error as any).data = data;
+        throw error;
+      }
+
+      // Even if HTTP status is 200, check if API indicates failure
+      if (data && data.success === false) {
+        const errorMessage = extractErrorMessage(data);
+        const error = new Error(errorMessage);
+        (error as any).data = data;
+        throw error;
+      }
+
+      console.log(`Connected to backend at ${API_URL}${endpoint}`);
+      return data;
+    } catch (error) {
+      console.error(`Failed to connect to backend at ${API_URL}${endpoint}:`, error);
+      throw error;
+    }
+  },
+
   async postFormData<T>(endpoint: string, body: Record<string, string>): Promise<T> {
     try {
       const formData = new FormData();

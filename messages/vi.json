@@ -157,7 +157,8 @@
   },
   "errors": {
     "failedToFetch": "Không thể kết nối đến máy chủ. Vui lòng kiểm tra lại kết nối mạng.",
-    "noProjectsMatchingFilters": "Không tìm thấy kế hoạch tiết kiệm nào khớp với bộ lọc đã chọn."
+    "noProjectsMatchingFilters": "Không tìm thấy kế hoạch tiết kiệm nào khớp với bộ lọc đã chọn.",
+    "failedToUpdate": "Không thể cập nhật trạng thái thông báo."
   },
   "notifications": {
     "welcome": "Chào mừng",
@@ -171,7 +172,13 @@
     "income": "Thu nhập",
     "inviteDescription": "Bạn đã được mời tham gia nhóm \"{groupName}\". Nhấp để chấp nhận.",
     "groupInvitation": "Lời mời tham gia nhóm",
-    "notificationTitle": "Thông báo"
+    "notificationTitle": "Thông báo",
+    "markAsRead": "Đánh dấu đã đọc",
+    "loadMore": "Tải thêm",
+    "all": "Tất cả",
+    "unread": "Chưa đọc",
+    "noUnreadNotifications": "Không Có Thông Báo Chưa Đọc",
+    "noUnreadNotificationsDesc": "Bạn không có thông báo chưa đọc nào."
   },
   "profile": {
     "editProfile": "Chỉnh Sửa Hồ Sơ",

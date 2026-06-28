@@ -12,7 +12,6 @@ import { useGroups } from '@/hooks/useGroups';
 import { useRouter } from 'next/navigation';
 import { useLocale } from 'next-intl';
 import { MdCheck, MdClose, MdNotifications } from 'react-icons/md';
-import { getReadNotificationIds, markNotificationsAsRead } from '@/lib/notifications';
 
 interface NotificationData {
   id: string;
@@ -20,6 +19,7 @@ interface NotificationData {
   content: string;
   deepLink: string | null;
   createdAt: string;
+  read: boolean;
 }
 
 export default function NotificationsPage() {
@@ -31,11 +31,15 @@ export default function NotificationsPage() {
   const { acceptGroupInvite, declineGroupInvite } = useGroups();
 
   const [notifications, setNotifications] = useState<NotificationData[]>([]);
-  const [readIds, setReadIds] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'all' | 'unread'>('all');
+
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const pageSize = 10;
 
   // Check auth
   useEffect(() => {
@@ -44,12 +48,25 @@ export default function NotificationsPage() {
     }
   }, [isAuthenticated, isInitializing, router, locale]);
 
-  // Load notifications and initial read status
+  // Listen to new notifications from WebSocket
+  useEffect(() => {
+    const handleNewNotification = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      const newNotif = customEvent.detail;
+      if (newNotif) {
+        setNotifications(prev => [newNotif, ...prev]);
+      }
+    };
+    window.addEventListener('notification-received', handleNewNotification);
+    return () => {
+      window.removeEventListener('notification-received', handleNewNotification);
+    };
+  }, []);
+
+  // Load notifications (initial)
   useEffect(() => {
     if (isAuthenticated && user) {
-      const savedReadIds = getReadNotificationIds(user.id);
-      setReadIds(new Set(savedReadIds));
-      loadNotifications();
+      loadNotifications(0, true);
     }
   }, [isAuthenticated, user]);
 
@@ -86,25 +103,30 @@ export default function NotificationsPage() {
     return content;
   };
 
-  const loadNotifications = async () => {
+  const loadNotifications = async (pageNum = 0, isInitial = false) => {
     try {
       setIsLoading(true);
       setError(null);
-      const res = await apiClient.get<any>('/api/v1/notifications');
+      const res = await apiClient.get<any>(`/api/v1/notifications?page=${pageNum}&size=${pageSize}`);
       let loadedNotifications: NotificationData[] = [];
-      // Backend returns CheckResponse<List<Notification>>
       if (res && res.success && res.data) {
         loadedNotifications = res.data;
       } else if (res && Array.isArray(res)) {
         loadedNotifications = res;
       }
-      setNotifications(loadedNotifications);
 
-      // Automatically mark fetched notifications as read in localStorage,
-      // so next time user sees the header or reloads the page, they are read.
-      if (user && loadedNotifications.length > 0) {
-        const ids = loadedNotifications.map(n => n.id);
-        markNotificationsAsRead(user.id, ids);
+      if (isInitial) {
+        setNotifications(loadedNotifications);
+        setPage(1);
+      } else {
+        setNotifications(prev => [...prev, ...loadedNotifications]);
+        setPage(pageNum + 1);
+      }
+
+      if (loadedNotifications.length < pageSize) {
+        setHasMore(false);
+      } else {
+        setHasMore(true);
       }
     } catch (err) {
       console.error('Failed to fetch notifications:', err);
@@ -119,11 +141,40 @@ export default function NotificationsPage() {
     }
   };
 
-  const handleMarkAllAsRead = () => {
+  const handleMarkAllAsRead = async () => {
     if (user && notifications.length > 0) {
-      const ids = notifications.map(n => n.id);
-      markNotificationsAsRead(user.id, ids);
-      setReadIds(new Set(ids));
+      const unreadIds = notifications.filter(n => !n.read).map(n => n.id);
+      if (unreadIds.length > 0) {
+        try {
+          setActionLoading('markAll');
+          await apiClient.patch('/api/v1/notifications/read', { notificationIds: unreadIds });
+          setNotifications(prev =>
+            prev.map(n => ({ ...n, read: true }))
+          );
+          window.dispatchEvent(new CustomEvent('notifications-changed'));
+        } catch (err) {
+          console.error('Failed to mark all notifications as read:', err);
+          setError(t('errors.failedToUpdate') || 'Failed to mark notifications as read');
+        } finally {
+          setActionLoading(null);
+        }
+      }
+    }
+  };
+
+  const handleToggleReadStatus = async (id: string, currentReadStatus: boolean) => {
+    try {
+      setActionLoading(id);
+      await apiClient.patch('/api/v1/notifications/read', { notificationIds: [id] });
+      setNotifications(prev =>
+        prev.map(n => n.id === id ? { ...n, read: true } : n)
+      );
+      window.dispatchEvent(new CustomEvent('notifications-changed'));
+    } catch (err) {
+      console.error('Failed to toggle notification read status:', err);
+      setError(t('errors.failedToUpdate') || 'Failed to update notification status');
+    } finally {
+      setActionLoading(null);
     }
   };
 
@@ -189,9 +240,15 @@ export default function NotificationsPage() {
     return notifTime.toLocaleDateString();
   };
 
-  const unreadNotificationsCount = notifications.filter(n => !readIds.has(n.id)).length;
+  const unreadNotificationsCount = notifications.filter(n => !n.read).length;
 
-  if (isInitializing || isLoading) {
+  const displayedNotifications = activeTab === 'all'
+    ? notifications
+    : notifications.filter(n => !n.read);
+
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
+
+  if (isInitializing || (isInitialLoading && notifications.length === 0)) {
     return (
       <SidebarLayout>
         <div className="flex items-center justify-center min-h-screen">
@@ -222,19 +279,19 @@ export default function NotificationsPage() {
                 variant="primary"
                 size="sm"
                 onClick={handleMarkAllAsRead}
+                disabled={actionLoading !== null}
               >
                 {t('notifications.markAllAsRead') || 'Mark all as read'}
               </Button>
             )}
-            {notifications.length > 0 && (
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={loadNotifications}
-              >
-                {t('analysis.refresh') || 'Refresh'}
-              </Button>
-            )}
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => loadNotifications(0, true)}
+              disabled={isLoading || isInitialLoading}
+            >
+              {t('analysis.refresh') || 'Refresh'}
+            </Button>
           </div>
         </div>
 
@@ -246,93 +303,145 @@ export default function NotificationsPage() {
           <Alert message={success} type="success" onClose={() => setSuccess(null)} />
         )}
 
+        {/* Tabs */}
+        <div className="flex border-b mb-6" style={{ borderColor: colors.border.light }}>
+          <button
+            onClick={() => setActiveTab('all')}
+            className="px-6 py-3 font-semibold text-sm transition-all flex items-center gap-2 relative border-b-2 hover:cursor-pointer"
+            style={{
+              borderColor: activeTab === 'all' ? colors.interactive.primary : 'transparent',
+              color: activeTab === 'all' ? colors.interactive.primary : colors.text.secondary,
+            }}
+          >
+            {t('notifications.all') || 'All'}
+          </button>
+          <button
+            onClick={() => setActiveTab('unread')}
+            className="px-6 py-3 font-semibold text-sm transition-all flex items-center gap-2 relative border-b-2 hover:cursor-pointer"
+            style={{
+              borderColor: activeTab === 'unread' ? colors.interactive.primary : 'transparent',
+              color: activeTab === 'unread' ? colors.interactive.primary : colors.text.secondary,
+            }}
+          >
+            {t('notifications.unread') || 'Unread'}
+            {unreadNotificationsCount > 0 && (
+              <span 
+                className="ml-1 px-1.5 py-0.5 text-xs rounded-full text-white"
+                style={{ backgroundColor: colors.interactive.primary }}
+              >
+                {unreadNotificationsCount}
+              </span>
+            )}
+          </button>
+        </div>
+
         {/* Notifications List */}
         <div className="space-y-4">
-          {notifications.length === 0 ? (
+          {displayedNotifications.length === 0 ? (
             <Card className="p-12 text-center">
               <MdNotifications className="w-16 h-16 mx-auto mb-4 opacity-50" style={{ color: colors.text.secondary }} />
               <Heading level={3}>
-                {t('notifications.noNotifications') || 'No Notifications'}
+                {activeTab === 'unread'
+                  ? (t('notifications.noUnreadNotifications') || 'No Unread Notifications')
+                  : (t('notifications.noNotifications') || 'No Notifications')}
               </Heading>
               <Text style={{ color: colors.text.secondary }}>
-                {t('notifications.noNotificationsDesc') || 'You don\'t have any notifications yet.'}
+                {activeTab === 'unread'
+                  ? (t('notifications.noUnreadNotificationsDesc') || "You don't have any unread notifications.")
+                  : (t('notifications.noNotificationsDesc') || "You don't have any notifications yet.")}
               </Text>
             </Card>
           ) : (
-            notifications.map(notification => {
-              const token = getInviteToken(notification.deepLink);
-              const isInvite = token !== null;
-              const isUnread = !readIds.has(notification.id);
+            <>
+              {displayedNotifications.map(notification => {
+                const token = getInviteToken(notification.deepLink);
+                const isInvite = token !== null;
+                const isUnread = !notification.read;
 
-              return (
-                <div
-                  key={notification.id}
-                  className="p-5 transition-all duration-200 border-l-4 rounded-lg flex flex-col md:flex-row md:items-center justify-between gap-4"
-                  style={{
-                    backgroundColor: isUnread ? `${colors.interactive.primary}0c` : colors.background.primary,
-                    borderLeftColor: isInvite ? '#F59E0B' : colors.interactive.primary,
-                    border: `1px solid ${isUnread ? colors.interactive.primary : colors.border.light}`,
-                    boxShadow: isUnread ? `0 0 8px ${colors.interactive.primary}20` : 'none',
-                  }}
-                >
-                  {/* Content */}
-                  <div className="flex-1 space-y-1">
-                    <div className="flex items-center gap-2">
-                      {isUnread && (
-                        <span 
-                          className="w-2.5 h-2.5 rounded-full flex-shrink-0" 
-                          style={{ backgroundColor: colors.interactive.primary }} 
-                          title="Unread"
-                        />
-                      )}
-                      <Heading
-                        level={4}
-                        style={{ fontWeight: isUnread ? 'bold' : 'normal' }}
+                return (
+                  <div
+                    key={notification.id}
+                    className="p-5 transition-all duration-200 border-l-4 rounded-lg flex flex-col md:flex-row md:items-center justify-between gap-4"
+                    style={{
+                      backgroundColor: isUnread ? `${colors.interactive.primary}0c` : colors.background.primary,
+                      borderLeftColor: isInvite ? '#F59E0B' : colors.interactive.primary,
+                      border: `1px solid ${isUnread ? colors.interactive.primary : colors.border.light}`,
+                      boxShadow: isUnread ? `0 0 8px ${colors.interactive.primary}20` : 'none',
+                    }}
+                  >
+                    {/* Content */}
+                    <div className="flex-1 space-y-1">
+                      <div className="flex items-center gap-2">
+                        {isUnread && (
+                          <span 
+                            className="w-2.5 h-2.5 rounded-full flex-shrink-0" 
+                            style={{ backgroundColor: colors.interactive.primary }} 
+                            title="Unread"
+                          />
+                        )}
+                        <Heading
+                          level={4}
+                          style={{ fontWeight: isUnread ? 'bold' : 'normal' }}
+                        >
+                          {isInvite 
+                            ? (t('notifications.groupInvitation') || 'Group Invitation')
+                            : (t('notifications.notificationTitle') || 'Notification')}
+                        </Heading>
+                      </div>
+                      <Text style={{ color: colors.text.secondary, fontWeight: isUnread ? '500' : 'normal' }}>
+                        {parseNotificationContent(notification.content)}
+                      </Text>
+                      <Text
+                        className="text-xs"
+                        style={{ color: colors.text.tertiary }}
                       >
-                        {isInvite 
-                          ? (t('notifications.groupInvitation') || 'Group Invitation')
-                          : (t('notifications.notificationTitle') || 'Notification')}
-                      </Heading>
+                        {formatTime(notification.createdAt)}
+                      </Text>
                     </div>
-                    <Text style={{ color: colors.text.secondary, fontWeight: isUnread ? '500' : 'normal' }}>
-                      {parseNotificationContent(notification.content)}
-                    </Text>
-                    <Text
-                      className="text-xs"
-                      style={{ color: colors.text.tertiary }}
-                    >
-                      {formatTime(notification.createdAt)}
-                    </Text>
-                  </div>
 
-                  {/* Actions (Invite accept/decline or standard dismiss) */}
-                  {isInvite ? (
+                    {/* Actions */}
                     <div className="flex items-center gap-2 flex-shrink-0">
-                      <Button
-                        variant="primary"
-                        size="sm"
-                        onClick={() => handleAcceptInvite(notification.id, token)}
-                        disabled={actionLoading !== null}
-                        className="flex items-center gap-1.5"
-                      >
-                        <MdCheck size={16} />
-                        {t('common.accept') || 'Accept'}
-                      </Button>
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        onClick={() => handleDeclineInvite(notification.id, token)}
-                        disabled={actionLoading !== null}
-                        className="flex items-center gap-1.5"
-                      >
-                        <MdClose size={16} />
-                        {t('common.decline') || 'Decline'}
-                      </Button>
+                      {isInvite && (
+                        <>
+                          <Button
+                            variant="primary"
+                            size="sm"
+                            onClick={() => handleAcceptInvite(notification.id, token)}
+                            disabled={actionLoading !== null}
+                            className="flex items-center gap-1.5"
+                          >
+                            <MdCheck size={16} />
+                            {t('common.accept') || 'Accept'}
+                          </Button>
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            onClick={() => handleDeclineInvite(notification.id, token)}
+                            disabled={actionLoading !== null}
+                            className="flex items-center gap-1.5"
+                          >
+                            <MdClose size={16} />
+                            {t('common.decline') || 'Decline'}
+                          </Button>
+                        </>
+                      )}
+                      {!notification.read && (
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          onClick={() => handleToggleReadStatus(notification.id, notification.read)}
+                          disabled={actionLoading !== null}
+                        >
+                          {t('notifications.markAsRead') || 'Mark as read'}
+                        </Button>
+                      )}
                     </div>
-                  ) : null}
-                </div>
-              );
-            })
+                  </div>
+                );
+              })}
+
+
+            </>
           )}
         </div>
       </div>

@@ -157,7 +157,8 @@
   },
   "errors": {
     "failedToFetch": "Failed to connect to the server. Please check your internet connection.",
-    "noProjectsMatchingFilters": "No projects found matching the given filters."
+    "noProjectsMatchingFilters": "No projects found matching the given filters.",
+    "failedToUpdate": "Failed to update notification status."
   },
   "notifications": {
     "welcome": "Welcome",
@@ -171,7 +172,13 @@
     "income": "Income",
     "inviteDescription": "You've been invited to join group \"{groupName}\". Tap to accept.",
     "groupInvitation": "Group Invitation",
-    "notificationTitle": "Notification"
+    "notificationTitle": "Notification",
+    "markAsRead": "Mark as read",
+    "loadMore": "Load More",
+    "all": "All",
+    "unread": "Unread",
+    "noUnreadNotifications": "No Unread Notifications",
+    "noUnreadNotificationsDesc": "You don't have any unread notifications."
   },
   "profile": {
     "editProfile": "Edit Profile",
