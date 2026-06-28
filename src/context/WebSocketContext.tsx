@@ -44,6 +44,7 @@ export const WebSocketProvider: React.FC<{ children: ReactNode }> = ({
 
   const clientRef = useRef<Client | null>(null);
   const userSubRef = useRef<any>(null);
+  const notifSubRef = useRef<any>(null);
 
   // jobId -> subscription callbacks
   const subscriptionsRef = useRef<
@@ -120,6 +121,13 @@ export const WebSocketProvider: React.FC<{ children: ReactNode }> = ({
         userSubRef.current = null;
       }
 
+      if (notifSubRef.current) {
+        try {
+          notifSubRef.current.unsubscribe();
+        } catch {}
+        notifSubRef.current = null;
+      }
+
       subscriptionsRef.current.clear();
 
       if (clientRef.current?.active) {
@@ -159,19 +167,30 @@ export const WebSocketProvider: React.FC<{ children: ReactNode }> = ({
         }
         userSubRef.current = null;
       }
+      if (notifSubRef.current) {
+        console.log('🔌 Unsubscribing from notifications topic');
+        try {
+          notifSubRef.current.unsubscribe();
+        } catch (err) {
+          console.error(err);
+        }
+        notifSubRef.current = null;
+      }
       return;
     }
 
     const topic = `/topic/ai/user/${userId}`;
+    const notifTopic = `/topic/notifications/${userId}`;
     console.log(`📌 Subscribing to user topic: ${topic}`);
-
+    console.log(`📌 Subscribing to notifications topic: ${notifTopic}`);
+ 
     try {
       const stompSub = client.subscribe(topic, (message: IMessage) => {
         try {
           const data = JSON.parse(message.body);
           const msgJobId = data.jobId;
           console.log(`✉️ Received WS message for job [${msgJobId}]`, data);
-
+ 
           if (msgJobId) {
             const subs = subscriptionsRef.current.get(msgJobId);
             subs?.callbacks.forEach((cb) => cb(data));
@@ -180,9 +199,23 @@ export const WebSocketProvider: React.FC<{ children: ReactNode }> = ({
           console.error(`❌ Parse error on user topic`, err);
         }
       });
-
+ 
       userSubRef.current = stompSub;
 
+      const stompNotifSub = client.subscribe(notifTopic, (message: IMessage) => {
+        try {
+          const data = JSON.parse(message.body);
+          console.log(`✉️ Received WS notification:`, data);
+          // Dispatch a custom event to notify all components (e.g. Header to update count)
+          window.dispatchEvent(new CustomEvent('notifications-changed'));
+          window.dispatchEvent(new CustomEvent('notification-received', { detail: data }));
+        } catch (err) {
+          console.error(`❌ Parse error on notifications topic`, err);
+        }
+      });
+
+      notifSubRef.current = stompNotifSub;
+ 
       // flush pending subscriptions
       pendingSubscriptionsRef.current.forEach((callbacks, jobId) => {
         callbacks.forEach((cb) => {
@@ -190,11 +223,11 @@ export const WebSocketProvider: React.FC<{ children: ReactNode }> = ({
         });
       });
       pendingSubscriptionsRef.current.clear();
-
+ 
     } catch (err) {
-      console.error('Failed to subscribe to user topic', err);
+      console.error('Failed to subscribe to user topic or notification topic', err);
     }
-
+ 
     return () => {
       if (userSubRef.current) {
         console.log('🔌 Cleanup: Unsubscribing from user topic');
@@ -204,6 +237,15 @@ export const WebSocketProvider: React.FC<{ children: ReactNode }> = ({
           console.error(err);
         }
         userSubRef.current = null;
+      }
+      if (notifSubRef.current) {
+        console.log('🔌 Cleanup: Unsubscribing from notifications topic');
+        try {
+          notifSubRef.current.unsubscribe();
+        } catch (err) {
+          console.error(err);
+        }
+        notifSubRef.current = null;
       }
     };
   }, [connected, userId]);
