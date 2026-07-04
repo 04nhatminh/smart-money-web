@@ -5,7 +5,7 @@ import { Button, Heading, Text, Input, Alert } from '@/components/atoms';
 import { useTheme } from '@/context/ThemeContext';
 import { useProjects } from '@/hooks/useProjects';
 import { useGroups } from '@/hooks/useGroups';
-import { useUserIncome } from '@/hooks/useUserIncome';
+import { useUserFinancial } from '@/hooks/useUserFinancial';
 import { ProjectAdvisorModeModal, ProjectAdvisorResultModal } from '.';
 import { CreateGroupModal } from './CreateGroupModal';
 import { GenerateBudgetModal } from './GenerateBudgetModal';
@@ -19,7 +19,7 @@ interface CreateProjectModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: () => void;
-  onOpenUserIncomeModal?: () => void;
+  onOpenUserFinancialModal?: () => void;
   usedPriorities?: string[];
   maxProjectsReached?: boolean;
   defaultType?: 'PERSONAL' | 'GROUP';
@@ -45,7 +45,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
   isOpen,
   onClose,
   onSuccess,
-  onOpenUserIncomeModal,
+  onOpenUserFinancialModal,
   usedPriorities = [],
   maxProjectsReached = false,
   defaultType,
@@ -55,7 +55,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
   const t = useTranslations();
   const { isLoading: projectsLoading, createProject, projectAdvisor } = useProjects();
   const { listGroups, getGroupProjectSuggestions, createGroupProject, isLoading: groupsLoading } = useGroups();
-  const { getUserIncome } = useUserIncome();
+  const { getUserFinancial } = useUserFinancial();
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const today = new Date().toISOString().split('T')[0];
@@ -323,21 +323,21 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
       return;
     }
 
-    // Check if user has set up user income
+    // Check if user has completed financial setup
     try {
-      const incomeResult = await getUserIncome();
-      if (!incomeResult.success || !incomeResult.data) {
-        setError(t('projects.createModal.errors.setupIncome'));
+      const financialResult = await getUserFinancial();
+      if (!financialResult.success || !financialResult.data) {
+        setError(t('financialSetup.setupIncome') || 'Please complete your financial setup first');
         setTimeout(() => {
-          onOpenUserIncomeModal?.();
+          onOpenUserFinancialModal?.();
         }, 500);
         return;
       }
     } catch (err) {
-      console.error('Error checking user income:', err);
-      setError(t('projects.createModal.errors.setupIncome'));
+      console.error('Error checking financial profile:', err);
+      setError(t('financialSetup.setupIncome') || 'Please complete your financial setup first');
       setTimeout(() => {
-        onOpenUserIncomeModal?.();
+        onOpenUserFinancialModal?.();
       }, 500);
       return;
     }

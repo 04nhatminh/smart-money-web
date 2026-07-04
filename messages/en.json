@@ -574,5 +574,43 @@
     "OTHER": "Other",
     "FOOD_AND_BEVERAGE": "Food & Beverage",
     "FOOD_BEV": "Food & Beverage"
+  },
+  "financialSetup": {
+    "title": "Financial Setup",
+    "titleEdit": "Edit Financial Setup",
+    "titleCreate": "Create Financial Setup",
+    "description": "Please complete your financial profile to help AI customize your budgets and saving plans.",
+    "successCreate": "Financial setup completed successfully!",
+    "successUpdate": "Financial setup updated successfully!",
+    "errorSave": "Failed to save financial setup",
+    "incomeLabel": "Monthly Income *",
+    "incomeHint": "Enter your average monthly income",
+    "savingPaceLabel": "Saving Pace *",
+    "savingPaceHint": "How aggressively do you want to save?",
+    "interventionLevelLabel": "Intervention Level *",
+    "interventionLevelHint": "How strictly should the AI monitor your spending?",
+    "focusModeLabel": "Focus Mode *",
+    "focusModeHint": "What is your main financial focus?",
+    "savingPaceOptions": {
+      "RELAXED": "Relaxed (Save less, spend comfortably)",
+      "BALANCED": "Balanced (Standard saving rate)",
+      "AGGRESIVE": "Aggressive (High saving rate, strict spending)"
+    },
+    "interventionLevelOptions": {
+      "NOTIFY": "Notify (Receive passive alerts)",
+      "GENTLE": "Gentle (Soft budget warnings)",
+      "HARD": "Hard (Strict budget limits)"
+    },
+    "focusModeOptions": {
+      "SAVE_MORE": "Save More (Grow savings goal)",
+      "REDUCE_SPENDING": "Reduce Spending (Cut down active expenses)",
+      "TRACK_ONLY": "Track Only (Visualize patterns only)"
+    },
+    "setupIncome": "Please complete your financial setup first",
+    "noInfo": "No financial setup details found. Click \"Set Up\" to get started.",
+    "incomeRequired": "Income is required and must be greater than zero",
+    "savingPaceRequired": "Saving pace is required",
+    "interventionLevelRequired": "Intervention level is required",
+    "focusModeRequired": "Focus mode is required"
   }
 }

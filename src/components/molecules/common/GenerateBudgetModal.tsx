@@ -10,8 +10,8 @@ import { API_ENDPOINTS } from '@/constants/api';
 import { formatVietnamsePrice } from '@/lib/format';
 import { getCookie } from '@/lib/auth';
 import { MdClose, MdAutoAwesome, MdCheck, MdError, MdRefresh } from 'react-icons/md';
-import { UserIncomeModal, UserFinancialModal } from '.';
-import { useUserIncome, useUserFinancial } from '@/hooks';
+import { UserFinancialModal } from '.';
+import { useUserFinancial } from '@/hooks';
 
 interface GenerateBudgetModalProps {
   isOpen: boolean;
@@ -33,11 +33,9 @@ export const GenerateBudgetModal: React.FC<GenerateBudgetModalProps> = ({
   const { colors } = useTheme();
   const { user, updateUser } = useAuth();
   const { subscribe } = useWebSocket();
-  const { getUserIncome } = useUserIncome();
   const { getUserFinancial } = useUserFinancial();
 
   // Onboarding sub-modals
-  const [isIncomeModalOpen, setIsIncomeModalOpen] = useState(false);
   const [isFinancialModalOpen, setIsFinancialModalOpen] = useState(false);
 
   // States
@@ -53,26 +51,16 @@ export const GenerateBudgetModal: React.FC<GenerateBudgetModalProps> = ({
   // Check setup flags saved in cookies or user object
   const checkSetupStatus = async () => {
     // Check locally saved user state first, fallback to cookies
-    const incomeCookie = getCookie('income_setup_completed');
     const financialCookie = getCookie('financial_setup_completed');
 
-    let incomeSetupCompleted = user?.incomeSetupCompleted || incomeCookie === 'true';
     let financialSetupCompleted = user?.financialSetupCompleted || financialCookie === 'true';
 
     // If not completed according to local state, verify with backend directly
-    if (!incomeSetupCompleted || !financialSetupCompleted) {
+    if (!financialSetupCompleted) {
       setStep('CHECKING');
       try {
-        const [incomeRes, financialRes] = await Promise.all([
-          getUserIncome(),
-          getUserFinancial()
-        ]);
+        const financialRes = await getUserFinancial();
         
-        if (incomeRes.success && incomeRes.data) {
-          incomeSetupCompleted = true;
-          // Sync with local state
-          updateUser({ incomeSetupCompleted: true });
-        }
         if (financialRes.success && financialRes.data) {
           financialSetupCompleted = true;
           // Sync with local state
@@ -83,11 +71,9 @@ export const GenerateBudgetModal: React.FC<GenerateBudgetModalProps> = ({
       }
     }
 
-    if (!incomeSetupCompleted || !financialSetupCompleted) {
+    if (!financialSetupCompleted) {
       setErrorMsg(
-        `Please complete the following setups before generating a budget plan:\n` +
-        `${!incomeSetupCompleted ? '• User Income Info\n' : ''}` +
-        `${!financialSetupCompleted ? '• User Financial Profile\n' : ''}`
+        `Please complete the financial setup before generating a budget plan.`
       );
       setStep('ERROR');
     } else {
@@ -265,12 +251,7 @@ export const GenerateBudgetModal: React.FC<GenerateBudgetModalProps> = ({
                   <Button variant="secondary" className="flex-1" onClick={onClose}>
                     Close
                   </Button>
-                  {errorMsg?.includes('Income') && (
-                    <Button variant="primary" className="flex-1" onClick={() => setIsIncomeModalOpen(true)}>
-                      Setup Income
-                    </Button>
-                  )}
-                  {errorMsg?.includes('Financial') && (
+                  {errorMsg?.includes('complete') && (
                     <Button variant="primary" className="flex-1" onClick={() => setIsFinancialModalOpen(true)}>
                       Setup Profile
                     </Button>
@@ -410,13 +391,6 @@ export const GenerateBudgetModal: React.FC<GenerateBudgetModalProps> = ({
       </div>
 
       {/* Sub-modals for setup */}
-      <UserIncomeModal
-        isOpen={isIncomeModalOpen}
-        onClose={() => {
-          setIsIncomeModalOpen(false);
-          checkSetupStatus();
-        }}
-      />
       <UserFinancialModal
         isOpen={isFinancialModalOpen}
         onClose={() => {

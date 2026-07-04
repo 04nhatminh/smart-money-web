@@ -6,7 +6,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { useAuth } from '@/context/AuthContext';
 import { SidebarLayout } from '@/components/templates';
 import { Heading, Text, Button } from '@/components/atoms';
-import { Card, StatCard, UserIncomeModal, UserFinancialModal, GenerateBudgetModal, CreateProjectModal } from '@/components/molecules/common';
+import { Card, StatCard, UserFinancialModal, GenerateBudgetModal, CreateProjectModal } from '@/components/molecules/common';
 import { useTheme } from '@/context/ThemeContext';
 import { useTransactions } from '@/hooks/useTransactions';
 import { useAnalytics } from '@/hooks/useAnalytics';
@@ -73,9 +73,7 @@ export default function DashboardPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   // Onboarding states
-  const [showIncomePrompt, setShowIncomePrompt] = useState(false);
   const [showFinancialPrompt, setShowFinancialPrompt] = useState(false);
-  const [isIncomeModalOpen, setIsIncomeModalOpen] = useState(false);
   const [isFinancialModalOpen, setIsFinancialModalOpen] = useState(false);
   const [isGenerateBudgetModalOpen, setIsGenerateBudgetModalOpen] = useState(false);
   const [isCreateProjectModalOpen, setIsCreateProjectModalOpen] = useState(false);
@@ -141,12 +139,10 @@ export default function DashboardPage() {
   // Check onboarding status
   useEffect(() => {
     if (isAuthenticated && user) {
-      const incomeDone = user.incomeSetupCompleted ?? true;
-      const financialDone = user.financialSetupCompleted ?? true;
+      const financialCookie = getCookie('financial_setup_completed');
+      const financialDone = user.financialSetupCompleted || financialCookie === 'true';
 
-      if (!incomeDone) {
-        setShowIncomePrompt(true);
-      } else if (!financialDone) {
+      if (!financialDone) {
         setShowFinancialPrompt(true);
       }
     }
@@ -503,41 +499,15 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Onboarding Income Prompt */}
-      {showIncomePrompt && (
-        <>
-          <div className="fixed inset-0" style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 999 }} />
-          <div className="fixed inset-0 flex items-center justify-center p-4" style={{ zIndex: 1000 }}>
-            <div className="max-w-md w-full p-6 rounded-2xl shadow-2xl space-y-4" style={{ backgroundColor: colors.background.primary }}>
-              <Heading level={3}>Setup Monthly Income</Heading>
-              <Text style={{ color: colors.text.secondary }}>
-                You haven't set up your monthly income details yet. Building an accurate budget or tracking savings requires your income info.
-              </Text>
-              <div className="flex gap-3 pt-2">
-                <Button variant="secondary" className="flex-1" onClick={() => setShowIncomePrompt(false)}>
-                  Skip for now
-                </Button>
-                <Button variant="primary" className="flex-1" onClick={() => {
-                  setShowIncomePrompt(false);
-                  setIsIncomeModalOpen(true);
-                }}>
-                  Setup Now
-                </Button>
-              </div>
-            </div>
-          </div>
-        </>
-      )}
-
       {/* Onboarding Financial Profile Prompt */}
-      {!showIncomePrompt && showFinancialPrompt && (
+      {showFinancialPrompt && (
         <>
           <div className="fixed inset-0" style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 999 }} />
           <div className="fixed inset-0 flex items-center justify-center p-4" style={{ zIndex: 1000 }}>
             <div className="max-w-md w-full p-6 rounded-2xl shadow-2xl space-y-4" style={{ backgroundColor: colors.background.primary }}>
               <Heading level={3}>Setup Financial Profile</Heading>
               <Text style={{ color: colors.text.secondary }}>
-                You haven't set up your financial profile. Defining your role, spending style, and living status helps AI generate personalized recommendations.
+                You haven't set up your financial profile. Defining your income, saving pace, intervention level, and focus mode helps AI generate personalized recommendations.
               </Text>
               <div className="flex gap-3 pt-2">
                 <Button variant="secondary" className="flex-1" onClick={() => setShowFinancialPrompt(false)}>
@@ -556,18 +526,6 @@ export default function DashboardPage() {
       )}
 
       {/* Core Modals */}
-      <UserIncomeModal
-        isOpen={isIncomeModalOpen}
-        onClose={() => setIsIncomeModalOpen(false)}
-        onSuccess={() => {
-          const financialCookie = getCookie('financial_setup_completed');
-          const financialDone = user?.financialSetupCompleted || financialCookie === 'true';
-          if (!financialDone) {
-            setShowFinancialPrompt(true);
-          }
-        }}
-      />
-
       <UserFinancialModal
         isOpen={isFinancialModalOpen}
         onClose={() => setIsFinancialModalOpen(false)}
@@ -584,9 +542,9 @@ export default function DashboardPage() {
         onClose={() => setIsCreateProjectModalOpen(false)}
         onSuccess={loadDashboardData}
         usedPriorities={usedPriorities}
-        onOpenUserIncomeModal={() => {
+        onOpenUserFinancialModal={() => {
           setIsCreateProjectModalOpen(false);
-          setIsIncomeModalOpen(true);
+          setIsFinancialModalOpen(true);
         }}
       />
     </SidebarLayout>

@@ -12,7 +12,7 @@ import {
   EditProjectModal,
   AddContributionModal,
   DeleteConfirmationModal,
-  UserIncomeModal,
+  UserFinancialModal,
   GenerateBudgetModal,
   CreateGroupModal,
   GroupDetailModal,
@@ -55,7 +55,7 @@ export default function ProjectsPage() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isContributeModalOpen, setIsContributeModalOpen] = useState(false);
-  const [isUserIncomeModalOpen, setIsUserIncomeModalOpen] = useState(false);
+  const [isUserFinancialModalOpen, setIsUserFinancialModalOpen] = useState(false);
   const [isGenerateBudgetModalOpen, setIsGenerateBudgetModalOpen] = useState(false);
   const [selectedProject, setSelectedProject] = useState<ProjectDetail | null>(null);
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
@@ -523,9 +523,9 @@ export default function ProjectsPage() {
             loadProjects();
             setIsGenerateBudgetModalOpen(true);
           }}
-          onOpenUserIncomeModal={() => {
+          onOpenUserFinancialModal={() => {
             setIsCreateModalOpen(false);
-            setIsUserIncomeModalOpen(true);
+            setIsUserFinancialModalOpen(true);
           }}
           usedPriorities={Array.from(getPrioritiesUsed())}
           maxProjectsReached={!canCreateProject()}
@@ -557,11 +557,11 @@ export default function ProjectsPage() {
           />
         )}
 
-        <UserIncomeModal
-          isOpen={isUserIncomeModalOpen}
-          onClose={() => setIsUserIncomeModalOpen(false)}
+        <UserFinancialModal
+          isOpen={isUserFinancialModalOpen}
+          onClose={() => setIsUserFinancialModalOpen(false)}
           onSuccess={() => {
-            setIsUserIncomeModalOpen(false);
+            setIsUserFinancialModalOpen(false);
             setIsCreateModalOpen(true);
           }}
         />

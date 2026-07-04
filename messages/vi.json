@@ -574,5 +574,43 @@
     "OTHER": "Khác",
     "FOOD_AND_BEVERAGE": "Ăn uống",
     "FOOD_BEV": "Ăn uống"
+  },
+  "financialSetup": {
+    "title": "Thiết lập Tài chính",
+    "titleEdit": "Chỉnh sửa Thiết lập Tài chính",
+    "titleCreate": "Tạo Thiết lập Tài chính",
+    "description": "Vui lòng hoàn thành thông tin tài chính để AI thiết lập ngân sách và kế hoạch tiết kiệm tối ưu cho bạn.",
+    "successCreate": "Thiết lập tài chính thành công!",
+    "successUpdate": "Cập nhật thiết lập tài chính thành công!",
+    "errorSave": "Không thể lưu thiết lập tài chính",
+    "incomeLabel": "Thu nhập Hàng tháng *",
+    "incomeHint": "Nhập thu nhập trung bình hàng tháng của bạn",
+    "savingPaceLabel": "Tốc độ Tiết kiệm *",
+    "savingPaceHint": "Mức độ tích lũy mục tiêu của bạn như thế nào?",
+    "interventionLevelLabel": "Mức độ Can thiệp *",
+    "interventionLevelHint": "AI nên kiểm soát chi tiêu của bạn nghiêm ngặt đến mức nào?",
+    "focusModeLabel": "Chế độ Tập trung *",
+    "focusModeHint": "Mục tiêu tài chính chính của bạn là gì?",
+    "savingPaceOptions": {
+      "RELAXED": "Thư thả (Tích lũy ít, chi tiêu thoải mái)",
+      "BALANCED": "Cân bằng (Tốc độ tích lũy vừa phải)",
+      "AGGRESIVE": "Quyết liệt (Tích lũy tối đa, chi tiêu nghiêm ngặt)"
+    },
+    "interventionLevelOptions": {
+      "NOTIFY": "Thông báo (Chỉ nhận cảnh báo thụ động)",
+      "GENTLE": "Vừa phải (Nhắc nhở nhẹ khi sắp vượt ngân sách)",
+      "HARD": "Nghiêm ngặt (Cảnh báo cứng và kiểm soát chặt)"
+    },
+    "focusModeOptions": {
+      "SAVE_MORE": "Tiết kiệm thêm (Tập trung tăng quỹ tích lũy)",
+      "REDUCE_SPENDING": "Cắt giảm chi tiêu (Tập trung giảm các khoản chi phí)",
+      "TRACK_ONLY": "Chỉ theo dõi (Chỉ quan sát dòng tiền chi tiêu)"
+    },
+    "setupIncome": "Vui lòng hoàn thành thiết lập thông tin tài chính trước",
+    "noInfo": "Chưa có thông tin thiết lập tài chính. Nhấp \"Thiết Lập\" để bắt đầu.",
+    "incomeRequired": "Thu nhập là bắt buộc và phải lớn hơn 0",
+    "savingPaceRequired": "Tốc độ tiết kiệm là bắt buộc",
+    "interventionLevelRequired": "Mức độ can thiệp là bắt buộc",
+    "focusModeRequired": "Chế độ tập trung là bắt buộc"
   }
 }

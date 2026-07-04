@@ -1,22 +1,17 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Button, Heading, Text, Alert } from '@/components/atoms';
+import { Button, Heading, Text, Input, Alert } from '@/components/atoms';
 import { useTheme } from '@/context/ThemeContext';
 import { useUserFinancial } from '@/hooks/useUserFinancial';
 import { useAuth } from '@/context/AuthContext';
 import { useTranslations } from 'next-intl';
-import { MdClose } from 'react-icons/md';
+import { MdClose, MdAutoAwesome } from 'react-icons/md';
+import { formatAmountInput, parseFormattedNumber } from '@/lib/format';
 import {
-  UserRole,
-  LivingStatus,
-  IncomeLevel,
-  TransportMode,
-  SpendingStyle,
-  WorkStyle,
-  FamilyStatus,
-  StudyIntensity,
-  HealthNeed,
+  SavingPace,
+  InterventionLevel,
+  FocusMode,
   CreateUserFinancialProfileRequest,
 } from '@/types/user-financial.api';
 
@@ -27,15 +22,10 @@ interface UserFinancialModalProps {
 }
 
 interface FormData {
-  role: UserRole;
-  living_status: LivingStatus;
-  income_level: IncomeLevel;
-  transport_mode: TransportMode;
-  spending_style: SpendingStyle;
-  work_style: WorkStyle;
-  family_status: FamilyStatus;
-  study_intensity: StudyIntensity;
-  health_need: HealthNeed;
+  income: string;
+  savingPace: SavingPace;
+  interventionLevel: InterventionLevel;
+  focusMode: FocusMode;
 }
 
 export const UserFinancialModal: React.FC<UserFinancialModalProps> = ({
@@ -51,15 +41,10 @@ export const UserFinancialModal: React.FC<UserFinancialModalProps> = ({
   const [success, setSuccess] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [formData, setFormData] = useState<FormData>({
-    role: 'STUDENT',
-    living_status: 'WITH_FAMILY',
-    income_level: 'MEDIUM',
-    transport_mode: 'MOTORBIKE',
-    spending_style: 'BALANCED',
-    work_style: 'NONE',
-    family_status: 'SINGLE',
-    study_intensity: 'NORMAL',
-    health_need: 'NORMAL',
+    income: '',
+    savingPace: 'BALANCED',
+    interventionLevel: 'GENTLE',
+    focusMode: 'SAVE_MORE',
   });
 
   // Prevent scrolling when modal is open
@@ -97,15 +82,10 @@ export const UserFinancialModal: React.FC<UserFinancialModalProps> = ({
     if (result.success && result.data) {
       const profile = result.data;
       setFormData({
-        role: profile.role || 'STUDENT',
-        living_status: profile.living_status || 'WITH_FAMILY',
-        income_level: profile.income_level || 'MEDIUM',
-        transport_mode: profile.transport_mode || 'MOTORBIKE',
-        spending_style: profile.spending_style || 'BALANCED',
-        work_style: profile.work_style || 'NONE',
-        family_status: profile.family_status || 'SINGLE',
-        study_intensity: profile.study_intensity || 'NORMAL',
-        health_need: profile.health_need || 'NORMAL',
+        income: profile.income ? formatAmountInput(profile.income.toString()) : '',
+        savingPace: profile.savingPace || 'BALANCED',
+        interventionLevel: profile.interventionLevel || 'GENTLE',
+        focusMode: profile.focusMode || 'SAVE_MORE',
       });
       setIsEditMode(true);
     } else {
@@ -113,29 +93,40 @@ export const UserFinancialModal: React.FC<UserFinancialModalProps> = ({
     }
   };
 
-  const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value,
-    }));
+    if (name === 'income') {
+      const formatted = formatAmountInput(value);
+      setFormData(prev => ({
+        ...prev,
+        [name]: formatted,
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
+    const parsedIncome = parseFormattedNumber(formData.income);
+    if (!formData.income || parsedIncome <= 0) {
+      setError(t('financialSetup.incomeRequired'));
+      return;
+    }
+
     try {
       const requestData: CreateUserFinancialProfileRequest = {
-        role: formData.role,
-        living_status: formData.living_status,
-        income_level: formData.income_level,
-        transport_mode: formData.transport_mode,
-        spending_style: formData.spending_style,
-        work_style: formData.work_style,
-        family_status: formData.family_status,
-        study_intensity: formData.study_intensity,
-        health_need: formData.health_need,
+        income: parsedIncome,
+        savingPace: formData.savingPace,
+        interventionLevel: formData.interventionLevel,
+        focusMode: formData.focusMode,
       };
 
       let result;
@@ -146,7 +137,7 @@ export const UserFinancialModal: React.FC<UserFinancialModalProps> = ({
       }
 
       if (result.success) {
-        // Also update AuthContext states and cookie
+        // Update AuthContext states
         updateUser({ financialSetupCompleted: true });
 
         setSuccess(true);
@@ -156,7 +147,7 @@ export const UserFinancialModal: React.FC<UserFinancialModalProps> = ({
           onSuccess?.();
         }, 1500);
       } else {
-        setError(result.error || 'Failed to save financial profile');
+        setError(result.error || t('financialSetup.errorSave'));
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
@@ -184,16 +175,19 @@ export const UserFinancialModal: React.FC<UserFinancialModalProps> = ({
 
       {/* Modal */}
       <div className="fixed inset-0 flex items-center justify-center p-4 pointer-events-none" style={{ zIndex: 10002 }}>
-         <div
+        <div
           className="bg-white rounded-lg shadow-2xl max-w-md w-full pointer-events-auto overflow-hidden flex flex-col max-h-[90vh]"
           style={{ backgroundColor: colors.background.primary }}
           onClick={e => e.stopPropagation()}
         >
           {/* Header */}
           <div className="flex items-center justify-between p-6 border-b" style={{ borderColor: colors.border.light, backgroundColor: colors.background.primary }}>
-            <Heading level={3} className="m-0">
-              {isEditMode ? 'Edit Financial Profile' : 'Create Financial Profile'}
-            </Heading>
+            <div className="flex items-center gap-2">
+              <MdAutoAwesome className="w-5 h-5" style={{ color: colors.interactive.primary }} />
+              <Heading level={3} className="m-0">
+                {isEditMode ? t('financialSetup.titleEdit') : t('financialSetup.titleCreate')}
+              </Heading>
+            </div>
             <button
               onClick={onClose}
               className="p-1 hover:opacity-70 transition-opacity"
@@ -205,6 +199,11 @@ export const UserFinancialModal: React.FC<UserFinancialModalProps> = ({
 
           {/* Content */}
           <form onSubmit={handleSubmit} className="p-6 space-y-4 overflow-y-auto flex-1">
+            {/* Description */}
+            <Text style={{ color: colors.text.secondary }} className="text-sm">
+              {t('financialSetup.description')}
+            </Text>
+
             {/* Success Message */}
             {success && (
               <div
@@ -215,7 +214,7 @@ export const UserFinancialModal: React.FC<UserFinancialModalProps> = ({
                 }}
               >
                 <Text className="font-semibold">
-                  {isEditMode ? 'Financial profile updated successfully!' : 'Financial profile created successfully!'}
+                  {isEditMode ? t('financialSetup.successUpdate') : t('financialSetup.successCreate')}
                 </Text>
               </div>
             )}
@@ -225,39 +224,48 @@ export const UserFinancialModal: React.FC<UserFinancialModalProps> = ({
               <Alert message={error} type="error" onClose={() => setError(null)} />
             )}
 
-            {/* Role */}
+            {/* Income */}
             <div className="space-y-2">
               <label style={{ color: colors.text.primary }} className="block text-sm font-semibold">
-                User Role *
+                {t('financialSetup.incomeLabel')}
               </label>
-              <select
-                name="role"
-                value={formData.role}
-                onChange={handleSelectChange}
-                disabled={isLoading}
-                className="w-full px-3 py-2 rounded-lg border transition-colors focus:outline-none"
-                style={{
-                  backgroundColor: colors.background.secondary,
-                  borderColor: colors.border.light,
-                  color: colors.text.primary,
-                }}
-              >
-                <option value="STUDENT">Student</option>
-                <option value="OFFICE_WORKER">Office Worker</option>
-                <option value="FREELANCER">Freelancer</option>
-                <option value="BUSINESS_OWNER">Business Owner</option>
-              </select>
+              <div className="flex gap-2">
+                <Input
+                  type="text"
+                  name="income"
+                  value={formData.income}
+                  onChange={handleInputChange}
+                  placeholder="0.00"
+                  disabled={isLoading}
+                  required
+                  className="flex-1"
+                />
+                <div
+                  className="px-3 py-2 rounded-lg border flex items-center justify-center font-semibold"
+                  style={{
+                    backgroundColor: colors.background.secondary,
+                    borderColor: colors.border.light,
+                    color: colors.text.primary,
+                    minWidth: '80px',
+                  }}
+                >
+                  VND
+                </div>
+              </div>
+              <Text style={{ color: colors.text.secondary }} className="text-xs">
+                {t('financialSetup.incomeHint')}
+              </Text>
             </div>
 
-            {/* Living Status */}
+            {/* Saving Pace */}
             <div className="space-y-2">
               <label style={{ color: colors.text.primary }} className="block text-sm font-semibold">
-                Living Status *
+                {t('financialSetup.savingPaceLabel')}
               </label>
               <select
-                name="living_status"
-                value={formData.living_status}
-                onChange={handleSelectChange}
+                name="savingPace"
+                value={formData.savingPace}
+                onChange={handleInputChange}
                 disabled={isLoading}
                 className="w-full px-3 py-2 rounded-lg border transition-colors focus:outline-none"
                 style={{
@@ -266,22 +274,24 @@ export const UserFinancialModal: React.FC<UserFinancialModalProps> = ({
                   color: colors.text.primary,
                 }}
               >
-                <option value="WITH_FAMILY">With Family</option>
-                <option value="RENT_ROOM">Renting Room</option>
-                <option value="DORM">Dormitory</option>
-                <option value="OWN_HOUSE">Own House</option>
+                <option value="RELAXED">{t('financialSetup.savingPaceOptions.RELAXED')}</option>
+                <option value="BALANCED">{t('financialSetup.savingPaceOptions.BALANCED')}</option>
+                <option value="AGGRESIVE">{t('financialSetup.savingPaceOptions.AGGRESIVE')}</option>
               </select>
+              <Text style={{ color: colors.text.secondary }} className="text-xs">
+                {t('financialSetup.savingPaceHint')}
+              </Text>
             </div>
 
-            {/* Income Level */}
+            {/* Intervention Level */}
             <div className="space-y-2">
               <label style={{ color: colors.text.primary }} className="block text-sm font-semibold">
-                Income Level *
+                {t('financialSetup.interventionLevelLabel')}
               </label>
               <select
-                name="income_level"
-                value={formData.income_level}
-                onChange={handleSelectChange}
+                name="interventionLevel"
+                value={formData.interventionLevel}
+                onChange={handleInputChange}
                 disabled={isLoading}
                 className="w-full px-3 py-2 rounded-lg border transition-colors focus:outline-none"
                 style={{
@@ -290,21 +300,24 @@ export const UserFinancialModal: React.FC<UserFinancialModalProps> = ({
                   color: colors.text.primary,
                 }}
               >
-                <option value="LOW">Low</option>
-                <option value="MEDIUM">Medium</option>
-                <option value="HIGH">High</option>
+                <option value="NOTIFY">{t('financialSetup.interventionLevelOptions.NOTIFY')}</option>
+                <option value="GENTLE">{t('financialSetup.interventionLevelOptions.GENTLE')}</option>
+                <option value="HARD">{t('financialSetup.interventionLevelOptions.HARD')}</option>
               </select>
+              <Text style={{ color: colors.text.secondary }} className="text-xs">
+                {t('financialSetup.interventionLevelHint')}
+              </Text>
             </div>
 
-            {/* Transport Mode */}
+            {/* Focus Mode */}
             <div className="space-y-2">
               <label style={{ color: colors.text.primary }} className="block text-sm font-semibold">
-                Transport Mode *
+                {t('financialSetup.focusModeLabel')}
               </label>
               <select
-                name="transport_mode"
-                value={formData.transport_mode}
-                onChange={handleSelectChange}
+                name="focusMode"
+                value={formData.focusMode}
+                onChange={handleInputChange}
                 disabled={isLoading}
                 className="w-full px-3 py-2 rounded-lg border transition-colors focus:outline-none"
                 style={{
@@ -313,126 +326,13 @@ export const UserFinancialModal: React.FC<UserFinancialModalProps> = ({
                   color: colors.text.primary,
                 }}
               >
-                <option value="MOTORBIKE">Motorbike</option>
-                <option value="BUS">Bus</option>
-                <option value="CAR">Car</option>
-                <option value="RIDE_HAILING">Ride Hailing</option>
+                <option value="SAVE_MORE">{t('financialSetup.focusModeOptions.SAVE_MORE')}</option>
+                <option value="REDUCE_SPENDING">{t('financialSetup.focusModeOptions.REDUCE_SPENDING')}</option>
+                <option value="TRACK_ONLY">{t('financialSetup.focusModeOptions.TRACK_ONLY')}</option>
               </select>
-            </div>
-
-            {/* Spending Style */}
-            <div className="space-y-2">
-              <label style={{ color: colors.text.primary }} className="block text-sm font-semibold">
-                Spending Style *
-              </label>
-              <select
-                name="spending_style"
-                value={formData.spending_style}
-                onChange={handleSelectChange}
-                disabled={isLoading}
-                className="w-full px-3 py-2 rounded-lg border transition-colors focus:outline-none"
-                style={{
-                  backgroundColor: colors.background.secondary,
-                  borderColor: colors.border.light,
-                  color: colors.text.primary,
-                }}
-              >
-                <option value="BALANCED">Balanced</option>
-                <option value="FRUGAL">Frugal</option>
-                <option value="SPENDER">Spender</option>
-              </select>
-            </div>
-
-            {/* Work Style */}
-            <div className="space-y-2">
-              <label style={{ color: colors.text.primary }} className="block text-sm font-semibold">
-                Work Style *
-              </label>
-              <select
-                name="work_style"
-                value={formData.work_style}
-                onChange={handleSelectChange}
-                disabled={isLoading}
-                className="w-full px-3 py-2 rounded-lg border transition-colors focus:outline-none"
-                style={{
-                  backgroundColor: colors.background.secondary,
-                  borderColor: colors.border.light,
-                  color: colors.text.primary,
-                }}
-              >
-                <option value="NONE">None</option>
-                <option value="ONSITE">Onsite</option>
-                <option value="HYBRID">Hybrid</option>
-                <option value="REMOTE">Remote</option>
-                <option value="PART_TIME">Part Time</option>
-              </select>
-            </div>
-
-            {/* Family Status */}
-            <div className="space-y-2">
-              <label style={{ color: colors.text.primary }} className="block text-sm font-semibold">
-                Family Status *
-              </label>
-              <select
-                name="family_status"
-                value={formData.family_status}
-                onChange={handleSelectChange}
-                disabled={isLoading}
-                className="w-full px-3 py-2 rounded-lg border transition-colors focus:outline-none"
-                style={{
-                  backgroundColor: colors.background.secondary,
-                  borderColor: colors.border.light,
-                  color: colors.text.primary,
-                }}
-              >
-                <option value="SINGLE">Single</option>
-                <option value="MARRIED">Married</option>
-              </select>
-            </div>
-
-            {/* Study Intensity */}
-            <div className="space-y-2">
-              <label style={{ color: colors.text.primary }} className="block text-sm font-semibold">
-                Study Intensity *
-              </label>
-              <select
-                name="study_intensity"
-                value={formData.study_intensity}
-                onChange={handleSelectChange}
-                disabled={isLoading}
-                className="w-full px-3 py-2 rounded-lg border transition-colors focus:outline-none"
-                style={{
-                  backgroundColor: colors.background.secondary,
-                  borderColor: colors.border.light,
-                  color: colors.text.primary,
-                }}
-              >
-                <option value="NORMAL">Normal</option>
-                <option value="COURSE_HEAVY">Course Heavy</option>
-              </select>
-            </div>
-
-            {/* Health Need */}
-            <div className="space-y-2">
-              <label style={{ color: colors.text.primary }} className="block text-sm font-semibold">
-                Health Need *
-              </label>
-              <select
-                name="health_need"
-                value={formData.health_need}
-                onChange={handleSelectChange}
-                disabled={isLoading}
-                className="w-full px-3 py-2 rounded-lg border transition-colors focus:outline-none"
-                style={{
-                  backgroundColor: colors.background.secondary,
-                  borderColor: colors.border.light,
-                  color: colors.text.primary,
-                }}
-              >
-                <option value="NORMAL">Normal</option>
-                <option value="LOW">Low</option>
-                <option value="HIGH">High</option>
-              </select>
+              <Text style={{ color: colors.text.secondary }} className="text-xs">
+                {t('financialSetup.focusModeHint')}
+              </Text>
             </div>
 
             {/* Buttons */}
@@ -443,7 +343,7 @@ export const UserFinancialModal: React.FC<UserFinancialModalProps> = ({
                 className="flex-1"
                 disabled={isLoading}
               >
-                Cancel
+                {t('common.cancel')}
               </Button>
               <Button
                 type="submit"
@@ -451,7 +351,7 @@ export const UserFinancialModal: React.FC<UserFinancialModalProps> = ({
                 className="flex-1"
                 disabled={isLoading}
               >
-                {isLoading ? 'Saving...' : isEditMode ? 'Update' : 'Create'}
+                {isLoading ? t('common.loading') : isEditMode ? t('common.save') : t('profile.setUp')}
               </Button>
             </div>
           </form>
