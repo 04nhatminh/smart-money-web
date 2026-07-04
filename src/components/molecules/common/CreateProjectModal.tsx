@@ -18,7 +18,7 @@ import { useTranslations } from 'next-intl';
 interface CreateProjectModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSuccess?: () => void;
+  onSuccess?: (budgetGenerated?: boolean) => void;
   onOpenUserFinancialModal?: () => void;
   usedPriorities?: string[];
   maxProjectsReached?: boolean;
@@ -209,7 +209,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
   const handleSuccessClose = () => {
     setSuccess(false);
     onClose();
-    onSuccess?.();
+    onSuccess?.(false);
   };
 
   const handleSuggest = async () => {
@@ -1030,12 +1030,12 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
         onClose={() => {
           setIsGenerateBudgetOpen(false);
           onClose();
-          onSuccess?.();
+          onSuccess?.(false);
         }}
         onSuccess={() => {
           setIsGenerateBudgetOpen(false);
           onClose();
-          onSuccess?.();
+          onSuccess?.(true);
         }}
       />
 

@@ -595,7 +595,7 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
                 <div className="flex justify-center">
                   <MdRefresh className="w-12 h-12 animate-spin" style={{ color: colors.interactive.primary }} />
                 </div>
-                <Heading level={4} style={{ color: colors.text.primary }}>
+                <Heading level={4} className='pb-2'>
                   {t('transactions.importProgress', { current: progress.current, total: progress.total })}
                 </Heading>
                 <div className="w-full bg-gray-200 rounded-full h-2 max-w-md mx-auto overflow-hidden">

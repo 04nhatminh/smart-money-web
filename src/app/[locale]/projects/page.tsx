@@ -519,9 +519,11 @@ export default function ProjectsPage() {
         <CreateProjectModal
           isOpen={isCreateModalOpen}
           onClose={() => setIsCreateModalOpen(false)}
-          onSuccess={() => {
+          onSuccess={(budgetGenerated) => {
             loadProjects();
-            setIsGenerateBudgetModalOpen(true);
+            if (!budgetGenerated) {
+              setIsGenerateBudgetModalOpen(true);
+            }
           }}
           onOpenUserFinancialModal={() => {
             setIsCreateModalOpen(false);
