@@ -189,8 +189,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
     router.push(`/${locale}`);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const executeLogin = async () => {
     setError(null);
 
     if (!email.trim() || !password.trim()) {
@@ -208,6 +207,18 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
       const errorMessage = err instanceof Error ? err.message : 'Login failed';
       setError(errorMessage);
       console.error('Login error:', err);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await executeLogin();
+  };
+
+  const handleKeyDown = async (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      await executeLogin();
     }
   };
 
@@ -258,6 +269,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
         label="Email Address"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
+        onKeyDown={handleKeyDown}
         placeholder="you@example.com"
         required
         disabled={isLoading || socialLoading}
@@ -269,6 +281,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
           label="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          onKeyDown={handleKeyDown}
           placeholder="Enter your password"
           required
           disabled={isLoading || socialLoading}

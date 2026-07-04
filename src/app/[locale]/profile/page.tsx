@@ -7,13 +7,10 @@ import { useAuth } from '@/context/AuthContext';
 import { SidebarLayout } from '@/components/templates';
 import { Heading, Text, Button } from '@/components/atoms';
 import { LogoutButton } from '@/components/molecules/auth';
-import { Card, UserIncomeModal, UserFinancialModal } from '@/components/molecules/common';
+import { Card, UserFinancialModal } from '@/components/molecules/common';
 import { useTheme } from '@/context/ThemeContext';
-import { useUserIncome } from '@/hooks/useUserIncome';
 import { useUserFinancial } from '@/hooks/useUserFinancial';
-import { UserIncomeResponse } from '@/types/user-income.api';
 import { UserFinancialProfileResponse } from '@/types/user-financial.api';
-import { formatAmountInput } from '@/lib/format';
 
 export default function ProfilePage() {
   const { user } = useAuth();
@@ -21,25 +18,19 @@ export default function ProfilePage() {
   const locale = useLocale();
   const t = useTranslations();
   const { colors } = useTheme();
-  const { getUserIncome } = useUserIncome();
   const { getUserFinancial } = useUserFinancial();
-  const [userIncome, setUserIncome] = useState<UserIncomeResponse | null>(null);
   const [userFinancial, setUserFinancial] = useState<UserFinancialProfileResponse | null>(null);
-  const [isUserIncomeModalOpen, setIsUserIncomeModalOpen] = useState(false);
   const [isUserFinancialModalOpen, setIsUserFinancialModalOpen] = useState(false);
-  const [isLoadingIncome, setIsLoadingIncome] = useState(false);
   const [isLoadingFinancial, setIsLoadingFinancial] = useState(false);
 
   const formatDate = (dateString?: string) => {
     if (!dateString) return 'N/A';
 
-    // If already in dd/MM/yyyy format, return as is
     if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateString)) {
       return dateString;
     }
 
     try {
-      // Handle ISO format (YYYY-MM-DD or YYYY-MM-DDTHH:mm:ss)
       const datePart = dateString.split('T')[0];
       const [year, month, day] = datePart.split('-');
 
@@ -50,13 +41,12 @@ export default function ProfilePage() {
         }
       }
 
-      // Fallback: try parsing the date as is
       const date = new Date(dateString);
       if (!isNaN(date.getTime())) {
         return date.toLocaleDateString('vi-VN');
       }
     } catch {
-      // If all parsing fails, return original string
+      // Fallback
     }
 
     return dateString;
@@ -64,23 +54,8 @@ export default function ProfilePage() {
 
   // Load user info on component mount
   useEffect(() => {
-    loadUserIncome();
     loadUserFinancialProfile();
   }, []);
-
-  const loadUserIncome = async () => {
-    setIsLoadingIncome(true);
-    try {
-      const result = await getUserIncome();
-      if (result.success && result.data) {
-        setUserIncome(result.data);
-      }
-    } catch (err) {
-      console.error('Failed to load user income:', err);
-    } finally {
-      setIsLoadingIncome(false);
-    }
-  };
 
   const loadUserFinancialProfile = async () => {
     setIsLoadingFinancial(true);
@@ -94,10 +69,6 @@ export default function ProfilePage() {
     } finally {
       setIsLoadingFinancial(false);
     }
-  };
-
-  const handleUserIncomeSuccess = () => {
-    loadUserIncome();
   };
 
   const handleUserFinancialSuccess = () => {
@@ -124,7 +95,7 @@ export default function ProfilePage() {
             >
               {t('profile.editProfile')}
             </Button>
-            <LogoutButton variant="secondary">
+            <LogoutButton variant="danger">
               {t('profile.logout')}
             </LogoutButton>
           </div>
@@ -202,80 +173,10 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* User Income Card */}
-        <Card className="p-6">
-          <div className="flex items-center justify-between mb-6">
-            <Heading level={3} className="m-0">{t('profile.incomeInfo')}</Heading>
-            <Button
-              variant="secondary"
-              onClick={() => setIsUserIncomeModalOpen(true)}
-              disabled={isLoadingIncome}
-            >
-              {userIncome ? t('common.edit') : t('profile.setUp')}
-            </Button>
-          </div>
-
-          {userIncome ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <p className="text-sm font-medium mb-2" style={{ color: colors.text.secondary }}>
-                  {t('profile.netIncome')}
-                </p>
-                <p className="text-lg font-semibold">
-                  {userIncome.netIncome?.toLocaleString()} {userIncome.currency}
-                </p>
-              </div>
-              <div>
-                <p className="text-sm font-medium mb-2" style={{ color: colors.text.secondary }}>
-                  {t('profile.usableIncome')}
-                </p>
-                <p className="text-lg font-semibold">
-                  {userIncome.usableIncome?.toLocaleString()} {userIncome.currency}
-                </p>
-              </div>
-              <div>
-                <p className="text-sm font-medium mb-2" style={{ color: colors.text.secondary }}>
-                  {t('profile.safeSpending')}
-                </p>
-                <p className="text-lg font-semibold">
-                  {userIncome.safeSpending?.toLocaleString()} {userIncome.currency}
-                </p>
-              </div>
-              <div>
-                <p className="text-sm font-medium mb-2" style={{ color: colors.text.secondary }}>
-                  {t('profile.autoInvest')}
-                </p>
-                <p className="text-lg font-semibold">
-                  {userIncome.autoInvestSurplus ? t('profile.enabled') : t('profile.disabled')}
-                </p>
-              </div>
-              {userIncome.calculationNote && (
-                <div className="md:col-span-2">
-                  <p className="text-sm font-medium mb-2" style={{ color: colors.text.secondary }}>
-                    {t('profile.calcNote')}
-                  </p>
-                  <p className="text-sm" style={{ color: colors.text.primary }}>
-                    {userIncome.calculationNote}
-                  </p>
-                </div>
-              )}
-            </div>
-          ) : (
-            <div
-              className="p-4 rounded-lg text-center"
-              style={{ backgroundColor: colors.background.secondary }}
-            >
-              <Text style={{ color: colors.text.secondary }}>
-                {t('profile.noIncomeInfo')}
-              </Text>
-            </div>
-          )}
-        </Card>
-
         {/* User Financial Card */}
         <Card className="p-6">
           <div className="flex items-center justify-between mb-6">
-            <Heading level={3} className="m-0">Financial Profile</Heading>
+            <Heading level={3} className="m-0">{t('financialSetup.title')}</Heading>
             <Button
               variant="secondary"
               onClick={() => setIsUserFinancialModalOpen(true)}
@@ -286,77 +187,43 @@ export default function ProfilePage() {
           </div>
 
           {userFinancial ? (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <p className="text-sm font-medium mb-2" style={{ color: colors.text.secondary }}>
-                  Role
+                  {t('financialSetup.incomeLabel')}
                 </p>
-                <p className="text-lg font-semibold capitalize">
-                  {userFinancial.role?.replace('_', ' ').toLowerCase()}
+                <p className="text-lg font-semibold">
+                  {userFinancial.income?.toLocaleString()} VND
                 </p>
               </div>
               <div>
                 <p className="text-sm font-medium mb-2" style={{ color: colors.text.secondary }}>
-                  Living Status
+                  {t('financialSetup.savingPaceLabel')}
                 </p>
-                <p className="text-lg font-semibold capitalize">
-                  {userFinancial.living_status?.replace('_', ' ').toLowerCase()}
-                </p>
-              </div>
-              <div>
-                <p className="text-sm font-medium mb-2" style={{ color: colors.text.secondary }}>
-                  Income Level
-                </p>
-                <p className="text-lg font-semibold capitalize">
-                  {userFinancial.income_level?.toLowerCase()}
+                <p className="text-lg font-semibold">
+                  {t.has(`financialSetup.savingPaceOptions.${userFinancial.savingPace}`)
+                    ? t(`financialSetup.savingPaceOptions.${userFinancial.savingPace}`)
+                    : userFinancial.savingPace}
                 </p>
               </div>
               <div>
                 <p className="text-sm font-medium mb-2" style={{ color: colors.text.secondary }}>
-                  Transport Mode
+                  {t('financialSetup.interventionLevelLabel')}
                 </p>
-                <p className="text-lg font-semibold capitalize">
-                  {userFinancial.transport_mode?.replace('_', ' ').toLowerCase()}
-                </p>
-              </div>
-              <div>
-                <p className="text-sm font-medium mb-2" style={{ color: colors.text.secondary }}>
-                  Spending Style
-                </p>
-                <p className="text-lg font-semibold capitalize">
-                  {userFinancial.spending_style?.toLowerCase()}
+                <p className="text-lg font-semibold">
+                  {t.has(`financialSetup.interventionLevelOptions.${userFinancial.interventionLevel}`)
+                    ? t(`financialSetup.interventionLevelOptions.${userFinancial.interventionLevel}`)
+                    : userFinancial.interventionLevel}
                 </p>
               </div>
               <div>
                 <p className="text-sm font-medium mb-2" style={{ color: colors.text.secondary }}>
-                  Work Style
+                  {t('financialSetup.focusModeLabel')}
                 </p>
-                <p className="text-lg font-semibold capitalize">
-                  {userFinancial.work_style?.replace('_', ' ').toLowerCase()}
-                </p>
-              </div>
-              <div>
-                <p className="text-sm font-medium mb-2" style={{ color: colors.text.secondary }}>
-                  Family Status
-                </p>
-                <p className="text-lg font-semibold capitalize">
-                  {userFinancial.family_status?.toLowerCase()}
-                </p>
-              </div>
-              <div>
-                <p className="text-sm font-medium mb-2" style={{ color: colors.text.secondary }}>
-                  Study Intensity
-                </p>
-                <p className="text-lg font-semibold capitalize">
-                  {userFinancial.study_intensity?.replace('_', ' ').toLowerCase()}
-                </p>
-              </div>
-              <div>
-                <p className="text-sm font-medium mb-2" style={{ color: colors.text.secondary }}>
-                  Health Need
-                </p>
-                <p className="text-lg font-semibold capitalize">
-                  {userFinancial.health_need?.toLowerCase()}
+                <p className="text-lg font-semibold">
+                  {t.has(`financialSetup.focusModeOptions.${userFinancial.focusMode}`)
+                    ? t(`financialSetup.focusModeOptions.${userFinancial.focusMode}`)
+                    : userFinancial.focusMode}
                 </p>
               </div>
             </div>
@@ -366,20 +233,11 @@ export default function ProfilePage() {
               style={{ backgroundColor: colors.background.secondary }}
             >
               <Text style={{ color: colors.text.secondary }}>
-                No financial profile information set up yet.
+                {t('financialSetup.noInfo')}
               </Text>
             </div>
           )}
         </Card>
-
-
-
-        {/* User Income Modal */}
-        <UserIncomeModal
-          isOpen={isUserIncomeModalOpen}
-          onClose={() => setIsUserIncomeModalOpen(false)}
-          onSuccess={handleUserIncomeSuccess}
-        />
 
         {/* User Financial Modal */}
         <UserFinancialModal

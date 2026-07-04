@@ -76,10 +76,10 @@ export const API_ENDPOINTS = {
 
   // User Financial Profile
   userFinancial: {
-    get: '/api/v1/user-financial-profile',
-    create: '/api/v1/user-financial-profile',
-    update: '/api/v1/user-financial-profile',
-    delete: '/api/v1/user-financial-profile',
+    get: '/api/v1/auth/me/financial-setup',
+    create: '/api/v1/auth/me/financial-setup',
+    update: '/api/v1/auth/me/financial-setup',
+    delete: '/api/v1/auth/me/financial-setup',
   },
 
   // Projects
