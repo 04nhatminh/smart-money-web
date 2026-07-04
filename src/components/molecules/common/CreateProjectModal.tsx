@@ -440,6 +440,12 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
       const startDateVal = isStartNextMonth ? getFirstOfNextMonth() : today;
       const bypassVal = (creationOption === 'SAVE_NOW' && dayOfMonth > 7);
 
+      const calculatedDeadline = (() => {
+        const d = new Date(startDateVal);
+        d.setMonth(d.getMonth() + (advisorData.numberOfMonths - 1));
+        return d.toISOString().split('T')[0];
+      })();
+
       const createData: CreateProjectRequest = {
         name: formData.name.trim(),
         description: formData.description.trim(),
@@ -447,7 +453,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
         priority: formData.priority,
         targetAmount: parseFormattedNumber(formData.targetAmount),
         currency: formData.currency.trim(),
-        deadline: formData.deadline,
+        deadline: calculatedDeadline,
         startDate: startDateVal,
         bypassDateGate: bypassVal,
       };
