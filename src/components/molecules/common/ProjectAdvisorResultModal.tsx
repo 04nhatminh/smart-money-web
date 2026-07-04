@@ -5,6 +5,7 @@ import { Button, Heading, Text, Alert } from '@/components/atoms';
 import { useTheme } from '@/context/ThemeContext';
 import { ProjectAdvisorResponse } from '@/types/project.api';
 import { MdClose, MdCheckCircle } from 'react-icons/md';
+import { useTranslations } from 'next-intl';
 
 interface ProjectAdvisorResultModalProps {
   isOpen: boolean;
@@ -28,6 +29,7 @@ export const ProjectAdvisorResultModal: React.FC<ProjectAdvisorResultModalProps>
   onClearError,
 }) => {
   const { colors } = useTheme();
+  const t = useTranslations();
 
   // Prevent scrolling when modal is open
   useEffect(() => {
@@ -99,7 +101,7 @@ export const ProjectAdvisorResultModal: React.FC<ProjectAdvisorResultModalProps>
             }}
           >
             <Heading level={3} className="m-0" style={{ color: colors.text.primary }}>
-              AI Recommendation
+              {t('projects.createModal.advisorTitle')}
             </Heading>
             <button
               onClick={onClose}
@@ -141,14 +143,14 @@ export const ProjectAdvisorResultModal: React.FC<ProjectAdvisorResultModalProps>
               }}
             >
               <Heading level={4} style={{ color: colors.text.primary }} className="mb-3">
-                Here's what we recommends:
+                {t('projects.createModal.advisorHeading')}
               </Heading>
 
               <div className="space-y-4">
                 {/* Monthly Savings */}
                 <div>
                   <Text className="text-sm" style={{ color: colors.text.secondary }}>
-                    Monthly Savings
+                    {t('projects.createModal.advisorMonthly')}
                   </Text>
                   <Heading
                     level={3}
@@ -162,27 +164,30 @@ export const ProjectAdvisorResultModal: React.FC<ProjectAdvisorResultModalProps>
                 {/* Duration */}
                 <div>
                   <Text className="text-sm" style={{ color: colors.text.secondary }}>
-                    Months to Goal
+                    {t('projects.createModal.advisorMonths')}
                   </Text>
                   <Heading
                     level={3}
                     style={{ color: colors.interactive.primary }}
                     className="mt-1"
                   >
-                    {advisorData.numberOfMonths} months
+                    {advisorData.numberOfMonths}
                   </Heading>
                 </div>
 
                 {/* Recommendation */}
                 <div>
                   <Text className="text-sm" style={{ color: colors.text.secondary }}>
-                    Summary
+                    {t('projects.createModal.advisorSummary')}
                   </Text>
                   <Text
                     className="mt-2 text-sm"
                     style={{ color: colors.text.primary }}
                   >
-                    You need to save {formatCurrency(advisorData.monthlySaving)} per month for {advisorData.numberOfMonths} months to reach your goal.
+                    {t('projects.createModal.advisorSummaryText', {
+                      saving: formatCurrency(advisorData.monthlySaving),
+                      months: advisorData.numberOfMonths
+                    })}
                   </Text>
                 </div>
               </div>
@@ -196,7 +201,7 @@ export const ProjectAdvisorResultModal: React.FC<ProjectAdvisorResultModalProps>
               }}
             >
               <Text className="text-xs" style={{ color: colors.text.tertiary }}>
-                If you agree, your project will be created with these suggested parameters.
+                {t('projects.createModal.advisorInfo')}
               </Text>
             </div>
 
@@ -207,18 +212,18 @@ export const ProjectAdvisorResultModal: React.FC<ProjectAdvisorResultModalProps>
                 variant="secondary"
                 onClick={onDisagree}
                 disabled={isLoading}
-                className="flex-1"
+                className="flex-1 text-xs px-2"
               >
-                Disagree
+                {t('projects.createModal.advisorDisagree')}
               </Button>
               <Button
                 type="button"
                 variant="primary"
                 onClick={onAgree}
                 disabled={isLoading}
-                className="flex-1"
+                className="flex-1 text-xs px-2"
               >
-                {isLoading ? 'Creating...' : 'Agree & Create'}
+                {isLoading ? t('projects.createModal.advisorAgreeing') : t('projects.createModal.advisorAgree')}
               </Button>
             </div>
           </div>

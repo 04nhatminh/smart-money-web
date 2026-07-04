@@ -107,8 +107,16 @@ export const GenerateBudgetModal: React.FC<GenerateBudgetModalProps> = ({
       console.log('[GenerateBudgetModal] WS data received:', data);
 
       if ((data.status === 'SUCCESS' || data.status === 'COMPLETED') && data.result) {
-        setTotalBudget(data.result.totalBudget || 0);
-        setSuggestions(data.result.categories || []);
+        let resultObj = data.result;
+        if (typeof resultObj === 'string') {
+          try {
+            resultObj = JSON.parse(resultObj);
+          } catch (e) {
+            console.error('Failed to parse WS result string:', e);
+          }
+        }
+        setTotalBudget(resultObj.totalBudget || 0);
+        setSuggestions(resultObj.categories || []);
         setStep('SUGGESTION');
       } else if (data.status === 'FAILED' || data.status === 'ERROR') {
         setErrorMsg(data.error || 'AI budget allocation failed. Please try again.');
@@ -118,14 +126,14 @@ export const GenerateBudgetModal: React.FC<GenerateBudgetModalProps> = ({
       }
     });
 
-    // Timeout fallback after 30 seconds
+    // Timeout fallback after 60 seconds
     const timer = setTimeout(() => {
       if (step === 'LOADING') {
         setErrorMsg('Request timed out. Please check your network connection.');
         setStep('ERROR');
         unsubscribe();
       }
-    }, 30000);
+    }, 60000);
 
     // Polling fallback in case WS fails or message is missed
     const pollInterval = setInterval(async () => {
@@ -137,8 +145,16 @@ export const GenerateBudgetModal: React.FC<GenerateBudgetModalProps> = ({
 
         if (data) {
           if ((data.status === 'SUCCESS' || data.status === 'COMPLETED') && data.result) {
-            setTotalBudget(data.result.totalBudget || 0);
-            setSuggestions(data.result.categories || []);
+            let resultObj = data.result;
+            if (typeof resultObj === 'string') {
+              try {
+                resultObj = JSON.parse(resultObj);
+              } catch (e) {
+                console.error('Failed to parse polled result string:', e);
+              }
+            }
+            setTotalBudget(resultObj.totalBudget || 0);
+            setSuggestions(resultObj.categories || []);
             setStep('SUGGESTION');
           } else if (data.status === 'FAILED' || data.status === 'ERROR') {
             setErrorMsg(data.error || 'AI budget allocation failed. Please try again.');
