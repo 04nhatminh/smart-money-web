@@ -105,10 +105,9 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
     return true;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const executeRegister = async () => {
     setError(null);
-    console.log('[RegisterForm] handleSubmit started with email:', email);
+    console.log('[RegisterForm] executeRegister started with email:', email);
 
     if (!validateForm()) {
       return;
@@ -158,6 +157,18 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
     }
   };
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await executeRegister();
+  };
+
+  const handleKeyDown = async (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      await executeRegister();
+    }
+  };
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6 w-full">
       {/* Logo and Website Name - Clickable */}
@@ -189,6 +200,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
         label="Full Name"
         value={fullName}
         onChange={(e) => setFullName(e.target.value)}
+        onKeyDown={handleKeyDown}
         placeholder="John Doe"
         required
         disabled={isSubmitting}
@@ -199,6 +211,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
         label="Username"
         value={username}
         onChange={(e) => setUsername(e.target.value)}
+        onKeyDown={handleKeyDown}
         placeholder="johndoe123"
         required
         disabled={isSubmitting}
@@ -209,6 +222,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
         label="Email Address"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
+        onKeyDown={handleKeyDown}
         placeholder="you@example.com"
         required
         disabled={isSubmitting}
@@ -219,6 +233,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
         label="Phone Number"
         value={phone}
         onChange={(e) => setPhone(e.target.value)}
+        onKeyDown={handleKeyDown}
         placeholder="+84 123 456 789"
         required
         disabled={isSubmitting}
@@ -229,6 +244,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
         label="Date of Birth"
         value={dateOfBirth}
         onChange={handleDateOfBirthChange}
+        onKeyDown={handleKeyDown}
         required
         disabled={isSubmitting}
       />
@@ -239,6 +255,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
           label="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          onKeyDown={handleKeyDown}
           placeholder="Create a strong password"
           required
           disabled={isSubmitting}
@@ -265,6 +282,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
           label="Confirm Password"
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
+          onKeyDown={handleKeyDown}
           placeholder="Confirm your password"
           required
           disabled={isSubmitting}

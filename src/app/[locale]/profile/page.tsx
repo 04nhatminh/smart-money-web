@@ -95,7 +95,7 @@ export default function ProfilePage() {
             >
               {t('profile.editProfile')}
             </Button>
-            <LogoutButton variant="secondary">
+            <LogoutButton variant="danger">
               {t('profile.logout')}
             </LogoutButton>
           </div>
