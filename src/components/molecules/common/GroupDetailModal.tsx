@@ -8,7 +8,8 @@ import { useAuth } from '@/context/AuthContext';
 import { useProjects } from '@/hooks/useProjects';
 import { GroupDetailResponse, GroupProjectDetailResponse, GroupMemberResponse } from '@/types/group.api';
 import { formatAmountInput, parseFormattedNumber, formatNumber, formatPrice } from '@/lib/format';
-import { MdClose, MdLock, MdPersonAdd, MdDelete, MdAddCircle, MdCheckCircle, MdCancel, MdRefresh } from 'react-icons/md';
+import { MdClose, MdLock, MdPersonAdd, MdDelete, MdAddCircle, MdCheckCircle, MdCancel, MdRefresh, MdAutoAwesome } from 'react-icons/md';
+import { GenerateBudgetModal } from './GenerateBudgetModal';
 
 interface GroupDetailModalProps {
   isOpen: boolean;
@@ -47,6 +48,8 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [localLoading, setLocalLoading] = useState(false);
+  const [isGenerateBudgetOpen, setIsGenerateBudgetOpen] = useState(false);
+  const [showRegenerateSuggest, setShowRegenerateSuggest] = useState(false);
 
   const isAdmin = group?.adminId === user?.id;
   const isForming = group?.status === 'FORMING';
@@ -60,6 +63,8 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
     } else {
       setGroup(null);
       setProjectDetail(null);
+      setShowRegenerateSuggest(false);
+      setIsGenerateBudgetOpen(false);
       document.body.style.overflow = '';
     }
     return () => {
@@ -207,6 +212,7 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
         setSuccess('Successfully joined group project! Created sub-personal project.');
         loadDetails();
         onSuccess?.();
+        setShowRegenerateSuggest(true);
       } else {
         setError(res.error || 'Failed to join group project');
       }
@@ -567,6 +573,63 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
           </div>
         </>
       )}
+
+      {showRegenerateSuggest && (
+        <>
+          <div
+            className="fixed inset-0 transition-opacity"
+            style={{
+              backgroundColor: 'rgba(0, 0, 0, 0.5)',
+              zIndex: 1010,
+              backdropFilter: 'blur(4px)',
+            }}
+            onClick={() => setShowRegenerateSuggest(false)}
+          />
+          <div className="fixed inset-0 flex items-center justify-center p-4 overflow-y-auto" style={{ zIndex: 1011 }}>
+            <div
+              className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 space-y-6 transition-all transform flex flex-col"
+              style={{ backgroundColor: colors.background.primary }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center gap-3 text-indigo-600">
+                <MdAutoAwesome className="w-8 h-8" style={{ color: colors.interactive.primary }} />
+                <Heading level={4} style={{ color: colors.text.primary }}>Recalculate Budget?</Heading>
+              </div>
+              <Text style={{ color: colors.text.secondary }} className="text-sm">
+                You have successfully joined the group project! Would you like AI to recalculate your spending budget to align with this new savings goal?
+              </Text>
+              <div className="flex gap-3 justify-end pt-2">
+                <Button
+                  variant="secondary"
+                  onClick={() => setShowRegenerateSuggest(false)}
+                  disabled={isLoading}
+                >
+                  Later
+                </Button>
+                <Button
+                  variant="primary"
+                  onClick={() => {
+                    setShowRegenerateSuggest(false);
+                    setIsGenerateBudgetOpen(true);
+                  }}
+                  disabled={isLoading}
+                >
+                  Recalculate Now
+                </Button>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+
+      <GenerateBudgetModal
+        isOpen={isGenerateBudgetOpen}
+        onClose={() => setIsGenerateBudgetOpen(false)}
+        onSuccess={() => {
+          setIsGenerateBudgetOpen(false);
+          loadDetails();
+        }}
+      />
     </>
   );
 };

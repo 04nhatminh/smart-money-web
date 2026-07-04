@@ -337,11 +337,12 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
         });
 
         if (res.success) {
+          setSuccessMode('WITHOUT_BUDGET');
           setSuccess(true);
           setTimeout(() => {
             setSuccess(false);
             onClose();
-            onSuccess?.();
+            onSuccess?.(true);
           }, 1500);
         } else {
           setError(res.error || 'Failed to create group project');
@@ -1075,7 +1076,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
 
               <div className="p-6 space-y-6">
                 <Text className="text-sm" style={{ color: colors.text.secondary }}>
-                  Với hạn mức đóng góp hiện tại của các thành viên, nhóm không thể hoàn thành mục tiêu này trong thời gian đã chọn (yêu cầu đóng góp trung bình <strong>{formatAmountInput(Math.ceil(reactiveSuggestions.targetAmount / reactiveSuggestions.totalMonths).toString())} VND/người/tháng</strong>, vượt quá hạn mức tối đa của thành viên đóng góp thấp nhất là <strong>{formatAmountInput(Math.ceil(reactiveSuggestions.totalCapacity / (groups.find(g => g.groupId === selectedGroupId)?.memberCount || 1)).toString())} VND/tháng</strong>).
+                  Với hạn mức đóng góp hiện tại của các thành viên, nhóm không thể hoàn thành mục tiêu này trong thời gian đã chọn (yêu cầu đóng góp trung bình <strong>{formatAmountInput(Math.ceil(reactiveSuggestions.targetAmount / (reactiveSuggestions.totalMonths * (groups.find(g => g.groupId === selectedGroupId)?.memberCount || 1))).toString())} VND/người/tháng</strong>).
                   <br />
                   <br />
                   Vui lòng chọn một trong các phương án điều chỉnh sau để phù hợp hơn:
