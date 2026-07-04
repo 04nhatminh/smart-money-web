@@ -6,12 +6,12 @@ import { useLocale, useTranslations } from 'next-intl';
 import { useAuth } from '@/context/AuthContext';
 import { SidebarLayout } from '@/components/templates';
 import { Heading, Text, Button, Alert } from '@/components/atoms';
-import { BudgetProgressCard, CreateBudgetModal, CreateBulkBudgetsModal, EditBudgetModal, DeleteConfirmationModal, DatePeriodSelector, GenerateBudgetModal } from '@/components/molecules/common';
+import { BudgetProgressCard, DatePeriodSelector, GenerateBudgetModal } from '@/components/molecules/common';
 import { useTheme } from '@/context/ThemeContext';
 import { useBudgets } from '@/hooks/useBudgets';
 import { Budget } from '@/types/budget.api';
 import { formatVietnamsePrice } from '@/lib/format';
-import { MdAdd, MdAutoAwesome } from 'react-icons/md';
+import { MdAutoAwesome } from 'react-icons/md';
 
 export default function BudgetsPage() {
   const router = useRouter();
@@ -19,16 +19,10 @@ export default function BudgetsPage() {
   const t = useTranslations();
   const { isAuthenticated, isInitializing } = useAuth();
   const { colors } = useTheme();
-  const { listBudgets, deleteBudget, isLoading } = useBudgets();
+  const { listBudgets, isLoading } = useBudgets();
 
   const [budgets, setBudgets] = useState<Budget[]>([]);
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [isCreateBulkModalOpen, setIsCreateBulkModalOpen] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isGenerateBudgetModalOpen, setIsGenerateBudgetModalOpen] = useState(false);
-  const [budgetToDelete, setBudgetToDelete] = useState<string | null>(null);
-  const [selectedBudgetId, setSelectedBudgetId] = useState<string | null>(null);
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth() + 1);
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const [error, setError] = useState<string | null>(null);
@@ -62,36 +56,6 @@ export default function BudgetsPage() {
       const errorMsg = err instanceof Error ? err.message : t('budgets.failedLoad');
       setError(errorMsg);
     }
-  };
-
-  const handleDeleteClick = (budgetId: string) => {
-    setBudgetToDelete(budgetId);
-    setIsDeleteModalOpen(true);
-  };
-
-  const handleDeleteConfirm = async () => {
-    if (!budgetToDelete) return;
-
-    try {
-      setError(null);
-      const result = await deleteBudget(budgetToDelete);
-
-      if (result.success) {
-        setBudgets(budgets.filter(b => b.budgetId !== budgetToDelete));
-        setIsDeleteModalOpen(false);
-        setBudgetToDelete(null);
-      } else {
-        setError(result.error || t('budgets.failedDelete'));
-      }
-    } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : t('budgets.failedDelete');
-      setError(errorMsg);
-    }
-  };
-
-  const handleDeleteCancel = () => {
-    setIsDeleteModalOpen(false);
-    setBudgetToDelete(null);
   };
 
   const handleMonthChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -130,7 +94,7 @@ export default function BudgetsPage() {
               {t('budgets.subtitle')}
             </Text>
           </div>
-           <div className="flex gap-2">
+          <div className="flex gap-2">
             <Button
               variant="secondary"
               onClick={() => setIsGenerateBudgetModalOpen(true)}
@@ -144,22 +108,6 @@ export default function BudgetsPage() {
             >
               <MdAutoAwesome className="w-5 h-5" />
               Generate Budget
-            </Button>
-            <Button
-              variant="secondary"
-              onClick={() => setIsCreateBulkModalOpen(true)}
-              className="flex items-center gap-2"
-            >
-              <MdAdd className="w-5 h-5" />
-              {t('budgets.createMultiple')}
-            </Button>
-            <Button
-              variant="primary"
-              onClick={() => setIsCreateModalOpen(true)}
-              className="flex items-center gap-2"
-            >
-              <MdAdd className="w-5 h-5" />
-              {t('budgets.createBudget')}
             </Button>
           </div>
         </div>
@@ -257,54 +205,11 @@ export default function BudgetsPage() {
               <BudgetProgressCard
                 key={budget.budgetId}
                 budget={budget}
-                onEdit={(budgetId) => {
-                  setSelectedBudgetId(budgetId);
-                  setIsEditModalOpen(true);
-                }}
-                onDelete={handleDeleteClick}
               />
             ))}
           </div>
         )}
       </div>
-
-      {/* Modals */}
-      <CreateBudgetModal
-        isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
-        onSuccess={loadBudgets}
-        currentMonth={currentMonth}
-        currentYear={currentYear}
-      />
-
-      <CreateBulkBudgetsModal
-        isOpen={isCreateBulkModalOpen}
-        onClose={() => setIsCreateBulkModalOpen(false)}
-        onSuccess={loadBudgets}
-        currentMonth={currentMonth}
-        currentYear={currentYear}
-      />
-
-      <EditBudgetModal
-        isOpen={isEditModalOpen}
-        budgetId={selectedBudgetId}
-        onClose={() => {
-          setIsEditModalOpen(false);
-          setSelectedBudgetId(null);
-        }}
-        onSuccess={loadBudgets}
-      />
-
-      <DeleteConfirmationModal
-        isOpen={isDeleteModalOpen}
-        title={t('budgets.deleteTitle')}
-        message={t('budgets.deleteConfirm')}
-        confirmLabel={t('budgets.delete')}
-        cancelLabel={t('budgets.cancel')}
-        isLoading={isLoading}
-        onConfirm={handleDeleteConfirm}
-        onCancel={handleDeleteCancel}
-      />
 
       <GenerateBudgetModal
         isOpen={isGenerateBudgetModalOpen}
