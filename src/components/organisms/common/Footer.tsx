@@ -2,7 +2,6 @@
 
 import React from 'react';
 import { Button, Text, Heading } from '@/components/atoms';
-import { ThemeToggle, LanguageToggle } from '@/components/molecules';
 import { useTheme } from '@/context';
 import { useTranslations } from 'next-intl';
 
@@ -45,9 +44,9 @@ export const Footer: React.FC<FooterProps> = ({
             {/* Company Info */}
             <div>
               <div className="flex items-center gap-3 mb-4">
-                <img src="/logo-nobg.png" alt={appName} className="h-12 w-12 object-contain flex-shrink-0" style={{ filter: colorScheme === 'dark' ? 'brightness(0) invert(1)' : 'none' }} />
-                <Heading 
-                  level={2} 
+                <img src="/logo.png" alt={appName} className="h-12 w-12 object-contain flex-shrink-0" style={{ filter: colorScheme === 'dark' ? 'brightness(0) invert(1)' : 'none' }} />
+                <Heading
+                  level={2}
                   className="text-xl m-0 font-bold flex items-center"
                 >
                   <span style={{ color: colorScheme === 'dark' ? colors.palette.white : colors.interactive.primary }}>Smart</span>
@@ -124,17 +123,8 @@ export const Footer: React.FC<FooterProps> = ({
           <div style={{ borderTopColor: colors.border.light, borderTopWidth: '1px' }} className="py-8">
             <div className="flex flex-col md:flex-row justify-between items-center gap-4">
               <Text variant="caption" style={{ color: colors.text.secondary }} className="text-center md:text-left">
-                © {year} {appName}. {t('page.copyright')} reserved.
+                © {year} {appName}. {t('page.copyright')}
               </Text>
-              <div className="flex gap-6">
-                <div className="flex items-center gap-2">
-                  <Text variant="caption" style={{ color: colors.text.secondary }}>
-                    {t('common.theme')}:
-                  </Text>
-                  <ThemeToggle />
-                </div>
-                <LanguageToggle />
-              </div>
             </div>
           </div>
         </div>

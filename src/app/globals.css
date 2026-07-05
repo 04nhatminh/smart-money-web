@@ -13,13 +13,153 @@ html.dark {
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-roboto-sans);
+  --font-mono: var(--font-roboto-mono);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-roboto-sans);
   transition: background-color 0.3s ease, color 0.3s ease;
 }
+
+/* ============================================================
+   SCROLL REVEAL — Animation System
+   Variants: fade-up | fade-down | fade-left | fade-right | zoom-in | flip-x
+   ============================================================ */
+
+/* Base state — hidden before intersection */
+.sr-hidden {
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+/* fade-up: slides up from below */
+.sr-fade-up.sr-hidden       { transform: translateY(48px); }
+.sr-fade-up.sr-visible      { transform: translateY(0); }
+
+/* fade-down: slides down from above */
+.sr-fade-down.sr-hidden     { transform: translateY(-48px); }
+.sr-fade-down.sr-visible    { transform: translateY(0); }
+
+/* fade-left: slides in from the left */
+.sr-fade-left.sr-hidden     { transform: translateX(-56px); }
+.sr-fade-left.sr-visible    { transform: translateX(0); }
+
+/* fade-right: slides in from the right */
+.sr-fade-right.sr-hidden    { transform: translateX(56px); }
+.sr-fade-right.sr-visible   { transform: translateX(0); }
+
+/* zoom-in: scales up from small */
+.sr-zoom-in.sr-hidden       { transform: scale(0.82); }
+.sr-zoom-in.sr-visible      { transform: scale(1); }
+
+/* flip-x: flips in along the X axis */
+.sr-flip-x.sr-hidden        { transform: perspective(600px) rotateX(20deg) translateY(32px); }
+.sr-flip-x.sr-visible       { transform: perspective(600px) rotateX(0deg) translateY(0); }
+
+/* Visible state — shared transition */
+.sr-visible {
+  opacity: 1;
+  transition:
+    opacity 0.65s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Hidden → visible transition (also applies when resetting) */
+.sr-hidden {
+  transition:
+    opacity 0.25s ease,
+    transform 0.25s ease;
+}
+
+/* Respect user's motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .sr-hidden,
+  .sr-visible {
+    transition: none !important;
+    transform: none !important;
+    opacity: 1 !important;
+  }
+  .animate-blob-1,
+  .animate-blob-2,
+  .animate-blob-3 {
+    animation: none !important;
+  }
+}
+
+/* ============================================================
+   AUTH PAGES - Dynamic Mesh Background & Glassmorphic Cards
+   ============================================================ */
+
+@keyframes blob-float-1 {
+  0%, 100% {
+    transform: translate(0px, 0px) scale(1);
+  }
+  33% {
+    transform: translate(40px, -60px) scale(1.15);
+  }
+  66% {
+    transform: translate(-30px, 30px) scale(0.9);
+  }
+}
+
+@keyframes blob-float-2 {
+  0%, 100% {
+    transform: translate(0px, 0px) scale(1);
+  }
+  50% {
+    transform: translate(-50px, 50px) scale(1.2);
+  }
+}
+
+@keyframes blob-float-3 {
+  0%, 100% {
+    transform: translate(0px, 0px) scale(1);
+  }
+  50% {
+    transform: translate(50px, -40px) scale(0.85);
+  }
+}
+
+.animate-blob-1 {
+  animation: blob-float-1 25s infinite alternate ease-in-out;
+}
+
+.animate-blob-2 {
+  animation: blob-float-2 30s infinite alternate ease-in-out;
+}
+
+.animate-blob-3 {
+  animation: blob-float-3 20s infinite alternate ease-in-out;
+}
+
+/* Glassmorphism auth card */
+.auth-glass-card {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 20px 40px -15px rgba(54, 41, 183, 0.15);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+.auth-glass-card:hover {
+  border-color: rgba(54, 41, 183, 0.25);
+  box-shadow: 0 25px 50px -12px rgba(54, 41, 183, 0.2);
+}
+
+html.dark .auth-glass-card {
+  background: rgba(10, 8, 30, 0.65);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.5);
+}
+
+html.dark .auth-glass-card:hover {
+  border-color: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 25px 50px -8px rgba(0, 0, 0, 0.6);
+}
+

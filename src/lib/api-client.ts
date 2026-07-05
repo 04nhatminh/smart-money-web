@@ -1,20 +1,85 @@
+import { getToken } from './auth';
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+
+const getHeaders = () => {
+  const token = getToken();
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
+
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
+  return headers;
+};
+
+// Helper function to extract error message from response
+const extractErrorMessage = (data: any): string => {
+  // If there's a message field, use it
+  if (data?.message) {
+    return data.message;
+  }
+  
+  // If there's an errors object with field-specific errors
+  if (data?.errors && typeof data.errors === 'object') {
+    const errorMessages = Object.entries(data.errors)
+      .map(([field, error]: [string, any]) => {
+        if (typeof error === 'string') {
+          return error;
+        }
+        if (Array.isArray(error)) {
+          return error.join(', ');
+        }
+        return String(error);
+      })
+      .filter(msg => msg.length > 0);
+    
+    if (errorMessages.length > 0) {
+      return errorMessages.join('\n');
+    }
+  }
+  
+  return 'An error occurred';
+};
 
 export const apiClient = {
   async get<T>(endpoint: string): Promise<T> {
     try {
       const response = await fetch(`${API_URL}${endpoint}`, {
         method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: getHeaders(),
+        credentials: 'include',
       });
 
-      if (!response.ok) {
-        throw new Error(`API error: ${response.statusText}`);
+      // Handle empty response body
+      let data: any;
+      const contentType = response.headers.get('content-type');
+      const contentLength = response.headers.get('content-length');
+      
+      if (contentLength === '0' || !contentType?.includes('application/json')) {
+        // Empty response or non-JSON response
+        data = {};
+      } else {
+        data = await response.json();
       }
 
-      const data = await response.json();
+      if (!response.ok) {
+        const errorMessage = extractErrorMessage(data);
+        const error = new Error(errorMessage);
+        (error as any).data = data;
+        throw error;
+      }
+
+      // Even if HTTP status is 200, check if API indicates failure
+      if (data && data.success === false) {
+        const errorMessage = extractErrorMessage(data);
+        const error = new Error(errorMessage);
+        (error as any).data = data;
+        throw error;
+      }
+
       console.log(`Connected to backend at ${API_URL}${endpoint}`);
       return data;
     } catch (error) {
@@ -23,21 +88,66 @@ export const apiClient = {
     }
   },
 
-  async post<T>(endpoint: string, body: unknown): Promise<T> {
+  async post<T>(endpoint: string, body: unknown, config?: { headers?: Record<string, string> }): Promise<T> {
     try {
+      const headers = { ...getHeaders(), ...(config?.headers || {}) };
+      
+      // Check if body is FormData (for multipart/form-data)
+      const isFormData = body instanceof FormData;
+      let fetchBody: string | FormData;
+      
+      if (isFormData) {
+        fetchBody = body;
+        // Remove Content-Type header for FormData - browser will set it with boundary
+        delete headers['Content-Type'];
+      } else {
+        const jsonBody = JSON.stringify(body);
+        fetchBody = jsonBody;
+        
+        // Log request details
+        console.log(`[API] POST ${API_URL}${endpoint}`);
+        console.log(`[API] Headers:`, headers);
+        console.log(`[API] Body:`, jsonBody);
+      }
+      
       const response = await fetch(`${API_URL}${endpoint}`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(body),
+        headers,
+        body: fetchBody,
+        credentials: 'include',
       });
 
-      if (!response.ok) {
-        throw new Error(`API error: ${response.statusText}`);
+      console.log(`[API] Response status:`, response.status);
+      console.log(`[API] Response headers:`, Object.fromEntries(response.headers.entries()));
+
+      // Handle empty response body
+      let data: any;
+      const contentType = response.headers.get('content-type');
+      const contentLength = response.headers.get('content-length');
+      
+      if (contentLength === '0' || !contentType?.includes('application/json')) {
+        // Empty response or non-JSON response
+        data = {};
+      } else {
+        data = await response.json();
       }
 
-      const data = await response.json();
+      // Check if response is not ok OR if the API returns success: false
+      if (!response.ok) {
+        const errorMessage = extractErrorMessage(data);
+        const error = new Error(errorMessage);
+        (error as any).data = data;
+        throw error;
+      }
+
+      // Even if HTTP status is 200, check if API indicates failure
+      if (data && data.success === false) {
+        const errorMessage = extractErrorMessage(data);
+        const error = new Error(errorMessage);
+        (error as any).data = data;
+        throw error;
+      }
+
       console.log(`Connected to backend at ${API_URL}${endpoint}`);
       return data;
     } catch (error) {
@@ -50,17 +160,184 @@ export const apiClient = {
     try {
       const response = await fetch(`${API_URL}${endpoint}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: getHeaders(),
         body: JSON.stringify(body),
+        credentials: 'include',
       });
 
-      if (!response.ok) {
-        throw new Error(`API error: ${response.statusText}`);
+      // Handle empty response body
+      let data: any;
+      const contentType = response.headers.get('content-type');
+      const contentLength = response.headers.get('content-length');
+      
+      if (contentLength === '0' || !contentType?.includes('application/json')) {
+        // Empty response or non-JSON response
+        data = {};
+      } else {
+        data = await response.json();
       }
 
-      const data = await response.json();
+      if (!response.ok) {
+        const errorMessage = extractErrorMessage(data);
+        const error = new Error(errorMessage);
+        (error as any).data = data;
+        throw error;
+      }
+
+      // Even if HTTP status is 200, check if API indicates failure
+      if (data && data.success === false) {
+        const errorMessage = extractErrorMessage(data);
+        const error = new Error(errorMessage);
+        (error as any).data = data;
+        throw error;
+      }
+
+      console.log(`Connected to backend at ${API_URL}${endpoint}`);
+      return data;
+    } catch (error) {
+      console.error(`Failed to connect to backend at ${API_URL}${endpoint}:`, error);
+      throw error;
+    }
+  },
+
+  async patch<T>(endpoint: string, body: unknown): Promise<T> {
+    try {
+      const response = await fetch(`${API_URL}${endpoint}`, {
+        method: 'PATCH',
+        headers: getHeaders(),
+        body: JSON.stringify(body),
+        credentials: 'include',
+      });
+
+      // Handle empty response body
+      let data: any;
+      const contentType = response.headers.get('content-type');
+      const contentLength = response.headers.get('content-length');
+      
+      if (contentLength === '0' || !contentType?.includes('application/json')) {
+        // Empty response or non-JSON response
+        data = {};
+      } else {
+        data = await response.json();
+      }
+
+      if (!response.ok) {
+        const errorMessage = extractErrorMessage(data);
+        const error = new Error(errorMessage);
+        (error as any).data = data;
+        throw error;
+      }
+
+      // Even if HTTP status is 200, check if API indicates failure
+      if (data && data.success === false) {
+        const errorMessage = extractErrorMessage(data);
+        const error = new Error(errorMessage);
+        (error as any).data = data;
+        throw error;
+      }
+
+      console.log(`Connected to backend at ${API_URL}${endpoint}`);
+      return data;
+    } catch (error) {
+      console.error(`Failed to connect to backend at ${API_URL}${endpoint}:`, error);
+      throw error;
+    }
+  },
+
+  async postFormData<T>(endpoint: string, body: Record<string, string>): Promise<T> {
+    try {
+      const formData = new FormData();
+      Object.entries(body).forEach(([key, value]) => {
+        formData.append(key, value);
+      });
+
+      const token = getToken();
+      const headers: Record<string, string> = {};
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
+      const response = await fetch(`${API_URL}${endpoint}`, {
+        method: 'POST',
+        headers,
+        body: formData,
+      });
+
+      // Handle empty response body
+      let data: any;
+      const contentType = response.headers.get('content-type');
+      const contentLength = response.headers.get('content-length');
+      
+      if (contentLength === '0' || !contentType?.includes('application/json')) {
+        // Empty response or non-JSON response
+        data = {};
+      } else {
+        data = await response.json();
+      }
+
+      if (!response.ok) {
+        const errorMessage = extractErrorMessage(data);
+        const error = new Error(errorMessage);
+        (error as any).data = data;
+        throw error;
+      }
+
+      if (data && data.success === false) {
+        const errorMessage = extractErrorMessage(data);
+        const error = new Error(errorMessage);
+        (error as any).data = data;
+        throw error;
+      }
+
+      console.log(`Connected to backend at ${API_URL}${endpoint}`);
+      return data;
+    } catch (error) {
+      console.error(`Failed to connect to backend at ${API_URL}${endpoint}:`, error);
+      throw error;
+    }
+  },
+
+  async putFormData<T>(endpoint: string, body: FormData): Promise<T> {
+    try {
+      const token = getToken();
+      const headers: Record<string, string> = {};
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
+      const response = await fetch(`${API_URL}${endpoint}`, {
+        method: 'PUT',
+        headers,
+        body,
+        credentials: 'include',
+      });
+
+      // Handle empty response body
+      let data: any;
+      const contentType = response.headers.get('content-type');
+      const contentLength = response.headers.get('content-length');
+      
+      if (contentLength === '0' || !contentType?.includes('application/json')) {
+        // Empty response or non-JSON response
+        data = {};
+      } else {
+        data = await response.json();
+      }
+
+      if (!response.ok) {
+        const errorMessage = extractErrorMessage(data);
+        const error = new Error(errorMessage);
+        (error as any).data = data;
+        throw error;
+      }
+
+      if (data && data.success === false) {
+        const errorMessage = extractErrorMessage(data);
+        const error = new Error(errorMessage);
+        (error as any).data = data;
+        throw error;
+      }
+
       console.log(`Connected to backend at ${API_URL}${endpoint}`);
       return data;
     } catch (error) {
@@ -73,16 +350,36 @@ export const apiClient = {
     try {
       const response = await fetch(`${API_URL}${endpoint}`, {
         method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: getHeaders(),
       });
 
-      if (!response.ok) {
-        throw new Error(`API error: ${response.statusText}`);
+      // Handle empty response body
+      let data: any;
+      const contentType = response.headers.get('content-type');
+      const contentLength = response.headers.get('content-length');
+      
+      if (contentLength === '0' || !contentType?.includes('application/json')) {
+        // Empty response or non-JSON response
+        data = {};
+      } else {
+        data = await response.json();
       }
 
-      const data = await response.json();
+      if (!response.ok) {
+        const errorMessage = extractErrorMessage(data);
+        const error = new Error(errorMessage);
+        (error as any).data = data;
+        throw error;
+      }
+
+      // Even if HTTP status is 200, check if API indicates failure
+      if (data && data.success === false) {
+        const errorMessage = extractErrorMessage(data);
+        const error = new Error(errorMessage);
+        (error as any).data = data;
+        throw error;
+      }
+
       console.log(`Connected to backend at ${API_URL}${endpoint}`);
       return data;
     } catch (error) {

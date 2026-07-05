@@ -1,20 +1,45 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
+import React, { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useLocale, useTranslations } from 'next-intl';
+import { LoginForm } from '@/components/molecules/auth';
 import { CenteredLayout } from '@/components/templates';
-import { AuthSection } from '@/components/organisms';
+import { Heading } from '@/components/atoms';
+import { useAuth } from '@/context/AuthContext';
+import { useTheme } from '@/context/ThemeContext';
 
-export default function Login() {
+export default function LoginPage() {
+  const router = useRouter();
+  const locale = useLocale();
   const t = useTranslations();
+  const { isAuthenticated, isInitializing } = useAuth();
+  const { colors } = useTheme();
 
-  const handleLoginSuccess = (token: string) => {
-    console.log('Login successful with token:', token);
-    // Handle successful login (e.g., redirect to dashboard)
-  };
+  useEffect(() => {
+    if (!isInitializing && isAuthenticated) {
+      router.push(`/${locale}/dashboard`);
+    }
+  }, [isAuthenticated, isInitializing, router, locale]);
+
+  if (isInitializing) {
+    return (
+      <CenteredLayout hideHeader hideFooter showBackButton>
+        <Heading level={2}>{t('common.loading')}</Heading>
+      </CenteredLayout>
+    );
+  }
 
   return (
-    <CenteredLayout title={t('auth.login')}>
-      <AuthSection onSuccess={handleLoginSuccess} />
+    <CenteredLayout hideHeader hideFooter>
+      <div className="w-full max-w-[520px] rounded-2xl p-10 auth-glass-card">
+        {/* Form */}
+        <LoginForm
+          onSuccess={() => {
+            router.push(`/${locale}/dashboard`);
+          }}
+        />
+      </div>
     </CenteredLayout>
   );
 }

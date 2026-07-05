@@ -3,6 +3,7 @@
 import React from 'react';
 import { Button, Text } from '@/components/atoms';
 import { useTheme } from '@/context';
+import { useTranslations } from 'next-intl';
 
 interface PaginationProps {
   currentPage: number;
@@ -16,27 +17,30 @@ export const Pagination: React.FC<PaginationProps> = ({
   onPageChange,
 }) => {
   const { colors } = useTheme();
+  const t = useTranslations();
 
   return (
     <div className="flex items-center justify-center gap-2">
       <Button
         variant="secondary"
         size="sm"
+        className='min-w-20'
         onClick={() => onPageChange?.(currentPage - 1)}
         disabled={currentPage === 1}
       >
-        Previous
+        {t('common.pagination.previous')}
       </Button>
-      <Text variant="caption" weight="medium" style={{ color: colors.text.primary }}>
-        Page {currentPage} of {totalPages}
+      <Text variant="caption" weight="medium" style={{ color: colors.text.primary }} className='px-4'>
+        {t('common.pagination.pageOf', { current: currentPage, total: totalPages })}
       </Text>
       <Button
         variant="secondary"
         size="sm"
+        className='min-w-20'
         onClick={() => onPageChange?.(currentPage + 1)}
         disabled={currentPage === totalPages}
       >
-        Next
+        {t('common.pagination.next')}
       </Button>
     </div>
   );

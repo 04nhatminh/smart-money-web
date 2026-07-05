@@ -1,7 +1,10 @@
 'use client';
 
 import React from 'react';
-import { Heading, Text, Button } from '@/components/atoms';
+import { useRouter } from 'next/navigation';
+import { useLocale } from 'next-intl';
+import { FiArrowRight } from 'react-icons/fi';
+import { Heading, Text, Button, ScrollReveal } from '@/components/atoms';
 import { useTheme } from '@/context';
 import { useTranslations } from 'next-intl';
 
@@ -22,8 +25,13 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   onPrimaryCTA,
   onSecondaryCTA,
 }) => {
+  const router = useRouter();
+  const locale = useLocale();
   const { colors } = useTheme();
   const t = useTranslations();
+
+  const handlePrimary = onPrimaryCTA || (() => router.push(`/${locale}/register`));
+  const handleSecondary = onSecondaryCTA || (() => router.push(`/${locale}/login`));
 
   const finalTitle = title || t('finance.hero.title');
   const finalSubtitle = subtitle || t('finance.hero.subtitle');
@@ -31,38 +39,44 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   const finalSecondaryCTA = secondaryCTA || t('finance.hero.login');
 
   return (
-    <section className="py-16 md:py-24 transition-colors" style={{ backgroundColor: colors.background.primary }}>
+    <section className="py-16 md:py-24 transition-colors" style={{ background: `linear-gradient(135deg, ${colors.background.secondary} 0%, ${colors.background.primary} 100%)` }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-3xl mx-auto">
           {/* Title */}
-          <Heading level={1} className="mb-6 text-4xl md:text-5xl lg:text-6xl font-bold" style={{ color: colors.interactive.primary }}>
-            {finalTitle}
-          </Heading>
+          <ScrollReveal variant="fade-up" delay={0}>
+            <Heading level={1} className="mb-6 text-4xl md:text-5xl lg:text-6xl font-bold" style={{ color: colors.interactive.primary }}>
+              {finalTitle}
+            </Heading>
+          </ScrollReveal>
 
           {/* Subtitle */}
-          <Text variant="body" className="mb-8 text-lg md:text-xl" style={{ color: colors.text.secondary }}>
-            {finalSubtitle}
-          </Text>
+          <ScrollReveal variant="fade-up" delay={120}>
+            <Text variant="body" className="mb-8 text-lg md:text-xl" style={{ color: colors.text.secondary }}>
+              {finalSubtitle}
+            </Text>
+          </ScrollReveal>
 
           {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button
-              variant="primary"
-              size="lg"
-              onClick={onPrimaryCTA}
-              className="font-semibold"
-            >
-              {finalPrimaryCTA}
-            </Button>
-            <Button
-              variant="secondary"
-              size="lg"
-              onClick={onSecondaryCTA}
-              className="font-semibold"
-            >
-              {finalSecondaryCTA}
-            </Button>
-          </div>
+          <ScrollReveal variant="fade-up" delay={240}>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button
+                variant="primary"
+                size="lg"
+                onClick={handlePrimary}
+                className="font-semibold inline-flex items-center justify-center gap-2"
+              >
+                {finalPrimaryCTA} <FiArrowRight className="w-5 h-5" />
+              </Button>
+              <Button
+                variant="secondary"
+                size="lg"
+                onClick={handleSecondary}
+                className="font-semibold"
+              >
+                {finalSecondaryCTA}
+              </Button>
+            </div>
+          </ScrollReveal>
         </div>
       </div>
     </section>

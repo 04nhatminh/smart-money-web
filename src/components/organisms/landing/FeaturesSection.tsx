@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Heading, Text } from '@/components/atoms';
+import { Heading, Text, ScrollReveal } from '@/components/atoms';
 import { FeatureCard } from '@/components/molecules';
 import { useTheme } from '@/context';
 import { useTranslations } from 'next-intl';
@@ -49,27 +49,30 @@ export const FeaturesSection: React.FC<FeaturesProps> = ({
   ];
 
   return (
-    <section id="features" className="py-16 md:py-24 transition-colors" style={{ backgroundColor: colors.background.primary }}>
+    <section id="features" className="py-16 md:py-24 transition-colors" style={{ backgroundColor: colors.background.secondary }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="text-center mb-16">
-          <Heading level={2} className="mb-4">
-            {finalTitle}
-          </Heading>
-          <Text variant="body" className="text-lg" style={{ color: colors.text.secondary }}>
-            {finalSubtitle}
-          </Text>
-        </div>
+        <ScrollReveal variant="fade-down">
+          <div className="text-center mb-16">
+            <Heading level={2} className="mb-4">
+              {finalTitle}
+            </Heading>
+            <Text variant="body" className="text-lg" style={{ color: colors.text.secondary }}>
+              {finalSubtitle}
+            </Text>
+          </div>
+        </ScrollReveal>
 
-        {/* Features Grid */}
+        {/* Features Grid — each card flips in with stagger */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {defaultFeatures.map((feature, index) => (
-            <FeatureCard
-              key={index}
-              title={feature.title}
-              description={feature.description}
-              icon={feature.icon}
-            />
+            <ScrollReveal key={index} variant="flip-x" delay={index * 130}>
+              <FeatureCard
+                title={feature.title}
+                description={feature.description}
+                icon={feature.icon}
+              />
+            </ScrollReveal>
           ))}
         </div>
       </div>

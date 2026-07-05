@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { NextIntlClientProvider } from 'next-intl';
-import { ThemeProvider } from '@/context';
+import { ThemeProvider, AuthProvider, WebSocketProvider } from '@/context';
 
 interface ProvidersProps {
   children: React.ReactNode;
@@ -13,9 +13,13 @@ interface ProvidersProps {
 export function Providers({ children, messages, locale }: ProvidersProps) {
   return (
     <NextIntlClientProvider messages={messages} locale={locale} timeZone="UTC">
-      <ThemeProvider>
-        {children}
-      </ThemeProvider>
+      <AuthProvider>
+        <WebSocketProvider>
+          <ThemeProvider>
+            {children}
+          </ThemeProvider>
+        </WebSocketProvider>
+      </AuthProvider>
     </NextIntlClientProvider>
   );
 }

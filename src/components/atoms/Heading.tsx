@@ -8,7 +8,7 @@ interface HeadingProps extends React.HTMLAttributes<HTMLHeadingElement> {
   level?: 1 | 2 | 3 | 4 | 5 | 6;
 }
 
-export const Heading: React.FC<HeadingProps> = ({ level = 1, className = '', ...props }) => {
+export const Heading: React.FC<HeadingProps> = ({ level = 1, className = '', style, ...props }) => {
   const { colors } = useTheme();
 
   const levelMap = {
@@ -39,6 +39,7 @@ export const Heading: React.FC<HeadingProps> = ({ level = 1, className = '', ...
         color: colors.text.primary,
         lineHeight: '1.2',
         margin: '0',
+        ...style,
       }}
       className={className}
       {...props}
