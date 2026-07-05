@@ -20,6 +20,7 @@ interface CreateProjectModalProps {
   onClose: () => void;
   onSuccess?: (budgetGenerated?: boolean) => void;
   onOpenUserFinancialModal?: () => void;
+  onOpenCreateGroupModal?: () => void;
   usedPriorities?: string[];
   maxProjectsReached?: boolean;
   defaultType?: 'PERSONAL' | 'GROUP';
@@ -46,6 +47,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
   onClose,
   onSuccess,
   onOpenUserFinancialModal,
+  onOpenCreateGroupModal,
   usedPriorities = [],
   maxProjectsReached = false,
   defaultType,
@@ -640,8 +642,14 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
                       </label>
                       <button
                         type="button"
-                        onClick={() => setIsCreateGroupModalOpen(true)}
-                        className="text-xs font-semibold hover:underline"
+                        onClick={() => {
+                          if (onOpenCreateGroupModal) {
+                            onOpenCreateGroupModal();
+                          } else {
+                            setIsCreateGroupModalOpen(true);
+                          }
+                        }}
+                        className="text-xs font-semibold hover:underline cursor-pointer hover:cursor-pointer"
                         style={{ color: colors.interactive.primary }}
                       >
                         {t('projects.createModal.createGroup')}

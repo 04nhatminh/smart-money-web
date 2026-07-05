@@ -50,6 +50,8 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
   const [localLoading, setLocalLoading] = useState(false);
   const [isGenerateBudgetOpen, setIsGenerateBudgetOpen] = useState(false);
   const [showRegenerateSuggest, setShowRegenerateSuggest] = useState(false);
+  const [resendingEmail, setResendingEmail] = useState<string | null>(null);
+  const [sentEmails, setSentEmails] = useState<Record<string, boolean>>({});
 
   const isAdmin = group?.adminId === user?.id;
   const isForming = group?.status === 'FORMING';
@@ -159,18 +161,22 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
     if (!group || !email) return;
     setError(null);
     setSuccess(null);
-    setLocalLoading(true);
+    setResendingEmail(email);
     try {
       const res = await inviteGroupMember(group.groupId, { email });
       if (res.success) {
         setSuccess(`Invitation resent to ${email}!`);
+        setSentEmails((prev) => ({ ...prev, [email]: true }));
+        setTimeout(() => {
+          setSentEmails((prev) => ({ ...prev, [email]: false }));
+        }, 4000);
       } else {
         setError(res.error || 'Failed to resend invitation');
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
-      setLocalLoading(false);
+      setResendingEmail(null);
     }
   };
 
@@ -471,15 +477,40 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
                           ) : (
                             <div className="flex items-center gap-1">
                               {isAdmin && member.inviteStatus === 'INVITED' && (
-                                <button
-                                  onClick={() => handleResendInvite(member.email)}
-                                  disabled={isLoading}
-                                  className="text-xs px-2.5 py-1 rounded-md border transition-all hover:bg-yellow-50 disabled:opacity-50 font-medium"
-                                  style={{ color: '#D97706', borderColor: '#FCD34D', backgroundColor: '#FEF3C750' }}
-                                  title={`Resend invitation to ${member.email}`}
-                                >
-                                  Resend
-                                </button>
+                                <>
+                                  {sentEmails[member.email] ? (
+                                    <span
+                                      className="text-xs px-2.5 py-1 rounded-md border font-medium flex items-center gap-1 bg-green-50 text-green-700 border-green-300"
+                                      title={`Invitation successfully resent to ${member.email}`}
+                                    >
+                                      <MdCheckCircle className="w-3.5 h-3.5 text-green-600" />
+                                      Sent!
+                                    </span>
+                                  ) : (
+                                    <button
+                                      onClick={() => handleResendInvite(member.email)}
+                                      disabled={isLoading || resendingEmail === member.email}
+                                      className={`text-xs px-2.5 py-1 rounded-md border transition-all font-medium flex items-center gap-1 ${
+                                        resendingEmail === member.email
+                                          ? 'bg-amber-50/50 text-amber-700/60 border-amber-200 cursor-not-allowed'
+                                          : 'bg-amber-50 text-amber-700 border-amber-300 hover:bg-amber-100 active:bg-amber-200 cursor-pointer'
+                                      }`}
+                                      title={`Resend invitation to ${member.email}`}
+                                    >
+                                      {resendingEmail === member.email ? (
+                                        <>
+                                          <svg className="animate-spin -ml-1 mr-1 h-3 w-3 text-amber-700" fill="none" viewBox="0 0 24 24">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                          </svg>
+                                          Resending...
+                                        </>
+                                      ) : (
+                                        'Resend'
+                                      )}
+                                    </button>
+                                  )}
+                                </>
                               )}
                               {isAdmin && member.inviteStatus === 'DECLINED' && (
                                 <button

@@ -6,7 +6,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { useAuth } from '@/context/AuthContext';
 import { SidebarLayout } from '@/components/templates';
 import { Heading, Text, Button } from '@/components/atoms';
-import { Card, StatCard, UserFinancialModal, GenerateBudgetModal, CreateProjectModal } from '@/components/molecules/common';
+import { Card, StatCard, UserFinancialModal, GenerateBudgetModal, CreateProjectModal, CreateGroupModal } from '@/components/molecules/common';
 import { useTheme } from '@/context/ThemeContext';
 import { useTransactions } from '@/hooks/useTransactions';
 import { useAnalytics } from '@/hooks/useAnalytics';
@@ -77,6 +77,7 @@ export default function DashboardPage() {
   const [isFinancialModalOpen, setIsFinancialModalOpen] = useState(false);
   const [isGenerateBudgetModalOpen, setIsGenerateBudgetModalOpen] = useState(false);
   const [isCreateProjectModalOpen, setIsCreateProjectModalOpen] = useState(false);
+  const [isCreateGroupModalOpen, setIsCreateGroupModalOpen] = useState(false);
 
   const currentMonth = new Date().getMonth() + 1;
   const currentYear = new Date().getFullYear();
@@ -546,6 +547,16 @@ export default function DashboardPage() {
           setIsCreateProjectModalOpen(false);
           setIsFinancialModalOpen(true);
         }}
+        onOpenCreateGroupModal={() => {
+          setIsCreateProjectModalOpen(false);
+          setIsCreateGroupModalOpen(true);
+        }}
+      />
+
+      <CreateGroupModal
+        isOpen={isCreateGroupModalOpen}
+        onClose={() => setIsCreateGroupModalOpen(false)}
+        onSuccess={loadDashboardData}
       />
     </SidebarLayout>
   );
