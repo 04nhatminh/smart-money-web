@@ -199,7 +199,7 @@ export const EditProjectModal: React.FC<EditProjectModalProps> = ({
             <Heading level={3} className="m-0" style={{ color: colors.text.primary }}>Edit Project</Heading>
             <button
               onClick={onClose}
-              className="p-1 rounded-lg transition-colors"
+              className="p-1 rounded-lg transition-colors hover:cursor-pointer"
               style={{
                 color: colors.text.secondary,
                 backgroundColor: `${colors.interactive.primary}10`,

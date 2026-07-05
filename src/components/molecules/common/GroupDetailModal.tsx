@@ -8,7 +8,8 @@ import { useAuth } from '@/context/AuthContext';
 import { useProjects } from '@/hooks/useProjects';
 import { GroupDetailResponse, GroupProjectDetailResponse, GroupMemberResponse } from '@/types/group.api';
 import { formatAmountInput, parseFormattedNumber, formatNumber, formatPrice } from '@/lib/format';
-import { MdClose, MdLock, MdPersonAdd, MdDelete, MdAddCircle, MdCheckCircle, MdCancel, MdRefresh } from 'react-icons/md';
+import { MdClose, MdLock, MdPersonAdd, MdDelete, MdAddCircle, MdCheckCircle, MdCancel, MdRefresh, MdAutoAwesome } from 'react-icons/md';
+import { GenerateBudgetModal } from './GenerateBudgetModal';
 
 interface GroupDetailModalProps {
   isOpen: boolean;
@@ -33,6 +34,7 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
     lockGroup,
     inviteGroupMember,
     removeGroupMember,
+    deleteGroup,
     getGroupProjectDetail,
     joinGroupProject,
     dissolveGroupProject,
@@ -47,6 +49,11 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [localLoading, setLocalLoading] = useState(false);
+  const [isGenerateBudgetOpen, setIsGenerateBudgetOpen] = useState(false);
+  const [showRegenerateSuggest, setShowRegenerateSuggest] = useState(false);
+  const [resendingEmail, setResendingEmail] = useState<string | null>(null);
+  const [sentEmails, setSentEmails] = useState<Record<string, boolean>>({});
+  const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = useState(false);
 
   const isAdmin = group?.adminId === user?.id;
   const isForming = group?.status === 'FORMING';
@@ -60,6 +67,8 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
     } else {
       setGroup(null);
       setProjectDetail(null);
+      setShowRegenerateSuggest(false);
+      setIsGenerateBudgetOpen(false);
       document.body.style.overflow = '';
     }
     return () => {
@@ -154,18 +163,22 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
     if (!group || !email) return;
     setError(null);
     setSuccess(null);
-    setLocalLoading(true);
+    setResendingEmail(email);
     try {
       const res = await inviteGroupMember(group.groupId, { email });
       if (res.success) {
         setSuccess(`Invitation resent to ${email}!`);
+        setSentEmails((prev) => ({ ...prev, [email]: true }));
+        setTimeout(() => {
+          setSentEmails((prev) => ({ ...prev, [email]: false }));
+        }, 4000);
       } else {
         setError(res.error || 'Failed to resend invitation');
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
-      setLocalLoading(false);
+      setResendingEmail(null);
     }
   };
 
@@ -190,6 +203,30 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
     }
   };
 
+  const handleDeleteGroup = async () => {
+    if (!group) return;
+    setError(null);
+    setSuccess(null);
+    setLocalLoading(true);
+    try {
+      const res = await deleteGroup(group.groupId);
+      if (res.success) {
+        setSuccess('Group deleted successfully!');
+        setTimeout(() => {
+          onClose();
+          onSuccess?.();
+        }, 1500);
+      } else {
+        setError(res.error || 'Failed to delete group');
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+    } finally {
+      setLocalLoading(false);
+      setIsConfirmDeleteOpen(false);
+    }
+  };
+
   const handleJoinProject = async () => {
     if (!projectDetail) return;
     setError(null);
@@ -207,6 +244,7 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
         setSuccess('Successfully joined group project! Created sub-personal project.');
         loadDetails();
         onSuccess?.();
+        setShowRegenerateSuggest(true);
       } else {
         setError(res.error || 'Failed to join group project');
       }
@@ -308,18 +346,32 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
                       <Text className="font-semibold">{group.status}</Text>
                     </div>
                   </div>
-                  {isAdmin && isForming && (
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      onClick={handleLockGroup}
-                      disabled={isLoading}
-                      className="flex items-center gap-1.5"
-                    >
-                      <MdLock size={16} />
-                      Lock Group
-                    </Button>
-                  )}
+                  <div className="flex items-center gap-2">
+                    {isAdmin && !group.groupProjectId && (
+                      <Button
+                        variant="danger"
+                        size="sm"
+                        onClick={() => setIsConfirmDeleteOpen(true)}
+                        disabled={isLoading}
+                        className="flex items-center gap-1.5"
+                      >
+                        <MdDelete size={16} />
+                        Delete Group
+                      </Button>
+                    )}
+                    {isAdmin && isForming && (
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={handleLockGroup}
+                        disabled={isLoading}
+                        className="flex items-center gap-1.5"
+                      >
+                        <MdLock size={16} />
+                        Lock Group
+                      </Button>
+                    )}
+                  </div>
                 </div>
 
                 {/* Group Project Info */}
@@ -429,11 +481,22 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
                   <div className="divide-y border rounded-xl overflow-hidden" style={{ borderColor: colors.border.light }}>
                     {group.members.map((member) => {
                       const prog = projectDetail?.members.find(m => m.userId === member.userId);
+                      const isCurrentUser = member.userId === user?.id;
                       return (
-                        <div key={member.userId} className="p-4 flex items-center justify-between flex-wrap gap-4" style={{ backgroundColor: 'white' }}>
+                        <div
+                          key={member.userId}
+                          className="p-4 flex items-center justify-between flex-wrap gap-4 transition-all"
+                          style={{
+                            backgroundColor: isCurrentUser ? `${colors.interactive.primary}08` : 'white',
+                            borderLeft: isCurrentUser ? `4px solid ${colors.interactive.primary}` : 'none',
+                            paddingLeft: isCurrentUser ? '12px' : '16px',
+                          }}
+                        >
                           <div>
-                            <div className="flex items-center gap-2">
-                              <Text className="font-semibold">{member.username || 'User'}</Text>
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <Text className={`font-semibold ${isCurrentUser ? 'font-bold' : ''}`} style={{ color: isCurrentUser ? colors.interactive.primary : colors.text.primary }}>
+                                {member.username || 'User'} {isCurrentUser && '(You)'}
+                              </Text>
                               <span className="text-[10px] px-1.5 py-0.5 rounded font-bold uppercase shrink-0" style={{
                                 backgroundColor: member.role === 'ADMIN' ? `${colors.interactive.primary}15` : colors.background.secondary,
                                 color: member.role === 'ADMIN' ? colors.interactive.primary : colors.text.secondary
@@ -441,14 +504,25 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
                                 {member.role}
                               </span>
                             </div>
+                            {member.email && (
+                              <div className="text-xs text-gray-400 mt-0.5">{member.email}</div>
+                            )}
                             <div className="flex gap-2 items-center mt-1 text-xs text-gray-500">
-                              <span className="flex items-center gap-1">
-                                {member.inviteStatus === 'JOINED' && <MdCheckCircle className="text-green-500" />}
-                                {member.inviteStatus === 'INVITED' && <span className="w-2 h-2 rounded-full bg-yellow-500" />}
-                                {member.inviteStatus === 'DECLINED' && <MdCancel className="text-red-500" />}
-                                {member.inviteStatus}
-                              </span>
-                              {member.capacitySnapshot != null && <span>&bull; Snap: {formatPrice(member.capacitySnapshot)}</span>}
+                              {projectDetail ? (
+                                prog?.projectStatus === 'ABANDONED' && (
+                                  <span className="flex items-center gap-1 text-red-500 font-semibold uppercase">
+                                    <MdCancel className="text-red-500" />
+                                    ABANDONED
+                                  </span>
+                                )
+                              ) : (
+                                <span className="flex items-center gap-1">
+                                  {member.inviteStatus === 'JOINED' && <MdCheckCircle className="text-green-500" />}
+                                  {member.inviteStatus === 'INVITED' && <span className="w-2 h-2 rounded-full bg-yellow-500" />}
+                                  {member.inviteStatus === 'DECLINED' && <MdCancel className="text-red-500" />}
+                                  {member.inviteStatus}
+                                </span>
+                              )}
                             </div>
                           </div>
 
@@ -465,15 +539,40 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
                           ) : (
                             <div className="flex items-center gap-1">
                               {isAdmin && member.inviteStatus === 'INVITED' && (
-                                <button
-                                  onClick={() => handleResendInvite(member.email)}
-                                  disabled={isLoading}
-                                  className="p-2 rounded-lg transition-colors hover:bg-yellow-50 disabled:opacity-50"
-                                  style={{ color: '#F59E0B' }}
-                                  title={`Resend invitation to ${member.email}`}
-                                >
-                                  <MdRefresh size={18} />
-                                </button>
+                                <>
+                                  {sentEmails[member.email] ? (
+                                    <span
+                                      className="text-xs px-2.5 py-1 rounded-md border font-medium flex items-center gap-1 bg-green-50 text-green-700 border-green-300"
+                                      title={`Invitation successfully resent to ${member.email}`}
+                                    >
+                                      <MdCheckCircle className="w-3.5 h-3.5 text-green-600" />
+                                      Sent!
+                                    </span>
+                                  ) : (
+                                    <button
+                                      onClick={() => handleResendInvite(member.email)}
+                                      disabled={isLoading || resendingEmail === member.email}
+                                      className={`text-xs px-2.5 py-1 rounded-md border transition-all font-medium flex items-center gap-1 ${
+                                        resendingEmail === member.email
+                                          ? 'bg-amber-50/50 text-amber-700/60 border-amber-200 cursor-not-allowed'
+                                          : 'bg-amber-50 text-amber-700 border-amber-300 hover:bg-amber-100 active:bg-amber-200 cursor-pointer'
+                                      }`}
+                                      title={`Resend invitation to ${member.email}`}
+                                    >
+                                      {resendingEmail === member.email ? (
+                                        <>
+                                          <svg className="animate-spin -ml-1 mr-1 h-3 w-3 text-amber-700" fill="none" viewBox="0 0 24 24">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                          </svg>
+                                          Resending...
+                                        </>
+                                      ) : (
+                                        'Resend'
+                                      )}
+                                    </button>
+                                  )}
+                                </>
                               )}
                               {isAdmin && member.inviteStatus === 'DECLINED' && (
                                 <button
@@ -522,6 +621,51 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
           </div>
         </div>
       </div>
+      {isConfirmDeleteOpen && (
+        <>
+          <div
+            className="fixed inset-0 transition-opacity"
+            style={{
+              backgroundColor: 'rgba(0, 0, 0, 0.5)',
+              zIndex: 1010,
+              backdropFilter: 'blur(4px)',
+            }}
+            onClick={() => setIsConfirmDeleteOpen(false)}
+          />
+          <div className="fixed inset-0 flex items-center justify-center p-4 overflow-y-auto" style={{ zIndex: 1011 }}>
+            <div
+              className="bg-white rounded-2xl overflow-hidden shadow-2xl max-w-md w-full p-6 space-y-6 transition-all transform flex flex-col"
+              style={{ backgroundColor: colors.background.primary }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center gap-3 text-red-500">
+                <MdDelete className="w-8 h-8" style={{ color: '#EF4444' }} />
+                <Heading level={4} style={{ color: colors.text.primary }}>Delete Group</Heading>
+              </div>
+              <Text style={{ color: colors.text.secondary }} className="text-sm">
+                Are you sure you want to delete this group? This will remove all members and delete the group permanently. This action cannot be undone.
+              </Text>
+              <div className="flex gap-3 justify-end pt-2">
+                <Button
+                  variant="secondary"
+                  onClick={() => setIsConfirmDeleteOpen(false)}
+                  disabled={isLoading}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="primary"
+                  onClick={handleDeleteGroup}
+                  disabled={isLoading}
+                  style={{ backgroundColor: '#EF4444', borderColor: '#EF4444', color: 'white' }}
+                >
+                  Confirm Delete
+                </Button>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
       {isConfirmDissolveOpen && (
         <>
           <div
@@ -535,7 +679,7 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
           />
           <div className="fixed inset-0 flex items-center justify-center p-4 overflow-y-auto" style={{ zIndex: 1011 }}>
             <div
-              className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 space-y-6 transition-all transform flex flex-col"
+              className="bg-white rounded-2xl overflow-hidden shadow-2xl max-w-md w-full p-6 space-y-6 transition-all transform flex flex-col"
               style={{ backgroundColor: colors.background.primary }}
               onClick={(e) => e.stopPropagation()}
             >
@@ -567,6 +711,63 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
           </div>
         </>
       )}
+
+      {showRegenerateSuggest && (
+        <>
+          <div
+            className="fixed inset-0 transition-opacity"
+            style={{
+              backgroundColor: 'rgba(0, 0, 0, 0.5)',
+              zIndex: 1010,
+              backdropFilter: 'blur(4px)',
+            }}
+            onClick={() => setShowRegenerateSuggest(false)}
+          />
+          <div className="fixed inset-0 flex items-center justify-center p-4 overflow-y-auto" style={{ zIndex: 1011 }}>
+            <div
+              className="bg-white rounded-2xl overflow-hidden shadow-2xl max-w-md w-full p-6 space-y-6 transition-all transform flex flex-col"
+              style={{ backgroundColor: colors.background.primary }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center gap-3 text-indigo-600">
+                <MdAutoAwesome className="w-8 h-8" style={{ color: colors.interactive.primary }} />
+                <Heading level={4} style={{ color: colors.text.primary }}>Recalculate Budget?</Heading>
+              </div>
+              <Text style={{ color: colors.text.secondary }} className="text-sm">
+                You have successfully joined the group project! Would you like AI to recalculate your spending budget to align with this new savings goal?
+              </Text>
+              <div className="flex gap-3 justify-end pt-2">
+                <Button
+                  variant="secondary"
+                  onClick={() => setShowRegenerateSuggest(false)}
+                  disabled={isLoading}
+                >
+                  Later
+                </Button>
+                <Button
+                  variant="primary"
+                  onClick={() => {
+                    setShowRegenerateSuggest(false);
+                    setIsGenerateBudgetOpen(true);
+                  }}
+                  disabled={isLoading}
+                >
+                  Recalculate Now
+                </Button>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+
+      <GenerateBudgetModal
+        isOpen={isGenerateBudgetOpen}
+        onClose={() => setIsGenerateBudgetOpen(false)}
+        onSuccess={() => {
+          setIsGenerateBudgetOpen(false);
+          loadDetails();
+        }}
+      />
     </>
   );
 };

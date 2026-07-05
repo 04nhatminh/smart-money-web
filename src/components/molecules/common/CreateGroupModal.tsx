@@ -77,17 +77,32 @@ export const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
       const result = await createGroup({ name: name.trim(), description: description.trim() });
       if (result.success && result.data) {
         const newGroupId = result.data.groupId;
+        const failedEmails: string[] = [];
 
-        // Invite members
+        // Invite members sequentially
         for (const email of emails) {
-          await inviteGroupMember(newGroupId, { email });
+          try {
+            const inviteRes = await inviteGroupMember(newGroupId, { email });
+            if (!inviteRes.success) {
+              console.error(`Failed to invite ${email}:`, inviteRes.error);
+              failedEmails.push(email);
+            }
+          } catch (inviteErr) {
+            console.error(`Error inviting ${email}:`, inviteErr);
+            failedEmails.push(email);
+          }
         }
 
-        setSuccess(true);
+        if (failedEmails.length > 0) {
+          setError(`Group created, but failed to invite: ${failedEmails.join(', ')}`);
+        } else {
+          setSuccess(true);
+        }
+
         setTimeout(() => {
           onClose();
           onSuccess?.();
-        }, 1500);
+        }, failedEmails.length > 0 ? 3000 : 1500);
       } else {
         setError(result.error || 'Failed to create group');
       }

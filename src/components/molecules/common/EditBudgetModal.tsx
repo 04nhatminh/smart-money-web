@@ -190,7 +190,7 @@ export const EditBudgetModal: React.FC<EditBudgetModalProps> = ({
       {/* Modal */}
       <div className="fixed inset-0 flex items-center justify-center p-4 pointer-events-none" style={{ zIndex: 1000 }}>
         <div
-          className="bg-white rounded-lg shadow-2xl max-w-md w-full pointer-events-auto"
+          className="bg-white rounded-2xl overflow-hidden shadow-2xl max-w-md w-full pointer-events-auto"
           style={{ backgroundColor: colors.background.primary }}
           onClick={e => e.stopPropagation()}
         >
@@ -199,7 +199,7 @@ export const EditBudgetModal: React.FC<EditBudgetModalProps> = ({
           <Heading level={3} className="m-0" style={{ color: colors.text.primary }}>Edit Budget</Heading>
           <button
             onClick={onClose}
-            className="p-1 rounded-lg transition-colors"
+            className="p-1 rounded-lg transition-colors hover:cursor-pointer"
             style={{
               color: colors.text.secondary,
               backgroundColor: `${colors.interactive.primary}10`,

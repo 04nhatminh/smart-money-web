@@ -275,7 +275,7 @@ export const CreateTransactionModal: React.FC<CreateTransactionModalProps> = ({
       {/* Modal */}
       <div className="fixed inset-0 flex items-center justify-center p-4 pointer-events-none" style={{ zIndex: 1000 }}>
         <div
-          className="bg-white rounded-lg shadow-2xl max-w-md w-full max-h-[90vh] flex flex-col overflow-hidden pointer-events-auto"
+          className="bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] flex flex-col overflow-hidden pointer-events-auto"
           style={{ backgroundColor: colors.background.primary }}
           onClick={e => e.stopPropagation()}
         >
@@ -289,7 +289,7 @@ export const CreateTransactionModal: React.FC<CreateTransactionModalProps> = ({
             </Heading>
             <button
               onClick={onClose}
-              className="p-1 rounded-lg transition-colors"
+              className="p-1 rounded-lg transition-colors hover:cursor-pointer"
               style={{
                 color: colors.text.secondary,
                 backgroundColor: `${colors.interactive.primary}10`,

@@ -61,7 +61,7 @@ export const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = (
             </Heading>
             <button
               onClick={onCancel}
-              className="p-1 rounded-lg transition-colors"
+              className="p-1 rounded-lg transition-colors hover:cursor-pointer"
               style={{
                 color: colors.text.secondary,
                 backgroundColor: `${colors.interactive.primary}10`,

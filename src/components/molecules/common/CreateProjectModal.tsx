@@ -18,8 +18,9 @@ import { useTranslations } from 'next-intl';
 interface CreateProjectModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSuccess?: () => void;
+  onSuccess?: (budgetGenerated?: boolean) => void;
   onOpenUserFinancialModal?: () => void;
+  onOpenCreateGroupModal?: () => void;
   usedPriorities?: string[];
   maxProjectsReached?: boolean;
   defaultType?: 'PERSONAL' | 'GROUP';
@@ -46,6 +47,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
   onClose,
   onSuccess,
   onOpenUserFinancialModal,
+  onOpenCreateGroupModal,
   usedPriorities = [],
   maxProjectsReached = false,
   defaultType,
@@ -78,6 +80,15 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
   const [totalMonths, setTotalMonths] = useState('1');
   const [suggestType, setSuggestType] = useState<'amount' | 'months'>('amount');
   const [isCreateGroupModalOpen, setIsCreateGroupModalOpen] = useState(false);
+
+  const [reactiveSuggestions, setReactiveSuggestions] = useState<{
+    totalCapacity: number;
+    suggestedMonths: number;
+    suggestedAmount: number;
+    targetAmount: number;
+    totalMonths: number;
+  } | null>(null);
+  const [showReactiveWarning, setShowReactiveWarning] = useState(false);
 
   // Future options and success modal states
   const [showDateGateOptions, setShowDateGateOptions] = useState(false);
@@ -200,7 +211,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
   const handleSuccessClose = () => {
     setSuccess(false);
     onClose();
-    onSuccess?.();
+    onSuccess?.(false);
   };
 
   const handleSuggest = async () => {
@@ -246,6 +257,19 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
     }
   };
 
+  const handleApplySuggestion = (type: 'adjust_months' | 'adjust_amount') => {
+    if (!reactiveSuggestions) return;
+    if (type === 'adjust_months') {
+      setTotalMonths(reactiveSuggestions.suggestedMonths.toString());
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        targetAmount: formatAmountInput(reactiveSuggestions.suggestedAmount.toString()),
+      }));
+    }
+    setShowReactiveWarning(false);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -273,6 +297,36 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
         return;
       }
 
+      // Group Project Capacity Check
+      try {
+        const suggestionsRes = await getGroupProjectSuggestions({
+          groupId: selectedGroupId,
+          inputMonths: 1,
+        });
+        if (suggestionsRes.success && suggestionsRes.data) {
+          const totalCapacity = suggestionsRes.data.totalCapacity;
+          if (totalCapacity > 0) {
+            const monthlyContribution = numericAmount / months;
+            if (monthlyContribution > totalCapacity) {
+              const suggestedMonthsVal = Math.ceil(numericAmount / totalCapacity);
+              const suggestedAmountVal = totalCapacity * months;
+
+              setReactiveSuggestions({
+                totalCapacity,
+                suggestedMonths: suggestedMonthsVal,
+                suggestedAmount: suggestedAmountVal,
+                targetAmount: numericAmount,
+                totalMonths: months,
+              });
+              setShowReactiveWarning(true);
+              return;
+            }
+          }
+        }
+      } catch (err) {
+        console.error("Error during capacity check:", err);
+      }
+
       // Group Project direct creation
       try {
         const res = await createGroupProject({
@@ -285,11 +339,12 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
         });
 
         if (res.success) {
+          setSuccessMode('WITHOUT_BUDGET');
           setSuccess(true);
           setTimeout(() => {
             setSuccess(false);
             onClose();
-            onSuccess?.();
+            onSuccess?.(true);
           }, 1500);
         } else {
           setError(res.error || 'Failed to create group project');
@@ -388,6 +443,12 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
       const startDateVal = isStartNextMonth ? getFirstOfNextMonth() : today;
       const bypassVal = (creationOption === 'SAVE_NOW' && dayOfMonth > 7);
 
+      const calculatedDeadline = (() => {
+        const d = new Date(startDateVal);
+        d.setMonth(d.getMonth() + (advisorData.numberOfMonths - 1));
+        return d.toISOString().split('T')[0];
+      })();
+
       const createData: CreateProjectRequest = {
         name: formData.name.trim(),
         description: formData.description.trim(),
@@ -395,7 +456,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
         priority: formData.priority,
         targetAmount: parseFormattedNumber(formData.targetAmount),
         currency: formData.currency.trim(),
-        deadline: formData.deadline,
+        deadline: calculatedDeadline,
         startDate: startDateVal,
         bypassDateGate: bypassVal,
       };
@@ -521,7 +582,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
               </div>
 
               {/* Content */}
-              <form onSubmit={handleSubmit} className="p-6 space-y-4 max-h-[75vh] overflow-y-auto">
+              <form onSubmit={handleSubmit} noValidate className="p-6 space-y-4 max-h-[75vh] overflow-y-auto">
                 {success && (
                   <div
                     className="p-4 rounded-lg text-center"
@@ -581,8 +642,14 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
                       </label>
                       <button
                         type="button"
-                        onClick={() => setIsCreateGroupModalOpen(true)}
-                        className="text-xs font-semibold hover:underline"
+                        onClick={() => {
+                          if (onOpenCreateGroupModal) {
+                            onOpenCreateGroupModal();
+                          } else {
+                            setIsCreateGroupModalOpen(true);
+                          }
+                        }}
+                        className="text-xs font-semibold hover:underline cursor-pointer hover:cursor-pointer"
                         style={{ color: colors.interactive.primary }}
                       >
                         {t('projects.createModal.createGroup')}
@@ -762,61 +829,12 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
                       onChange={(e) => setTotalMonths(e.target.value)}
                       disabled={isLoading}
                       min={1}
-                      max={60}
                       required
                     />
                   </div>
                 )}
 
-                {/* Suggest block for Group Projects */}
-                {formData.type === 'GROUP' && (
-                  <div className="p-4 border rounded-xl space-y-3" style={{ borderColor: colors.border.light, backgroundColor: `${colors.interactive.primary}05` }}>
-                    <div className="flex items-center gap-1.5">
-                      <MdLightbulb className="text-yellow-500" size={18} />
-                      <Heading level={4} className="text-xs font-bold uppercase" style={{ color: colors.text.primary }}>
-                        {t('projects.createModal.budgetSuggestion')}
-                      </Heading>
-                    </div>
-                    <Text className="text-xs" style={{ color: colors.text.secondary }}>
-                      {t('projects.createModal.suggestionDesc')}
-                    </Text>
-                    <div className="flex gap-2">
-                      <button
-                        type="button"
-                        onClick={() => setSuggestType('amount')}
-                        className="flex-1 py-1.5 rounded-lg border text-xs font-semibold"
-                        style={{
-                          borderColor: suggestType === 'amount' ? colors.interactive.primary : colors.border.light,
-                          backgroundColor: suggestType === 'amount' ? `${colors.interactive.primary}10` : 'white',
-                          color: suggestType === 'amount' ? colors.interactive.primary : colors.text.secondary,
-                        }}
-                      >
-                        {t('projects.createModal.byAmount')}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setSuggestType('months')}
-                        className="flex-1 py-1.5 rounded-lg border text-xs font-semibold"
-                        style={{
-                          borderColor: suggestType === 'months' ? colors.interactive.primary : colors.border.light,
-                          backgroundColor: suggestType === 'months' ? `${colors.interactive.primary}10` : 'white',
-                          color: suggestType === 'months' ? colors.interactive.primary : colors.text.secondary,
-                        }}
-                      >
-                        {t('projects.createModal.byMonths')}
-                      </button>
-                    </div>
-                    <Button
-                      type="button"
-                      variant="secondary"
-                      className="w-full text-xs font-bold py-1.5"
-                      onClick={handleSuggest}
-                      disabled={isLoading}
-                    >
-                      {t('projects.createModal.suggest')}
-                    </Button>
-                  </div>
-                )}
+
 
                 {/* Buttons */}
                 <div className="flex gap-3 pt-4 border-t" style={{ borderColor: colors.border.light }}>
@@ -861,7 +879,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
           />
           <div className="fixed inset-0 flex items-center justify-center p-4 overflow-y-auto" style={{ zIndex: 1000 }}>
             <div
-              className="bg-white rounded-2xl shadow-2xl max-w-md w-full my-8 p-8 text-center space-y-6 pointer-events-auto"
+              className="bg-white rounded-2xl overflow-hidden shadow-2xl max-w-md w-full my-8 p-8 text-center space-y-6 pointer-events-auto"
               style={{ backgroundColor: colors.background.primary }}
               onClick={e => e.stopPropagation()}
             >
@@ -1020,14 +1038,109 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
         onClose={() => {
           setIsGenerateBudgetOpen(false);
           onClose();
-          onSuccess?.();
+          onSuccess?.(false);
         }}
         onSuccess={() => {
           setIsGenerateBudgetOpen(false);
           onClose();
-          onSuccess?.();
+          onSuccess?.(true);
         }}
       />
+
+      {/* Reactive Warning Modal */}
+      {showReactiveWarning && reactiveSuggestions && (
+        <>
+          <div
+            className="fixed inset-0 transition-opacity"
+            style={{
+              backgroundColor: 'rgba(0, 0, 0, 0.5)',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              zIndex: 1010,
+              backdropFilter: 'blur(4px)',
+            }}
+            onClick={() => setShowReactiveWarning(false)}
+          />
+          <div className="fixed inset-0 flex items-center justify-center p-4 overflow-y-auto" style={{ zIndex: 1020 }}>
+            <div
+              className="bg-white rounded-2xl shadow-2xl max-w-md w-full my-8 overflow-hidden pointer-events-auto"
+              style={{ backgroundColor: colors.background.primary }}
+              onClick={e => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between p-6 border-b" style={{ borderColor: colors.border.light }}>
+                <Heading level={3} className="m-0" style={{ color: colors.text.primary }}>
+                  Cảnh báo hạn mức đóng góp
+                </Heading>
+                <button
+                  onClick={() => setShowReactiveWarning(false)}
+                  className="p-1 rounded-lg transition-colors hover:opacity-75 hover:cursor-pointer"
+                  style={{ color: colors.text.secondary }}
+                >
+                  <MdClose className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="p-6 space-y-6">
+                <Text className="text-sm" style={{ color: colors.text.secondary }}>
+                  Với hạn mức đóng góp hiện tại của các thành viên, nhóm không thể hoàn thành mục tiêu này trong thời gian đã chọn (yêu cầu đóng góp trung bình <strong>{formatAmountInput(Math.ceil(reactiveSuggestions.targetAmount / (reactiveSuggestions.totalMonths * (groups.find(g => g.groupId === selectedGroupId)?.memberCount || 1))).toString())} VND/người/tháng</strong>).
+                  <br />
+                  <br />
+                  Vui lòng chọn một trong các phương án điều chỉnh sau để phù hợp hơn:
+                </Text>
+
+                <div className="space-y-4">
+                  <button
+                    type="button"
+                    onClick={() => handleApplySuggestion('adjust_months')}
+                    className="w-full p-4 rounded-xl border text-left transition-all hover:bg-gray-50 flex flex-col gap-1 hover:cursor-pointer"
+                    style={{
+                      borderColor: colors.border.light,
+                      backgroundColor: colors.background.secondary,
+                    }}
+                  >
+                    <span className="font-bold text-sm" style={{ color: colors.interactive.primary }}>
+                      Phương án 1: Kéo dài thời gian tích lũy
+                    </span>
+                    <span className="text-xs" style={{ color: colors.text.secondary }}>
+                      Giữ nguyên số tiền mục tiêu và tự động tăng thời gian lên <strong>{reactiveSuggestions.suggestedMonths} tháng</strong>.
+                    </span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleApplySuggestion('adjust_amount')}
+                    className="w-full p-4 rounded-xl border text-left transition-all hover:bg-gray-50 flex flex-col gap-1 hover:cursor-pointer"
+                    style={{
+                      borderColor: colors.border.light,
+                      backgroundColor: colors.background.secondary,
+                    }}
+                  >
+                    <span className="font-bold text-sm" style={{ color: colors.text.primary }}>
+                      Phương án 2: Giảm số tiền mục tiêu
+                    </span>
+                    <span className="text-xs" style={{ color: colors.text.secondary }}>
+                      Giữ nguyên thời gian tích lũy <strong>{reactiveSuggestions.totalMonths} tháng</strong> và giảm mục tiêu xuống <strong>{formatAmountInput(reactiveSuggestions.suggestedAmount.toString())} VND</strong>.
+                    </span>
+                  </button>
+                </div>
+
+                <div className="flex gap-3 pt-2">
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={() => setShowReactiveWarning(false)}
+                    className="w-full"
+                  >
+                    Hủy bỏ và tự chỉnh sửa
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
     </>
   );
 };

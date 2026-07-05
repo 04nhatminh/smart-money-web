@@ -190,7 +190,7 @@ export const ImageBillUploadModal: React.FC<ImageBillUploadModalProps> = ({ isOp
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-lg shadow-lg p-8 max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto"
+        className="bg-white rounded-2xl shadow-lg p-8 max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto"
         style={{ backgroundColor: colors.background.primary }}
         onClick={(e) => e.stopPropagation()}
       >

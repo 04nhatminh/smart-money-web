@@ -85,6 +85,8 @@ export const GenerateBudgetModal: React.FC<GenerateBudgetModalProps> = ({
   useEffect(() => {
     if (isOpen) {
       checkSetupStatus();
+      setSelectedMonth(new Date().getMonth() + 1);
+      setSelectedYear(new Date().getFullYear());
     } else {
       // Reset state on close
       setStep('CHECKING');
@@ -105,8 +107,16 @@ export const GenerateBudgetModal: React.FC<GenerateBudgetModalProps> = ({
       console.log('[GenerateBudgetModal] WS data received:', data);
 
       if ((data.status === 'SUCCESS' || data.status === 'COMPLETED') && data.result) {
-        setTotalBudget(data.result.totalBudget || 0);
-        setSuggestions(data.result.categories || []);
+        let resultObj = data.result;
+        if (typeof resultObj === 'string') {
+          try {
+            resultObj = JSON.parse(resultObj);
+          } catch (e) {
+            console.error('Failed to parse WS result string:', e);
+          }
+        }
+        setTotalBudget(resultObj.totalBudget || 0);
+        setSuggestions(resultObj.categories || []);
         setStep('SUGGESTION');
       } else if (data.status === 'FAILED' || data.status === 'ERROR') {
         setErrorMsg(data.error || 'AI budget allocation failed. Please try again.');
@@ -116,18 +126,52 @@ export const GenerateBudgetModal: React.FC<GenerateBudgetModalProps> = ({
       }
     });
 
-    // Timeout fallback after 30 seconds
+    // Timeout fallback after 60 seconds
     const timer = setTimeout(() => {
       if (step === 'LOADING') {
         setErrorMsg('Request timed out. Please check your network connection.');
         setStep('ERROR');
         unsubscribe();
       }
-    }, 30000);
+    }, 60000);
+
+    // Polling fallback in case WS fails or message is missed
+    const pollInterval = setInterval(async () => {
+      try {
+        console.log(`[GenerateBudgetModal] Polling job status: ${jobId}`);
+        const response = await apiClient.get<any>(`/api/v1/ai/${jobId}`);
+        const data = response.data || response;
+        console.log('[GenerateBudgetModal] Polled data:', data);
+
+        if (data) {
+          if ((data.status === 'SUCCESS' || data.status === 'COMPLETED') && data.result) {
+            let resultObj = data.result;
+            if (typeof resultObj === 'string') {
+              try {
+                resultObj = JSON.parse(resultObj);
+              } catch (e) {
+                console.error('Failed to parse polled result string:', e);
+              }
+            }
+            setTotalBudget(resultObj.totalBudget || 0);
+            setSuggestions(resultObj.categories || []);
+            setStep('SUGGESTION');
+          } else if (data.status === 'FAILED' || data.status === 'ERROR') {
+            setErrorMsg(data.error || 'AI budget allocation failed. Please try again.');
+            setStep('ERROR');
+          } else if (data.statusMessage) {
+            setLoadingStatus(data.statusMessage);
+          }
+        }
+      } catch (err) {
+        console.error('[GenerateBudgetModal] Error polling job status:', err);
+      }
+    }, 3000);
 
     return () => {
       unsubscribe();
       clearTimeout(timer);
+      clearInterval(pollInterval);
     };
   }, [jobId, step]);
 
@@ -228,7 +272,7 @@ export const GenerateBudgetModal: React.FC<GenerateBudgetModalProps> = ({
             </div>
             <button
               onClick={onClose}
-              className="p-1 hover:opacity-70 transition-opacity"
+              className="p-1 hover:opacity-70 transition-opacity hover:cursor-pointer"
               aria-label="Close modal"
             >
               <MdClose size={24} style={{ color: colors.text.secondary }} />
@@ -280,32 +324,19 @@ export const GenerateBudgetModal: React.FC<GenerateBudgetModalProps> = ({
                   </Text>
                 </div>
 
-                {/* Period selection */}
-                <div className="max-w-xs mx-auto space-y-2 text-left pt-2">
-                  <label className="block text-xs font-bold uppercase tracking-wider" style={{ color: colors.text.secondary }}>
+                {/* Period selection (Fixed to current month/year) */}
+                <div className="max-w-xs mx-auto space-y-2 text-center pt-2">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-center" style={{ color: colors.text.secondary }}>
                     Budget Month / Year
                   </label>
-                  <div className="grid grid-cols-2 gap-3">
-                    <select
-                      value={selectedMonth}
-                      onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
-                      className="w-full px-3 py-2 rounded-lg border focus:outline-none"
-                      style={{ backgroundColor: colors.background.secondary, borderColor: colors.border.light, color: colors.text.primary }}
-                    >
-                      {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
-                        <option key={m} value={m}>Month {m}</option>
-                      ))}
-                    </select>
-                    <select
-                      value={selectedYear}
-                      onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-                      className="w-full px-3 py-2 rounded-lg border focus:outline-none"
-                      style={{ backgroundColor: colors.background.secondary, borderColor: colors.border.light, color: colors.text.primary }}
-                    >
-                      {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() + i - 1).map((y) => (
-                        <option key={y} value={y}>{y}</option>
-                      ))}
-                    </select>
+                  <div className="w-full px-4 py-2.5 rounded-lg border font-semibold text-sm text-center"
+                    style={{
+                      backgroundColor: colors.background.secondary,
+                      borderColor: colors.border.light,
+                      color: colors.text.primary
+                    }}
+                  >
+                    Month {selectedMonth} / {selectedYear}
                   </div>
                 </div>
 

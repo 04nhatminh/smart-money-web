@@ -216,7 +216,7 @@ export default function ProjectsPage() {
 
   const stats = getProjectStats();
 
-  const canCreateProject = () => projects.length < 3;
+  const canCreateProject = () => projects.filter(p => p.status === 'ACTIVE').length < 3;
 
   const getPrioritiesUsed = () => {
     const used = new Set<string>();
@@ -519,13 +519,19 @@ export default function ProjectsPage() {
         <CreateProjectModal
           isOpen={isCreateModalOpen}
           onClose={() => setIsCreateModalOpen(false)}
-          onSuccess={() => {
+          onSuccess={(budgetGenerated) => {
             loadProjects();
-            setIsGenerateBudgetModalOpen(true);
+            if (!budgetGenerated) {
+              setIsGenerateBudgetModalOpen(true);
+            }
           }}
           onOpenUserFinancialModal={() => {
             setIsCreateModalOpen(false);
             setIsUserFinancialModalOpen(true);
+          }}
+          onOpenCreateGroupModal={() => {
+            setIsCreateModalOpen(false);
+            setIsCreateGroupModalOpen(true);
           }}
           usedPriorities={Array.from(getPrioritiesUsed())}
           maxProjectsReached={!canCreateProject()}

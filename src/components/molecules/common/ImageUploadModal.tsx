@@ -44,7 +44,7 @@ export const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
         style={{ zIndex: 1000 }}
       >
         <div
-          className="bg-white rounded-lg shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto pointer-events-auto"
+          className="bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto pointer-events-auto"
           style={{ backgroundColor: colors.background.primary }}
           onClick={(e) => e.stopPropagation()}
         >
@@ -61,7 +61,7 @@ export const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
             </Heading>
             <button
               onClick={onClose}
-              className="p-1 rounded-lg transition-colors"
+              className="p-1 rounded-lg transition-colors hover:cursor-pointer"
               style={{
                 color: colors.text.secondary,
                 backgroundColor: `${colors.interactive.primary}10`,

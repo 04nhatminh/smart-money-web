@@ -10,8 +10,6 @@ import { useTranslations } from 'next-intl';
 
 interface BudgetProgressCardProps {
   budget: Budget;
-  onEdit: (budgetId: string) => void;
-  onDelete: (budgetId: string) => void;
 }
 
 const getAlertColor = (alertLevel: string): string => {
@@ -26,8 +24,6 @@ const getAlertColor = (alertLevel: string): string => {
 
 export const BudgetProgressCard: React.FC<BudgetProgressCardProps> = ({
   budget,
-  onEdit,
-  onDelete,
 }) => {
   const { colors } = useTheme();
   const t = useTranslations();
@@ -37,25 +33,34 @@ export const BudgetProgressCard: React.FC<BudgetProgressCardProps> = ({
 
   return (
     <div
-      className="rounded-lg p-4 border"
+      className="rounded-xl p-5 border transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg"
       style={{
         borderColor: colors.border.light,
         backgroundColor: colors.surface.primary,
       }}
+      onMouseEnter={e => {
+        e.currentTarget.style.borderColor = alertColor + '80';
+        e.currentTarget.style.boxShadow = `0 10px 20px -10px ${alertColor}30`;
+      }}
+      onMouseLeave={e => {
+        e.currentTarget.style.borderColor = colors.border.light;
+        e.currentTarget.style.boxShadow = 'none';
+      }}
     >
       {/* Header with Category and Status */}
-      <div className="flex items-start justify-between mb-4">
-        <div className="flex items-center gap-3 flex-1">
+      <div className="flex items-start justify-between mb-5">
+        <div className="flex items-center gap-3.5 flex-1">
           <div
-            className="p-2 rounded-lg flex items-center justify-center"
+            className="p-2.5 rounded-xl flex items-center justify-center transition-all duration-300"
             style={{
-              backgroundColor: colors.surface.secondary,
+              backgroundColor: alertColor + '12',
+              color: alertColor,
             }}
           >
             {getCategoryIcon(budget.category)}
           </div>
           <div className="flex-1">
-            <Text className="font-semibold" style={{ color: colors.text.primary }}>
+            <Text className="font-semibold text-base" style={{ color: colors.text.primary }}>
               {t(`categories.${budget.category}`)}
             </Text>
             <Text className="text-xs" style={{ color: colors.text.tertiary }}>
@@ -68,8 +73,8 @@ export const BudgetProgressCard: React.FC<BudgetProgressCardProps> = ({
         </div>
         <div className="flex items-center gap-2">
           <div
-            className="px-3 py-1 rounded-full text-xs font-medium"
-            style={{ backgroundColor: alertColor + '20', color: alertColor }}
+            className="px-3 py-1 rounded-full text-xs font-semibold tracking-wide uppercase transition-all duration-300"
+            style={{ backgroundColor: alertColor + '18', color: alertColor }}
           >
             {t(`budgets.status.${budget.alertLevel}`)}
           </div>
@@ -77,75 +82,43 @@ export const BudgetProgressCard: React.FC<BudgetProgressCardProps> = ({
       </div>
 
       {/* Amount Info */}
-      <div className="mb-4 space-y-2">
+      <div className="space-y-3">
         <div className="flex justify-between items-baseline">
-          <Text className="text-sm" style={{ color: colors.text.secondary }}>
+          <Text className="text-sm font-medium" style={{ color: colors.text.secondary }}>
             {t('budgets.spentLimit')}
           </Text>
-          <Text className="font-semibold" style={{ color: colors.text.primary }}>
-            {formatVietnamsePrice(budget.spent)} / {formatVietnamsePrice(budget.amountLimit)}
+          <Text className="font-bold text-base" style={{ color: colors.text.primary }}>
+            {formatVietnamsePrice(budget.spent)} <span className="text-xs font-normal" style={{ color: colors.text.tertiary }}>/ {formatVietnamsePrice(budget.amountLimit)}</span>
           </Text>
         </div>
 
         {/* Progress Bar */}
         <div
-          className="h-2 rounded-full overflow-hidden"
+          className="h-2.5 rounded-full overflow-hidden"
           style={{ backgroundColor: colors.border.light }}
         >
           <div
-            className="h-full transition-all duration-300"
+            className="h-full rounded-full transition-all duration-500 ease-out"
             style={{
               width: `${spentPercentage}%`,
               backgroundColor: alertColor,
+              boxShadow: `0 0 8px ${alertColor}60`,
             }}
           />
         </div>
 
         {/* Progress Info */}
-        <div className="flex justify-between items-center">
-          <Text className="text-xs" style={{ color: colors.text.tertiary }}>
+        <div className="flex justify-between items-center pt-1">
+          <Text className="text-xs font-medium" style={{ color: colors.text.tertiary }}>
             {t('budgets.used', { percent: spentPercentage.toFixed(1) })}
           </Text>
-          <Text className="text-xs font-medium" style={{ color: colors.text.primary }}>
-            {t('budgets.remainingAmount', { amount: formatVietnamsePrice(budget.remaining) })}
+          <Text className="text-xs font-semibold" style={{ color: budget.remaining < 0 ? '#EF4444' : '#10B981' }}>
+            {budget.remaining < 0 
+              ? t('budgets.overspent', { amount: formatVietnamsePrice(Math.abs(budget.remaining)) })
+              : t('budgets.remainingAmount', { amount: formatVietnamsePrice(budget.remaining) })
+            }
           </Text>
         </div>
-      </div>
-
-      {/* Action Buttons */}
-      <div className="flex gap-2 pt-2">
-        <button
-          onClick={() => onEdit(budget.budgetId)}
-          className="flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
-          style={{
-            backgroundColor: colors.background.primary + '15',
-            color: colors.text.primary,
-          }}
-          onMouseEnter={e => {
-            e.currentTarget.style.backgroundColor = colors.background.secondary + '25';
-          }}
-          onMouseLeave={e => {
-            e.currentTarget.style.backgroundColor = colors.background.primary + '15';
-          }}
-        >
-          {t('common.edit')}
-        </button>
-        <button
-          onClick={() => onDelete(budget.budgetId)}
-          className="flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
-          style={{
-            backgroundColor: '#EF4444' + '15',
-            color: '#EF4444',
-          }}
-          onMouseEnter={e => {
-            e.currentTarget.style.backgroundColor = '#EF4444' + '25';
-          }}
-          onMouseLeave={e => {
-            e.currentTarget.style.backgroundColor = '#EF4444' + '15';
-          }}
-        >
-          {t('common.delete')}
-        </button>
       </div>
     </div>
   );

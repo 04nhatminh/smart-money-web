@@ -214,7 +214,7 @@ export const CreateBulkBudgetsModal: React.FC<CreateBulkBudgetsModalProps> = ({
       {/* Modal */}
       <div className="fixed inset-0 flex items-center justify-center p-4 pointer-events-none" style={{ zIndex: 1000 }}>
         <div
-          className="bg-white rounded-lg shadow-2xl max-w-2xl w-full pointer-events-auto overflow-hidden flex flex-col max-h-[90vh]"
+          className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full pointer-events-auto overflow-hidden flex flex-col max-h-[90vh]"
           style={{ backgroundColor: colors.background.primary }}
           onClick={e => e.stopPropagation()}
         >
@@ -225,7 +225,7 @@ export const CreateBulkBudgetsModal: React.FC<CreateBulkBudgetsModalProps> = ({
             </Heading>
             <button
               onClick={onClose}
-              className="p-1 rounded-lg transition-colors"
+              className="p-1 rounded-lg transition-colors hover:cursor-pointer"
               style={{
                 color: colors.text.secondary,
                 backgroundColor: `${colors.interactive.primary}10`,
@@ -403,7 +403,7 @@ export const CreateBulkBudgetsModal: React.FC<CreateBulkBudgetsModalProps> = ({
                 type="button"
                 onClick={handleAddBudget}
                 disabled={isLoading}
-                className="w-full px-3 py-2 rounded-lg border-2 border-dashed transition-colors flex items-center justify-center gap-2"
+                className="w-full px-3 py-2 rounded-lg border-2 border-dashed transition-colors flex items-center justify-center gap-2 hover:cursor-pointer"
                 style={{
                   borderColor: colors.interactive.primary,
                   color: colors.interactive.primary,
