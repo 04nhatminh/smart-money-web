@@ -202,6 +202,27 @@ export const useGroups = () => {
     }
   }, []);
 
+  // Delete group
+  const deleteGroup = useCallback(async (groupId: string) => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      await apiClient.delete<any>(API_ENDPOINTS.groups.delete(groupId));
+      return {
+        success: true,
+      };
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : 'Failed to delete group';
+      setError(errorMsg);
+      return {
+        success: false,
+        error: errorMsg,
+      };
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
   // Get suggestions
   const getGroupProjectSuggestions = useCallback(async (data: GetGroupProjectSuggestionsRequest) => {
     try {
@@ -326,6 +347,7 @@ export const useGroups = () => {
     acceptGroupInvite,
     declineGroupInvite,
     removeGroupMember,
+    deleteGroup,
     getGroupProjectSuggestions,
     createGroupProject,
     getGroupProjectDetail,

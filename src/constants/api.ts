@@ -110,6 +110,7 @@ export const API_ENDPOINTS = {
     acceptInvite: '/api/v1/groups/invites/accept',
     declineInvite: '/api/v1/groups/invites/decline',
     removeMember: (groupId: string, userId: string) => `/api/v1/groups/${groupId}/members/${userId}`,
+    delete: (id: string) => `/api/v1/groups/${id}`,
   },
 
   // Group Projects

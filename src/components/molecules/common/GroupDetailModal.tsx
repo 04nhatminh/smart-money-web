@@ -34,6 +34,7 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
     lockGroup,
     inviteGroupMember,
     removeGroupMember,
+    deleteGroup,
     getGroupProjectDetail,
     joinGroupProject,
     dissolveGroupProject,
@@ -52,6 +53,7 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
   const [showRegenerateSuggest, setShowRegenerateSuggest] = useState(false);
   const [resendingEmail, setResendingEmail] = useState<string | null>(null);
   const [sentEmails, setSentEmails] = useState<Record<string, boolean>>({});
+  const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = useState(false);
 
   const isAdmin = group?.adminId === user?.id;
   const isForming = group?.status === 'FORMING';
@@ -201,6 +203,30 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
     }
   };
 
+  const handleDeleteGroup = async () => {
+    if (!group) return;
+    setError(null);
+    setSuccess(null);
+    setLocalLoading(true);
+    try {
+      const res = await deleteGroup(group.groupId);
+      if (res.success) {
+        setSuccess('Group deleted successfully!');
+        setTimeout(() => {
+          onClose();
+          onSuccess?.();
+        }, 1500);
+      } else {
+        setError(res.error || 'Failed to delete group');
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+    } finally {
+      setLocalLoading(false);
+      setIsConfirmDeleteOpen(false);
+    }
+  };
+
   const handleJoinProject = async () => {
     if (!projectDetail) return;
     setError(null);
@@ -320,18 +346,33 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
                       <Text className="font-semibold">{group.status}</Text>
                     </div>
                   </div>
-                  {isAdmin && isForming && (
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      onClick={handleLockGroup}
-                      disabled={isLoading}
-                      className="flex items-center gap-1.5"
-                    >
-                      <MdLock size={16} />
-                      Lock Group
-                    </Button>
-                  )}
+                  <div className="flex items-center gap-2">
+                    {isAdmin && !group.groupProjectId && (
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => setIsConfirmDeleteOpen(true)}
+                        disabled={isLoading}
+                        style={{ color: '#EF4444', borderColor: '#EF444430', backgroundColor: '#EF444405' }}
+                        className="flex items-center gap-1.5 hover:bg-red-50 hover:border-red-300"
+                      >
+                        <MdDelete size={16} />
+                        Delete Group
+                      </Button>
+                    )}
+                    {isAdmin && isForming && (
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={handleLockGroup}
+                        disabled={isLoading}
+                        className="flex items-center gap-1.5"
+                      >
+                        <MdLock size={16} />
+                        Lock Group
+                      </Button>
+                    )}
+                  </div>
                 </div>
 
                 {/* Group Project Info */}
@@ -559,6 +600,51 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
           </div>
         </div>
       </div>
+      {isConfirmDeleteOpen && (
+        <>
+          <div
+            className="fixed inset-0 transition-opacity"
+            style={{
+              backgroundColor: 'rgba(0, 0, 0, 0.5)',
+              zIndex: 1010,
+              backdropFilter: 'blur(4px)',
+            }}
+            onClick={() => setIsConfirmDeleteOpen(false)}
+          />
+          <div className="fixed inset-0 flex items-center justify-center p-4 overflow-y-auto" style={{ zIndex: 1011 }}>
+            <div
+              className="bg-white rounded-2xl overflow-hidden shadow-2xl max-w-md w-full p-6 space-y-6 transition-all transform flex flex-col"
+              style={{ backgroundColor: colors.background.primary }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center gap-3 text-red-500">
+                <MdDelete className="w-8 h-8" style={{ color: '#EF4444' }} />
+                <Heading level={4} style={{ color: colors.text.primary }}>Delete Group</Heading>
+              </div>
+              <Text style={{ color: colors.text.secondary }} className="text-sm">
+                Are you sure you want to delete this group? This will remove all members and delete the group permanently. This action cannot be undone.
+              </Text>
+              <div className="flex gap-3 justify-end pt-2">
+                <Button
+                  variant="secondary"
+                  onClick={() => setIsConfirmDeleteOpen(false)}
+                  disabled={isLoading}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="primary"
+                  onClick={handleDeleteGroup}
+                  disabled={isLoading}
+                  style={{ backgroundColor: '#EF4444', borderColor: '#EF4444', color: 'white' }}
+                >
+                  Confirm Delete
+                </Button>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
       {isConfirmDissolveOpen && (
         <>
           <div
