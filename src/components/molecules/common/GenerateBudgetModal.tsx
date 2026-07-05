@@ -272,7 +272,7 @@ export const GenerateBudgetModal: React.FC<GenerateBudgetModalProps> = ({
             </div>
             <button
               onClick={onClose}
-              className="p-1 hover:opacity-70 transition-opacity"
+              className="p-1 hover:opacity-70 transition-opacity hover:cursor-pointer"
               aria-label="Close modal"
             >
               <MdClose size={24} style={{ color: colors.text.secondary }} />

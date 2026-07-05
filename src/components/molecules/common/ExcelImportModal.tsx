@@ -377,7 +377,7 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
       {/* Modal Container */}
       <div className="fixed inset-0 flex items-center justify-center p-4" style={{ zIndex: 1000 }}>
         <div
-          className="bg-white rounded-xl shadow-2xl max-w-lg w-full max-h-[85vh] flex flex-col overflow-hidden"
+          className="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[85vh] flex flex-col overflow-hidden"
           style={{ backgroundColor: colors.background.primary }}
         >
           {/* Header */}

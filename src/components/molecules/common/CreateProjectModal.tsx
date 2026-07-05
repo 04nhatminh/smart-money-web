@@ -872,7 +872,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
           />
           <div className="fixed inset-0 flex items-center justify-center p-4 overflow-y-auto" style={{ zIndex: 1000 }}>
             <div
-              className="bg-white rounded-2xl shadow-2xl max-w-md w-full my-8 p-8 text-center space-y-6 pointer-events-auto"
+              className="bg-white rounded-2xl overflow-hidden shadow-2xl max-w-md w-full my-8 p-8 text-center space-y-6 pointer-events-auto"
               style={{ backgroundColor: colors.background.primary }}
               onClick={e => e.stopPropagation()}
             >

@@ -88,7 +88,7 @@ export const ProjectAdvisorResultModal: React.FC<ProjectAdvisorResultModalProps>
         style={{ zIndex: 10000 }}
       >
         <div
-          className="bg-white rounded-lg shadow-2xl max-w-md w-full pointer-events-auto my-8"
+          className="bg-white rounded-2xl overflow-hidden shadow-2xl max-w-md w-full pointer-events-auto my-8"
           style={{ backgroundColor: colors.background.primary }}
           onClick={(e) => e.stopPropagation()}
         >
@@ -105,7 +105,7 @@ export const ProjectAdvisorResultModal: React.FC<ProjectAdvisorResultModalProps>
             </Heading>
             <button
               onClick={onClose}
-              className="p-1 rounded-lg transition-colors"
+              className="p-1 rounded-lg transition-colors hover:cursor-pointer"
               disabled={isLoading}
               style={{
                 color: colors.text.secondary,

@@ -186,7 +186,7 @@ export const UserIncomeModal: React.FC<UserIncomeModalProps> = ({
       {/* Modal */}
       <div className="fixed inset-0 flex items-center justify-center p-4 pointer-events-none" style={{ zIndex: 10002 }}>
         <div
-          className="bg-white rounded-lg shadow-2xl max-w-md w-full pointer-events-auto overflow-hidden flex flex-col max-h-[90vh]"
+          className="bg-white rounded-2xl shadow-2xl max-w-md w-full pointer-events-auto overflow-hidden flex flex-col max-h-[90vh]"
           style={{ backgroundColor: colors.background.primary }}
           onClick={e => e.stopPropagation()}
         >
@@ -197,7 +197,7 @@ export const UserIncomeModal: React.FC<UserIncomeModalProps> = ({
             </Heading>
             <button
               onClick={onClose}
-              className="p-1 hover:opacity-70 transition-opacity"
+              className="p-1 hover:opacity-70 transition-opacity hover:cursor-pointer"
               aria-label="Close modal"
             >
               <MdClose size={24} style={{ color: colors.text.secondary }} />

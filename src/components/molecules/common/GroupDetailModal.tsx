@@ -474,11 +474,11 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
                                 <button
                                   onClick={() => handleResendInvite(member.email)}
                                   disabled={isLoading}
-                                  className="p-2 rounded-lg transition-colors hover:bg-yellow-50 disabled:opacity-50"
-                                  style={{ color: '#F59E0B' }}
+                                  className="text-xs px-2.5 py-1 rounded-md border transition-all hover:bg-yellow-50 disabled:opacity-50 font-medium"
+                                  style={{ color: '#D97706', borderColor: '#FCD34D', backgroundColor: '#FEF3C750' }}
                                   title={`Resend invitation to ${member.email}`}
                                 >
-                                  <MdRefresh size={18} />
+                                  Resend
                                 </button>
                               )}
                               {isAdmin && member.inviteStatus === 'DECLINED' && (
@@ -541,7 +541,7 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
           />
           <div className="fixed inset-0 flex items-center justify-center p-4 overflow-y-auto" style={{ zIndex: 1011 }}>
             <div
-              className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 space-y-6 transition-all transform flex flex-col"
+              className="bg-white rounded-2xl overflow-hidden shadow-2xl max-w-md w-full p-6 space-y-6 transition-all transform flex flex-col"
               style={{ backgroundColor: colors.background.primary }}
               onClick={(e) => e.stopPropagation()}
             >
@@ -587,7 +587,7 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
           />
           <div className="fixed inset-0 flex items-center justify-center p-4 overflow-y-auto" style={{ zIndex: 1011 }}>
             <div
-              className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 space-y-6 transition-all transform flex flex-col"
+              className="bg-white rounded-2xl overflow-hidden shadow-2xl max-w-md w-full p-6 space-y-6 transition-all transform flex flex-col"
               style={{ backgroundColor: colors.background.primary }}
               onClick={(e) => e.stopPropagation()}
             >
