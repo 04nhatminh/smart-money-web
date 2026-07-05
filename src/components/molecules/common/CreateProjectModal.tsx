@@ -582,7 +582,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
               </div>
 
               {/* Content */}
-              <form onSubmit={handleSubmit} className="p-6 space-y-4 max-h-[75vh] overflow-y-auto">
+              <form onSubmit={handleSubmit} noValidate className="p-6 space-y-4 max-h-[75vh] overflow-y-auto">
                 {success && (
                   <div
                     className="p-4 rounded-lg text-center"
@@ -829,7 +829,6 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
                       onChange={(e) => setTotalMonths(e.target.value)}
                       disabled={isLoading}
                       min={1}
-                      max={60}
                       required
                     />
                   </div>
@@ -1054,16 +1053,17 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
           <div
             className="fixed inset-0 transition-opacity"
             style={{
-              backgroundColor: 'rgba(0, 0, 0, 0.3)',
+              backgroundColor: 'rgba(0, 0, 0, 0.5)',
               top: 0,
               left: 0,
               width: '100%',
               height: '100%',
-              zIndex: 999,
+              zIndex: 1010,
+              backdropFilter: 'blur(4px)',
             }}
             onClick={() => setShowReactiveWarning(false)}
           />
-          <div className="fixed inset-0 flex items-center justify-center p-4 overflow-y-auto" style={{ zIndex: 1000 }}>
+          <div className="fixed inset-0 flex items-center justify-center p-4 overflow-y-auto" style={{ zIndex: 1020 }}>
             <div
               className="bg-white rounded-2xl shadow-2xl max-w-md w-full my-8 overflow-hidden pointer-events-auto"
               style={{ backgroundColor: colors.background.primary }}

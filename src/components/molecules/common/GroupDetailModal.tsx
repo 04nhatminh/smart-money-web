@@ -349,12 +349,11 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
                   <div className="flex items-center gap-2">
                     {isAdmin && !group.groupProjectId && (
                       <Button
-                        variant="secondary"
+                        variant="danger"
                         size="sm"
                         onClick={() => setIsConfirmDeleteOpen(true)}
                         disabled={isLoading}
-                        style={{ color: '#EF4444', borderColor: '#EF444430', backgroundColor: '#EF444405' }}
-                        className="flex items-center gap-1.5 hover:bg-red-50 hover:border-red-300"
+                        className="flex items-center gap-1.5"
                       >
                         <MdDelete size={16} />
                         Delete Group
@@ -482,11 +481,22 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
                   <div className="divide-y border rounded-xl overflow-hidden" style={{ borderColor: colors.border.light }}>
                     {group.members.map((member) => {
                       const prog = projectDetail?.members.find(m => m.userId === member.userId);
+                      const isCurrentUser = member.userId === user?.id;
                       return (
-                        <div key={member.userId} className="p-4 flex items-center justify-between flex-wrap gap-4" style={{ backgroundColor: 'white' }}>
+                        <div
+                          key={member.userId}
+                          className="p-4 flex items-center justify-between flex-wrap gap-4 transition-all"
+                          style={{
+                            backgroundColor: isCurrentUser ? `${colors.interactive.primary}08` : 'white',
+                            borderLeft: isCurrentUser ? `4px solid ${colors.interactive.primary}` : 'none',
+                            paddingLeft: isCurrentUser ? '12px' : '16px',
+                          }}
+                        >
                           <div>
-                            <div className="flex items-center gap-2">
-                              <Text className="font-semibold">{member.username || 'User'}</Text>
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <Text className={`font-semibold ${isCurrentUser ? 'font-bold' : ''}`} style={{ color: isCurrentUser ? colors.interactive.primary : colors.text.primary }}>
+                                {member.username || 'User'} {isCurrentUser && '(You)'}
+                              </Text>
                               <span className="text-[10px] px-1.5 py-0.5 rounded font-bold uppercase shrink-0" style={{
                                 backgroundColor: member.role === 'ADMIN' ? `${colors.interactive.primary}15` : colors.background.secondary,
                                 color: member.role === 'ADMIN' ? colors.interactive.primary : colors.text.secondary
@@ -494,14 +504,25 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
                                 {member.role}
                               </span>
                             </div>
+                            {member.email && (
+                              <div className="text-xs text-gray-400 mt-0.5">{member.email}</div>
+                            )}
                             <div className="flex gap-2 items-center mt-1 text-xs text-gray-500">
-                              <span className="flex items-center gap-1">
-                                {member.inviteStatus === 'JOINED' && <MdCheckCircle className="text-green-500" />}
-                                {member.inviteStatus === 'INVITED' && <span className="w-2 h-2 rounded-full bg-yellow-500" />}
-                                {member.inviteStatus === 'DECLINED' && <MdCancel className="text-red-500" />}
-                                {member.inviteStatus}
-                              </span>
-                              {member.capacitySnapshot != null && <span>&bull; Snap: {formatPrice(member.capacitySnapshot)}</span>}
+                              {projectDetail ? (
+                                prog?.projectStatus === 'ABANDONED' && (
+                                  <span className="flex items-center gap-1 text-red-500 font-semibold uppercase">
+                                    <MdCancel className="text-red-500" />
+                                    ABANDONED
+                                  </span>
+                                )
+                              ) : (
+                                <span className="flex items-center gap-1">
+                                  {member.inviteStatus === 'JOINED' && <MdCheckCircle className="text-green-500" />}
+                                  {member.inviteStatus === 'INVITED' && <span className="w-2 h-2 rounded-full bg-yellow-500" />}
+                                  {member.inviteStatus === 'DECLINED' && <MdCancel className="text-red-500" />}
+                                  {member.inviteStatus}
+                                </span>
+                              )}
                             </div>
                           </div>
 

@@ -189,6 +189,12 @@ export default function NotificationsPage() {
     setError(null);
     setSuccess(null);
     try {
+      await apiClient.patch('/api/v1/notifications/read', { notificationIds: [notifId] });
+      window.dispatchEvent(new CustomEvent('notifications-changed'));
+    } catch (e) {
+      console.error('Failed to mark accepted invitation notification as read:', e);
+    }
+    try {
       const res = await acceptGroupInvite(token);
       if (res.success) {
         setSuccess('Successfully joined the group!');
@@ -210,6 +216,12 @@ export default function NotificationsPage() {
     setActionLoading(notifId);
     setError(null);
     setSuccess(null);
+    try {
+      await apiClient.patch('/api/v1/notifications/read', { notificationIds: [notifId] });
+      window.dispatchEvent(new CustomEvent('notifications-changed'));
+    } catch (e) {
+      console.error('Failed to mark declined invitation notification as read:', e);
+    }
     try {
       const res = await declineGroupInvite(token);
       if (res.success) {
@@ -425,7 +437,7 @@ export default function NotificationsPage() {
                           </Button>
                         </>
                       )}
-                      {!notification.read && (
+                      {!notification.read && !isInvite && (
                         <Button
                           variant="secondary"
                           size="sm"
