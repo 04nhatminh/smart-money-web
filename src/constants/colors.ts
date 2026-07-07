@@ -32,7 +32,7 @@ export const PRIMARY_COLORS = {
     secondary: PRIMARY_PALETTE[100],
     tertiary: PRIMARY_PALETTE[150],
   },
-  
+
   // Text
   text: {
     primary: PRIMARY_PALETTE[900],
@@ -40,24 +40,25 @@ export const PRIMARY_COLORS = {
     tertiary: PRIMARY_PALETTE[400],
     inverse: PRIMARY_PALETTE.white,
   },
-  
+
   // Surfaces (elevated components)
   surface: {
     primary: PRIMARY_PALETTE.white,
     secondary: PRIMARY_PALETTE[100],
   },
-  
+
   // States
   states: {
     hover: 'rgba(54, 41, 183, 0.04)',
     active: 'rgba(54, 41, 183, 0.08)',
     disabled: 'rgba(54, 41, 183, 0.12)',
   },
-  
+
   // Interactive
   interactive: {
     primary: PRIMARY_PALETTE.base,
-    secondary: PRIMARY_PALETTE[350],
+    secondary: PRIMARY_PALETTE[150],
+    tertiary: PRIMARY_PALETTE[350],
     danger: '#D32F2F',
     dangerHover: '#C62828',
     success: '#388E3C',
@@ -67,21 +68,21 @@ export const PRIMARY_COLORS = {
     info: '#0288D1',
     infoHover: '#01579B',
   },
-  
+
   // Borders
   border: {
     light: PRIMARY_PALETTE[200],
     medium: PRIMARY_PALETTE[300],
     dark: PRIMARY_PALETTE[400],
   },
-  
+
   // Shadows
   shadow: {
     sm: 'rgba(54, 41, 183, 0.1)',
     md: 'rgba(54, 41, 183, 0.12)',
     lg: 'rgba(54, 41, 183, 0.14)',
   },
-  
+
   // Palette values (for gradient and direct access)
   palette: PRIMARY_PALETTE,
 } as const;
@@ -94,7 +95,7 @@ export const DARK_COLORS = {
     secondary: PRIMARY_PALETTE[900],
     tertiary: PRIMARY_PALETTE[850],
   },
-  
+
   // Text
   text: {
     primary: PRIMARY_PALETTE.white,
@@ -102,24 +103,25 @@ export const DARK_COLORS = {
     tertiary: PRIMARY_PALETTE[200],
     inverse: PRIMARY_PALETTE[900],
   },
-  
+
   // Surfaces (elevated components)
   surface: {
     primary: PRIMARY_PALETTE[900],
     secondary: PRIMARY_PALETTE[850],
   },
-  
+
   // States
   states: {
     hover: 'rgba(200, 193, 241, 0.1)',
     active: 'rgba(200, 193, 241, 0.15)',
     disabled: 'rgba(200, 193, 241, 0.25)',
   },
-  
+
   // Interactive
   interactive: {
     primary: PRIMARY_PALETTE[350],
     secondary: PRIMARY_PALETTE[550],
+    tertiary: PRIMARY_PALETTE[700],
     danger: '#FF5252',
     dangerHover: '#FF1744',
     success: '#66BB6A',
@@ -129,21 +131,21 @@ export const DARK_COLORS = {
     info: '#42A5F5',
     infoHover: '#1E88E5',
   },
-  
+
   // Borders
   border: {
     light: PRIMARY_PALETTE[800],
     medium: PRIMARY_PALETTE[700],
     dark: PRIMARY_PALETTE[600],
   },
-  
+
   // Shadows
   shadow: {
     sm: 'rgba(0, 0, 0, 0.5)',
     md: 'rgba(0, 0, 0, 0.6)',
     lg: 'rgba(0, 0, 0, 0.7)',
   },
-  
+
   // Palette values (for gradient and direct access)
   palette: PRIMARY_PALETTE,
 } as const;

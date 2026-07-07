@@ -50,7 +50,7 @@ export const Footer: React.FC<FooterProps> = ({
                   className="text-xl m-0 font-bold flex items-center"
                 >
                   <span style={{ color: colorScheme === 'dark' ? colors.palette.white : colors.interactive.primary }}>Smart</span>
-                  <span style={{ color: colorScheme === 'dark' ? colors.palette.white : colors.interactive.secondary }}>Money</span>
+                  <span style={{ color: colorScheme === 'dark' ? colors.palette.white : colors.interactive.tertiary }}>Money</span>
                 </Heading>
               </div>
               <Text variant="caption" style={{ color: colors.text.secondary }}>

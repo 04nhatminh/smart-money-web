@@ -39,7 +39,7 @@ export const Button: React.FC<ButtonProps> = ({
     } as React.CSSProperties,
     secondary: {
       backgroundColor: colors.interactive.secondary,
-      color: colors.palette.white,
+      color: colors.palette.base,
     } as React.CSSProperties,
     danger: {
       backgroundColor: colors.interactive.danger,
