@@ -123,7 +123,7 @@ export const Header: React.FC<HeaderProps> = ({
               className="text-2xl md:text-4xl m-0 font-bold flex items-center"
             >
               <span style={{ color: colorScheme === 'dark' ? colors.palette.white : colors.interactive.primary }}>Smart</span>
-              <span style={{ color: colorScheme === 'dark' ? colors.palette.white : colors.interactive.secondary }}>Money</span>
+              <span style={{ color: colorScheme === 'dark' ? colors.palette.white : colors.interactive.tertiary }}>Money</span>
             </Heading>
           </div>
 
@@ -170,7 +170,7 @@ export const Header: React.FC<HeaderProps> = ({
                     />
                   </svg>
                   {unreadCount > 0 && (
-                    <span 
+                    <span
                       className="absolute -top-1 -right-1 min-w-[20px] h-5 px-1.5 rounded-full text-[10px] font-bold flex items-center justify-center text-white"
                       style={{ backgroundColor: colors.interactive.danger }}
                     >
