@@ -147,11 +147,13 @@ export const Header: React.FC<HeaderProps> = ({
                 {/* Notification Bell */}
                 <button
                   onClick={handleNotificationClick}
-                  className="p-2 rounded-lg transition-colors duration-200 hover:bg-opacity-10 flex items-center justify-center relative hover:cursor-pointer"
+                  className="p-2 rounded-lg transition-colors duration-200 flex items-center justify-center relative hover:cursor-pointer"
                   style={{
                     backgroundColor: `${colors.interactive.primary}10`,
                     color: colors.interactive.primary,
                   }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = `${colors.interactive.primary}20`}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = `${colors.interactive.primary}10`}
                   title={t('common.notifications') || 'Notifications'}
                 >
                   {/* Bell Icon SVG */}

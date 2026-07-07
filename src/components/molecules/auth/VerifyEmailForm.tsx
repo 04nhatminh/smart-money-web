@@ -127,7 +127,7 @@ export const VerifyEmailForm: React.FC<VerifyEmailFormProps> = ({ email }) => {
         />
         <h1 className="text-2xl font-bold flex items-center">
           <span style={{ color: colorScheme === 'dark' ? colors.palette?.white : colors.interactive.primary }}>Smart</span>
-          <span style={{ color: colorScheme === 'dark' ? colors.palette?.white : colors.interactive.secondary }}>Money</span>
+          <span style={{ color: colorScheme === 'dark' ? colors.palette?.white : colors.interactive.tertiary }}>Money</span>
         </h1>
       </div>
 
