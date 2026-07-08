@@ -395,6 +395,7 @@
       "HIGH": "Cao"
     },
     "targetContributed": "Mục tiêu / Đã đóng góp",
+    "contributedTarget": "Đã đóng góp / Mục tiêu",
     "reached": "Đạt {percent}%",
     "remaining": "Còn lại {amount}",
     "deadline": "Hạn chót",
