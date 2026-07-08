@@ -395,6 +395,7 @@
       "HIGH": "High"
     },
     "targetContributed": "Target / Contributed",
+    "contributedTarget": "Contributed / Target",
     "reached": "{percent}% reached",
     "remaining": "{amount} remaining",
     "deadline": "Deadline",
