@@ -3,7 +3,8 @@
 import React from 'react';
 import { Button, Text, Heading } from '@/components/atoms';
 import { useTheme } from '@/context';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
+import Link from 'next/link';
 
 interface FooterProps {
   year?: number;
@@ -16,116 +17,47 @@ export const Footer: React.FC<FooterProps> = ({
 }) => {
   const { colors, colorScheme } = useTheme();
   const t = useTranslations();
+  const locale = useLocale();
 
-  const productLinks = [
-    { label: t('common.features'), href: '#features' },
-    { label: t('common.pricing'), href: '#pricing' },
-    { label: t('common.security'), href: '#security' },
-  ];
-
-  const companyLinks = [
-    { label: t('common.about'), href: '#about' },
-    { label: t('common.blog'), href: '#blog' },
-    { label: t('common.contact'), href: '#contact' },
-  ];
-
-  const supportLinks = [
-    { label: t('common.helpCenter'), href: '#help' },
-    { label: t('common.contact'), href: '#contact' },
-    { label: t('common.privacy'), href: '#privacy' },
+  const footerLinks = [
+    { label: t('common.privacy'), href: `/${locale}/privacy` },
+    { label: t('common.helpCenter'), href: `/${locale}/help` },
+    { label: t('common.contact'), href: `/${locale}/contact` },
   ];
 
   return (
     <footer className="mt-12 transition-colors border-t" style={{ backgroundColor: colors.background.primary, borderTopColor: colors.border.light }}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Main Footer Content */}
-        <div className="py-12">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-            {/* Company Info */}
-            <div>
-              <div className="flex items-center gap-3 mb-4">
-                <img src="/logo.png" alt={appName} className="h-12 w-12 object-contain flex-shrink-0" style={{ filter: colorScheme === 'dark' ? 'brightness(0) invert(1)' : 'none' }} />
-                <Heading
-                  level={2}
-                  className="text-xl m-0 font-bold flex items-center"
-                >
-                  <span style={{ color: colorScheme === 'dark' ? colors.palette.white : colors.interactive.primary }}>Smart</span>
-                  <span style={{ color: colorScheme === 'dark' ? colors.palette.white : colors.interactive.tertiary }}>Money</span>
-                </Heading>
-              </div>
-              <Text variant="caption" style={{ color: colors.text.secondary }}>
-                {t('finance.appDescription')}
-              </Text>
+      <div className="mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="flex flex-col md:flex-row justify-between items-center gap-6">
+          {/* Brand & Copyright Info */}
+          <div className="flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left">
+            <div className="flex items-center gap-2">
+              <img src="/logo.png" alt={appName} className="h-8 w-8 object-contain flex-shrink-0" style={{ filter: colorScheme === 'dark' ? 'brightness(0) invert(1)' : 'none' }} />
+              <Heading
+                level={2}
+                className="text-lg m-0 font-bold flex items-center"
+              >
+                <span style={{ color: colorScheme === 'dark' ? colors.palette.white : colors.interactive.primary }}>Smart</span>
+                <span style={{ color: colorScheme === 'dark' ? colors.palette.white : colors.interactive.tertiary }}>Money</span>
+              </Heading>
             </div>
-
-            {/* Product */}
-            <div>
-              <Text className="font-semibold mb-4" style={{ color: colors.text.primary }}>
-                {t('common.features')}
-              </Text>
-              <ul className="space-y-2">
-                {productLinks.map((link) => (
-                  <li key={link.href}>
-                    <a
-                      href={link.href}
-                      className="transition-colors hover:opacity-80"
-                      style={{ color: colors.text.secondary }}
-                    >
-                      {link.label}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Company */}
-            <div>
-              <Text className="font-semibold mb-4" style={{ color: colors.text.primary }}>
-                {t('common.about')}
-              </Text>
-              <ul className="space-y-2">
-                {companyLinks.map((link) => (
-                  <li key={link.href}>
-                    <a
-                      href={link.href}
-                      className="transition-colors hover:opacity-80"
-                      style={{ color: colors.text.secondary }}
-                    >
-                      {link.label}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Support */}
-            <div>
-              <Text className="font-semibold mb-4" style={{ color: colors.text.primary }}>
-                {t('common.settings')}
-              </Text>
-              <ul className="space-y-2">
-                {supportLinks.map((link) => (
-                  <li key={link.href}>
-                    <a
-                      href={link.href}
-                      className="transition-colors hover:opacity-80"
-                      style={{ color: colors.text.secondary }}
-                    >
-                      {link.label}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
+            <Text variant="caption" style={{ color: colors.text.secondary }} className="sm:border-l sm:pl-4 sm:border-gray-300 dark:sm:border-gray-700">
+              © {year} {appName}. {t('page.copyright')}
+            </Text>
           </div>
 
-          {/* Divider */}
-          <div style={{ borderTopColor: colors.border.light, borderTopWidth: '1px' }} className="py-8">
-            <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-              <Text variant="caption" style={{ color: colors.text.secondary }} className="text-center md:text-left">
-                © {year} {appName}. {t('page.copyright')}
-              </Text>
-            </div>
+          {/* Minimal Links */}
+          <div className="flex items-center gap-6 flex-wrap justify-center">
+            {footerLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="text-sm transition-colors hover:opacity-80"
+                style={{ color: colors.text.secondary }}
+              >
+                {link.label}
+              </Link>
+            ))}
           </div>
         </div>
       </div>
