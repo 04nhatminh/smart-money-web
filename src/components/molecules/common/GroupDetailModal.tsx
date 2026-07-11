@@ -8,7 +8,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useProjects } from '@/hooks/useProjects';
 import { GroupDetailResponse, GroupProjectDetailResponse, GroupMemberResponse } from '@/types/group.api';
 import { formatAmountInput, parseFormattedNumber, formatNumber, formatPrice } from '@/lib/format';
-import { MdClose, MdLock, MdPersonAdd, MdDelete, MdAddCircle, MdCheckCircle, MdCancel, MdRefresh, MdAutoAwesome } from 'react-icons/md';
+import { MdClose, MdLock, MdLockOpen, MdPersonAdd, MdDelete, MdAddCircle, MdCheckCircle, MdCancel, MdRefresh, MdAutoAwesome } from 'react-icons/md';
 import { GenerateBudgetModal } from './GenerateBudgetModal';
 
 interface GroupDetailModalProps {
@@ -32,6 +32,7 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
   const {
     getGroupDetail,
     lockGroup,
+    unlockGroup,
     inviteGroupMember,
     removeGroupMember,
     deleteGroup,
@@ -195,6 +196,26 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
         loadDetails();
       } else {
         setError(res.error || 'Failed to lock group. Verify you have at least one JOINED member.');
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+    } finally {
+      setLocalLoading(false);
+    }
+  };
+
+  const handleUnlockGroup = async () => {
+    if (!group) return;
+    setError(null);
+    setSuccess(null);
+    setLocalLoading(true);
+    try {
+      const res = await unlockGroup(group.groupId);
+      if (res.success) {
+        setSuccess('Group unlocked successfully!');
+        loadDetails();
+      } else {
+        setError(res.error || 'Failed to unlock group.');
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
@@ -371,6 +392,18 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
                         Lock Group
                       </Button>
                     )}
+                    {isAdmin && isLocked && !group.groupProjectId && (
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={handleUnlockGroup}
+                        disabled={isLoading}
+                        className="flex items-center gap-1.5"
+                      >
+                        <MdLockOpen size={16} />
+                        Unlock Group
+                      </Button>
+                    )}
                   </div>
                 </div>
 
@@ -538,7 +571,7 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
                             </div>
                           ) : (
                             <div className="flex items-center gap-1">
-                              {isAdmin && member.inviteStatus === 'INVITED' && (
+                              {isAdmin && isForming && member.inviteStatus === 'INVITED' && (
                                 <>
                                   {sentEmails[member.email] ? (
                                     <span
@@ -552,11 +585,10 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
                                     <button
                                       onClick={() => handleResendInvite(member.email)}
                                       disabled={isLoading || resendingEmail === member.email}
-                                      className={`text-xs px-2.5 py-1 rounded-md border transition-all font-medium flex items-center gap-1 ${
-                                        resendingEmail === member.email
+                                      className={`text-xs px-2.5 py-1 rounded-md border transition-all font-medium flex items-center gap-1 ${resendingEmail === member.email
                                           ? 'bg-amber-50/50 text-amber-700/60 border-amber-200 cursor-not-allowed'
                                           : 'bg-amber-50 text-amber-700 border-amber-300 hover:bg-amber-100 active:bg-amber-200 cursor-pointer'
-                                      }`}
+                                        }`}
                                       title={`Resend invitation to ${member.email}`}
                                     >
                                       {resendingEmail === member.email ? (
@@ -572,9 +604,16 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
                                       )}
                                     </button>
                                   )}
+                                  <button
+                                    onClick={() => handleRemoveMember(member.userId)}
+                                    className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors hover:cursor-pointer"
+                                    title="Kick invited member"
+                                  >
+                                    <MdDelete size={18} />
+                                  </button>
                                 </>
                               )}
-                              {isAdmin && member.inviteStatus === 'DECLINED' && (
+                              {isAdmin && isForming && member.inviteStatus === 'DECLINED' && (
                                 <button
                                   onClick={() => handleRemoveMember(member.userId)}
                                   className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"

@@ -428,21 +428,33 @@ export default function AnalysisPage() {
       <div className="space-y-6">
 
         {/* ── Page Header ── */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <Heading level={2} className="flex items-center gap-2">
-              <MdAnalytics className="w-7 h-7" style={{ color: colors.interactive.primary }} />
-              {t('analysis.title')}
-            </Heading>
-            <Text style={{ color: colors.text.secondary }} className="text-sm mt-1">
-              {t('analysis.subtitle', { year: selectedYear })}
-            </Text>
-          </div>
+        <div className="flex flex-col gap-1 mb-6">
+          <Heading level={2} className="flex items-center gap-2">
+            <MdAnalytics className="w-7 h-7" style={{ color: colors.interactive.primary }} />
+            {t('analysis.title')}
+          </Heading>
+          <Text style={{ color: colors.text.secondary }} className="text-sm">
+            {t('analysis.subtitle', { year: selectedYear })}
+          </Text>
+        </div>
 
-          {/* Filter Controls with DatePeriodSelector and viewMode */}
-          <div className="flex items-center gap-3 flex-wrap">
+        {/* ── Filter Controls with DatePeriodSelector and viewMode (Centered Toolbar) ── */}
+        <div className="flex justify-center mb-8">
+          <div
+            className="flex items-center gap-3 flex-wrap justify-center p-2 rounded-2xl border shadow-sm"
+            style={{
+              backgroundColor: colors.background.secondary,
+              borderColor: colors.border.light,
+            }}
+          >
             {/* View Mode Buttons */}
-            <div className="flex p-1 rounded-xl border" style={{ backgroundColor: colors.background.secondary, borderColor: colors.border.light }}>
+            <div
+              className="flex items-center h-10 p-1 rounded-xl border text-xs gap-1"
+              style={{
+                backgroundColor: colors.background.primary,
+                borderColor: colors.border.light,
+              }}
+            >
               {(['DAY', 'MONTH', 'YEAR'] as const).map((mode) => (
                 <button
                   key={mode}
@@ -456,9 +468,9 @@ export default function AnalysisPage() {
                       }
                     }
                   }}
-                  className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all hover:cursor-pointer"
+                  className="px-3 h-full flex items-center justify-center rounded-lg text-xs font-semibold transition-all hover:cursor-pointer"
                   style={{
-                    backgroundColor: viewMode === mode ? colors.surface.primary : 'transparent',
+                    backgroundColor: viewMode === mode ? colors.surface.secondary : 'transparent',
                     color: viewMode === mode ? colors.interactive.primary : colors.text.secondary,
                     boxShadow: viewMode === mode ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
                   }}
@@ -484,7 +496,7 @@ export default function AnalysisPage() {
               onClick={loadAnalytics}
               disabled={isLoading}
               title={t('analysis.refresh')}
-              className="w-10 h-10 rounded-full flex items-center justify-center transition hover:opacity-80"
+              className="w-10 h-10 rounded-xl flex items-center justify-center transition hover:opacity-80"
               style={{ backgroundColor: `${colors.interactive.primary}22` }}
             >
               <MdRefresh
@@ -656,7 +668,7 @@ export default function AnalysisPage() {
 
                       {/* Day Transactions List */}
                       <div className="mt-2">
-                        <Heading level={4} className="text-xs font-bold uppercase tracking-wider mb-3" style={{ color: colors.text.secondary }}>
+                        <Heading level={4} className="text-xs font-bold uppercase tracking-wider pb-3" style={{ color: colors.text.secondary }}>
                           {locale === 'vi' ? 'Giao dịch trong ngày' : 'Daily Transactions'}
                         </Heading>
                         {loadingDayTransactions ? (

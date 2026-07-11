@@ -21,6 +21,8 @@ export const DatePeriodSelector: React.FC<DatePeriodSelectorProps> = ({
   const { colors } = useTheme();
   const locale = useLocale();
   const [selectorMode, setSelectorMode] = useState<'slider' | 'quick'>('slider');
+  const [isMonthOpen, setIsMonthOpen] = useState(false);
+  const [isYearOpen, setIsYearOpen] = useState(false);
 
   const handlePrev = () => {
     if (showMonth) {
@@ -56,10 +58,21 @@ export const DatePeriodSelector: React.FC<DatePeriodSelectorProps> = ({
   };
 
   return (
-    <div className="flex items-center gap-2 flex-wrap">
+    <div className="flex items-center gap-2 flex-wrap relative">
+      {/* Click-outside backdrop */}
+      {(isMonthOpen || isYearOpen) && (
+        <div
+          className="fixed inset-0 z-40 bg-transparent cursor-default"
+          onClick={() => {
+            setIsMonthOpen(false);
+            setIsYearOpen(false);
+          }}
+        />
+      )}
+
       {selectorMode === 'slider' ? (
         <div
-          className="flex items-center gap-3 px-3 py-1.5 rounded-xl border transition-all"
+          className="flex items-center h-10 gap-3 px-3 rounded-xl border transition-all"
           style={{
             backgroundColor: colors.background.secondary,
             borderColor: colors.border.light,
@@ -95,63 +108,151 @@ export const DatePeriodSelector: React.FC<DatePeriodSelectorProps> = ({
         </div>
       ) : (
         <div
-          className="flex items-center gap-2 px-3 py-1.5 rounded-xl border transition-all"
+          className="flex items-center h-10 gap-2 px-3 rounded-xl border transition-all"
           style={{
             backgroundColor: colors.background.secondary,
             borderColor: colors.border.light,
           }}
         >
           {showMonth && (
-            <select
-              value={currentMonth}
-              onChange={(e) => onChange(parseInt(e.target.value), currentYear)}
-              className="px-2 py-1 rounded-lg border outline-none font-semibold text-xs"
+            <div className="relative z-50">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsMonthOpen(!isMonthOpen);
+                  setIsYearOpen(false);
+                }}
+                className="px-2.5 h-7 rounded-lg border outline-none font-semibold text-xs flex items-center justify-between gap-1.5 transition hover:opacity-80 hover:cursor-pointer min-w-[64px]"
+                style={{
+                  borderColor: colors.border.light,
+                  backgroundColor: colors.background.primary,
+                  color: colors.text.primary,
+                }}
+              >
+                <span>{new Date(2024, currentMonth - 1).toLocaleString(locale, { month: 'short' })}</span>
+                <span className="text-[8px] opacity-70">▼</span>
+              </button>
+              {isMonthOpen && (
+                <div
+                  className="absolute left-0 mt-1 w-28 max-h-56 overflow-y-auto rounded-xl border shadow-xl z-50 py-1"
+                  style={{
+                    backgroundColor: colors.background.primary,
+                    borderColor: colors.border.light,
+                  }}
+                >
+                  {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => {
+                    const isSelected = m === currentMonth;
+                    return (
+                      <button
+                        key={m}
+                        type="button"
+                        onClick={() => {
+                          onChange(m, currentYear);
+                          setIsMonthOpen(false);
+                        }}
+                        className="w-full text-left px-3 py-1.5 text-xs font-semibold hover:cursor-pointer transition-colors"
+                        style={{
+                          backgroundColor: isSelected ? `${colors.interactive.primary}15` : 'transparent',
+                          color: isSelected ? colors.interactive.primary : colors.text.primary,
+                        }}
+                      >
+                        {new Date(2024, m - 1).toLocaleString(locale, { month: 'long' })}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
+          
+          <div className="relative z-50">
+            <button
+              type="button"
+              onClick={() => {
+                setIsYearOpen(!isYearOpen);
+                setIsMonthOpen(false);
+              }}
+              className="px-2.5 h-7 rounded-lg border outline-none font-semibold text-xs flex items-center justify-between gap-1.5 transition hover:opacity-80 hover:cursor-pointer min-w-[64px]"
               style={{
                 borderColor: colors.border.light,
                 backgroundColor: colors.background.primary,
                 color: colors.text.primary,
               }}
             >
-              {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
-                <option key={m} value={m}>
-                  {new Date(2024, m - 1).toLocaleString(locale, { month: 'short' })}
-                </option>
-              ))}
-            </select>
-          )}
-          <select
-            value={currentYear}
-            onChange={(e) => onChange(currentMonth, parseInt(e.target.value))}
-            className="px-2 py-1 rounded-lg border outline-none font-semibold text-xs"
-            style={{
-              borderColor: colors.border.light,
-              backgroundColor: colors.background.primary,
-              color: colors.text.primary,
-            }}
-          >
-            {Array.from({ length: 10 }, (_, i) => new Date().getFullYear() - 5 + i).map((y) => (
-              <option key={y} value={y}>
-                {y}
-              </option>
-            ))}
-          </select>
+              <span>{currentYear}</span>
+              <span className="text-[8px] opacity-70">▼</span>
+            </button>
+            {isYearOpen && (
+              <div
+                className="absolute left-0 mt-1 w-24 max-h-56 overflow-y-auto rounded-xl border shadow-xl z-50 py-1"
+                style={{
+                  backgroundColor: colors.background.primary,
+                  borderColor: colors.border.light,
+                }}
+              >
+                {Array.from({ length: 10 }, (_, i) => new Date().getFullYear() - 5 + i).map((y) => {
+                  const isSelected = y === currentYear;
+                  return (
+                    <button
+                      key={y}
+                      type="button"
+                      onClick={() => {
+                        onChange(currentMonth, y);
+                        setIsYearOpen(false);
+                      }}
+                      className="w-full text-left px-3 py-1.5 text-xs font-semibold hover:cursor-pointer transition-colors"
+                      style={{
+                        backgroundColor: isSelected ? `${colors.interactive.primary}15` : 'transparent',
+                        color: isSelected ? colors.interactive.primary : colors.text.primary,
+                      }}
+                    >
+                      {y}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         </div>
       )}
 
-      {/* Switch Mode Button */}
-      <button
-        type="button"
-        onClick={() => setSelectorMode((prev) => (prev === 'slider' ? 'quick' : 'slider'))}
-        className="w-9 h-9 rounded-xl border flex items-center justify-center transition-all hover:opacity-85 hover:cursor-pointer"
+      {/* Switch Mode Segmented Control */}
+      <div
+        className="flex items-center h-10 p-0.5 border text-xs gap-0.5 rounded-xl"
         style={{
-          borderColor: colors.border.light,
           backgroundColor: colors.background.secondary,
-          color: colors.interactive.primary,
+          borderColor: colors.border.light,
         }}
-        title={selectorMode === 'slider' ? 'Quick Jump' : 'Slider Mode'}
       >
-        {selectorMode === 'slider' ? <MdSwapHoriz className="w-5 h-5" /> : <MdCalendarToday className="w-5 h-5" />}
-      </button>
+        <button
+          type="button"
+          onClick={() => setSelectorMode('slider')}
+          className="px-2.5 h-full rounded-lg text-xs font-semibold transition-all hover:cursor-pointer flex items-center justify-center gap-1.5"
+          style={{
+            backgroundColor: selectorMode === 'slider' ? colors.surface.primary : 'transparent',
+            color: selectorMode === 'slider' ? colors.interactive.primary : colors.text.secondary,
+            boxShadow: selectorMode === 'slider' ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
+          }}
+          title={locale === 'vi' ? 'Duyệt theo từng tháng' : 'Step month-by-month'}
+        >
+          <MdSwapHoriz className="w-4 h-4" />
+          <span>{locale === 'vi' ? 'Từng tháng' : 'Slider'}</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => setSelectorMode('quick')}
+          className="px-2.5 h-full rounded-lg text-xs font-semibold transition-all hover:cursor-pointer flex items-center justify-center gap-1.5"
+          style={{
+            backgroundColor: selectorMode === 'quick' ? colors.surface.primary : 'transparent',
+            color: selectorMode === 'quick' ? colors.interactive.primary : colors.text.secondary,
+            boxShadow: selectorMode === 'quick' ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
+          }}
+          title={locale === 'vi' ? 'Chọn nhanh tháng/năm' : 'Quickly select month/year'}
+        >
+          <MdCalendarToday className="w-4 h-4" />
+          <span>{locale === 'vi' ? 'Chọn nhanh' : 'Quick Jump'}</span>
+        </button>
+      </div>
     </div>
   );
 };

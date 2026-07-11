@@ -6,6 +6,8 @@ import { useTheme } from '@/context/ThemeContext';
 import { useGroups } from '@/hooks/useGroups';
 import { MdClose, MdPersonAdd } from 'react-icons/md';
 
+import type { GroupSummaryResponse } from '@/types/group.api';
+
 interface CreateGroupModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -18,12 +20,14 @@ export const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
   onSuccess,
 }) => {
   const { colors } = useTheme();
-  const { createGroup, inviteGroupMember, isLoading } = useGroups();
+  const { createGroup, inviteGroupMember, listGroups, isLoading } = useGroups();
 
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [emails, setEmails] = useState<string[]>([]);
   const [currentEmail, setCurrentEmail] = useState('');
+  const [myGroups, setMyGroups] = useState<GroupSummaryResponse[]>([]);
+  const [cloneGroupId, setCloneGroupId] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
@@ -33,16 +37,24 @@ export const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
       setDescription('');
       setEmails([]);
       setCurrentEmail('');
+      setCloneGroupId('');
       setError(null);
       setSuccess(false);
       document.body.style.overflow = 'hidden';
+
+      // Fetch user's existing groups
+      listGroups().then((res) => {
+        if (res.success && res.data) {
+          setMyGroups(res.data);
+        }
+      });
     } else {
       document.body.style.overflow = '';
     }
     return () => {
       document.body.style.overflow = '';
     };
-  }, [isOpen]);
+  }, [isOpen, listGroups]);
 
   const handleAddEmail = () => {
     if (!currentEmail.trim()) return;
@@ -74,22 +86,29 @@ export const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
     }
 
     try {
-      const result = await createGroup({ name: name.trim(), description: description.trim() });
+      const result = await createGroup({
+        name: name.trim(),
+        description: description.trim(),
+        cloneGroupId: cloneGroupId || undefined,
+      });
       if (result.success && result.data) {
         const newGroupId = result.data.groupId;
         const failedEmails: string[] = [];
 
-        // Invite members sequentially
-        for (const email of emails) {
-          try {
-            const inviteRes = await inviteGroupMember(newGroupId, { email });
-            if (!inviteRes.success) {
-              console.error(`Failed to invite ${email}:`, inviteRes.error);
+        // Only invite manually added emails if we are not cloning
+        if (!cloneGroupId) {
+          // Invite members sequentially
+          for (const email of emails) {
+            try {
+              const inviteRes = await inviteGroupMember(newGroupId, { email });
+              if (!inviteRes.success) {
+                console.error(`Failed to invite ${email}:`, inviteRes.error);
+                failedEmails.push(email);
+              }
+            } catch (inviteErr) {
+              console.error(`Error inviting ${email}:`, inviteErr);
               failedEmails.push(email);
             }
-          } catch (inviteErr) {
-            console.error(`Error inviting ${email}:`, inviteErr);
-            failedEmails.push(email);
           }
         }
 
@@ -198,57 +217,95 @@ export const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
               />
             </div>
 
-            {/* Invite Members Block */}
+            {/* Clone existing group */}
             <div>
               <label className="block text-sm font-medium mb-2" style={{ color: colors.text.primary }}>
-                Invite Members by Email
+                Clone from existing group (optional)
               </label>
-              <div className="flex gap-2">
-                <Input
-                  type="email"
-                  value={currentEmail}
-                  onChange={(e) => setCurrentEmail(e.target.value)}
-                  placeholder="user@example.com"
-                  disabled={isLoading}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault();
-                      handleAddEmail();
-                    }
-                  }}
-                />
-                <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={handleAddEmail}
-                  disabled={isLoading}
-                  className="flex items-center gap-1 shrink-0"
-                >
-                  <MdPersonAdd size={18} />
-                  Add
-                </Button>
-              </div>
+              <select
+                value={cloneGroupId}
+                onChange={(e) => {
+                  setCloneGroupId(e.target.value);
+                  if (e.target.value) {
+                    setEmails([]);
+                  }
+                }}
+                className="w-full px-3 py-2 rounded-lg border transition-colors focus:outline-none focus:ring-2"
+                style={{
+                  borderColor: colors.border.light,
+                  backgroundColor: colors.background.secondary,
+                  color: colors.text.primary,
+                }}
+                disabled={isLoading}
+              >
+                <option value="">-- Select group to clone --</option>
+                {myGroups.map((g) => (
+                  <option key={g.groupId} value={g.groupId}>
+                    {g.name} ({g.memberCount} members)
+                  </option>
+                ))}
+              </select>
             </div>
 
-            {/* Invited Emails Chips */}
-            {emails.length > 0 && (
-              <div className="flex flex-wrap gap-2 p-3 rounded-lg border" style={{ borderColor: colors.border.light, backgroundColor: colors.background.secondary }}>
-                {emails.map((email, idx) => (
-                  <span
-                    key={idx}
-                    className="flex items-center gap-1 text-xs px-2 py-1 rounded-full border bg-white"
-                    style={{ borderColor: colors.border.light, color: colors.text.primary }}
-                  >
-                    <span>{email}</span>
-                    <button
+            {/* Invite Members Block */}
+            {!cloneGroupId ? (
+              <>
+                <div>
+                  <label className="block text-sm font-medium mb-2" style={{ color: colors.text.primary }}>
+                    Invite Members by Email
+                  </label>
+                  <div className="flex gap-2">
+                    <Input
+                      type="email"
+                      value={currentEmail}
+                      onChange={(e) => setCurrentEmail(e.target.value)}
+                      placeholder="user@example.com"
+                      disabled={isLoading}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          handleAddEmail();
+                        }
+                      }}
+                    />
+                    <Button
                       type="button"
-                      onClick={() => handleRemoveEmail(idx)}
-                      className="hover:text-red-500 font-bold"
+                      variant="secondary"
+                      onClick={handleAddEmail}
+                      disabled={isLoading}
+                      className="flex items-center gap-1 shrink-0"
                     >
-                      &times;
-                    </button>
-                  </span>
-                ))}
+                      <MdPersonAdd size={18} />
+                      Add
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Invited Emails Chips */}
+                {emails.length > 0 && (
+                  <div className="flex flex-wrap gap-2 p-3 rounded-lg border" style={{ borderColor: colors.border.light, backgroundColor: colors.background.secondary }}>
+                    {emails.map((email, idx) => (
+                      <span
+                        key={idx}
+                        className="flex items-center gap-1 text-xs px-2 py-1 rounded-full border bg-white"
+                        style={{ borderColor: colors.border.light, color: colors.text.primary }}
+                      >
+                        <span>{email}</span>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveEmail(idx)}
+                          className="hover:text-red-500 font-bold"
+                        >
+                          &times;
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="p-3 rounded-lg border text-sm" style={{ borderColor: colors.border.light, backgroundColor: colors.background.secondary, color: colors.text.secondary }}>
+                Members from the selected group will be automatically invited.
               </div>
             )}
 
