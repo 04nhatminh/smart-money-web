@@ -21,6 +21,8 @@ const getStatusColor = (status: ProjectStatus): string => {
     ACTIVE: '#10B981', // Green
     COMPLETED: '#6B7280', // Gray
     ABANDONED: '#EF4444', // Red
+    FROZEN: '#F59E0B', // Amber
+    EXPIRED: '#B91C1C', // Dark Red
   };
   return colors[status] || '#6B7280';
 };
