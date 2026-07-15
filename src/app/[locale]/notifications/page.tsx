@@ -28,7 +28,15 @@ export default function NotificationsPage() {
   const t = useTranslations();
   const router = useRouter();
   const locale = useLocale();
-  const { acceptGroupInvite, declineGroupInvite } = useGroups();
+  const [sponsorshipRequests, setSponsorshipRequests] = useState<any[]>([]);
+  const [sponsorshipLoading, setSponsorshipLoading] = useState(false);
+
+  const {
+    acceptGroupInvite,
+    declineGroupInvite,
+    getPendingSponsorshipRequests,
+    respondToSponsorshipRequest
+  } = useGroups();
 
   const [notifications, setNotifications] = useState<NotificationData[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -67,8 +75,41 @@ export default function NotificationsPage() {
   useEffect(() => {
     if (isAuthenticated && user) {
       loadNotifications(0, true);
+      loadSponsorshipRequests();
     }
   }, [isAuthenticated, user]);
+
+  const loadSponsorshipRequests = async () => {
+    try {
+      setSponsorshipLoading(true);
+      const res = await getPendingSponsorshipRequests();
+      if (res.success && res.data) {
+        setSponsorshipRequests(res.data);
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setSponsorshipLoading(false);
+    }
+  };
+
+  const handleRespondSponsorship = async (requestId: string, agreed: boolean) => {
+    try {
+      setActionLoading(requestId);
+      const res = await respondToSponsorshipRequest(requestId, { agreed });
+      if (res.success) {
+        setSuccess(agreed ? 'Bạn đã đồng ý gánh vác đóng góp giúp đồng đội!' : 'Bạn đã từ chối gánh vác đóng góp.');
+        loadSponsorshipRequests();
+        loadNotifications(0, true);
+      } else {
+        setError(res.error || 'Có lỗi xảy ra khi gửi phản hồi');
+      }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Có lỗi xảy ra');
+    } finally {
+      setActionLoading(null);
+    }
+  };
 
   const parseNotificationContent = (content: string) => {
     if (content.startsWith('notification.notification_done|')) {
@@ -346,6 +387,63 @@ export default function NotificationsPage() {
             )}
           </button>
         </div>
+
+        {/* Pending Sponsorship Requests Queue */}
+        {sponsorshipRequests.length > 0 && (
+          <div className="space-y-3 mb-6">
+            <Heading level={3} className="text-sm font-bold flex items-center gap-1.5" style={{ color: colors.interactive.primary }}>
+              <MdNotifications className="animate-bounce" />
+              Khảo Sát Đóng Góp Giúp Đồng Đội Đang Chờ
+            </Heading>
+            <div className="grid gap-4 md:grid-cols-2">
+              {sponsorshipRequests.map((req) => (
+                <div
+                  key={req.requestId}
+                  className="p-5 bg-gradient-to-br from-amber-50/70 to-orange-50/30 rounded-xl border flex flex-col justify-between gap-4 transition-all hover:shadow-md"
+                  style={{ borderColor: '#F59E0B30' }}
+                >
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span className="text-[10px] font-bold text-amber-700 uppercase bg-amber-100 px-2 py-0.5 rounded-full">
+                        Yêu cầu hỗ trợ
+                      </span>
+                      <span className="text-xs text-gray-500 font-semibold">Dự án: {req.totalMonths} tháng</span>
+                    </div>
+                    <h4 className="font-bold text-sm text-gray-800">
+                      Nhóm: {req.groupName} &bull; Dự án: {req.groupProjectName}
+                    </h4>
+                    <p className="text-xs text-gray-600 leading-relaxed">
+                      Có thành viên trong nhóm không đủ khả năng tích lũy cơ bản. Hệ thống đề xuất bạn hỗ trợ thêm{' '}
+                      <strong>{Number(req.askedAmount).toLocaleString()} VND/tháng</strong> (nâng đóng góp của bạn lên{' '}
+                      <strong>{Number(req.proposedShare).toLocaleString()} VND/tháng</strong> thay vì{' '}
+                      <strong>{Number(req.originalShare).toLocaleString()} VND/tháng</strong>).
+                    </p>
+                  </div>
+                  <div className="flex gap-2 justify-end pt-2 border-t border-amber-200/50">
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      onClick={() => handleRespondSponsorship(req.requestId, false)}
+                      disabled={actionLoading === req.requestId}
+                      style={{ color: '#EF4444', borderColor: '#EF444420', backgroundColor: 'transparent' }}
+                    >
+                      Từ chối
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="primary"
+                      onClick={() => handleRespondSponsorship(req.requestId, true)}
+                      disabled={actionLoading === req.requestId}
+                      className="bg-amber-600 hover:bg-amber-700 text-white font-bold"
+                    >
+                      Đồng ý giúp
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Notifications List */}
         <div className="space-y-4">

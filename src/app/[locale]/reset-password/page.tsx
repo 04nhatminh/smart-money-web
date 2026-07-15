@@ -16,7 +16,7 @@ function ResetPasswordContent() {
 
   if (!email) {
     return (
-      <CenteredLayout hideHeader hideFooter showBackButton>
+      <CenteredLayout hideHeader hideFooter>
         <div className="w-full max-w-[520px] rounded-2xl p-10 auth-glass-card text-center">
           <h1 className="text-2xl font-bold mb-2">{t('resetPassword.invalidRequest')}</h1>
           <p>{t('resetPassword.pleaseGoBack')}</p>
@@ -27,7 +27,7 @@ function ResetPasswordContent() {
 
   if (isOtpVerified && resetToken) {
     return (
-      <CenteredLayout hideHeader hideFooter showBackButton>
+      <CenteredLayout hideHeader hideFooter>
         <div className="w-full max-w-[520px] rounded-2xl p-10 auth-glass-card">
           <ResetPasswordForm
             email={email}
@@ -42,7 +42,7 @@ function ResetPasswordContent() {
   }
 
   return (
-    <CenteredLayout hideHeader hideFooter showBackButton>
+    <CenteredLayout hideHeader hideFooter>
       <div className="w-full max-w-[520px] rounded-2xl p-10 auth-glass-card">
         <VerifyOtpForm
           email={email}

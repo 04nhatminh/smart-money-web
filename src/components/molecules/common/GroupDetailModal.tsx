@@ -39,6 +39,7 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
     getGroupProjectDetail,
     joinGroupProject,
     dissolveGroupProject,
+    updateAutoSponsorship,
     isLoading: groupsLoading,
   } = useGroups();
 
@@ -55,6 +56,11 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
   const [resendingEmail, setResendingEmail] = useState<string | null>(null);
   const [sentEmails, setSentEmails] = useState<Record<string, boolean>>({});
   const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = useState(false);
+
+  const [autoSponsorEnabled, setAutoSponsorEnabled] = useState(false);
+  const [autoSponsorLimitType, setAutoSponsorLimitType] = useState<'MAX' | 'CUSTOM'>('MAX');
+  const [autoSponsorLimit, setAutoSponsorLimit] = useState('');
+  const [isSavingSponsorship, setIsSavingSponsorship] = useState(false);
 
   const isAdmin = group?.adminId === user?.id;
   const isForming = group?.status === 'FORMING';
@@ -100,6 +106,14 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
       const res = await getGroupDetail(groupId);
       if (res.success && res.data) {
         setGroup(res.data);
+        
+        const me = res.data.members.find((m: any) => m.userId === user?.id);
+        if (me) {
+          setAutoSponsorEnabled(me.autoSponsorEnabled || false);
+          setAutoSponsorLimitType(me.autoSponsorLimit ? 'CUSTOM' : 'MAX');
+          setAutoSponsorLimit(me.autoSponsorLimit ? formatAmountInput(me.autoSponsorLimit.toString()) : '');
+        }
+
         if (res.data.groupProjectId) {
           const projRes = await getGroupProjectDetail(res.data.groupProjectId);
           if (projRes.success && projRes.data) {
@@ -115,6 +129,34 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
       setLocalLoading(false);
+    }
+  };
+
+  const handleSaveSponsorshipSettings = async () => {
+    if (!group) return;
+    setError(null);
+    setSuccess(null);
+    setIsSavingSponsorship(true);
+    try {
+      const limitVal = autoSponsorLimitType === 'CUSTOM' && autoSponsorLimit
+        ? parseFormattedNumber(autoSponsorLimit)
+        : undefined;
+
+      const res = await updateAutoSponsorship(group.groupId, {
+        enabled: autoSponsorEnabled,
+        limit: limitVal,
+      });
+
+      if (res.success) {
+        setSuccess('Cập nhật cấu hình tự động hỗ trợ thành công!');
+        loadDetails();
+      } else {
+        setError(res.error || 'Không thể cập nhật cấu hình');
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Đã có lỗi xảy ra');
+    } finally {
+      setIsSavingSponsorship(false);
     }
   };
 
@@ -506,6 +548,83 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
                       </Button>
                     </div>
                   )
+                )}
+
+                {/* Auto-Sponsorship Settings Panel */}
+                {group.status !== 'DISSOLVED' && (
+                  <div className="p-4 border rounded-xl space-y-3 bg-gradient-to-r from-blue-50/20 to-indigo-50/20" style={{ borderColor: colors.border.light }}>
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <Heading level={4} className="text-sm font-bold flex items-center gap-1.5" style={{ color: colors.interactive.primary }}>
+                          <MdAutoAwesome />
+                          Tự Động Hỗ Trợ Đồng Đội (Auto-Sponsor)
+                        </Heading>
+                        <Text className="text-[11px]" style={{ color: colors.text.secondary }}>
+                          Hệ thống sẽ tự động trích quỹ usable dư thừa để bù đắp phần thiếu hụt của đồng đội khi tạo dự án.
+                        </Text>
+                      </div>
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={autoSponsorEnabled}
+                          onChange={(e) => setAutoSponsorEnabled(e.target.checked)}
+                          className="sr-only peer"
+                        />
+                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                      </label>
+                    </div>
+
+                    {autoSponsorEnabled && (
+                      <div className="space-y-3 pt-2 border-t border-dashed" style={{ borderColor: colors.border.light }}>
+                        <div className="flex gap-4">
+                          <label className="flex items-center gap-2 text-xs font-semibold cursor-pointer text-gray-700">
+                            <input
+                              type="radio"
+                              name="sponsorLimitType"
+                              checked={autoSponsorLimitType === 'MAX'}
+                              onChange={() => setAutoSponsorLimitType('MAX')}
+                              className="text-blue-600 focus:ring-blue-500"
+                            />
+                            Tối đa khả năng (Toàn bộ thặng dư)
+                          </label>
+                          <label className="flex items-center gap-2 text-xs font-semibold cursor-pointer text-gray-700">
+                            <input
+                              type="radio"
+                              name="sponsorLimitType"
+                              checked={autoSponsorLimitType === 'CUSTOM'}
+                              onChange={() => setAutoSponsorLimitType('CUSTOM')}
+                              className="text-blue-600 focus:ring-blue-500"
+                            />
+                            Hạn mức tối đa cụ thể
+                          </label>
+                        </div>
+
+                        {autoSponsorLimitType === 'CUSTOM' && (
+                          <div className="max-w-xs">
+                            <label className="block text-xs font-medium mb-1 text-gray-500">Hạn mức hỗ trợ tối đa mỗi tháng (VND)</label>
+                            <Input
+                              type="text"
+                              value={autoSponsorLimit}
+                              onChange={(e) => setAutoSponsorLimit(formatAmountInput(e.target.value))}
+                              placeholder="Nhập số tiền, ví dụ: 200,000"
+                              className="w-full text-xs"
+                            />
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    <div className="flex justify-end pt-1">
+                      <Button
+                        size="sm"
+                        variant="primary"
+                        onClick={handleSaveSponsorshipSettings}
+                        disabled={isSavingSponsorship}
+                      >
+                        {isSavingSponsorship ? 'Đang lưu...' : 'Lưu cấu hình'}
+                      </Button>
+                    </div>
+                  </div>
                 )}
 
                 {/* Member lineup & individual progress */}

@@ -11,9 +11,10 @@ import { CreateGroupModal } from './CreateGroupModal';
 import { GenerateBudgetModal } from './GenerateBudgetModal';
 import { CreateProjectRequest, ProjectAdvisorResponse } from '@/types/project.api';
 import { GroupSummaryResponse } from '@/types/group.api';
-import { formatAmountInput, parseFormattedNumber } from '@/lib/format';
+import { formatAmountInput, parseFormattedNumber, formatPrice } from '@/lib/format';
 import { MdClose, MdLightbulb, MdAutoAwesome } from 'react-icons/md';
 import { useTranslations } from 'next-intl';
+import { useAuth } from '@/context/AuthContext';
 
 interface CreateProjectModalProps {
   isOpen: boolean;
@@ -55,6 +56,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
 }) => {
   const { colors } = useTheme();
   const t = useTranslations();
+  const { user } = useAuth();
   const { isLoading: projectsLoading, createProject, projectAdvisor } = useProjects();
   const { listGroups, getGroupProjectSuggestions, createGroupProject, isLoading: groupsLoading } = useGroups();
   const { getUserFinancial } = useUserFinancial();
@@ -73,7 +75,6 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
   const [isAdvisorResultModalOpen, setIsAdvisorResultModalOpen] = useState(false);
   const [advisorData, setAdvisorData] = useState<ProjectAdvisorResponse | null>(null);
   const [userIncomeData, setUserIncomeData] = useState<any>(null);
-
   // Group states
   const [groups, setGroups] = useState<GroupSummaryResponse[]>([]);
   const [selectedGroupId, setSelectedGroupId] = useState('');
@@ -90,6 +91,8 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
   } | null>(null);
   const [showReactiveWarning, setShowReactiveWarning] = useState(false);
 
+  const [simulationData, setSimulationData] = useState<any>(null);
+  const [showSimulationModal, setShowSimulationModal] = useState(false);
   // Future options and success modal states
   const [showDateGateOptions, setShowDateGateOptions] = useState(false);
   const [creationOption, setCreationOption] = useState<'SAVE_NOW' | 'START_NEXT_MONTH' | null>(null);
@@ -257,6 +260,40 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
     }
   };
 
+  const performCreateGroupProject = async (amount: number, months: number) => {
+    try {
+      const res = await createGroupProject({
+        groupId: selectedGroupId,
+        name: formData.name.trim(),
+        description: formData.description.trim(),
+        targetAmount: amount,
+        currency: formData.currency,
+        totalMonths: months,
+      });
+
+      if (res.success) {
+        setSuccessMode('WITHOUT_BUDGET');
+        setSuccess(true);
+        setTimeout(() => {
+          setSuccess(false);
+          onClose();
+          onSuccess?.(true);
+        }, 1500);
+      } else {
+        setError(res.error || 'Failed to create group project');
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+    }
+  };
+
+  const handleConfirmCreateGroupProject = async () => {
+    setShowSimulationModal(false);
+    const numericAmount = parseFormattedNumber(formData.targetAmount);
+    const months = parseInt(totalMonths, 10) || 1;
+    await performCreateGroupProject(numericAmount, months);
+  };
+
   const handleApplySuggestion = (type: 'adjust_months' | 'adjust_amount') => {
     if (!reactiveSuggestions) return;
     if (type === 'adjust_months') {
@@ -297,19 +334,27 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
         return;
       }
 
-      // Group Project Capacity Check
+      // Group Project Capacity Check via Sponsorship Simulation
       try {
         const suggestionsRes = await getGroupProjectSuggestions({
           groupId: selectedGroupId,
-          inputMonths: 1,
+          inputMonths: months,
+          inputAmount: numericAmount,
         });
         if (suggestionsRes.success && suggestionsRes.data) {
-          const totalCapacity = suggestionsRes.data.totalCapacity;
-          if (totalCapacity > 0) {
-            const monthlyContribution = numericAmount / months;
-            if (monthlyContribution > totalCapacity) {
-              const suggestedMonthsVal = Math.ceil(numericAmount / totalCapacity);
-              const suggestedAmountVal = totalCapacity * months;
+          const data = suggestionsRes.data;
+          
+          if (data.totalDeficit && data.totalDeficit > 0) {
+            if (data.isFeasible) {
+              // Group can afford via sponsorship! Show simulation modal
+              setSimulationData(data);
+              setShowSimulationModal(true);
+              return;
+            } else {
+              // Not feasible. Show the adjustment warning modal
+              const totalCapacity = data.totalCapacity;
+              const suggestedMonthsVal = data.suggestedMonths || Math.ceil(numericAmount / totalCapacity);
+              const suggestedAmountVal = data.suggestedAmount || (totalCapacity * months);
 
               setReactiveSuggestions({
                 totalCapacity,
@@ -327,31 +372,8 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
         console.error("Error during capacity check:", err);
       }
 
-      // Group Project direct creation
-      try {
-        const res = await createGroupProject({
-          groupId: selectedGroupId,
-          name: formData.name.trim(),
-          description: formData.description.trim(),
-          targetAmount: numericAmount,
-          currency: formData.currency,
-          totalMonths: months,
-        });
-
-        if (res.success) {
-          setSuccessMode('WITHOUT_BUDGET');
-          setSuccess(true);
-          setTimeout(() => {
-            setSuccess(false);
-            onClose();
-            onSuccess?.(true);
-          }, 1500);
-        } else {
-          setError(res.error || 'Failed to create group project');
-        }
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'An error occurred');
-      }
+      // Group Project direct creation (no deficits detected)
+      await performCreateGroupProject(numericAmount, months);
       return;
     }
 
@@ -1134,6 +1156,123 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
                     className="w-full"
                   >
                     Hủy bỏ và tự chỉnh sửa
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+      
+      {/* Sponsorship Simulation Modal */}
+      {showSimulationModal && simulationData && (
+        <>
+          <div
+            className="fixed inset-0 transition-opacity"
+            style={{
+              backgroundColor: 'rgba(0, 0, 0, 0.5)',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              zIndex: 1010,
+              backdropFilter: 'blur(4px)',
+            }}
+            onClick={() => setShowSimulationModal(false)}
+          />
+          <div className="fixed inset-0 flex items-center justify-center p-4 overflow-y-auto" style={{ zIndex: 1020 }}>
+            <div
+              className="bg-white rounded-2xl shadow-2xl max-w-lg w-full my-8 overflow-hidden pointer-events-auto"
+              style={{ backgroundColor: colors.background.primary }}
+              onClick={e => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between p-6 border-b" style={{ borderColor: colors.border.light }}>
+                <Heading level={3} className="m-0 text-xl font-bold flex items-center gap-2" style={{ color: colors.interactive.primary }}>
+                  <MdAutoAwesome className="w-6 h-6 animate-pulse" />
+                  Mô Phỏng Gánh Vác Đóng Góp
+                </Heading>
+                <button
+                  onClick={() => setShowSimulationModal(false)}
+                  className="p-1 rounded-lg transition-colors hover:opacity-75 hover:cursor-pointer"
+                  style={{ color: colors.text.secondary }}
+                >
+                  <MdClose className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="p-6 space-y-4">
+                <Text className="text-sm" style={{ color: colors.text.secondary }}>
+                  Một số thành viên trong nhóm không đủ khả năng tài chính để đóng góp đều nhau. Tuy nhiên, các thành viên khác có đủ khả năng bù đắp. Dưới đây là phương án phân bổ đề xuất:
+                </Text>
+
+                <div className="border rounded-xl overflow-hidden divide-y text-sm max-h-60 overflow-y-auto" style={{ borderColor: colors.border.light }}>
+                  {simulationData.memberSimulations?.map((sim: any) => {
+                    const diff = sim.proposedShare - sim.originalShare;
+                    const isHelper = diff > 0;
+                    const isHelped = sim.deficit > 0;
+
+                    return (
+                      <div key={sim.userId} className="p-3 flex justify-between items-center bg-white hover:bg-gray-50/50">
+                        <div>
+                          <div className="font-bold text-gray-800 flex items-center gap-1.5">
+                            {sim.fullName} ({sim.username})
+                            {sim.userId === user?.id && <span className="text-[10px] bg-blue-100 text-blue-700 px-1 rounded font-normal">Bạn</span>}
+                          </div>
+                          <div className="text-xs text-gray-400 mt-0.5">
+                            Khả năng tối đa: {formatPrice(sim.capacity)} VND/tháng
+                          </div>
+                        </div>
+
+                        <div className="text-right">
+                          <div className="font-semibold text-gray-800">
+                            {formatPrice(sim.proposedShare)} VND/tháng
+                          </div>
+                          <div className="mt-1">
+                            {isHelped && (
+                              <span className="text-[10px] px-1.5 py-0.5 rounded-full font-semibold bg-emerald-50 text-emerald-600">
+                                Được gánh: -{formatPrice(sim.deficit)}/tháng
+                              </span>
+                            )}
+                            {isHelper && (
+                              <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-semibold ${
+                                sim.autoSponsorEnabled && (!sim.autoSponsorLimit || diff <= sim.autoSponsorLimit)
+                                  ? 'bg-blue-50 text-blue-600'
+                                  : 'bg-amber-50 text-amber-600'
+                              }`}>
+                                {sim.autoSponsorEnabled && (!sim.autoSponsorLimit || diff <= sim.autoSponsorLimit)
+                                  ? 'Tự động giúp'
+                                  : 'Cần khảo sát ý kiến'
+                                } (+{formatPrice(diff)})
+                              </span>
+                            )}
+                            {!isHelper && !isHelped && (
+                              <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-gray-50 text-gray-400">
+                                Đóng góp cơ bản
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <div className="flex gap-3 pt-4 border-t" style={{ borderColor: colors.border.light }}>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={() => setShowSimulationModal(false)}
+                    className="flex-1"
+                  >
+                    Hủy bỏ
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="primary"
+                    onClick={handleConfirmCreateGroupProject}
+                    className="flex-1"
+                  >
+                    Xác nhận & Khởi tạo
                   </Button>
                 </div>
               </div>
