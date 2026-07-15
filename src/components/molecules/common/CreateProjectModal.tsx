@@ -1202,60 +1202,45 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
 
               <div className="p-6 space-y-4">
                 <Text className="text-sm" style={{ color: colors.text.secondary }}>
-                  Một số thành viên trong nhóm không đủ khả năng tài chính để đóng góp đều nhau. Tuy nhiên, các thành viên khác có đủ khả năng bù đắp. Dưới đây là phương án phân bổ đề xuất:
+                  Một số thành viên trong nhóm không đủ khả năng tài chính để đóng góp đều nhau. Tuy nhiên, các thành viên khác có đủ khả năng bù đắp phần thiếu hụt này.
                 </Text>
 
-                <div className="border rounded-xl overflow-hidden divide-y text-sm max-h-60 overflow-y-auto" style={{ borderColor: colors.border.light }}>
-                  {simulationData.memberSimulations?.map((sim: any) => {
-                    const diff = sim.proposedShare - sim.originalShare;
-                    const isHelper = diff > 0;
-                    const isHelped = sim.deficit > 0;
-
-                    return (
-                      <div key={sim.userId} className="p-3 flex justify-between items-center bg-white hover:bg-gray-50/50">
-                        <div>
-                          <div className="font-bold text-gray-800 flex items-center gap-1.5">
-                            {sim.fullName} ({sim.username})
-                            {sim.userId === user?.id && <span className="text-[10px] bg-blue-100 text-blue-700 px-1 rounded font-normal">Bạn</span>}
-                          </div>
-                          <div className="text-xs text-gray-400 mt-0.5">
-                            Khả năng tối đa: {formatPrice(sim.capacity)} VND/tháng
-                          </div>
-                        </div>
-
-                        <div className="text-right">
-                          <div className="font-semibold text-gray-800">
-                            {formatPrice(sim.proposedShare)} VND/tháng
-                          </div>
-                          <div className="mt-1">
-                            {isHelped && (
-                              <span className="text-[10px] px-1.5 py-0.5 rounded-full font-semibold bg-emerald-50 text-emerald-600">
-                                Được gánh: -{formatPrice(sim.deficit)}/tháng
-                              </span>
-                            )}
-                            {isHelper && (
-                              <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-semibold ${
-                                sim.autoSponsorEnabled && (!sim.autoSponsorLimit || diff <= sim.autoSponsorLimit)
-                                  ? 'bg-blue-50 text-blue-600'
-                                  : 'bg-amber-50 text-amber-600'
-                              }`}>
-                                {sim.autoSponsorEnabled && (!sim.autoSponsorLimit || diff <= sim.autoSponsorLimit)
-                                  ? 'Tự động giúp'
-                                  : 'Cần khảo sát ý kiến'
-                                } (+{formatPrice(diff)})
-                              </span>
-                            )}
-                            {!isHelper && !isHelped && (
-                              <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-gray-50 text-gray-400">
-                                Đóng góp cơ bản
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
+                <div className="p-4 border rounded-xl bg-emerald-50/30 text-emerald-800 text-xs font-medium space-y-1.5" style={{ borderColor: '#10B98130' }}>
+                  <div className="font-bold text-sm flex items-center gap-1.5 text-emerald-700">
+                    ✓ Nhóm Có Đủ Khả Năng Gánh Vác
+                  </div>
+                  <p className="leading-relaxed">
+                    Mức thu nhập và tiết kiệm hiện tại của nhóm đủ khả năng bù đắp cho các thành viên còn thiếu hụt.
+                  </p>
                 </div>
+
+                {(() => {
+                  const sims = simulationData.memberSimulations || [];
+                  const pendingCount = sims.filter((sim: any) => {
+                    const diff = sim.proposedShare - sim.originalShare;
+                    if (diff <= 0) return false;
+                    const autoSponsor = sim.autoSponsorEnabled;
+                    const withinLimit = !sim.autoSponsorLimit || diff <= sim.autoSponsorLimit;
+                    return !(autoSponsor && withinLimit);
+                  }).length;
+
+                  return (
+                    <div className="p-4 border rounded-xl bg-amber-50/30 text-amber-900 text-xs space-y-1.5" style={{ borderColor: '#F59E0B30' }}>
+                      <div className="font-bold text-sm text-amber-800">
+                        Quy trình phê duyệt dự kiến:
+                      </div>
+                      {pendingCount > 0 ? (
+                        <p className="leading-relaxed">
+                          Hệ thống sẽ gửi <strong>yêu cầu khảo sát đồng ý hỗ trợ đóng góp giúp</strong> đến <strong>{pendingCount} thành viên</strong> gánh vác. Dự án sẽ ở trạng thái <strong>Chờ Khảo Sát</strong> và kích hoạt ngay sau khi họ đồng ý.
+                        </p>
+                      ) : (
+                        <p className="leading-relaxed">
+                          Tất cả thành viên gánh vác đều đã kích hoạt tính năng Tự động hỗ trợ đồng đội trong hạn mức. Dự án sẽ được <strong>Kích hoạt Tự động (ACTIVE)</strong> ngay lập tức!
+                        </p>
+                      )}
+                    </div>
+                  );
+                })()}
 
                 <div className="flex gap-3 pt-4 border-t" style={{ borderColor: colors.border.light }}>
                   <Button
