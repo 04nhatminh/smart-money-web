@@ -106,6 +106,7 @@ export const API_ENDPOINTS = {
     create: '/api/v1/groups',
     getById: (id: string) => `/api/v1/groups/${id}`,
     lock: (id: string) => `/api/v1/groups/${id}/lock`,
+    unlock: (id: string) => `/api/v1/groups/${id}/unlock`,
     invite: (id: string) => `/api/v1/groups/${id}/members/invite`,
     acceptInvite: '/api/v1/groups/invites/accept',
     declineInvite: '/api/v1/groups/invites/decline',

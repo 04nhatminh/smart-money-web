@@ -76,6 +76,7 @@ export interface GroupProjectSuggestionsResponse {
 export interface CreateGroupRequest {
   name: string;
   description?: string;
+  cloneGroupId?: string;
 }
 
 export interface InviteGroupMemberRequest {

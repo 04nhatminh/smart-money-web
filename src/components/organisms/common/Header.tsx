@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useLocale } from 'next-intl';
+import Link from 'next/link';
 import { Button, Heading, Text } from '@/components/atoms';
 import { ThemeToggle, LanguageToggle } from '@/components/molecules';
 import { useTheme } from '@/context';
@@ -116,7 +117,7 @@ export const Header: React.FC<HeaderProps> = ({
       <div className="mx-auto px-4 sm:px-6 lg:px-8 h-20">
         <div className="flex items-center py-2 relative h-full justify-between">
           {/* Logo - Left */}
-          <div className="flex items-center justify-start gap-3">
+          <Link href={token ? `/${locale}/dashboard` : `/${locale}`} className="flex items-center justify-start gap-3 hover:opacity-90 transition-opacity">
             <img src="/logo.png" alt={appName} className="h-14 w-14 object-contain flex-shrink-0" style={{ filter: colorScheme === 'dark' ? 'brightness(0) invert(1)' : 'none' }} />
             <Heading
               level={1}
@@ -125,7 +126,7 @@ export const Header: React.FC<HeaderProps> = ({
               <span style={{ color: colorScheme === 'dark' ? colors.palette.white : colors.interactive.primary }}>Smart</span>
               <span style={{ color: colorScheme === 'dark' ? colors.palette.white : colors.interactive.tertiary }}>Money</span>
             </Heading>
-          </div>
+          </Link>
 
           {/* Actions - Right */}
           <div className="flex gap-4 items-center">

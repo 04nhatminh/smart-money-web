@@ -395,6 +395,7 @@
       "HIGH": "Cao"
     },
     "targetContributed": "Mục tiêu / Đã đóng góp",
+    "contributedTarget": "Đã đóng góp / Mục tiêu",
     "reached": "Đạt {percent}%",
     "remaining": "Còn lại {amount}",
     "deadline": "Hạn chót",
@@ -622,5 +623,46 @@
     "savingPaceRequired": "Tốc độ tiết kiệm là bắt buộc",
     "interventionLevelRequired": "Mức độ can thiệp là bắt buộc",
     "focusModeRequired": "Chế độ tập trung là bắt buộc"
+  },
+  "privacyPage": {
+    "subtitle": "Chính sách bảo mật này mô tả cách chúng tôi thu thập, sử dụng và bảo vệ thông tin tài chính cá nhân của bạn.",
+    "questions": "Bạn có câu hỏi nào khác?",
+    "contactSupport": "Vui lòng liên hệ với ban quản trị qua email: support@smartmoney.vn",
+    "sec1Title": "1. Thu Thập Thông Tin",
+    "sec1Desc": "Chúng tôi thu thập thông tin để cung cấp dịch vụ tốt hơn cho người dùng. Thông tin này bao gồm dữ liệu bạn cung cấp khi tạo tài khoản (như tên, email) và các giao dịch tài chính bạn nhập vào hệ thống để phân tích và lập kế hoạch ngân sách.",
+    "sec2Title": "2. Cách Chúng Tôi Sử Dụng Dữ Liệu",
+    "sec2Desc": "Dữ liệu của bạn được sử dụng để phân tích xu hướng chi tiêu, đề xuất ngân sách thông qua trợ lý AI và cá nhân hóa trải nghiệm quản lý tài chính của bạn. Chúng tôi tuyệt đối không bán hoặc chia sẻ thông tin tài chính cá nhân của bạn cho bên thứ ba.",
+    "sec3Title": "3. Bảo Mật Thông Tin",
+    "sec3Desc": "Chúng tôi áp dụng các biện pháp bảo mật tiêu chuẩn mã hóa dữ liệu truyền tải (SSL/TLS) và bảo vệ dữ liệu trong cơ sở dữ liệu. Mật khẩu của bạn được mã hóa một chiều trước khi lưu trữ.",
+    "sec4Title": "4. Quyền Của Bạn",
+    "sec4Desc": "Bạn có toàn quyền truy cập, chỉnh sửa, hoặc yêu cầu xóa bỏ tài khoản cũng như toàn bộ dữ liệu tài chính đã lưu trữ trong hệ thống SmartMoney bất kỳ lúc nào thông qua phần Cài đặt tài khoản hoặc liên hệ trực tiếp với chúng tôi."
+  },
+  "helpPage": {
+    "subtitle": "Tìm câu trả lời cho các câu hỏi thường gặp hoặc tìm hiểu cách sử dụng SmartMoney hiệu quả nhất.",
+    "q1": "Làm thế nào để tạo tài khoản mới?",
+    "a1": "Bạn có thể click vào nút \"Đăng Ký\" trên trang chủ, điền thông tin email, tên tài khoản và mật khẩu để bắt đầu sử dụng SmartMoney.",
+    "q2": "Làm thế nào để lập ngân sách chi tiêu?",
+    "a2": "Đi tới mục \"Ngân Sách\" từ thanh menu bên, nhấn nút \"Tạo ngân sách\". Bạn có thể tự điền ngân sách cho từng danh mục hoặc sử dụng tính năng \"Tạo ngân sách tự động bằng AI\" để hệ thống tự phân tích và gợi ý.",
+    "q3": "Dữ liệu giao dịch của tôi có được bảo mật không?",
+    "a3": "Tất cả dữ liệu giao dịch của bạn đều được mã hóa SSL/TLS khi truyền tải và được bảo mật an toàn trên máy chủ của chúng tôi. Chúng tôi không chia sẻ dữ liệu của bạn cho bất kỳ bên thứ ba nào.",
+    "q4": "Tôi có thể xuất dữ liệu báo cáo ra Excel không?",
+    "a4": "Có, hệ thống hỗ trợ xuất báo cáo chi tiêu và danh sách giao dịch của bạn dưới dạng tệp Excel (.xlsx). Bạn có thể tìm thấy nút xuất Excel trong màn hình Quản lý Giao dịch hoặc Báo cáo Phân tích."
+  },
+  "contactPage": {
+    "subtitle": "Chúng tôi luôn lắng nghe đóng góp của bạn. Hãy gửi tin nhắn hoặc kết nối với chúng tôi qua các kênh hỗ trợ.",
+    "formTitle": "Gửi Tin Nhắn",
+    "successMessage": "Cảm ơn bạn! Yêu cầu hỗ trợ của bạn đã được gửi thành công.",
+    "fullNameLabel": "Họ và tên",
+    "fullNamePlaceholder": "Nhập họ và tên...",
+    "emailPlaceholder": "Nhập email...",
+    "messageLabel": "Nội dung tin nhắn",
+    "messagePlaceholder": "Nhập tin nhắn...",
+    "submitBtn": "Gửi đi",
+    "infoTitle": "Thông Tin Liên Hệ",
+    "infoDesc": "Bạn có thể trực tiếp liên hệ với chúng tôi qua thông tin liên lạc dưới đây. Đội ngũ hỗ trợ của chúng tôi sẵn sàng giải đáp thắc mắc của bạn 24/7.",
+    "addressLabel": "Địa chỉ",
+    "addressVal": "Khu Công nghệ cao Hòa Lạc, Thạch Thất, Hà Nội",
+    "workingHoursLabel": "Thời gian làm việc",
+    "workingHoursVal": "Thứ 2 - Thứ 6: 8:00 - 17:30"
   }
 }

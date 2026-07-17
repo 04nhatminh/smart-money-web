@@ -16,6 +16,7 @@ export interface ProjectListItem {
   totalContributed: number;
   progressPercent: number;
   deadline: string;
+  groupProjectId?: string | null;
 }
 
 export interface ProjectDetail extends ProjectListItem {

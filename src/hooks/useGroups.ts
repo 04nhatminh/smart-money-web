@@ -110,6 +110,29 @@ export const useGroups = () => {
     }
   }, []);
 
+  // Unlock group
+  const unlockGroup = useCallback(async (groupId: string) => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const response = await apiClient.post<any>(API_ENDPOINTS.groups.unlock(groupId), {});
+      return {
+        data: response.data as GroupDetailResponse,
+        success: true,
+      };
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : 'Failed to unlock group';
+      setError(errorMsg);
+      return {
+        data: null,
+        success: false,
+        error: errorMsg,
+      };
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
   // Invite member by email
   const inviteGroupMember = useCallback(async (groupId: string, data: InviteGroupMemberRequest) => {
     try {
@@ -343,6 +366,7 @@ export const useGroups = () => {
     createGroup,
     getGroupDetail,
     lockGroup,
+    unlockGroup,
     inviteGroupMember,
     acceptGroupInvite,
     declineGroupInvite,

@@ -6,7 +6,7 @@ import { useTheme } from '@/context/ThemeContext';
 import { ProjectListItem, ProjectStatus, ProjectPriority } from '@/types/project.api';
 import { formatVietnamsePrice } from '@/lib/format';
 import { MdEdit, MdDelete, MdCheckCircle } from 'react-icons/md';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 
 interface ProjectCardProps {
   project: ProjectListItem;
@@ -43,11 +43,19 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
 }) => {
   const { colors } = useTheme();
   const t = useTranslations();
+  const locale = useLocale();
 
   const progressPercent = Math.min(project.progressPercent, 100);
   const statusColor = getStatusColor(project.status);
   const priorityColor = getPriorityColor(project.priority);
   const daysLeft = project.deadline ? Math.ceil((new Date(project.deadline).getTime() - Date.now()) / (1000 * 60 * 60 * 24)) : 0;
+  const formattedDeadline = project.deadline
+    ? new Date(project.deadline).toLocaleDateString(locale, {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+      })
+    : '';
 
   return (
     <div
@@ -70,7 +78,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
             className="text-xs"
             style={{ color: colors.text.tertiary }}
           >
-            {project.type === 'PERSONAL' ? t('projects.personal') : t('projects.group')} • {project.currency}
+            {(project.type === 'GROUP' || project.groupProjectId) ? t('projects.group') : t('projects.personal')} • {project.currency}
           </Text>
         </div>
         <div className="flex items-center gap-2">
@@ -93,7 +101,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
       <div className="mb-3 pb-3 border-b" style={{ borderColor: colors.border.light }}>
         <div className="flex justify-between items-baseline mb-1">
           <Text className="text-sm" style={{ color: colors.text.secondary }}>
-            {t('projects.targetContributed')}
+            {t('projects.contributedTarget')}
           </Text>
           <Text className="font-semibold text-sm" style={{ color: colors.text.primary }}>
             {formatVietnamsePrice(project.totalContributed)} / {formatVietnamsePrice(project.targetAmount)}
@@ -137,7 +145,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
               color: daysLeft < 7 ? '#EF4444' : daysLeft < 30 ? '#F59E0B' : colors.text.primary
             }}
           >
-            {daysLeft > 0 ? t('projects.daysLeft', { days: daysLeft }) : daysLeft === 0 ? t('projects.today') : t('projects.expired')}
+            {formattedDeadline} ({daysLeft > 0 ? t('projects.daysLeft', { days: daysLeft }) : daysLeft === 0 ? t('projects.today') : t('projects.expired')})
           </Text>
         </div>
       )}
@@ -180,23 +188,25 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
             {t('projects.contributeBtn')}
           </button>
         )}
-        <button
-          onClick={() => onEdit(project.projectId)}
-          className="px-3 py-2 rounded-lg text-sm font-medium transition-colors hover:cursor-pointer"
-          style={{
-            backgroundColor: colors.background.primary + '15',
-            color: colors.text.primary,
-          }}
-          onMouseEnter={e => {
-            e.currentTarget.style.backgroundColor = colors.background.secondary + '25';
-          }}
-          onMouseLeave={e => {
-            e.currentTarget.style.backgroundColor = colors.background.primary + '15';
-          }}
-          title={t('common.edit')}
-        >
-          <MdEdit size={18} />
-        </button>
+        {!(project.type === 'GROUP' || project.groupProjectId) && (
+          <button
+            onClick={() => onEdit(project.projectId)}
+            className="px-3 py-2 rounded-lg text-sm font-medium transition-colors hover:cursor-pointer"
+            style={{
+              backgroundColor: colors.background.primary + '15',
+              color: colors.text.primary,
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.backgroundColor = colors.background.secondary + '25';
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.backgroundColor = colors.background.primary + '15';
+            }}
+            title={t('common.edit')}
+          >
+            <MdEdit size={18} />
+          </button>
+        )}
         <button
           onClick={() => onDelete(project.projectId)}
           className="px-3 py-2 rounded-lg text-sm font-medium transition-colors hover:cursor-pointer"
