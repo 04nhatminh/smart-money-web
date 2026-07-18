@@ -378,7 +378,7 @@ export default function NotificationsPage() {
           >
             {t('notifications.unread') || 'Unread'}
             {unreadNotificationsCount > 0 && (
-              <span 
+              <span
                 className="ml-1 px-1.5 py-0.5 text-xs rounded-full text-white"
                 style={{ backgroundColor: colors.interactive.primary }}
               >
@@ -391,7 +391,7 @@ export default function NotificationsPage() {
         {/* Pending Sponsorship Requests Queue */}
         {sponsorshipRequests.length > 0 && (
           <div className="space-y-3 mb-6">
-            <Heading level={3} className="text-sm font-bold flex items-center gap-1.5" style={{ color: colors.interactive.primary }}>
+            <Heading level={3} className="text-sm font-bold flex items-center gap-1.5 pb-2" style={{ color: colors.interactive.primary }}>
               <MdNotifications className="animate-bounce" />
               Khảo Sát Đóng Góp Giúp Đồng Đội Đang Chờ
             </Heading>
@@ -483,9 +483,9 @@ export default function NotificationsPage() {
                     <div className="flex-1 space-y-1">
                       <div className="flex items-center gap-2">
                         {isUnread && (
-                          <span 
-                            className="w-2.5 h-2.5 rounded-full flex-shrink-0" 
-                            style={{ backgroundColor: colors.interactive.primary }} 
+                          <span
+                            className="w-2.5 h-2.5 rounded-full flex-shrink-0"
+                            style={{ backgroundColor: colors.interactive.primary }}
                             title="Unread"
                           />
                         )}
@@ -493,7 +493,7 @@ export default function NotificationsPage() {
                           level={4}
                           style={{ fontWeight: isUnread ? 'bold' : 'normal' }}
                         >
-                          {isInvite 
+                          {isInvite
                             ? (t('notifications.groupInvitation') || 'Group Invitation')
                             : (t('notifications.notificationTitle') || 'Notification')}
                         </Heading>

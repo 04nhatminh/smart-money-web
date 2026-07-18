@@ -226,6 +226,14 @@ export default function ProfilePage() {
                     : userFinancial.focusMode}
                 </p>
               </div>
+              <div>
+                <p className="text-sm font-medium mb-2" style={{ color: colors.text.secondary }}>
+                  {t('profile.autoInvest')}
+                </p>
+                <p className="text-lg font-semibold">
+                  {userFinancial.autoInvestSurplus ? t('profile.enabled') : t('profile.disabled')}
+                </p>
+              </div>
             </div>
           ) : (
             <div

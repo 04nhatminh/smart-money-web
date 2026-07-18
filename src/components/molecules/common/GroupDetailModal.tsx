@@ -449,7 +449,7 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    {isAdmin && !group.groupProjectId && (
+                    {isAdmin && (!group.groupProjectId || (projectDetail && projectDetail.status === 'DISSOLVED')) && (
                       <Button
                         variant="danger"
                         size="sm"
@@ -473,7 +473,7 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
                         Lock Group
                       </Button>
                     )}
-                    {isAdmin && isLocked && !group.groupProjectId && (
+                    {isAdmin && isLocked && (!group.groupProjectId || (projectDetail && projectDetail.status === 'DISSOLVED')) && (
                       <Button
                         variant="secondary"
                         size="sm"
@@ -489,7 +489,7 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
                 </div>
 
                 {/* Group Project Info */}
-                {projectDetail ? (
+                {projectDetail && projectDetail.status !== 'DISSOLVED' ? (
                   <div className="border rounded-xl p-4 space-y-4" style={{ borderColor: colors.border.light }}>
                     <div className="flex justify-between items-start">
                       <div>

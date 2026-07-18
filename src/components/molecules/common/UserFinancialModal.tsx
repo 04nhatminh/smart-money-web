@@ -26,6 +26,7 @@ interface FormData {
   savingPace: SavingPace;
   interventionLevel: InterventionLevel;
   focusMode: FocusMode;
+  autoInvestSurplus: boolean;
 }
 
 export const UserFinancialModal: React.FC<UserFinancialModalProps> = ({
@@ -45,6 +46,7 @@ export const UserFinancialModal: React.FC<UserFinancialModalProps> = ({
     savingPace: 'BALANCED',
     interventionLevel: 'GENTLE',
     focusMode: 'SAVE_MORE',
+    autoInvestSurplus: true,
   });
 
   // Prevent scrolling when modal is open
@@ -86,6 +88,7 @@ export const UserFinancialModal: React.FC<UserFinancialModalProps> = ({
         savingPace: profile.savingPace || 'BALANCED',
         interventionLevel: profile.interventionLevel || 'GENTLE',
         focusMode: profile.focusMode || 'SAVE_MORE',
+        autoInvestSurplus: profile.autoInvestSurplus !== undefined ? profile.autoInvestSurplus : true,
       });
       setIsEditMode(true);
     } else {
@@ -96,8 +99,13 @@ export const UserFinancialModal: React.FC<UserFinancialModalProps> = ({
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
-    const { name, value } = e.target;
-    if (name === 'income') {
+    const { name, value, type } = e.target;
+    if (type === 'checkbox') {
+      setFormData(prev => ({
+        ...prev,
+        [name]: (e.target as HTMLInputElement).checked,
+      }));
+    } else if (name === 'income') {
       const formatted = formatAmountInput(value);
       setFormData(prev => ({
         ...prev,
@@ -127,6 +135,7 @@ export const UserFinancialModal: React.FC<UserFinancialModalProps> = ({
         savingPace: formData.savingPace,
         interventionLevel: formData.interventionLevel,
         focusMode: formData.focusMode,
+        autoInvestSurplus: formData.autoInvestSurplus,
       };
 
       let result;
@@ -333,6 +342,27 @@ export const UserFinancialModal: React.FC<UserFinancialModalProps> = ({
               <Text style={{ color: colors.text.secondary }} className="text-xs">
                 {t('financialSetup.focusModeHint')}
               </Text>
+            </div>
+
+            {/* Auto Invest Surplus */}
+            <div className="flex items-center space-x-3 p-3 rounded-lg" style={{ backgroundColor: colors.background.secondary }}>
+              <input
+                type="checkbox"
+                name="autoInvestSurplus"
+                id="autoInvestSurplus"
+                checked={formData.autoInvestSurplus}
+                onChange={handleInputChange}
+                disabled={isLoading}
+                className="w-4 h-4 rounded cursor-pointer"
+              />
+              <label htmlFor="autoInvestSurplus" className="flex-1 cursor-pointer">
+                <Text style={{ color: colors.text.primary }} className="font-semibold text-sm">
+                  Auto invest surplus
+                </Text>
+                <Text style={{ color: colors.text.secondary }} className="text-xs">
+                  Automatically invest unused balance
+                </Text>
+              </label>
             </div>
 
             {/* Buttons */}
