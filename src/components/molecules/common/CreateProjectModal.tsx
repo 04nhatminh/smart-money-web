@@ -11,9 +11,10 @@ import { CreateGroupModal } from './CreateGroupModal';
 import { GenerateBudgetModal } from './GenerateBudgetModal';
 import { CreateProjectRequest, ProjectAdvisorResponse } from '@/types/project.api';
 import { GroupSummaryResponse } from '@/types/group.api';
-import { formatAmountInput, parseFormattedNumber } from '@/lib/format';
+import { formatAmountInput, parseFormattedNumber, formatPrice } from '@/lib/format';
 import { MdClose, MdLightbulb, MdAutoAwesome } from 'react-icons/md';
 import { useTranslations } from 'next-intl';
+import { useAuth } from '@/context/AuthContext';
 
 interface CreateProjectModalProps {
   isOpen: boolean;
@@ -55,6 +56,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
 }) => {
   const { colors } = useTheme();
   const t = useTranslations();
+  const { user } = useAuth();
   const { isLoading: projectsLoading, createProject, projectAdvisor } = useProjects();
   const { listGroups, getGroupProjectSuggestions, createGroupProject, isLoading: groupsLoading } = useGroups();
   const { getUserFinancial } = useUserFinancial();
@@ -73,7 +75,6 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
   const [isAdvisorResultModalOpen, setIsAdvisorResultModalOpen] = useState(false);
   const [advisorData, setAdvisorData] = useState<ProjectAdvisorResponse | null>(null);
   const [userIncomeData, setUserIncomeData] = useState<any>(null);
-
   // Group states
   const [groups, setGroups] = useState<GroupSummaryResponse[]>([]);
   const [selectedGroupId, setSelectedGroupId] = useState('');
@@ -90,6 +91,8 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
   } | null>(null);
   const [showReactiveWarning, setShowReactiveWarning] = useState(false);
 
+  const [simulationData, setSimulationData] = useState<any>(null);
+  const [showSimulationModal, setShowSimulationModal] = useState(false);
   // Future options and success modal states
   const [showDateGateOptions, setShowDateGateOptions] = useState(false);
   const [creationOption, setCreationOption] = useState<'SAVE_NOW' | 'START_NEXT_MONTH' | null>(null);
@@ -257,6 +260,40 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
     }
   };
 
+  const performCreateGroupProject = async (amount: number, months: number) => {
+    try {
+      const res = await createGroupProject({
+        groupId: selectedGroupId,
+        name: formData.name.trim(),
+        description: formData.description.trim(),
+        targetAmount: amount,
+        currency: formData.currency,
+        totalMonths: months,
+      });
+
+      if (res.success) {
+        setSuccessMode('WITHOUT_BUDGET');
+        setSuccess(true);
+        setTimeout(() => {
+          setSuccess(false);
+          onClose();
+          onSuccess?.(true);
+        }, 1500);
+      } else {
+        setError(res.error || 'Failed to create group project');
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+    }
+  };
+
+  const handleConfirmCreateGroupProject = async () => {
+    setShowSimulationModal(false);
+    const numericAmount = parseFormattedNumber(formData.targetAmount);
+    const months = parseInt(totalMonths, 10) || 1;
+    await performCreateGroupProject(numericAmount, months);
+  };
+
   const handleApplySuggestion = (type: 'adjust_months' | 'adjust_amount') => {
     if (!reactiveSuggestions) return;
     if (type === 'adjust_months') {
@@ -297,19 +334,27 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
         return;
       }
 
-      // Group Project Capacity Check
+      // Group Project Capacity Check via Sponsorship Simulation
       try {
         const suggestionsRes = await getGroupProjectSuggestions({
           groupId: selectedGroupId,
-          inputMonths: 1,
+          inputMonths: months,
+          inputAmount: numericAmount,
         });
         if (suggestionsRes.success && suggestionsRes.data) {
-          const totalCapacity = suggestionsRes.data.totalCapacity;
-          if (totalCapacity > 0) {
-            const monthlyContribution = numericAmount / months;
-            if (monthlyContribution > totalCapacity) {
-              const suggestedMonthsVal = Math.ceil(numericAmount / totalCapacity);
-              const suggestedAmountVal = totalCapacity * months;
+          const data = suggestionsRes.data;
+          
+          if (data.totalDeficit && data.totalDeficit > 0) {
+            if (data.isFeasible) {
+              // Group can afford via sponsorship! Show simulation modal
+              setSimulationData(data);
+              setShowSimulationModal(true);
+              return;
+            } else {
+              // Not feasible. Show the adjustment warning modal
+              const totalCapacity = data.totalCapacity;
+              const suggestedMonthsVal = data.suggestedMonths || Math.ceil(numericAmount / totalCapacity);
+              const suggestedAmountVal = data.suggestedAmount || (totalCapacity * months);
 
               setReactiveSuggestions({
                 totalCapacity,
@@ -327,31 +372,8 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
         console.error("Error during capacity check:", err);
       }
 
-      // Group Project direct creation
-      try {
-        const res = await createGroupProject({
-          groupId: selectedGroupId,
-          name: formData.name.trim(),
-          description: formData.description.trim(),
-          targetAmount: numericAmount,
-          currency: formData.currency,
-          totalMonths: months,
-        });
-
-        if (res.success) {
-          setSuccessMode('WITHOUT_BUDGET');
-          setSuccess(true);
-          setTimeout(() => {
-            setSuccess(false);
-            onClose();
-            onSuccess?.(true);
-          }, 1500);
-        } else {
-          setError(res.error || 'Failed to create group project');
-        }
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'An error occurred');
-      }
+      // Group Project direct creation (no deficits detected)
+      await performCreateGroupProject(numericAmount, months);
       return;
     }
 
@@ -1134,6 +1156,108 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
                     className="w-full"
                   >
                     Hủy bỏ và tự chỉnh sửa
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+      
+      {/* Sponsorship Simulation Modal */}
+      {showSimulationModal && simulationData && (
+        <>
+          <div
+            className="fixed inset-0 transition-opacity"
+            style={{
+              backgroundColor: 'rgba(0, 0, 0, 0.5)',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              zIndex: 1010,
+              backdropFilter: 'blur(4px)',
+            }}
+            onClick={() => setShowSimulationModal(false)}
+          />
+          <div className="fixed inset-0 flex items-center justify-center p-4 overflow-y-auto" style={{ zIndex: 1020 }}>
+            <div
+              className="bg-white rounded-2xl shadow-2xl max-w-lg w-full my-8 overflow-hidden pointer-events-auto"
+              style={{ backgroundColor: colors.background.primary }}
+              onClick={e => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between p-6 border-b" style={{ borderColor: colors.border.light }}>
+                <Heading level={3} className="m-0 text-xl font-bold flex items-center gap-2" style={{ color: colors.interactive.primary }}>
+                  <MdAutoAwesome className="w-6 h-6 animate-pulse" />
+                  Mô Phỏng Gánh Vác Đóng Góp
+                </Heading>
+                <button
+                  onClick={() => setShowSimulationModal(false)}
+                  className="p-1 rounded-lg transition-colors hover:opacity-75 hover:cursor-pointer"
+                  style={{ color: colors.text.secondary }}
+                >
+                  <MdClose className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="p-6 space-y-4">
+                <Text className="text-sm" style={{ color: colors.text.secondary }}>
+                  Một số thành viên trong nhóm không đủ khả năng tài chính để đóng góp đều nhau. Tuy nhiên, các thành viên khác có đủ khả năng bù đắp phần thiếu hụt này.
+                </Text>
+
+                <div className="p-4 border rounded-xl bg-emerald-50/30 text-emerald-800 text-xs font-medium space-y-1.5" style={{ borderColor: '#10B98130' }}>
+                  <div className="font-bold text-sm flex items-center gap-1.5 text-emerald-700">
+                    ✓ Nhóm Có Đủ Khả Năng Gánh Vác
+                  </div>
+                  <p className="leading-relaxed">
+                    Mức thu nhập và tiết kiệm hiện tại của nhóm đủ khả năng bù đắp cho các thành viên còn thiếu hụt.
+                  </p>
+                </div>
+
+                {(() => {
+                  const sims = simulationData.memberSimulations || [];
+                  const pendingCount = sims.filter((sim: any) => {
+                    const diff = sim.proposedShare - sim.originalShare;
+                    if (diff <= 0) return false;
+                    const autoSponsor = sim.autoSponsorEnabled;
+                    const withinLimit = !sim.autoSponsorLimit || diff <= sim.autoSponsorLimit;
+                    return !(autoSponsor && withinLimit);
+                  }).length;
+
+                  return (
+                    <div className="p-4 border rounded-xl bg-amber-50/30 text-amber-900 text-xs space-y-1.5" style={{ borderColor: '#F59E0B30' }}>
+                      <div className="font-bold text-sm text-amber-800">
+                        Quy trình phê duyệt dự kiến:
+                      </div>
+                      {pendingCount > 0 ? (
+                        <p className="leading-relaxed">
+                          Hệ thống sẽ gửi <strong>yêu cầu khảo sát đồng ý hỗ trợ đóng góp giúp</strong> đến <strong>{pendingCount} thành viên</strong> gánh vác. Dự án sẽ ở trạng thái <strong>Chờ Khảo Sát</strong> và kích hoạt ngay sau khi họ đồng ý.
+                        </p>
+                      ) : (
+                        <p className="leading-relaxed">
+                          Tất cả thành viên gánh vác đều đã kích hoạt tính năng Tự động hỗ trợ đồng đội trong hạn mức. Dự án sẽ được <strong>Kích hoạt Tự động (ACTIVE)</strong> ngay lập tức!
+                        </p>
+                      )}
+                    </div>
+                  );
+                })()}
+
+                <div className="flex gap-3 pt-4 border-t" style={{ borderColor: colors.border.light }}>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={() => setShowSimulationModal(false)}
+                    className="flex-1"
+                  >
+                    Hủy bỏ
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="primary"
+                    onClick={handleConfirmCreateGroupProject}
+                    className="flex-1"
+                  >
+                    Xác nhận & Khởi tạo
                   </Button>
                 </div>
               </div>

@@ -2,7 +2,7 @@ import type { ApiResponse } from './base.api';
 
 // ============ Project ============
 export type ProjectType = 'PERSONAL' | 'GROUP';
-export type ProjectStatus = 'ACTIVE' | 'COMPLETED' | 'ABANDONED';
+export type ProjectStatus = 'ACTIVE' | 'COMPLETED' | 'ABANDONED' | 'FROZEN' | 'EXPIRED';
 export type ProjectPriority = 'LOW' | 'MEDIUM' | 'HIGH';
 
 export interface ProjectListItem {
@@ -16,6 +16,7 @@ export interface ProjectListItem {
   totalContributed: number;
   progressPercent: number;
   deadline: string;
+  groupProjectId?: string | null;
 }
 
 export interface ProjectDetail extends ProjectListItem {

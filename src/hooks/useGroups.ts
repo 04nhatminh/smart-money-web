@@ -11,6 +11,9 @@ import {
   GroupDetailResponse,
   GroupProjectDetailResponse,
   GroupProjectSuggestionsResponse,
+  UpdateAutoSponsorshipRequest,
+  GroupProjectSponsorshipRequestResponse,
+  RespondToSponsorshipRequest,
 } from '@/types/group.api';
 
 export const useGroups = () => {
@@ -110,6 +113,29 @@ export const useGroups = () => {
     }
   }, []);
 
+  // Unlock group
+  const unlockGroup = useCallback(async (groupId: string) => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const response = await apiClient.post<any>(API_ENDPOINTS.groups.unlock(groupId), {});
+      return {
+        data: response.data as GroupDetailResponse,
+        success: true,
+      };
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : 'Failed to unlock group';
+      setError(errorMsg);
+      return {
+        data: null,
+        success: false,
+        error: errorMsg,
+      };
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
   // Invite member by email
   const inviteGroupMember = useCallback(async (groupId: string, data: InviteGroupMemberRequest) => {
     try {
@@ -117,7 +143,7 @@ export const useGroups = () => {
       setError(null);
       const response = await apiClient.post<any>(API_ENDPOINTS.groups.invite(groupId), data);
       return {
-        data: response.data,
+        data: response.data as GroupDetailResponse,
         success: true,
       };
     } catch (err) {
@@ -336,6 +362,71 @@ export const useGroups = () => {
     }
   }, []);
 
+  // Update auto-sponsorship settings
+  const updateAutoSponsorship = useCallback(async (groupId: string, data: UpdateAutoSponsorshipRequest) => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      await apiClient.put<any>(API_ENDPOINTS.groups.updateAutoSponsorship(groupId), data);
+      return {
+        success: true,
+      };
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : 'Failed to update auto-sponsorship settings';
+      setError(errorMsg);
+      return {
+        success: false,
+        error: errorMsg,
+      };
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  // Get pending sponsorship requests
+  const getPendingSponsorshipRequests = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const response = await apiClient.get<any>(API_ENDPOINTS.groupProjects.pendingSponsorshipRequests);
+      return {
+        data: response.data as GroupProjectSponsorshipRequestResponse[],
+        success: true,
+      };
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : 'Failed to fetch pending sponsorship requests';
+      setError(errorMsg);
+      return {
+        data: null,
+        success: false,
+        error: errorMsg,
+      };
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  // Respond to sponsorship request
+  const respondToSponsorshipRequest = useCallback(async (requestId: string, data: RespondToSponsorshipRequest) => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      await apiClient.post<any>(API_ENDPOINTS.groupProjects.respondSponsorshipRequest(requestId), data);
+      return {
+        success: true,
+      };
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : 'Failed to respond to sponsorship request';
+      setError(errorMsg);
+      return {
+        success: false,
+        error: errorMsg,
+      };
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
   return {
     isLoading,
     error,
@@ -343,6 +434,7 @@ export const useGroups = () => {
     createGroup,
     getGroupDetail,
     lockGroup,
+    unlockGroup,
     inviteGroupMember,
     acceptGroupInvite,
     declineGroupInvite,
@@ -353,5 +445,8 @@ export const useGroups = () => {
     getGroupProjectDetail,
     joinGroupProject,
     dissolveGroupProject,
+    updateAutoSponsorship,
+    getPendingSponsorshipRequests,
+    respondToSponsorshipRequest,
   };
 };

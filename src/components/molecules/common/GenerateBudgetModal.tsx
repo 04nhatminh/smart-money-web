@@ -9,9 +9,10 @@ import { apiClient } from '@/lib/api-client';
 import { API_ENDPOINTS } from '@/constants/api';
 import { formatVietnamsePrice } from '@/lib/format';
 import { getCookie } from '@/lib/auth';
+import { useLocale } from 'next-intl';
 import { MdClose, MdAutoAwesome, MdCheck, MdError, MdRefresh } from 'react-icons/md';
 import { UserFinancialModal } from '.';
-import { useUserFinancial } from '@/hooks';
+import { useUserFinancial, useBudgets } from '@/hooks';
 
 interface GenerateBudgetModalProps {
   isOpen: boolean;
@@ -34,6 +35,8 @@ export const GenerateBudgetModal: React.FC<GenerateBudgetModalProps> = ({
   const { user, updateUser } = useAuth();
   const { subscribe } = useWebSocket();
   const { getUserFinancial } = useUserFinancial();
+  const { listBudgets } = useBudgets();
+  const locale = useLocale();
 
   // Onboarding sub-modals
   const [isFinancialModalOpen, setIsFinancialModalOpen] = useState(false);
@@ -47,6 +50,16 @@ export const GenerateBudgetModal: React.FC<GenerateBudgetModalProps> = ({
   const [totalBudget, setTotalBudget] = useState<number>(0);
   const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth() + 1);
   const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
+  const [currentBudgets, setCurrentBudgets] = useState<any[]>([]);
+  const [reason, setReason] = useState<string | null>(null);
+
+  const getFormattedPeriod = () => {
+    if (locale === 'vi') {
+      return `Tháng ${selectedMonth}/${selectedYear}`;
+    }
+    const monthName = new Date(selectedYear, selectedMonth - 1).toLocaleString(locale, { month: 'long' });
+    return `${monthName} ${selectedYear}`;
+  };
 
   // Check setup flags saved in cookies or user object
   const checkSetupStatus = async () => {
@@ -82,17 +95,49 @@ export const GenerateBudgetModal: React.FC<GenerateBudgetModalProps> = ({
     }
   };
 
+  const loadCurrentBudgets = async (m: number, y: number) => {
+    try {
+      const res = await listBudgets(m, y);
+      if (res.success && res.data) {
+        const budgetList = res.data.items || res.data.content || res.data.budgets || [];
+        setCurrentBudgets(budgetList);
+      }
+    } catch (e) {
+      console.error('Failed to load current budgets in modal:', e);
+    }
+  };
+
+  const getCurrentBudgetForCategory = (suggestionCategory: string) => {
+    let normalized = suggestionCategory;
+    if (normalized === 'TRANSPORT') {
+      normalized = 'TRANSPORTATION';
+    }
+    const match = currentBudgets.find((b) => {
+      let bCat = b.category;
+      if (bCat === 'TRANSPORT') {
+        bCat = 'TRANSPORTATION';
+      }
+      return bCat === normalized;
+    });
+    return match ? match.amountLimit : 0;
+  };
+
   useEffect(() => {
     if (isOpen) {
       checkSetupStatus();
-      setSelectedMonth(new Date().getMonth() + 1);
-      setSelectedYear(new Date().getFullYear());
+      const currentM = new Date().getMonth() + 1;
+      const currentY = new Date().getFullYear();
+      setSelectedMonth(currentM);
+      setSelectedYear(currentY);
+      loadCurrentBudgets(currentM, currentY);
     } else {
       // Reset state on close
       setStep('CHECKING');
       setErrorMsg(null);
       setJobId(null);
       setSuggestions([]);
+      setCurrentBudgets([]);
+      setReason(null);
     }
   }, [isOpen, user]);
 
@@ -117,6 +162,7 @@ export const GenerateBudgetModal: React.FC<GenerateBudgetModalProps> = ({
         }
         setTotalBudget(resultObj.totalBudget || 0);
         setSuggestions(resultObj.categories || []);
+        setReason(resultObj.reason || resultObj.explanation || resultObj.message || null);
         setStep('SUGGESTION');
       } else if (data.status === 'FAILED' || data.status === 'ERROR') {
         setErrorMsg(data.error || 'AI budget allocation failed. Please try again.');
@@ -155,6 +201,7 @@ export const GenerateBudgetModal: React.FC<GenerateBudgetModalProps> = ({
             }
             setTotalBudget(resultObj.totalBudget || 0);
             setSuggestions(resultObj.categories || []);
+            setReason(resultObj.reason || resultObj.explanation || resultObj.message || null);
             setStep('SUGGESTION');
           } else if (data.status === 'FAILED' || data.status === 'ERROR') {
             setErrorMsg(data.error || 'AI budget allocation failed. Please try again.');
@@ -267,7 +314,7 @@ export const GenerateBudgetModal: React.FC<GenerateBudgetModalProps> = ({
             <div className="flex items-center gap-2">
               <MdAutoAwesome className="w-6 h-6" style={{ color: colors.interactive.primary }} />
               <Heading level={3} className="m-0">
-                AI Budget Generation
+                {locale === 'vi' ? 'Tự Động Tạo Ngân Sách AI' : 'AI Budget Generation'}
               </Heading>
             </div>
             <button
@@ -293,16 +340,16 @@ export const GenerateBudgetModal: React.FC<GenerateBudgetModalProps> = ({
 
                 <div className="flex gap-3 pt-2">
                   <Button variant="secondary" className="flex-1" onClick={onClose}>
-                    Close
+                    {locale === 'vi' ? 'Đóng' : 'Close'}
                   </Button>
                   {errorMsg?.includes('complete') && (
                     <Button variant="primary" className="flex-1" onClick={() => setIsFinancialModalOpen(true)}>
-                      Setup Profile
+                      {locale === 'vi' ? 'Thiết Lập Hồ Sơ' : 'Setup Profile'}
                     </Button>
                   )}
                   {!errorMsg?.includes('complete') && (
                     <Button variant="primary" className="flex-1 flex items-center justify-center gap-2" onClick={checkSetupStatus}>
-                      <MdRefresh className="w-5 h-5" /> Retry Check
+                      <MdRefresh className="w-5 h-5" /> {locale === 'vi' ? 'Thử Lại' : 'Retry Check'}
                     </Button>
                   )}
                 </div>
@@ -317,17 +364,19 @@ export const GenerateBudgetModal: React.FC<GenerateBudgetModalProps> = ({
                 </div>
                 <div className="space-y-2">
                   <Heading level={4} style={{ color: colors.text.primary }}>
-                    Ready to Build Your Smart Budget
+                    {locale === 'vi' ? 'Sẵn Sàng Tạo Ngân Sách Thông Minh' : 'Ready to Build Your Smart Budget'}
                   </Heading>
                   <Text style={{ color: colors.text.secondary }} className="text-sm px-4">
-                    Our AI assistant will analyze your financial profile, monthly income details, and transaction history to allocate a custom budget plan optimized for your needs.
+                    {locale === 'vi' 
+                      ? 'Trợ lý AI của chúng tôi sẽ phân tích hồ sơ tài chính, chi tiết thu nhập hàng tháng và lịch sử giao dịch của bạn để phân bổ một kế hoạch ngân sách tùy chỉnh tối ưu hóa cho nhu cầu của bạn.'
+                      : 'Our AI assistant will analyze your financial profile, monthly income details, and transaction history to allocate a custom budget plan optimized for your needs.'}
                   </Text>
                 </div>
 
                 {/* Period selection (Fixed to current month/year) */}
                 <div className="max-w-xs mx-auto space-y-2 text-center pt-2">
                   <label className="block text-xs font-bold uppercase tracking-wider text-center" style={{ color: colors.text.secondary }}>
-                    Budget Month / Year
+                    {locale === 'vi' ? 'Tháng / Năm Ngân Sách' : 'Budget Month / Year'}
                   </label>
                   <div className="w-full px-4 py-2.5 rounded-lg border font-semibold text-sm text-center"
                     style={{
@@ -336,17 +385,17 @@ export const GenerateBudgetModal: React.FC<GenerateBudgetModalProps> = ({
                       color: colors.text.primary
                     }}
                   >
-                    Month {selectedMonth} / {selectedYear}
+                    {getFormattedPeriod()}
                   </div>
                 </div>
 
                 <div className="flex gap-3 pt-4">
                   <Button variant="secondary" className="flex-1" onClick={onClose}>
-                    Cancel
+                    {locale === 'vi' ? 'Hủy' : 'Cancel'}
                   </Button>
                   <Button variant="primary" className="flex-1 flex items-center justify-center gap-2" onClick={handleGenerateClick}>
                     <MdAutoAwesome className="w-5 h-5" style={{ color: colors.text.inverse }} />
-                    <span>Generate Now</span>
+                    <span>{locale === 'vi' ? 'Tạo Ngay' : 'Generate Now'}</span>
                   </Button>
                 </div>
               </div>
@@ -360,7 +409,7 @@ export const GenerateBudgetModal: React.FC<GenerateBudgetModalProps> = ({
                 </div>
                 <div className="space-y-2">
                   <Text className="font-semibold text-lg" style={{ color: colors.text.primary }}>
-                    Generating Budget Plan
+                    {locale === 'vi' ? 'Đang Tạo Kế Hoạch Ngân Sách' : 'Generating Budget Plan'}
                   </Text>
                   <Text style={{ color: colors.text.secondary }} className="text-sm animate-pulse">
                     {loadingStatus}
@@ -374,45 +423,66 @@ export const GenerateBudgetModal: React.FC<GenerateBudgetModalProps> = ({
               <div className="space-y-5">
                 <div className="p-4 rounded-xl border text-center" style={{ backgroundColor: `${colors.interactive.primary}10`, borderColor: `${colors.interactive.primary}30` }}>
                   <Text className="text-xs font-bold uppercase tracking-wider" style={{ color: colors.text.secondary }}>
-                    AI Recommended Total Budget
+                    {locale === 'vi' ? 'Tổng Ngân Sách Khuyến Nghị Từ AI' : 'AI Recommended Total Budget'}
                   </Text>
                   <Heading level={2} className="mt-1" style={{ color: colors.interactive.primary }}>
                     {formatVietnamsePrice(totalBudget)}
                   </Heading>
                 </div>
 
+                {reason && (
+                  <div className="p-4 rounded-xl border text-left text-sm" style={{ backgroundColor: colors.background.secondary, borderColor: colors.border.light }}>
+                    <Text className="font-bold text-xs uppercase tracking-wider mb-1" style={{ color: colors.interactive.primary }}>
+                      {locale === 'vi' ? 'Lý do thay đổi từ AI:' : 'AI Reasoning:'}
+                    </Text>
+                    <Text style={{ color: colors.text.secondary }} className="italic">
+                      {reason}
+                    </Text>
+                  </div>
+                )}
+
                 <Heading level={4} style={{ color: colors.text.primary }} className="mb-2">
-                  Allocation Breakdown
+                  {locale === 'vi' ? 'Chi Tiết Phân Bổ' : 'Allocation Breakdown'}
                 </Heading>
 
                 <div className="divide-y max-h-60 overflow-y-auto pr-1" style={{ borderColor: colors.border.light }}>
-                  {suggestions.map((item, idx) => (
-                    <div key={idx} className="flex justify-between py-3">
-                      <div>
-                        <Text className="font-bold text-sm" style={{ color: colors.text.primary }}>
-                          {item.category}
-                        </Text>
-                        <Text className="text-xs" style={{ color: colors.text.secondary }}>
-                          Allocation ratio: {(item.ratio * 100).toFixed(1)}%
-                        </Text>
+                  {suggestions.map((item, idx) => {
+                    const currentLimit = getCurrentBudgetForCategory(item.category);
+                    return (
+                      <div key={idx} className="flex justify-between py-3">
+                        <div>
+                          <Text className="font-bold text-sm" style={{ color: colors.text.primary }}>
+                            {item.category}
+                          </Text>
+                          <Text className="text-xs" style={{ color: colors.text.secondary }}>
+                            {locale === 'vi' ? 'Tỷ lệ phân bổ:' : 'Allocation ratio:'} {(item.ratio * 100).toFixed(1)}%
+                          </Text>
+                        </div>
+                        <div className="text-right">
+                          <Text className="text-xs" style={{ color: colors.text.secondary, textDecoration: 'line-through' }}>
+                            {formatVietnamsePrice(currentLimit)}
+                          </Text>
+                          <Text className="font-extrabold text-sm" style={{ color: colors.interactive.primary }}>
+                            {formatVietnamsePrice(item.amount)}
+                          </Text>
+                        </div>
                       </div>
-                      <Text className="font-extrabold text-sm" style={{ color: colors.interactive.primary }}>
-                        {formatVietnamsePrice(item.amount)}
-                      </Text>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
 
                 <div className="p-3 rounded-lg text-xs" style={{ backgroundColor: colors.background.secondary, color: colors.text.tertiary }}>
-                  Confirming will bulk update your budget categories for {selectedMonth}/{selectedYear}.
+                  {locale === 'vi' 
+                    ? `Xác nhận sẽ cập nhật hàng loạt các danh mục ngân sách cho ${getFormattedPeriod()}.`
+                    : `Confirming will bulk update your budget categories for ${getFormattedPeriod()}.`}
                 </div>
 
                 <div className="flex gap-3 pt-4">
                   <Button variant="secondary" className="flex-1" onClick={() => setStep('READY')}>
-                    Back
+                    {locale === 'vi' ? 'Quay Lại' : 'Back'}
                   </Button>
                   <Button variant="primary" className="flex-1 flex items-center justify-center gap-2" onClick={handleConfirmBudgets}>
-                    <MdCheck className="w-5 h-5" /> Confirm & Apply
+                    <MdCheck className="w-5 h-5" /> {locale === 'vi' ? 'Xác Nhận & Áp Dụng' : 'Confirm & Apply'}
                   </Button>
                 </div>
               </div>
