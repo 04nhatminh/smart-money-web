@@ -12,7 +12,7 @@ import { getCookie } from '@/lib/auth';
 import { useLocale } from 'next-intl';
 import { MdClose, MdAutoAwesome, MdCheck, MdError, MdRefresh } from 'react-icons/md';
 import { UserFinancialModal } from '.';
-import { useUserFinancial } from '@/hooks';
+import { useUserFinancial, useBudgets } from '@/hooks';
 
 interface GenerateBudgetModalProps {
   isOpen: boolean;
@@ -35,6 +35,7 @@ export const GenerateBudgetModal: React.FC<GenerateBudgetModalProps> = ({
   const { user, updateUser } = useAuth();
   const { subscribe } = useWebSocket();
   const { getUserFinancial } = useUserFinancial();
+  const { listBudgets } = useBudgets();
   const locale = useLocale();
 
   // Onboarding sub-modals
@@ -49,6 +50,8 @@ export const GenerateBudgetModal: React.FC<GenerateBudgetModalProps> = ({
   const [totalBudget, setTotalBudget] = useState<number>(0);
   const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth() + 1);
   const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
+  const [currentBudgets, setCurrentBudgets] = useState<any[]>([]);
+  const [reason, setReason] = useState<string | null>(null);
 
   const getFormattedPeriod = () => {
     if (locale === 'vi') {
@@ -92,17 +95,49 @@ export const GenerateBudgetModal: React.FC<GenerateBudgetModalProps> = ({
     }
   };
 
+  const loadCurrentBudgets = async (m: number, y: number) => {
+    try {
+      const res = await listBudgets(m, y);
+      if (res.success && res.data) {
+        const budgetList = res.data.items || res.data.content || res.data.budgets || [];
+        setCurrentBudgets(budgetList);
+      }
+    } catch (e) {
+      console.error('Failed to load current budgets in modal:', e);
+    }
+  };
+
+  const getCurrentBudgetForCategory = (suggestionCategory: string) => {
+    let normalized = suggestionCategory;
+    if (normalized === 'TRANSPORT') {
+      normalized = 'TRANSPORTATION';
+    }
+    const match = currentBudgets.find((b) => {
+      let bCat = b.category;
+      if (bCat === 'TRANSPORT') {
+        bCat = 'TRANSPORTATION';
+      }
+      return bCat === normalized;
+    });
+    return match ? match.amountLimit : 0;
+  };
+
   useEffect(() => {
     if (isOpen) {
       checkSetupStatus();
-      setSelectedMonth(new Date().getMonth() + 1);
-      setSelectedYear(new Date().getFullYear());
+      const currentM = new Date().getMonth() + 1;
+      const currentY = new Date().getFullYear();
+      setSelectedMonth(currentM);
+      setSelectedYear(currentY);
+      loadCurrentBudgets(currentM, currentY);
     } else {
       // Reset state on close
       setStep('CHECKING');
       setErrorMsg(null);
       setJobId(null);
       setSuggestions([]);
+      setCurrentBudgets([]);
+      setReason(null);
     }
   }, [isOpen, user]);
 
@@ -127,6 +162,7 @@ export const GenerateBudgetModal: React.FC<GenerateBudgetModalProps> = ({
         }
         setTotalBudget(resultObj.totalBudget || 0);
         setSuggestions(resultObj.categories || []);
+        setReason(resultObj.reason || resultObj.explanation || resultObj.message || null);
         setStep('SUGGESTION');
       } else if (data.status === 'FAILED' || data.status === 'ERROR') {
         setErrorMsg(data.error || 'AI budget allocation failed. Please try again.');
@@ -165,6 +201,7 @@ export const GenerateBudgetModal: React.FC<GenerateBudgetModalProps> = ({
             }
             setTotalBudget(resultObj.totalBudget || 0);
             setSuggestions(resultObj.categories || []);
+            setReason(resultObj.reason || resultObj.explanation || resultObj.message || null);
             setStep('SUGGESTION');
           } else if (data.status === 'FAILED' || data.status === 'ERROR') {
             setErrorMsg(data.error || 'AI budget allocation failed. Please try again.');
@@ -393,26 +430,45 @@ export const GenerateBudgetModal: React.FC<GenerateBudgetModalProps> = ({
                   </Heading>
                 </div>
 
+                {reason && (
+                  <div className="p-4 rounded-xl border text-left text-sm" style={{ backgroundColor: colors.background.secondary, borderColor: colors.border.light }}>
+                    <Text className="font-bold text-xs uppercase tracking-wider mb-1" style={{ color: colors.interactive.primary }}>
+                      {locale === 'vi' ? 'Lý do thay đổi từ AI:' : 'AI Reasoning:'}
+                    </Text>
+                    <Text style={{ color: colors.text.secondary }} className="italic">
+                      {reason}
+                    </Text>
+                  </div>
+                )}
+
                 <Heading level={4} style={{ color: colors.text.primary }} className="mb-2">
                   {locale === 'vi' ? 'Chi Tiết Phân Bổ' : 'Allocation Breakdown'}
                 </Heading>
 
                 <div className="divide-y max-h-60 overflow-y-auto pr-1" style={{ borderColor: colors.border.light }}>
-                  {suggestions.map((item, idx) => (
-                    <div key={idx} className="flex justify-between py-3">
-                      <div>
-                        <Text className="font-bold text-sm" style={{ color: colors.text.primary }}>
-                          {item.category}
-                        </Text>
-                        <Text className="text-xs" style={{ color: colors.text.secondary }}>
-                          {locale === 'vi' ? 'Tỷ lệ phân bổ:' : 'Allocation ratio:'} {(item.ratio * 100).toFixed(1)}%
-                        </Text>
+                  {suggestions.map((item, idx) => {
+                    const currentLimit = getCurrentBudgetForCategory(item.category);
+                    return (
+                      <div key={idx} className="flex justify-between py-3">
+                        <div>
+                          <Text className="font-bold text-sm" style={{ color: colors.text.primary }}>
+                            {item.category}
+                          </Text>
+                          <Text className="text-xs" style={{ color: colors.text.secondary }}>
+                            {locale === 'vi' ? 'Tỷ lệ phân bổ:' : 'Allocation ratio:'} {(item.ratio * 100).toFixed(1)}%
+                          </Text>
+                        </div>
+                        <div className="text-right">
+                          <Text className="text-xs" style={{ color: colors.text.secondary, textDecoration: 'line-through' }}>
+                            {formatVietnamsePrice(currentLimit)}
+                          </Text>
+                          <Text className="font-extrabold text-sm" style={{ color: colors.interactive.primary }}>
+                            {formatVietnamsePrice(item.amount)}
+                          </Text>
+                        </div>
                       </div>
-                      <Text className="font-extrabold text-sm" style={{ color: colors.interactive.primary }}>
-                        {formatVietnamsePrice(item.amount)}
-                      </Text>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
 
                 <div className="p-3 rounded-lg text-xs" style={{ backgroundColor: colors.background.secondary, color: colors.text.tertiary }}>

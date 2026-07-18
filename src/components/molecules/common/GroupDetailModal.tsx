@@ -39,6 +39,9 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
     getGroupProjectDetail,
     joinGroupProject,
     dissolveGroupProject,
+    updateAutoSponsorship,
+    getPendingSponsorshipRequests,
+    respondToSponsorshipRequest,
     isLoading: groupsLoading,
   } = useGroups();
 
@@ -55,6 +58,13 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
   const [resendingEmail, setResendingEmail] = useState<string | null>(null);
   const [sentEmails, setSentEmails] = useState<Record<string, boolean>>({});
   const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = useState(false);
+
+  const [autoSponsorEnabled, setAutoSponsorEnabled] = useState(false);
+  const [autoSponsorLimitType, setAutoSponsorLimitType] = useState<'MAX' | 'CUSTOM'>('MAX');
+  const [autoSponsorLimit, setAutoSponsorLimit] = useState('');
+  const [isSavingSponsorship, setIsSavingSponsorship] = useState(false);
+  const [myPendingRequest, setMyPendingRequest] = useState<any | null>(null);
+  const [savedSponsorshipText, setSavedSponsorshipText] = useState('Chưa cấu hình');
 
   const isAdmin = group?.adminId === user?.id;
   const isForming = group?.status === 'FORMING';
@@ -100,19 +110,90 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
       const res = await getGroupDetail(groupId);
       if (res.success && res.data) {
         setGroup(res.data);
+        
+        const me = res.data.members.find((m: any) => m.userId === user?.id);
+        if (me) {
+          setAutoSponsorEnabled(me.autoSponsorEnabled || false);
+          setAutoSponsorLimitType(me.autoSponsorLimit ? 'CUSTOM' : 'MAX');
+          setAutoSponsorLimit(me.autoSponsorLimit ? formatAmountInput(me.autoSponsorLimit.toString()) : '');
+
+          if (!me.autoSponsorEnabled) {
+            setSavedSponsorshipText('Không tự động hỗ trợ');
+          } else {
+            setSavedSponsorshipText(me.autoSponsorLimit ? `Tự động hỗ trợ (Tối đa ${formatAmountInput(me.autoSponsorLimit.toString())} VND/tháng)` : 'Tự động hỗ trợ (Tối đa khả năng)');
+          }
+        }
+
         if (res.data.groupProjectId) {
           const projRes = await getGroupProjectDetail(res.data.groupProjectId);
           if (projRes.success && projRes.data) {
             setProjectDetail(projRes.data);
           }
+
+          const pendingRes = await getPendingSponsorshipRequests();
+          if (pendingRes.success && pendingRes.data) {
+            const match = pendingRes.data.find((r: any) => r.groupProjectId === res.data.groupProjectId);
+            setMyPendingRequest(match || null);
+          } else {
+            setMyPendingRequest(null);
+          }
         } else {
           setProjectDetail(null);
+          setMyPendingRequest(null);
         }
       } else {
         setError(res.error || 'Failed to load group details');
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
+    } finally {
+      setLocalLoading(false);
+    }
+  };
+
+  const handleSaveSponsorshipSettings = async () => {
+    if (!group) return;
+    setError(null);
+    setSuccess(null);
+    setIsSavingSponsorship(true);
+    try {
+      const limitVal = autoSponsorLimitType === 'CUSTOM' && autoSponsorLimit
+        ? parseFormattedNumber(autoSponsorLimit)
+        : undefined;
+
+      const res = await updateAutoSponsorship(group.groupId, {
+        enabled: autoSponsorEnabled,
+        limit: limitVal,
+      });
+
+      if (res.success) {
+        setSuccess('Cập nhật cấu hình tự động hỗ trợ thành công!');
+        loadDetails();
+      } else {
+        setError(res.error || 'Không thể cập nhật cấu hình');
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Đã có lỗi xảy ra');
+    } finally {
+      setIsSavingSponsorship(false);
+    }
+  };
+
+  const handleRespondSponsorship = async (agreed: boolean) => {
+    if (!myPendingRequest) return;
+    setError(null);
+    setSuccess(null);
+    setLocalLoading(true);
+    try {
+      const res = await respondToSponsorshipRequest(myPendingRequest.requestId, { agreed });
+      if (res.success) {
+        setSuccess(agreed ? 'Bạn đã đồng ý gánh vác đóng góp giúp đồng đội!' : 'Bạn đã từ chối gánh vác đóng góp.');
+        loadDetails();
+      } else {
+        setError(res.error || 'Có lỗi xảy ra khi phản hồi');
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Có lỗi xảy ra');
     } finally {
       setLocalLoading(false);
     }
@@ -368,7 +449,7 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    {isAdmin && !group.groupProjectId && (
+                    {isAdmin && (!group.groupProjectId || (projectDetail && projectDetail.status === 'DISSOLVED')) && (
                       <Button
                         variant="danger"
                         size="sm"
@@ -392,7 +473,7 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
                         Lock Group
                       </Button>
                     )}
-                    {isAdmin && isLocked && !group.groupProjectId && (
+                    {isAdmin && isLocked && (!group.groupProjectId || (projectDetail && projectDetail.status === 'DISSOLVED')) && (
                       <Button
                         variant="secondary"
                         size="sm"
@@ -408,7 +489,7 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
                 </div>
 
                 {/* Group Project Info */}
-                {projectDetail ? (
+                {projectDetail && projectDetail.status !== 'DISSOLVED' ? (
                   <div className="border rounded-xl p-4 space-y-4" style={{ borderColor: colors.border.light }}>
                     <div className="flex justify-between items-start">
                       <div>
@@ -450,8 +531,8 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
                       </Text>
                     </div>
 
-                    {/* Join flow for current user */}
-                    {!hasJoinedProject() && group?.status !== 'DISSOLVED' && (
+                    {/* Join flow for current user (only when ACTIVE) */}
+                    {!hasJoinedProject() && group?.status !== 'DISSOLVED' && projectDetail.status === 'ACTIVE' && (
                       <div className="p-4 border rounded-xl space-y-3" style={{ borderColor: colors.border.light, backgroundColor: `${colors.interactive.primary}05` }}>
                         <Heading level={4} className='pb-2'>Join Group Project</Heading>
                         <Text className="text-xs">
@@ -488,6 +569,57 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
                         </Button>
                       </div>
                     )}
+
+                    {/* Sponsorship survey pending notice & response actions */}
+                    {group?.status !== 'DISSOLVED' && projectDetail.status === 'PENDING_SPONSORSHIP' && (
+                      <div className="p-4 border rounded-xl bg-gradient-to-br from-amber-50 to-orange-50/50 space-y-3 animate-fade-in" style={{ borderColor: '#F59E0B30' }}>
+                        <div className="flex items-center gap-2 text-xs font-bold text-amber-800">
+                          <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+                          {myPendingRequest ? 'Yêu Cầu Hỗ Trợ Đang Chờ Bạn Phản Hồi' : 'Đang chờ khảo sát ý kiến đồng đội...'}
+                        </div>
+                        {myPendingRequest ? (
+                          <div className="space-y-3">
+                            <Text className="text-xs text-gray-600 leading-relaxed">
+                              Đồng đội trong nhóm của bạn không đủ khả năng tài chính. Hệ thống đề xuất bạn hỗ trợ thêm{' '}
+                              <strong>{Number(myPendingRequest.askedAmount).toLocaleString()} VND/tháng</strong> (nâng mức đóng góp của bạn lên{' '}
+                              <strong>{Number(myPendingRequest.proposedShare).toLocaleString()} VND/tháng</strong> thay vì{' '}
+                              <strong>{Number(myPendingRequest.originalShare).toLocaleString()} VND/tháng</strong>).
+                            </Text>
+                            <div className="flex gap-2 justify-end">
+                              <Button
+                                size="sm"
+                                variant="secondary"
+                                onClick={() => handleRespondSponsorship(false)}
+                                disabled={localLoading}
+                                style={{ color: '#EF4444', borderColor: '#EF444420', backgroundColor: 'transparent' }}
+                              >
+                                Từ chối
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="primary"
+                                onClick={() => handleRespondSponsorship(true)}
+                                disabled={localLoading}
+                                className="bg-amber-600 hover:bg-amber-700 text-white font-bold"
+                              >
+                                Đồng ý giúp
+                              </Button>
+                            </div>
+                          </div>
+                        ) : (
+                          <Text className="text-xs text-gray-500">
+                            Dự án đang chờ các thành viên phản hồi khảo sát đóng góp giúp để kích hoạt.
+                          </Text>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Sponsorship failed notice */}
+                    {group?.status !== 'DISSOLVED' && projectDetail.status === 'SPONSORSHIP_FAILED' && (
+                      <div className="p-4 border rounded-xl bg-red-50 text-red-800 text-xs font-semibold" style={{ borderColor: '#EF444430' }}>
+                        Dự án này đã thất bại do các thành viên từ chối hoặc không đủ khả năng đóng góp giúp.
+                      </div>
+                    )}
                   </div>
                 ) : (
                   isAdmin && isLocked && (
@@ -506,6 +638,86 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
                       </Button>
                     </div>
                   )
+                )}
+
+                {/* Auto-Sponsorship Settings Panel */}
+                {group.status !== 'DISSOLVED' && (
+                  <div className="p-4 border rounded-xl space-y-3 bg-gradient-to-r from-blue-50/20 to-indigo-50/20" style={{ borderColor: colors.border.light }}>
+                    <div className="text-[11px] font-semibold text-blue-700 bg-blue-100/40 px-2.5 py-1 rounded-md border border-blue-200/50 inline-block mb-1">
+                      Lựa chọn hiện tại: {savedSponsorshipText}
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <Heading level={4} className="text-sm font-bold flex items-center gap-1.5" style={{ color: colors.interactive.primary }}>
+                          <MdAutoAwesome />
+                          Tự Động Hỗ Trợ Đồng Đội (Auto-Sponsor)
+                        </Heading>
+                        <Text className="text-[11px]" style={{ color: colors.text.secondary }}>
+                          Hệ thống sẽ tự động trích quỹ usable dư thừa để bù đắp phần thiếu hụt của đồng đội khi tạo dự án.
+                        </Text>
+                      </div>
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={autoSponsorEnabled}
+                          onChange={(e) => setAutoSponsorEnabled(e.target.checked)}
+                          className="sr-only peer"
+                        />
+                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                      </label>
+                    </div>
+
+                    {autoSponsorEnabled && (
+                      <div className="space-y-3 pt-2 border-t border-dashed" style={{ borderColor: colors.border.light }}>
+                        <div className="flex gap-4">
+                          <label className="flex items-center gap-2 text-xs font-semibold cursor-pointer text-gray-700">
+                            <input
+                              type="radio"
+                              name="sponsorLimitType"
+                              checked={autoSponsorLimitType === 'MAX'}
+                              onChange={() => setAutoSponsorLimitType('MAX')}
+                              className="text-blue-600 focus:ring-blue-500"
+                            />
+                            Tối đa khả năng (Toàn bộ thặng dư)
+                          </label>
+                          <label className="flex items-center gap-2 text-xs font-semibold cursor-pointer text-gray-700">
+                            <input
+                              type="radio"
+                              name="sponsorLimitType"
+                              checked={autoSponsorLimitType === 'CUSTOM'}
+                              onChange={() => setAutoSponsorLimitType('CUSTOM')}
+                              className="text-blue-600 focus:ring-blue-500"
+                            />
+                            Hạn mức tối đa cụ thể
+                          </label>
+                        </div>
+
+                        {autoSponsorLimitType === 'CUSTOM' && (
+                          <div className="max-w-xs">
+                            <label className="block text-xs font-medium mb-1 text-gray-500">Hạn mức hỗ trợ tối đa mỗi tháng (VND)</label>
+                            <Input
+                              type="text"
+                              value={autoSponsorLimit}
+                              onChange={(e) => setAutoSponsorLimit(formatAmountInput(e.target.value))}
+                              placeholder="Nhập số tiền, ví dụ: 200,000"
+                              className="w-full text-xs"
+                            />
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    <div className="flex justify-end pt-1">
+                      <Button
+                        size="sm"
+                        variant="primary"
+                        onClick={handleSaveSponsorshipSettings}
+                        disabled={isSavingSponsorship}
+                      >
+                        {isSavingSponsorship ? 'Đang lưu...' : 'Lưu cấu hình'}
+                      </Button>
+                    </div>
+                  </div>
                 )}
 
                 {/* Member lineup & individual progress */}
@@ -562,9 +774,6 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
                           {/* Member Progress details if joined */}
                           {prog && prog.personalProjectId ? (
                             <div className="text-right">
-                              <Text className="text-xs font-semibold" style={{ color: colors.text.secondary }}>
-                                Net: {formatNumber(prog.netSaved ?? 0)} / {formatNumber(prog.targetAmount ?? 0)}
-                              </Text>
                               <div className="text-[11px] font-bold mt-0.5" style={{ color: colors.interactive.primary }}>
                                 {(prog.progressPercent ?? 0).toFixed(0)}% Progress
                               </div>

@@ -6,7 +6,7 @@ import { CenteredLayout } from '@/components/templates';
 
 export default function ForgotPasswordPage() {
   return (
-    <CenteredLayout hideHeader hideFooter showBackButton>
+    <CenteredLayout hideHeader hideFooter>
       <div className="w-full max-w-[520px] rounded-2xl p-10 auth-glass-card">
         <ForgotPasswordForm
           onSuccess={() => {
