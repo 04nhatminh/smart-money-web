@@ -13,6 +13,7 @@ export const API_ENDPOINTS = {
     verifyOtp: '/api/v1/auth/verify-otp',
     resetPassword: '/api/v1/auth/reset-password',
     forgotPassword: '/api/v1/auth/forgot',
+    deviceActivate: '/api/v1/auth/device/activate',
   },
 
   // Transactions

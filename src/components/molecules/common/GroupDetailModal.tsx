@@ -155,6 +155,41 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
     if (!group) return;
     setError(null);
     setSuccess(null);
+
+    const me = group.members.find((m: any) => m.userId === user?.id);
+    const capacity = me?.capacitySnapshot ?? 0;
+
+    if (autoSponsorEnabled && autoSponsorLimitType === 'CUSTOM' && autoSponsorLimit) {
+      const limitVal = parseFormattedNumber(autoSponsorLimit);
+      if (limitVal > capacity) {
+        const confirmSwitch = window.confirm(
+          `Hạn mức hỗ trợ nhập vào (${limitVal.toLocaleString()} VND) vượt quá khả năng tài chính tối đa của bạn (${capacity.toLocaleString()} VND).\n\nBạn có muốn chuyển sang tùy chọn 'Tối đa khả năng' không?\n- Nhấp OK để chuyển sang 'Tối đa khả năng' và tiến hành lưu.\n- Nhấp Cancel để hủy và tự nhập lại số khác.`
+        );
+        if (confirmSwitch) {
+          setAutoSponsorLimitType('MAX');
+          setAutoSponsorLimit('');
+          setIsSavingSponsorship(true);
+          try {
+            const res = await updateAutoSponsorship(group.groupId, {
+              enabled: true,
+              limit: undefined,
+            });
+            if (res.success) {
+              setSuccess('Cập nhật cấu hình tự động hỗ trợ thành công!');
+              loadDetails();
+            } else {
+              setError(res.error || 'Không thể cập nhật cấu hình');
+            }
+          } catch (err) {
+            setError(err instanceof Error ? err.message : 'Đã có lỗi xảy ra');
+          } finally {
+            setIsSavingSponsorship(false);
+          }
+        }
+        return;
+      }
+    }
+
     setIsSavingSponsorship(true);
     try {
       const limitVal = autoSponsorLimitType === 'CUSTOM' && autoSponsorLimit
