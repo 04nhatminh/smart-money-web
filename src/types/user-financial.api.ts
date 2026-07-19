@@ -18,6 +18,7 @@ export interface UserFinancialProfileResponse {
   savingPace: SavingPace;
   interventionLevel: InterventionLevel;
   focusMode: FocusMode;
+  autoInvestSurplus: boolean;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -27,6 +28,7 @@ export interface CreateUserFinancialProfileRequest {
   savingPace: SavingPace;
   interventionLevel: InterventionLevel;
   focusMode: FocusMode;
+  autoInvestSurplus: boolean;
 }
 
 export interface UpdateUserFinancialProfileRequest {
@@ -34,6 +36,7 @@ export interface UpdateUserFinancialProfileRequest {
   savingPace?: SavingPace;
   interventionLevel?: InterventionLevel;
   focusMode?: FocusMode;
+  autoInvestSurplus?: boolean;
 }
 
 export interface CheckResponseUserFinancialProfileResponse {

@@ -113,6 +113,7 @@ export const API_ENDPOINTS = {
     declineInvite: '/api/v1/groups/invites/decline',
     removeMember: (groupId: string, userId: string) => `/api/v1/groups/${groupId}/members/${userId}`,
     delete: (id: string) => `/api/v1/groups/${id}`,
+    updateAutoSponsorship: (id: string) => `/api/v1/groups/${id}/auto-sponsorship`,
   },
 
   // Group Projects
@@ -122,5 +123,7 @@ export const API_ENDPOINTS = {
     suggestions: '/api/v1/group-projects/suggestions',
     join: (id: string) => `/api/v1/group-projects/${id}/join`,
     dissolve: (id: string) => `/api/v1/group-projects/${id}/dissolve`,
+    pendingSponsorshipRequests: '/api/v1/group-projects/sponsorship/pending',
+    respondSponsorshipRequest: (id: string) => `/api/v1/group-projects/sponsorship/${id}/respond`,
   },
 } as const;

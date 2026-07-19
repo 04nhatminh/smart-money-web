@@ -61,7 +61,7 @@ export default function ProjectsPage() {
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [projectToDelete, setProjectToDelete] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [filterStatus, setFilterStatus] = useState<'ALL' | 'ACTIVE' | 'COMPLETED' | 'ABANDONED'>('ACTIVE');
+  const [filterStatus, setFilterStatus] = useState<'ALL' | 'ACTIVE' | 'COMPLETED' | 'ABANDONED' | 'FROZEN' | 'EXPIRED'>('ACTIVE');
 
   // Groups State
   const [groups, setGroups] = useState<GroupSummaryResponse[]>([]);
@@ -211,6 +211,8 @@ export default function ProjectsPage() {
       active: projects.filter(p => p.status === 'ACTIVE').length,
       completed: projects.filter(p => p.status === 'COMPLETED').length,
       abandoned: projects.filter(p => p.status === 'ABANDONED').length,
+      frozen: projects.filter(p => p.status === 'FROZEN').length,
+      expired: projects.filter(p => p.status === 'EXPIRED').length,
     };
   };
 
@@ -329,12 +331,14 @@ export default function ProjectsPage() {
         {activeTab === 'projects' && (
           <div className="space-y-6">
             {/* Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
               {[
                 { label: t('projects.stats.total'), value: stats.total, color: colors.interactive.primary },
                 { label: t('projects.stats.active'), value: stats.active, color: '#10B981' },
                 { label: t('projects.stats.completed'), value: stats.completed, color: '#6B7280' },
                 { label: t('projects.stats.abandoned'), value: stats.abandoned, color: '#EF4444' },
+                { label: t('projects.stats.frozen'), value: stats.frozen, color: '#F59E0B' },
+                { label: t('projects.stats.expired'), value: stats.expired, color: '#B91C1C' },
               ].map((stat, idx) => (
                 <div
                   key={idx}
@@ -400,6 +404,26 @@ export default function ProjectsPage() {
                 }}
               >
                 {t('projects.filter.abandoned')}
+              </button>
+              <button
+                onClick={() => setFilterStatus('FROZEN')}
+                className="px-4 py-2 rounded-lg text-sm font-medium hover:cursor-pointer"
+                style={{
+                  backgroundColor: filterStatus === 'FROZEN' ? '#F59E0B' : colors.background.secondary,
+                  color: filterStatus === 'FROZEN' ? 'white' : colors.text.primary,
+                }}
+              >
+                {t('projects.filter.frozen')}
+              </button>
+              <button
+                onClick={() => setFilterStatus('EXPIRED')}
+                className="px-4 py-2 rounded-lg text-sm font-medium hover:cursor-pointer"
+                style={{
+                  backgroundColor: filterStatus === 'EXPIRED' ? '#B91C1C' : colors.background.secondary,
+                  color: filterStatus === 'EXPIRED' ? 'white' : colors.text.primary,
+                }}
+              >
+                {t('projects.filter.expired')}
               </button>
             </div>
 

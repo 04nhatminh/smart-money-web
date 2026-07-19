@@ -3,7 +3,7 @@ import type { ApiResponse } from './base.api';
 export type GroupStatus = 'FORMING' | 'LOCKED' | 'DISSOLVED';
 export type GroupMemberRole = 'ADMIN' | 'MEMBER';
 export type GroupMemberInviteStatus = 'INVITED' | 'JOINED' | 'DECLINED';
-export type GroupProjectStatus = 'ACTIVE' | 'COMPLETED' | 'DISSOLVED';
+export type GroupProjectStatus = 'ACTIVE' | 'COMPLETED' | 'DISSOLVED' | 'PENDING_SPONSORSHIP' | 'SPONSORSHIP_FAILED';
 
 export interface GroupMemberResponse {
   userId: string;
@@ -13,6 +13,8 @@ export interface GroupMemberResponse {
   inviteStatus: GroupMemberInviteStatus;
   capacitySnapshot: number;
   joinedAt: string | null;
+  autoSponsorEnabled: boolean;
+  autoSponsorLimit: number | null;
 }
 
 export interface GroupSummaryResponse {
@@ -66,10 +68,26 @@ export interface GroupProjectDetailResponse {
   members: GroupProjectMemberProgressResponse[];
 }
 
+export interface MemberSimulationDto {
+  userId: string;
+  username: string;
+  fullName: string;
+  capacity: number;
+  originalShare: number;
+  proposedShare: number;
+  deficit: number;
+  needsSponsorship: boolean;
+  autoSponsorEnabled: boolean;
+  autoSponsorLimit: number | null;
+}
+
 export interface GroupProjectSuggestionsResponse {
   totalCapacity: number;
   suggestedMonths: number;
   suggestedAmount: number;
+  isFeasible: boolean | null;
+  totalDeficit: number | null;
+  memberSimulations: MemberSimulationDto[] | null;
 }
 
 // Requests
@@ -100,4 +118,24 @@ export interface CreateGroupProjectRequest {
 
 export interface CreateSubPersonalProjectRequest {
   priority: 'LOW' | 'MEDIUM' | 'HIGH';
+}
+
+export interface UpdateAutoSponsorshipRequest {
+  enabled: boolean;
+  limit?: number;
+}
+
+export interface GroupProjectSponsorshipRequestResponse {
+  requestId: string;
+  groupProjectId: string;
+  groupProjectName: string;
+  groupName: string;
+  askedAmount: number;
+  originalShare: number;
+  proposedShare: number;
+  totalMonths: number;
+}
+
+export interface RespondToSponsorshipRequest {
+  agreed: boolean;
 }

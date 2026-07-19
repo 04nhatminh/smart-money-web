@@ -364,13 +364,17 @@
       "total": "Tổng số",
       "active": "Đang hoạt động",
       "completed": "Đã hoàn thành",
-      "abandoned": "Bị bỏ dở"
+      "abandoned": "Bị bỏ dở",
+      "frozen": "Đóng băng",
+      "expired": "Hết hạn"
     },
     "filter": {
       "all": "Tất cả",
       "active": "Đang hoạt động",
       "completed": "Đã hoàn thành",
-      "abandoned": "Bị bỏ dở"
+      "abandoned": "Bị bỏ dở",
+      "frozen": "Đóng băng",
+      "expired": "Hết hạn"
     },
     "noProjects": "Không tìm thấy kế hoạch tiết kiệm nào",
     "createFirst": "Tạo kế hoạch tiết kiệm đầu tiên của bạn để bắt đầu",
@@ -387,7 +391,9 @@
     "status": {
       "ACTIVE": "Đang hoạt động",
       "COMPLETED": "Đã hoàn thành",
-      "ABANDONED": "Bị bỏ dở"
+      "ABANDONED": "Bị bỏ dở",
+      "FROZEN": "Đóng băng",
+      "EXPIRED": "Hết hạn"
     },
     "priority": {
       "LOW": "Thấp",

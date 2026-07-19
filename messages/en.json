@@ -364,13 +364,17 @@
       "total": "Total",
       "active": "Active",
       "completed": "Completed",
-      "abandoned": "Abandoned"
+      "abandoned": "Abandoned",
+      "frozen": "Frozen",
+      "expired": "Expired"
     },
     "filter": {
       "all": "All",
       "active": "Active",
       "completed": "Completed",
-      "abandoned": "Abandoned"
+      "abandoned": "Abandoned",
+      "frozen": "Frozen",
+      "expired": "Expired"
     },
     "noProjects": "No projects found",
     "createFirst": "Create your first project to get started",
@@ -387,7 +391,9 @@
     "status": {
       "ACTIVE": "Active",
       "COMPLETED": "Completed",
-      "ABANDONED": "Abandoned"
+      "ABANDONED": "Abandoned",
+      "FROZEN": "Frozen",
+      "EXPIRED": "Expired"
     },
     "priority": {
       "LOW": "Low",
