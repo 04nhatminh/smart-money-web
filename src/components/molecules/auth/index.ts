@@ -5,3 +5,4 @@ export { ForgotPasswordForm } from './ForgotPasswordForm';
 export { VerifyOtpForm } from './VerifyOtpForm';
 export { ResetPasswordForm } from './ResetPasswordForm';
 export { LogoutButton } from './LogoutButton';
+export { DeviceActivateForm } from './DeviceActivateForm';
