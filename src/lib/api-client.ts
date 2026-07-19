@@ -21,7 +21,7 @@ const extractErrorMessage = (data: any): string => {
   if (data?.message) {
     return data.message;
   }
-  
+
   // If there's an errors object with field-specific errors
   if (data?.errors && typeof data.errors === 'object') {
     const errorMessages = Object.entries(data.errors)
@@ -35,12 +35,12 @@ const extractErrorMessage = (data: any): string => {
         return String(error);
       })
       .filter(msg => msg.length > 0);
-    
+
     if (errorMessages.length > 0) {
       return errorMessages.join('\n');
     }
   }
-  
+
   return 'An error occurred';
 };
 
@@ -57,7 +57,7 @@ export const apiClient = {
       let data: any;
       const contentType = response.headers.get('content-type');
       const contentLength = response.headers.get('content-length');
-      
+
       if (contentLength === '0' || !contentType?.includes('application/json')) {
         // Empty response or non-JSON response
         data = {};
@@ -80,10 +80,8 @@ export const apiClient = {
         throw error;
       }
 
-      console.log(`Connected to backend at ${API_URL}${endpoint}`);
       return data;
     } catch (error) {
-      console.error(`Failed to connect to backend at ${API_URL}${endpoint}:`, error);
       throw error;
     }
   },
@@ -91,11 +89,11 @@ export const apiClient = {
   async post<T>(endpoint: string, body: unknown, config?: { headers?: Record<string, string> }): Promise<T> {
     try {
       const headers = { ...getHeaders(), ...(config?.headers || {}) };
-      
+
       // Check if body is FormData (for multipart/form-data)
       const isFormData = body instanceof FormData;
       let fetchBody: string | FormData;
-      
+
       if (isFormData) {
         fetchBody = body;
         // Remove Content-Type header for FormData - browser will set it with boundary
@@ -103,13 +101,8 @@ export const apiClient = {
       } else {
         const jsonBody = JSON.stringify(body);
         fetchBody = jsonBody;
-        
-        // Log request details
-        console.log(`[API] POST ${API_URL}${endpoint}`);
-        console.log(`[API] Headers:`, headers);
-        console.log(`[API] Body:`, jsonBody);
       }
-      
+
       const response = await fetch(`${API_URL}${endpoint}`, {
         method: 'POST',
         headers,
@@ -117,14 +110,11 @@ export const apiClient = {
         credentials: 'include',
       });
 
-      console.log(`[API] Response status:`, response.status);
-      console.log(`[API] Response headers:`, Object.fromEntries(response.headers.entries()));
-
       // Handle empty response body
       let data: any;
       const contentType = response.headers.get('content-type');
       const contentLength = response.headers.get('content-length');
-      
+
       if (contentLength === '0' || !contentType?.includes('application/json')) {
         // Empty response or non-JSON response
         data = {};
@@ -148,10 +138,8 @@ export const apiClient = {
         throw error;
       }
 
-      console.log(`Connected to backend at ${API_URL}${endpoint}`);
       return data;
     } catch (error) {
-      console.error(`Failed to connect to backend at ${API_URL}${endpoint}:`, error);
       throw error;
     }
   },
@@ -169,7 +157,7 @@ export const apiClient = {
       let data: any;
       const contentType = response.headers.get('content-type');
       const contentLength = response.headers.get('content-length');
-      
+
       if (contentLength === '0' || !contentType?.includes('application/json')) {
         // Empty response or non-JSON response
         data = {};
@@ -192,10 +180,8 @@ export const apiClient = {
         throw error;
       }
 
-      console.log(`Connected to backend at ${API_URL}${endpoint}`);
       return data;
     } catch (error) {
-      console.error(`Failed to connect to backend at ${API_URL}${endpoint}:`, error);
       throw error;
     }
   },
@@ -213,7 +199,7 @@ export const apiClient = {
       let data: any;
       const contentType = response.headers.get('content-type');
       const contentLength = response.headers.get('content-length');
-      
+
       if (contentLength === '0' || !contentType?.includes('application/json')) {
         // Empty response or non-JSON response
         data = {};
@@ -236,10 +222,8 @@ export const apiClient = {
         throw error;
       }
 
-      console.log(`Connected to backend at ${API_URL}${endpoint}`);
       return data;
     } catch (error) {
-      console.error(`Failed to connect to backend at ${API_URL}${endpoint}:`, error);
       throw error;
     }
   },
@@ -267,7 +251,7 @@ export const apiClient = {
       let data: any;
       const contentType = response.headers.get('content-type');
       const contentLength = response.headers.get('content-length');
-      
+
       if (contentLength === '0' || !contentType?.includes('application/json')) {
         // Empty response or non-JSON response
         data = {};
@@ -289,10 +273,8 @@ export const apiClient = {
         throw error;
       }
 
-      console.log(`Connected to backend at ${API_URL}${endpoint}`);
       return data;
     } catch (error) {
-      console.error(`Failed to connect to backend at ${API_URL}${endpoint}:`, error);
       throw error;
     }
   },
@@ -316,7 +298,7 @@ export const apiClient = {
       let data: any;
       const contentType = response.headers.get('content-type');
       const contentLength = response.headers.get('content-length');
-      
+
       if (contentLength === '0' || !contentType?.includes('application/json')) {
         // Empty response or non-JSON response
         data = {};
@@ -338,10 +320,8 @@ export const apiClient = {
         throw error;
       }
 
-      console.log(`Connected to backend at ${API_URL}${endpoint}`);
       return data;
     } catch (error) {
-      console.error(`Failed to connect to backend at ${API_URL}${endpoint}:`, error);
       throw error;
     }
   },
@@ -357,7 +337,7 @@ export const apiClient = {
       let data: any;
       const contentType = response.headers.get('content-type');
       const contentLength = response.headers.get('content-length');
-      
+
       if (contentLength === '0' || !contentType?.includes('application/json')) {
         // Empty response or non-JSON response
         data = {};
@@ -380,10 +360,8 @@ export const apiClient = {
         throw error;
       }
 
-      console.log(`Connected to backend at ${API_URL}${endpoint}`);
       return data;
     } catch (error) {
-      console.error(`Failed to connect to backend at ${API_URL}${endpoint}:`, error);
       throw error;
     }
   },

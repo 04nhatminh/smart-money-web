@@ -69,9 +69,6 @@ export const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({
       return;
     }
 
-    console.log('[ResetPasswordForm] resetToken:', resetToken);
-    console.log('[ResetPasswordForm] email:', email);
-
     try {
       setIsLoading(true);
 
@@ -88,8 +85,6 @@ export const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({
           },
         }
       );
-
-      console.log('[ResetPasswordForm] Response:', response);
 
       setSuccess(true);
       onSuccess?.();

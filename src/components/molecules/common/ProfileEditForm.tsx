@@ -32,10 +32,8 @@ export const ProfileEditForm: React.FC<ProfileEditFormProps> = ({ onSuccess, isL
 
   // Initialize form with authUser data immediately
   useEffect(() => {
-    console.log('🔵 ProfileEditForm - authUser:', authUser);
     if (authUser) {
       const formatted = formatDateToInput(authUser.dateOfBirth);
-      console.log('🔵 ProfileEditForm - formatted date:', authUser.dateOfBirth, '->', formatted);
       setFormData({
         fullName: authUser.fullName || '',
         phone: authUser.phone || '',
@@ -90,7 +88,7 @@ export const ProfileEditForm: React.FC<ProfileEditFormProps> = ({ onSuccess, isL
         setError(t('profile.phoneInvalid'));
         return false;
       }
-      
+
       // Check if phone has exactly 10 digits and starts with 0
       if (!/^0\d{9}$/.test(formData.phone)) {
         setError(t('profile.phoneFormatInvalid'));

@@ -72,7 +72,6 @@ export const VerifyEmailForm: React.FC<VerifyEmailFormProps> = ({ email }) => {
 
       // apiClient.post returns response data directly (not wrapped in .data)
       // API response format: { success: boolean, message: string }
-      console.log('[VerifyEmailForm] Verify response:', response);
 
       if (response && response.success === true) {
         setSuccess('Email verified successfully! Redirecting to login...');

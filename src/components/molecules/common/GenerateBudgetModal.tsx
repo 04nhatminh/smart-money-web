@@ -73,7 +73,7 @@ export const GenerateBudgetModal: React.FC<GenerateBudgetModalProps> = ({
       setStep('CHECKING');
       try {
         const financialRes = await getUserFinancial();
-        
+
         if (financialRes.success && financialRes.data) {
           financialSetupCompleted = true;
           // Sync with local state
@@ -145,12 +145,9 @@ export const GenerateBudgetModal: React.FC<GenerateBudgetModalProps> = ({
   useEffect(() => {
     if (!jobId || step !== 'LOADING') return;
 
-    console.log(`[GenerateBudgetModal] Subscribing to job: ${jobId}`);
     setLoadingStatus('AI is analyzing your profile and transactions...');
 
     const unsubscribe = subscribe(jobId, (data) => {
-      console.log('[GenerateBudgetModal] WS data received:', data);
-
       if ((data.status === 'SUCCESS' || data.status === 'COMPLETED') && data.result) {
         let resultObj = data.result;
         if (typeof resultObj === 'string') {
@@ -184,10 +181,8 @@ export const GenerateBudgetModal: React.FC<GenerateBudgetModalProps> = ({
     // Polling fallback in case WS fails or message is missed
     const pollInterval = setInterval(async () => {
       try {
-        console.log(`[GenerateBudgetModal] Polling job status: ${jobId}`);
         const response = await apiClient.get<any>(`/api/v1/ai/${jobId}`);
         const data = response.data || response;
-        console.log('[GenerateBudgetModal] Polled data:', data);
 
         if (data) {
           if ((data.status === 'SUCCESS' || data.status === 'COMPLETED') && data.result) {
@@ -367,7 +362,7 @@ export const GenerateBudgetModal: React.FC<GenerateBudgetModalProps> = ({
                     {locale === 'vi' ? 'Sẵn Sàng Tạo Ngân Sách Thông Minh' : 'Ready to Build Your Smart Budget'}
                   </Heading>
                   <Text style={{ color: colors.text.secondary }} className="text-sm px-4">
-                    {locale === 'vi' 
+                    {locale === 'vi'
                       ? 'Trợ lý AI của chúng tôi sẽ phân tích hồ sơ tài chính, chi tiết thu nhập hàng tháng và lịch sử giao dịch của bạn để phân bổ một kế hoạch ngân sách tùy chỉnh tối ưu hóa cho nhu cầu của bạn.'
                       : 'Our AI assistant will analyze your financial profile, monthly income details, and transaction history to allocate a custom budget plan optimized for your needs.'}
                   </Text>
@@ -472,7 +467,7 @@ export const GenerateBudgetModal: React.FC<GenerateBudgetModalProps> = ({
                 </div>
 
                 <div className="p-3 rounded-lg text-xs" style={{ backgroundColor: colors.background.secondary, color: colors.text.tertiary }}>
-                  {locale === 'vi' 
+                  {locale === 'vi'
                     ? `Xác nhận sẽ cập nhật hàng loạt các danh mục ngân sách cho ${getFormattedPeriod()}.`
                     : `Confirming will bulk update your budget categories for ${getFormattedPeriod()}.`}
                 </div>

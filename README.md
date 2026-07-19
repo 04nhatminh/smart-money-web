@@ -153,8 +153,6 @@ const updated = await apiClient.put('/api/items/1', { name: 'Updated' });
 const deleted = await apiClient.delete('/api/items/1');
 ```
 
-When any API call is successful, a console.log message appears confirming the connection to the backend endpoint.
-
 ## Pages
 
 - **Home** (`/`): Main page showcasing featured items and search functionality
@@ -171,7 +169,6 @@ MIT
 
 ## Notes
 
-- All console.log messages for API connections include the endpoint URL without any icons
 - The application is fully typed with TypeScript
 - Tailwind CSS 4 provides the latest styling features
 - The project follows Next.js 16 best practices with the App Router

@@ -27,7 +27,6 @@ export const useProjects = () => {
 
       const response = await apiClient.get<any>(API_ENDPOINTS.projects.list);
 
-      console.log('Fetched projects:', response);
       return {
         data: response.data,
         success: true,
@@ -79,13 +78,11 @@ export const useProjects = () => {
       setIsLoading(true);
       setError(null);
 
-      console.log('Creating project with data:', data);
       const response = await apiClient.post<any>(
         API_ENDPOINTS.projects.create,
         data
       );
 
-      console.log('Project created successfully:', response);
       return {
         success: true,
         data: response.data,
@@ -114,7 +111,6 @@ export const useProjects = () => {
           data
         );
 
-        console.log('Project updated successfully:', response);
         return {
           success: true,
           data: response.data,
@@ -321,8 +317,6 @@ export const useProjects = () => {
           API_ENDPOINTS.projects.projectAdvisor,
           data
         );
-
-        console.log('Project advisor response:', response);
 
         return {
           success: true,
