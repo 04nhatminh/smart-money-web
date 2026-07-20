@@ -467,7 +467,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
 
       const calculatedDeadline = (() => {
         const d = new Date(startDateVal);
-        d.setMonth(d.getMonth() + (advisorData.numberOfMonths - 1));
+        d.setMonth(d.getMonth() + advisorData.numberOfMonths);
         return d.toISOString().split('T')[0];
       })();
 

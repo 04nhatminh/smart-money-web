@@ -29,7 +29,7 @@ export const useUserIncome = () => {
     } catch (err) {
       // Handle 404 - User hasn't created income yet (not an error state)
       const errorMsg = err instanceof Error ? err.message : 'Failed to fetch user income';
-      
+
       if (errorMsg.includes('not found') || errorMsg.includes('404')) {
         // User doesn't have income set up yet - this is normal
         return {
@@ -57,14 +57,11 @@ export const useUserIncome = () => {
         setIsLoading(true);
         setError(null);
 
-        console.log('Creating user income with data:', data);
         const response = await apiClient.post<CheckResponseUserIncomeResponse>(
           API_ENDPOINTS.userIncome.create,
           data
         );
 
-        console.log('User income created successfully:', response);
-        
         // Handle empty response from backend
         if (!response || Object.keys(response).length === 0) {
           console.warn('Empty response from create user income endpoint');

@@ -59,8 +59,6 @@ export const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({
         { email }
       );
 
-      console.log('[ForgotPasswordForm] Response:', response);
-
       setSuccess(true);
       onSuccess?.();
 

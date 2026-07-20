@@ -51,13 +51,14 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
   const statusColor = getStatusColor(project.status);
   const priorityColor = getPriorityColor(project.priority);
   const daysLeft = project.deadline ? Math.ceil((new Date(project.deadline).getTime() - Date.now()) / (1000 * 60 * 60 * 24)) : 0;
-  const formattedDeadline = project.deadline
-    ? new Date(project.deadline).toLocaleDateString(locale, {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-      })
-    : '';
+  const formattedDeadline = (() => {
+    if (!project.deadline) return '';
+    const parts = project.deadline.split('T')[0].split('-');
+    if (parts.length === 3) {
+      return `${parts[2]}/${parts[1]}/${parts[0]}`;
+    }
+    return project.deadline;
+  })();
 
   return (
     <div
@@ -159,14 +160,14 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
             onClick={() => onViewDetails(project.projectId)}
             className="flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-1"
             style={{
-              backgroundColor: colors.background.primary + '20',
-              color: colors.background.primary,
+              backgroundColor: colors.interactive.primary + '20',
+              color: colors.interactive.primary,
             }}
             onMouseEnter={e => {
-              e.currentTarget.style.backgroundColor = colors.background.secondary + '30';
+              e.currentTarget.style.backgroundColor = colors.interactive.primary + '30';
             }}
             onMouseLeave={e => {
-              e.currentTarget.style.backgroundColor = colors.background.primary + '20';
+              e.currentTarget.style.backgroundColor = colors.interactive.primary + '20';
             }}
           >
             <MdCheckCircle size={16} /> {t('projects.viewBtn')}
@@ -177,7 +178,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
             onClick={() => onContribute(project.projectId)}
             className="flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
             style={{
-              backgroundColor: colors.background.primary,
+              backgroundColor: colors.interactive.primary,
               color: 'white',
             }}
             onMouseEnter={e => {
@@ -195,14 +196,14 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
             onClick={() => onEdit(project.projectId)}
             className="px-3 py-2 rounded-lg text-sm font-medium transition-colors hover:cursor-pointer"
             style={{
-              backgroundColor: colors.background.primary + '15',
+              backgroundColor: colors.interactive.primary + '15',
               color: colors.text.primary,
             }}
             onMouseEnter={e => {
-              e.currentTarget.style.backgroundColor = colors.background.secondary + '25';
+              e.currentTarget.style.backgroundColor = colors.interactive.primary + '25';
             }}
             onMouseLeave={e => {
-              e.currentTarget.style.backgroundColor = colors.background.primary + '15';
+              e.currentTarget.style.backgroundColor = colors.interactive.primary + '15';
             }}
             title={t('common.edit')}
           >

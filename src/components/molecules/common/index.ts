@@ -30,4 +30,4 @@ export { DatePeriodSelector } from './DatePeriodSelector';
 export { GenerateBudgetModal } from './GenerateBudgetModal';
 export { CreateGroupModal } from './CreateGroupModal';
 export { GroupDetailModal } from './GroupDetailModal';
-
+export { ProjectDetailModal } from './ProjectDetailModal';

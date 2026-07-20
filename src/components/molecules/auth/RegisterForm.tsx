@@ -107,7 +107,6 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
 
   const executeRegister = async () => {
     setError(null);
-    console.log('[RegisterForm] executeRegister started with email:', email);
 
     if (!validateForm()) {
       return;
@@ -123,15 +122,12 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
         formattedDate = `${day}/${month}/${year}`;
       }
 
-      console.log('[RegisterForm] Calling register API...');
       // Call register through auth context
       await register(username, fullName, email, password, phone, formattedDate);
-      console.log('[RegisterForm] Register API success');
 
       // Build redirect URL and perform redirect immediately
       // Don't use setTimeout to avoid navigation interruption
       const redirectUrl = `/${locale}/verify-email?email=${encodeURIComponent(email)}`;
-      console.log('[RegisterForm] Redirecting to URL:', redirectUrl);
 
       // Use router.push with options to ensure navigation
       router.push(redirectUrl);

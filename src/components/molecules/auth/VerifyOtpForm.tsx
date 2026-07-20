@@ -79,8 +79,6 @@ export const VerifyOtpForm: React.FC<VerifyOtpFormProps> = ({
         }
       );
 
-      console.log('[VerifyOtpForm] Response:', response);
-
       if (response?.success && response?.data?.resetToken) {
         const resetToken = response.data.resetToken;
         onSuccess?.(resetToken);
