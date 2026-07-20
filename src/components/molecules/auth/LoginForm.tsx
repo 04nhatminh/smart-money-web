@@ -34,14 +34,10 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
       setSocialLoading(true);
       setError(null);
 
-      console.log('Google response:', response);
-
       if (response.credential) {
         const credentialResponse = JSON.parse(
           atob(response.credential.split('.')[1])
         );
-
-        console.log('Google credential decoded:', credentialResponse);
 
         await loginWithGoogle(response.credential, {
           email: credentialResponse.email,
@@ -65,10 +61,6 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
   }, [loginWithGoogle, onSuccess]);
 
   const handleFacebookLogin = useCallback(() => {
-    console.log('Facebook button clicked');
-    console.log('FB available:', typeof (window as any).FB !== 'undefined');
-    console.log('Window FB:', (window as any).FB);
-
     if (typeof window === 'undefined') {
       setError('Window is not available');
       return;
@@ -89,21 +81,16 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
     }
 
     try {
-      console.log('Calling FB.login');
       FB.login(
         (response: any) => {
-          console.log('FB.login callback received:', response);
-
           if (!response) {
             setError('No response from Facebook');
             return;
           }
 
           if (response.authResponse) {
-            console.log('Auth response received:', response.authResponse);
             loginWithFacebook(response.authResponse.accessToken)
               .then(() => {
-                console.log('Facebook login successful');
                 onSuccess?.();
               })
               .catch((err: any) => {
@@ -113,7 +100,6 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
               });
           } else {
             setError(`Facebook login failed: ${response.status || 'Unknown error'}`);
-            console.log('No auth response. Status:', response.status);
           }
         },
         { scope: 'public_profile,email' }
@@ -139,7 +125,6 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
           client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '',
           callback: handleGoogleLogin,
         });
-        console.log('Google Sign-In initialized');
       }
     };
 
@@ -147,7 +132,6 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
 
     // Initialize Facebook SDK - Set fbAsyncInit BEFORE loading script
     (window as any).fbAsyncInit = function () {
-      console.log('fbAsyncInit called');
       if ((window as any).FB) {
         (window as any).FB.init({
           appId: process.env.NEXT_PUBLIC_FACEBOOK_APP_ID,
@@ -156,7 +140,6 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
           status: true,
           cookie: true,
         });
-        console.log('Facebook SDK initialized with appId:', process.env.NEXT_PUBLIC_FACEBOOK_APP_ID);
       } else {
         console.error('FB object not available in fbAsyncInit');
       }
@@ -167,12 +150,8 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
     fbScript.src = 'https://connect.facebook.net/en_US/sdk.js';
     fbScript.async = true;
     fbScript.defer = true;
-    fbScript.onload = () => {
-      console.log('Facebook SDK script loaded');
-    };
-    fbScript.onerror = () => {
-      console.error('Failed to load Facebook SDK script');
-    };
+    fbScript.onload = () => { };
+    fbScript.onerror = () => { };
     document.body.appendChild(fbScript);
 
     return () => {
@@ -342,13 +321,10 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
             try {
               if (typeof window !== 'undefined' && (window as any).google) {
                 (window as any).google.accounts.id.prompt();
-                console.log('Google prompt opened');
               } else {
-                console.error('Google not loaded');
                 setError('Google Sign-In is not loaded. Please refresh the page.');
               }
             } catch (err) {
-              console.error('Error opening Google prompt:', err);
               setError('Error opening Google Sign-In');
             }
           }}

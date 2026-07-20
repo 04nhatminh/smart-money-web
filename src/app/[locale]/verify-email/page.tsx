@@ -20,16 +20,10 @@ export default function VerifyEmailPage() {
   const { isAuthenticated, isInitializing } = useAuth();
   const { colors } = useTheme();
 
-  useEffect(() => {
-    console.log('[VerifyEmailPage] Mounted - email:', email, 'isAuthenticated:', isAuthenticated, 'isInitializing:', isInitializing);
-  }, []);
-
   // Redirect to dashboard only if user is already authenticated
   // This should only happen if someone tries to access verify-email with an existing session
   useEffect(() => {
-    console.log('[VerifyEmailPage] Auth check - isAuthenticated:', isAuthenticated, 'isInitializing:', isInitializing);
     if (!isInitializing && isAuthenticated) {
-      console.log('[VerifyEmailPage] User already authenticated, redirecting to dashboard');
       router.push(`/${locale}/dashboard`);
     }
   }, [isAuthenticated, isInitializing, router, locale]);
@@ -40,9 +34,7 @@ export default function VerifyEmailPage() {
     // Only redirect if we've checked searchParams and there's still no email
     // Add a small delay to allow URL parameters to be properly parsed
     const timer = setTimeout(() => {
-      console.log('[VerifyEmailPage] Email check - email:', email);
       if (!email) {
-        console.log('[VerifyEmailPage] No email found, redirecting to register');
         router.push(`/${locale}/register`);
       }
     }, 100);

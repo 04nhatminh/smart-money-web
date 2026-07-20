@@ -16,6 +16,7 @@ import {
   GenerateBudgetModal,
   CreateGroupModal,
   GroupDetailModal,
+  ProjectDetailModal,
 } from '@/components/molecules/common';
 import { useTheme } from '@/context/ThemeContext';
 import { useProjects } from '@/hooks/useProjects';
@@ -62,6 +63,8 @@ export default function ProjectsPage() {
   const [projectToDelete, setProjectToDelete] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [filterStatus, setFilterStatus] = useState<'ALL' | 'ACTIVE' | 'COMPLETED' | 'ABANDONED' | 'FROZEN' | 'EXPIRED'>('ACTIVE');
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [selectedDetailProject, setSelectedDetailProject] = useState<ProjectListItem | null>(null);
 
   // Groups State
   const [groups, setGroups] = useState<GroupSummaryResponse[]>([]);
@@ -144,18 +147,11 @@ export default function ProjectsPage() {
     setIsContributeModalOpen(true);
   };
 
-  const handleViewDetails = async (projectId: string) => {
-    try {
-      setError(null);
-      const result = await getProject(projectId);
-      if (result.success && result.data) {
-        router.push(`/${locale}/projects/${projectId}`);
-      } else {
-        setError(t('projects.loadDetailsFailed'));
-      }
-    } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : t('projects.loadSingleFailed');
-      setError(errorMsg);
+  const handleViewDetails = (projectId: string) => {
+    const proj = projects.find(p => p.projectId === projectId);
+    if (proj) {
+      setSelectedDetailProject(proj);
+      setIsDetailModalOpen(true);
     }
   };
 
@@ -634,6 +630,15 @@ export default function ProjectsPage() {
           isOpen={isGenerateBudgetModalOpen}
           onClose={() => setIsGenerateBudgetModalOpen(false)}
           onSuccess={loadProjects}
+        />
+
+        <ProjectDetailModal
+          isOpen={isDetailModalOpen}
+          onClose={() => {
+            setIsDetailModalOpen(false);
+            setSelectedDetailProject(null);
+          }}
+          project={selectedDetailProject}
         />
       </div>
     </SidebarLayout>

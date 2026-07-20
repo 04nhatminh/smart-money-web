@@ -77,7 +77,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
         // Check if response has nested data object (for login/social login)
         const loginData = response.data || response;
-        
+
         if (loginData.accessToken && loginData.user) {
           setToken(loginData.accessToken);
           setAuthToken(loginData.accessToken);
@@ -100,7 +100,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     async (username: string, fullName: string, email: string, hashedPassword: string, phone: string, dateOfBirth: string) => {
       try {
         setIsLoading(true);
-        
+
         // Create FormData for multipart/form-data request
         const formData = new FormData();
         formData.append('username', username);
@@ -110,7 +110,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         formData.append('confirmPassword', hashedPassword);
         formData.append('phone', phone);
         formData.append('dateOfBirth', dateOfBirth);
-        
+
         const response = await apiClient.post<any>(
           API_ENDPOINTS.auth.register,
           formData
@@ -122,9 +122,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (!response || response.success !== true) {
           throw new Error(response?.message || 'Registration failed');
         }
-        
+
         // Registration successful - user will verify email on the next page
-        console.log('[AuthContext] Registration successful');
       } catch (error) {
         const errorMsg = error instanceof Error ? error.message : 'Registration failed';
         console.error('[AuthContext] Registration error:', errorMsg);
@@ -165,7 +164,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
         // Check if response has nested data object
         const loginData = response.data || response;
-        
+
         if (loginData.accessToken && loginData.user) {
           setToken(loginData.accessToken);
           setAuthToken(loginData.accessToken);
@@ -202,7 +201,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
         // Check if response has nested data object
         const loginData = response.data || response;
-        
+
         if (loginData.accessToken && loginData.user) {
           setToken(loginData.accessToken);
           setAuthToken(loginData.accessToken);

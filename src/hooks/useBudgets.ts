@@ -29,7 +29,6 @@ export const useBudgets = () => {
           `${API_ENDPOINTS.budgets.list}?month=${month}&year=${year}`
         );
 
-        console.log('Fetched budgets:', response);
         return {
           data: response.data,  // ← Extract inner data object
           success: true,
@@ -86,13 +85,10 @@ export const useBudgets = () => {
         setIsLoading(true);
         setError(null);
 
-        console.log('Creating budget with data:', data);
         const response = await apiClient.post<any>(
           API_ENDPOINTS.budgets.create,
           data
         );
-
-        console.log('Budget created successfully:', response);
         return {
           success: true,
           data: response.data,
@@ -175,13 +171,10 @@ export const useBudgets = () => {
         setIsLoading(true);
         setError(null);
 
-        console.log('Creating bulk budgets with data:', data);
         const response = await apiClient.post<any>(
           API_ENDPOINTS.budgets.createBulk,
           data
         );
-
-        console.log('Bulk budgets created successfully:', response);
         return {
           success: true,
           data: response.data,
