@@ -108,22 +108,22 @@ const KPICard: React.FC<KPICardProps> = ({ label, value, icon, accentColor, tren
   const { colors } = useTheme();
   return (
     <div
-      className="rounded-2xl p-6 flex flex-col gap-3 shadow-md transition-transform hover:-translate-y-1"
+      className="rounded-2xl p-4 sm:p-6 flex flex-col gap-3 shadow-md transition-transform hover:-translate-y-1"
       style={{ backgroundColor: colors.surface.primary, borderLeft: `4px solid ${accentColor}` }}
     >
-      <div className="flex items-center justify-between">
-        <Text variant="caption" style={{ color: colors.text.secondary, fontSize: 13, fontWeight: 600, letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+      <div className="flex items-center justify-between gap-2">
+        <Text variant="caption" style={{ color: colors.text.secondary, fontSize: 12, fontWeight: 600, letterSpacing: '0.04em', textTransform: 'uppercase' }} className="truncate">
           {label}
         </Text>
-        <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ backgroundColor: `${accentColor}22` }}>
+        <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: `${accentColor}22` }}>
           <span style={{ color: accentColor }}>{icon}</span>
         </div>
       </div>
-      <span className="text-2xl font-extrabold" style={{ color: colors.text.primary }}>{value}</span>
+      <span className="font-extrabold break-all" style={{ color: colors.text.primary, fontSize: 'clamp(1.15rem, 4.5vw, 1.5rem)', wordBreak: 'break-all' }}>{value}</span>
       {trend && (
-        <div className="flex items-center gap-1">
-          {trendUp ? <MdTrendingUp style={{ color: '#10B981' }} /> : <MdTrendingDown style={{ color: '#EF4444' }} />}
-          <Text variant="caption" style={{ color: trendUp ? '#10B981' : '#EF4444', fontSize: 12 }}>{trend}</Text>
+        <div className="flex items-center gap-1 min-w-0">
+          {trendUp ? <MdTrendingUp style={{ color: '#10B981' }} className="flex-shrink-0" /> : <MdTrendingDown style={{ color: '#EF4444' }} className="flex-shrink-0" />}
+          <Text variant="caption" style={{ color: trendUp ? '#10B981' : '#EF4444', fontSize: 11 }} className="truncate">{trend}</Text>
         </div>
       )}
     </div>
@@ -441,7 +441,7 @@ export default function AnalysisPage() {
         {/* ── Filter Controls with DatePeriodSelector and viewMode (Centered Toolbar) ── */}
         <div className="flex justify-center mb-8">
           <div
-            className="flex items-center gap-3 flex-wrap justify-center p-2 rounded-2xl border shadow-sm"
+            className="flex flex-col sm:flex-row items-center gap-3 p-3 sm:p-2 rounded-2xl border shadow-sm w-fit mx-auto"
             style={{
               backgroundColor: colors.background.secondary,
               borderColor: colors.border.light,
@@ -449,7 +449,7 @@ export default function AnalysisPage() {
           >
             {/* View Mode Buttons */}
             <div
-              className="flex items-center h-10 p-1 rounded-xl border text-xs gap-1"
+              className="flex items-center justify-center h-10 p-1 rounded-xl border text-xs gap-1"
               style={{
                 backgroundColor: colors.background.primary,
                 borderColor: colors.border.light,
@@ -489,6 +489,7 @@ export default function AnalysisPage() {
                 setSelectedYear(year);
               }}
               showMonth={viewMode !== 'YEAR'}
+              className="items-center"
             />
 
             <button
@@ -496,7 +497,7 @@ export default function AnalysisPage() {
               onClick={loadAnalytics}
               disabled={isLoading}
               title={t('analysis.refresh')}
-              className="w-10 h-10 rounded-xl flex items-center justify-center transition hover:opacity-80"
+              className="w-10 h-10 rounded-xl flex items-center justify-center transition hover:opacity-80 flex-shrink-0"
               style={{ backgroundColor: `${colors.interactive.primary}22` }}
             >
               <MdRefresh
@@ -534,7 +535,7 @@ export default function AnalysisPage() {
         {/* ── Loading Skeletons ── */}
         {isLoading && (
           <div className="space-y-4">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {[...Array(4)].map((_, i) => <ShimmerBlock key={i} height={120} />)}
             </div>
             <ShimmerBlock height={280} />
@@ -560,7 +561,7 @@ export default function AnalysisPage() {
         {!isLoading && analyticsData && kpis && (
           <>
             {/* KPI Cards — always visible */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <KPICard
                 label={t('analysis.totalIncome')}
                 value={formatVietnamsePrice(kpis.totalIncome)}
@@ -757,26 +758,28 @@ export default function AnalysisPage() {
                     <Heading level={3} className="mb-4 text-base font-semibold">
                       {t('analysis.spendingByCategory')}
                     </Heading>
-                    <div className="flex items-center gap-4">
-                      <ResponsiveContainer width="55%" height={240}>
-                        <PieChart>
-                          <Pie
-                            data={analyticsData.categoryProportions ?? []}
-                            cx="50%"
-                            cy="50%"
-                            innerRadius={60}
-                            outerRadius={100}
-                            dataKey="percentage"
-                            paddingAngle={1}
-                          >
-                            {(analyticsData.categoryProportions ?? []).map((entry, index) => (
-                              <Cell key={entry.category} fill={CHART_COLORS[index % CHART_COLORS.length]} />
-                            ))}
-                          </Pie>
-                          <Tooltip content={<PieTooltipCustom />} />
-                        </PieChart>
-                      </ResponsiveContainer>
-                      <div className="flex flex-col gap-2 flex-1 overflow-auto max-h-56">
+                    <div className="flex flex-col sm:flex-row items-center gap-4">
+                      <div className="w-full sm:w-[55%] h-[240px]">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <PieChart>
+                            <Pie
+                              data={analyticsData.categoryProportions ?? []}
+                              cx="50%"
+                              cy="50%"
+                              innerRadius={60}
+                              outerRadius={100}
+                              dataKey="percentage"
+                              paddingAngle={1}
+                            >
+                              {(analyticsData.categoryProportions ?? []).map((entry, index) => (
+                                <Cell key={entry.category} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+                              ))}
+                            </Pie>
+                            <Tooltip content={<PieTooltipCustom />} />
+                          </PieChart>
+                        </ResponsiveContainer>
+                      </div>
+                      <div className="flex flex-col gap-2 w-full sm:flex-1 overflow-auto max-h-56">
                         {(analyticsData.categoryProportions ?? []).map((entry, index) => (
                           <div key={entry.category} className="flex items-center gap-2 min-w-0">
                             <div

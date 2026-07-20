@@ -315,7 +315,7 @@ export default function NotificationsPage() {
     <SidebarLayout>
       <div className="space-y-8 max-w-4xl mx-auto">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
           <div>
             <Heading level={1}>
               {t('common.notifications') || 'Notifications'}
@@ -326,13 +326,14 @@ export default function NotificationsPage() {
                 : t('notificationsPage.allCaughtUp') || 'All caught up!'}
             </Text>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 w-full sm:w-auto justify-start sm:justify-end">
             {unreadNotificationsCount > 0 && (
               <Button
                 variant="primary"
                 size="sm"
                 onClick={handleMarkAllAsRead}
                 disabled={actionLoading !== null}
+                className="flex-1 sm:flex-none justify-center"
               >
                 {t('notifications.markAllAsRead') || 'Mark all as read'}
               </Button>
@@ -342,6 +343,7 @@ export default function NotificationsPage() {
               size="sm"
               onClick={() => loadNotifications(0, true)}
               disabled={isLoading || isInitialLoading}
+              className="flex-1 sm:flex-none justify-center"
             >
               {t('analysis.refresh') || 'Refresh'}
             </Button>

@@ -12,20 +12,20 @@ import { useTranslations } from 'next-intl';
 import { apiClient } from '@/lib/api-client';
 import { HealthCheckResponse } from '@/types/api';
 import { API_ENDPOINTS } from '@/constants/api';
-
-interface NavItem {
-  label: string;
-  href: string;
-}
+import { NavItem } from './Sidebar';
 
 interface HeaderProps {
   navItems?: NavItem[];
   appName?: string;
+  showSidebarToggle?: boolean;
+  onToggleSidebar?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
   navItems = [],
   appName = 'SmartMoney',
+  showSidebarToggle = false,
+  onToggleSidebar,
 }) => {
   const router = useRouter();
   const locale = useLocale();
@@ -114,22 +114,51 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <header className="shadow-md transition-colors sticky top-0 z-50" style={{ backgroundColor: colors.background.primary, borderBottomColor: colors.border.light, borderBottomWidth: '1px' }}>
-      <div className="mx-auto px-4 sm:px-6 lg:px-8 h-20">
+      <div className="mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20">
         <div className="flex items-center py-2 relative h-full justify-between">
-          {/* Logo - Left */}
-          <Link href={token ? `/${locale}/dashboard` : `/${locale}`} className="flex items-center justify-start gap-3 hover:opacity-90 transition-opacity">
-            <img src="/logo.png" alt={appName} className="h-14 w-14 object-contain flex-shrink-0" style={{ filter: colorScheme === 'dark' ? 'brightness(0) invert(1)' : 'none' }} />
-            <Heading
-              level={1}
-              className="text-2xl md:text-4xl m-0 font-bold flex items-center"
-            >
-              <span style={{ color: colorScheme === 'dark' ? colors.palette.white : colors.interactive.primary }}>Smart</span>
-              <span style={{ color: colorScheme === 'dark' ? colors.palette.white : colors.interactive.tertiary }}>Money</span>
-            </Heading>
-          </Link>
+          <div className="flex items-center">
+            {/* Sidebar Toggle Hamburger - Left on mobile */}
+            {showSidebarToggle && (
+              <button
+                onClick={onToggleSidebar}
+                className="p-2 mr-2 rounded-lg lg:hidden hover:cursor-pointer transition-colors duration-200"
+                style={{
+                  color: colors.text.primary,
+                }}
+                title="Toggle Sidebar"
+              >
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 6h16M4 12h16M4 18h16"
+                  />
+                </svg>
+              </button>
+            )}
+
+            {/* Logo - Left */}
+            <Link href={token ? `/${locale}/dashboard` : `/${locale}`} className="flex items-center justify-start gap-1.5 sm:gap-3 hover:opacity-90 transition-opacity">
+              <img src="/logo.png" alt={appName} className="h-8 w-8 sm:h-14 sm:w-14 object-contain flex-shrink-0" style={{ filter: colorScheme === 'dark' ? 'brightness(0) invert(1)' : 'none' }} />
+              <Heading
+                level={1}
+                className="text-lg sm:text-2xl md:text-3xl m-0 font-bold hidden sm:flex items-center"
+              >
+                <span style={{ color: colorScheme === 'dark' ? colors.palette.white : colors.interactive.primary }}>Smart</span>
+                <span style={{ color: colorScheme === 'dark' ? colors.palette.white : colors.interactive.tertiary }}>Money</span>
+              </Heading>
+            </Link>
+          </div>
 
           {/* Actions - Right */}
-          <div className="flex gap-4 items-center">
+          <div className="flex gap-2 sm:gap-4 items-center">
             <ThemeToggle />
             <LanguageToggle />
             {showAuthActions && (
@@ -137,14 +166,17 @@ export const Header: React.FC<HeaderProps> = ({
                 <Button variant="secondary" size="md" className="hidden sm:block" onClick={handleLoginClick}>
                   {t('finance.hero.login')}
                 </Button>
-                <Button variant="primary" size="md" onClick={handleSignupClick}>
+                <Button variant="primary" size="md" className="hidden sm:block" onClick={handleSignupClick}>
                   {t('finance.hero.cta')}
+                </Button>
+                <Button variant="primary" size="sm" className="sm:hidden" onClick={handleLoginClick}>
+                  {t('finance.hero.login')}
                 </Button>
               </>
             )}
 
             {showUserActions && (
-              <div className="flex gap-4 items-center">
+              <div className="flex gap-2 sm:gap-4 items-center">
                 {/* Notification Bell */}
                 <button
                   onClick={handleNotificationClick}

@@ -88,7 +88,7 @@ export default function ProfilePage() {
               {t('profile.editProfileDescription')}
             </Text>
           </div>
-          <div className="flex gap-3 shrink-0">
+          <div className="hidden sm:flex gap-3 shrink-0">
             <Button
               variant="primary"
               onClick={() => router.push(`/${locale}/profile/edit`)}
@@ -246,6 +246,20 @@ export default function ProfilePage() {
             </div>
           )}
         </Card>
+
+        {/* Mobile action buttons at the bottom */}
+        <div className="flex flex-col gap-3 sm:hidden mt-8">
+          <Button
+            variant="primary"
+            onClick={() => router.push(`/${locale}/profile/edit`)}
+            className="w-full justify-center"
+          >
+            {t('profile.editProfile')}
+          </Button>
+          <LogoutButton variant="danger" className="w-full justify-center">
+            {t('profile.logout')}
+          </LogoutButton>
+        </div>
 
         {/* User Financial Modal */}
         <UserFinancialModal
