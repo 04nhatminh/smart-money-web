@@ -199,22 +199,23 @@ export default function DashboardPage() {
     <SidebarLayout>
       <div className="space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <Heading level={2}>
+        <div className="flex flex-col gap-1.5 mb-2">
+          <div className="flex items-center gap-3">
+            <Heading level={2} className="text-xl sm:text-2xl font-bold">
               {t('dashboard.welcome', { name: user?.fullName || user?.username || 'User' })}
             </Heading>
-            <Text style={{ color: colors.text.secondary }} className="text-lg">
-              {t('dashboard.overviewSubtitle')}
-            </Text>
+            <button
+              onClick={loadDashboardData}
+              className="p-1.5 rounded-lg transition-colors hover:opacity-85 flex-shrink-0"
+              style={{ backgroundColor: `${colors.interactive.primary}15`, color: colors.interactive.primary }}
+              title="Refresh"
+            >
+              <MdRefresh className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`} />
+            </button>
           </div>
-          <button
-            onClick={loadDashboardData}
-            className="p-2 rounded-full transition-colors hover:opacity-85"
-            style={{ backgroundColor: `${colors.interactive.primary}15`, color: colors.interactive.primary }}
-          >
-            <MdRefresh className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`} />
-          </button>
+          <Text style={{ color: colors.text.secondary }} className="text-sm sm:text-base">
+            {t('dashboard.overviewSubtitle')}
+          </Text>
         </div>
 
         {/* 2x2 Grid Layout for Overview Cards */}
@@ -229,10 +230,10 @@ export default function DashboardPage() {
             <div className="flex items-center justify-between mb-4 border-b pb-3" style={{ borderColor: colors.border.light }}>
               <div className="flex items-center gap-2">
                 <MdInsights className="w-5 h-5" style={{ color: colors.interactive.primary }} />
-                <Heading level={3} className="text-lg font-bold">{t('dashboard.financialAnalysis')}</Heading>
+                <Heading level={3} className="text-base sm:text-lg font-bold">{t('dashboard.financialAnalysis')}</Heading>
               </div>
               <div className="flex items-center text-sm font-semibold opacity-80 group-hover:translate-x-1 transition-transform" style={{ color: colors.interactive.primary }}>
-                {t('dashboard.detailedInsights')} <MdChevronRight className="w-5 h-5" />
+                <span className="hidden sm:inline mr-1">{t('dashboard.detailedInsights')}</span> <MdChevronRight className="w-5 h-5" />
               </div>
             </div>
 
@@ -324,10 +325,10 @@ export default function DashboardPage() {
             <div className="flex items-center justify-between mb-4 border-b pb-3" style={{ borderColor: colors.border.light }}>
               <div className="flex items-center gap-2">
                 <MdSwapHoriz className="w-5 h-5" style={{ color: colors.interactive.primary }} />
-                <Heading level={3} className="text-lg font-bold">{t('dashboard.recentTransactions')}</Heading>
+                <Heading level={3} className="text-base sm:text-lg font-bold">{t('dashboard.recentTransactions')}</Heading>
               </div>
               <div className="flex items-center text-sm font-semibold opacity-80 group-hover:translate-x-1 transition-transform" style={{ color: colors.interactive.primary }}>
-                {t('dashboard.viewAll')} <MdChevronRight className="w-5 h-5" />
+                <span className="hidden sm:inline mr-1">{t('dashboard.viewAll')}</span> <MdChevronRight className="w-5 h-5" />
               </div>
             </div>
 
@@ -365,10 +366,10 @@ export default function DashboardPage() {
             <div className="flex items-center justify-between mb-4 border-b pb-3" style={{ borderColor: colors.border.light }}>
               <div className="flex items-center gap-2">
                 <MdPieChart className="w-5 h-5" style={{ color: colors.interactive.primary }} />
-                <Heading level={3} className="text-lg font-bold">{t('dashboard.budgetsRemaining')}</Heading>
+                <Heading level={3} className="text-base sm:text-lg font-bold">{t('dashboard.budgetsRemaining')}</Heading>
               </div>
               <div className="flex items-center text-sm font-semibold opacity-80 group-hover:translate-x-1 transition-transform" style={{ color: colors.interactive.primary }}>
-                {t('dashboard.manageBudgets')} <MdChevronRight className="w-5 h-5" />
+                <span className="hidden sm:inline mr-1">{t('dashboard.manageBudgets')}</span> <MdChevronRight className="w-5 h-5" />
               </div>
             </div>
 
@@ -438,10 +439,10 @@ export default function DashboardPage() {
             <div className="flex items-center justify-between mb-4 border-b pb-3" style={{ borderColor: colors.border.light }}>
               <div className="flex items-center gap-2">
                 <MdFolderOpen className="w-5 h-5" style={{ color: colors.interactive.primary }} />
-                <Heading level={3} className="text-lg font-bold">{t('dashboard.projectsOverview')}</Heading>
+                <Heading level={3} className="text-base sm:text-lg font-bold">{t('dashboard.projectsOverview')}</Heading>
               </div>
               <div className="flex items-center text-sm font-semibold opacity-80 group-hover:translate-x-1 transition-transform" style={{ color: colors.interactive.primary }}>
-                {t('dashboard.viewProjects')} <MdChevronRight className="w-5 h-5" />
+                <span className="hidden sm:inline mr-1">{t('dashboard.viewProjects')}</span> <MdChevronRight className="w-5 h-5" />
               </div>
             </div>
 
