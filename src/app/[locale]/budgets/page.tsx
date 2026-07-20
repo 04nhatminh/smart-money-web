@@ -87,18 +87,18 @@ export default function BudgetsPage() {
     <SidebarLayout>
       <div className="space-y-5">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <Heading level={2}>{t('budgets.title')}</Heading>
             <Text style={{ color: colors.text.secondary }} className="text-lg">
               {t('budgets.subtitle')}
             </Text>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 w-full sm:w-auto">
             <Button
               variant="secondary"
               onClick={() => setIsGenerateBudgetModalOpen(true)}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 w-full sm:w-auto justify-center"
               style={{
                 border: `2px solid ${colors.interactive.primary}`,
                 color: colors.interactive.primary,

@@ -121,7 +121,7 @@ export const DashboardPreview: React.FC = () => {
         {/* Dashboard Card — fades up after KPI cards */}
         <ScrollReveal variant="fade-up" delay={200}>
           <div
-            className="rounded-2xl shadow-xl p-8 border"
+            className="rounded-2xl shadow-xl p-4 sm:p-8 border"
             style={{
               backgroundColor: colors.surface.primary,
               borderColor: colors.border.light,
@@ -129,12 +129,12 @@ export const DashboardPreview: React.FC = () => {
           >
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
               {/* Stacked Bar Chart — Weekly Income vs Expense */}
-              <div>
+              <div className="w-full overflow-hidden">
                 <Text className="font-semibold mb-4 text-base">
                   {t('finance.dashboard.weeklyIncomeVsExpense')}
                 </Text>
                 <ResponsiveContainer width="100%" height={220}>
-                  <BarChart data={monthlyStats} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
+                  <BarChart data={monthlyStats} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke={colors.border.light} />
                     <XAxis
                       dataKey="week"
@@ -161,30 +161,32 @@ export const DashboardPreview: React.FC = () => {
               </div>
 
               {/* Donut Chart — Category Proportions */}
-              <div>
+              <div className="w-full overflow-hidden">
                 <Text className="font-semibold mb-4 text-base">
                   {t('finance.dashboard.spendingByCategory')}
                 </Text>
-                <div className="flex items-center gap-4">
-                  <ResponsiveContainer width="55%" height={220}>
-                    <PieChart>
-                      <Pie
-                        data={categoryProportions}
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={55}
-                        outerRadius={90}
-                        dataKey="percentage"
-                        paddingAngle={1}
-                      >
-                        {categoryProportions.map((entry, index) => (
-                          <Cell key={entry.category} fill={DONUT_COLORS[index % DONUT_COLORS.length]} />
-                        ))}
-                      </Pie>
-                      <PieTooltip content={<DonutTooltip />} />
-                    </PieChart>
-                  </ResponsiveContainer>
-                  <div className="flex flex-col gap-2 flex-1">
+                <div className="flex flex-col sm:flex-row items-center gap-4">
+                  <div className="w-full sm:w-[55%] h-[220px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={categoryProportions}
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={55}
+                          outerRadius={90}
+                          dataKey="percentage"
+                          paddingAngle={1}
+                        >
+                          {categoryProportions.map((entry, index) => (
+                            <Cell key={entry.category} fill={DONUT_COLORS[index % DONUT_COLORS.length]} />
+                          ))}
+                        </Pie>
+                        <PieTooltip content={<DonutTooltip />} />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                  <div className="flex flex-col gap-2 w-full sm:flex-1">
                     {categoryProportions.map((entry, index) => (
                       <div key={entry.category} className="flex items-center gap-2">
                         <div
@@ -202,22 +204,22 @@ export const DashboardPreview: React.FC = () => {
             </div>
 
             {/* Blurred CTA Overlay */}
-            <div className="relative mt-10 min-h-48">
+            <div className="relative mt-10 min-h-[300px] sm:min-h-[160px]">
               <div
-                className="rounded-xl p-6"
+                className="rounded-xl p-4 sm:p-6"
                 style={{
                   filter: 'blur(4px)',
                   pointerEvents: 'none',
                   backgroundColor: colors.background.primary,
                 }}
               >
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   {[
                     { label: t('finance.dashboard.savingsRate'), value: '5.9%' },
                     { label: t('finance.dashboard.topCategory'), value: t('finance.dashboard.foodBev') },
                     { label: t('finance.dashboard.runwayMonths'), value: '3.2' },
                   ].map((item) => (
-                    <div key={item.label} className="text-center p-4 rounded-lg" style={{ backgroundColor: colors.surface.primary }}>
+                    <div key={item.label} className="text-center p-3 rounded-lg" style={{ backgroundColor: colors.surface.primary }}>
                       <div className="font-bold text-lg">{item.value}</div>
                       <div className="text-sm" style={{ color: colors.text.secondary }}>{item.label}</div>
                     </div>
@@ -226,10 +228,10 @@ export const DashboardPreview: React.FC = () => {
               </div>
 
               <div
-                className="absolute inset-0 flex flex-col items-center justify-center rounded-xl px-6 py-4"
+                className="absolute inset-0 flex flex-col items-center justify-center rounded-xl px-4 py-6"
                 style={{ background: 'rgba(54,41,183,0.72)', backdropFilter: 'blur(2px)' }}
               >
-                <Text className="font-bold text-xl mb-2 text-center" style={{ color: '#fff' }}>
+                <Text className="font-bold text-lg sm:text-xl mb-2 text-center" style={{ color: '#fff' }}>
                   {t('finance.dashboard.overlayTitle')}
                 </Text>
                 <Text variant="caption" style={{ color: '#c5c1f1', textAlign: 'center', maxWidth: '36rem' }} className="mb-4 text-center px-4">

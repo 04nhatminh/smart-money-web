@@ -166,7 +166,7 @@ export const TransactionFilter: React.FC<TransactionFilterProps> = ({
   return (
     <>
       {/* Search and Filter Bar */}
-      <div className="flex gap-3 items-center">
+      <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
         {/* Search Input */}
         <div className="flex-1 relative">
           <div
@@ -202,7 +202,7 @@ export const TransactionFilter: React.FC<TransactionFilterProps> = ({
             setEndTime(end.time);
             setIsModalOpen(true);
           }}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium transition-all whitespace-nowrap hover:opacity-90 hover:cursor-pointer"
+          className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg font-medium transition-all whitespace-nowrap hover:opacity-90 hover:cursor-pointer w-full sm:w-auto"
           style={{
             backgroundColor: colors.interactive.primary,
             color: 'white',

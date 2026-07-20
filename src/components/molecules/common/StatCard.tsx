@@ -41,7 +41,14 @@ export const StatCard: React.FC<StatCardProps> = ({
         </div>
       </div>
       <div>
-        <Heading level={2} className="mb-2">
+        <Heading
+          level={2}
+          className="mb-2 break-all"
+          style={{
+            fontSize: 'clamp(1.15rem, 5.5vw, 1.875rem)',
+            wordBreak: 'break-word',
+          }}
+        >
           {value}
         </Heading>
         {trend && (

@@ -293,10 +293,10 @@ export default function ProjectsPage() {
         </div>
 
         {/* Tab Headers */}
-        <div className="flex border-b" style={{ borderColor: colors.border.light }}>
+        <div className="w-full flex border-b" style={{ borderColor: colors.border.light }}>
           <button
             onClick={() => setActiveTab('projects')}
-            className="px-6 py-3 font-semibold text-sm transition-all flex items-center gap-2 relative border-b-2 hover:cursor-pointer"
+            className="flex-1 sm:flex-initial justify-center sm:justify-start px-4 sm:px-6 py-3 font-semibold text-sm transition-all flex items-center gap-2 relative border-b-2 hover:cursor-pointer"
             style={{
               borderColor: activeTab === 'projects' ? colors.interactive.primary : 'transparent',
               color: activeTab === 'projects' ? colors.interactive.primary : colors.text.secondary,
@@ -307,7 +307,7 @@ export default function ProjectsPage() {
           </button>
           <button
             onClick={() => setActiveTab('groups')}
-            className="px-6 py-3 font-semibold text-sm transition-all flex items-center gap-2 relative border-b-2 hover:cursor-pointer"
+            className="flex-1 sm:flex-initial justify-center sm:justify-start px-4 sm:px-6 py-3 font-semibold text-sm transition-all flex items-center gap-2 relative border-b-2 hover:cursor-pointer"
             style={{
               borderColor: activeTab === 'groups' ? colors.interactive.primary : 'transparent',
               color: activeTab === 'groups' ? colors.interactive.primary : colors.text.secondary,

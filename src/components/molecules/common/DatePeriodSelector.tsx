@@ -10,6 +10,7 @@ interface DatePeriodSelectorProps {
   currentYear: number;
   onChange: (month: number, year: number) => void;
   showMonth?: boolean;
+  className?: string;
 }
 
 export const DatePeriodSelector: React.FC<DatePeriodSelectorProps> = ({
@@ -17,6 +18,7 @@ export const DatePeriodSelector: React.FC<DatePeriodSelectorProps> = ({
   currentYear,
   onChange,
   showMonth = true,
+  className = '',
 }) => {
   const { colors } = useTheme();
   const locale = useLocale();
@@ -58,7 +60,7 @@ export const DatePeriodSelector: React.FC<DatePeriodSelectorProps> = ({
   };
 
   return (
-    <div className="flex items-center gap-2 flex-wrap relative">
+    <div className={`flex flex-col sm:flex-row items-start sm:items-center gap-2 relative ${className}`}>
       {/* Click-outside backdrop */}
       {(isMonthOpen || isYearOpen) && (
         <div

@@ -236,7 +236,7 @@ export default function TransactionsPage() {
     <SidebarLayout>
       <div className="space-y-5">
         {/* Welcome Section */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <Heading level={2}>
               {t('transactions.title')}
@@ -245,11 +245,11 @@ export default function TransactionsPage() {
               {t('transactions.subtitle')}
             </Text>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
             <Button
               variant="secondary"
               onClick={() => setIsExcelExportOpen(true)}
-              className="flex items-center gap-2"
+              className="w-full sm:w-auto flex items-center justify-center gap-2"
               disabled={transactions.length === 0}
             >
               <MdFileDownload className="w-5 h-5" />
@@ -258,7 +258,7 @@ export default function TransactionsPage() {
             <Button
               variant="primary"
               onClick={() => setIsMethodModalOpen(true)}
-              className="flex items-center gap-2"
+              className="w-full sm:w-auto flex items-center justify-center gap-2"
             >
               <MdAdd className="w-5 h-5" />
               {t('transactions.addTransaction')}
@@ -304,52 +304,54 @@ export default function TransactionsPage() {
             />
 
             {/* Sort Options */}
-            <div className="mt-4 flex items-center gap-3">
+            <div className="mt-4 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
               <div className="flex items-center gap-2">
                 <MdSort className="w-5 h-5" style={{ color: colors.text.secondary }} />
                 <Text style={{ color: colors.text.secondary }} className="text-sm font-medium">
                   {t('transactions.sortBy')}
                 </Text>
               </div>
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as any)}
-                style={{
-                  backgroundColor: colors.background.secondary,
-                  color: colors.text.primary,
-                  borderColor: colors.border.light,
-                  padding: '0.5rem 0.75rem',
-                  borderRadius: '0.375rem',
-                  border: `1px solid ${colors.border.light}`,
-                  cursor: 'pointer',
-                  fontSize: '0.875rem',
-                }}
-                className="focus:outline-none focus:ring-2"
-              >
-                <option value="date">{t('transactions.sortOptions.date')}</option>
-                <option value="amount">{t('transactions.sortOptions.amount')}</option>
-                <option value="category">{t('transactions.sortOptions.category')}</option>
-                <option value="type">{t('transactions.sortOptions.type')}</option>
-                <option value="description">{t('transactions.sortOptions.description')}</option>
-              </select>
-              <select
-                value={sortOrder}
-                onChange={(e) => setSortOrder(e.target.value as any)}
-                style={{
-                  backgroundColor: colors.background.secondary,
-                  color: colors.text.primary,
-                  borderColor: colors.border.light,
-                  padding: '0.5rem 0.75rem',
-                  borderRadius: '0.375rem',
-                  border: `1px solid ${colors.border.light}`,
-                  cursor: 'pointer',
-                  fontSize: '0.875rem',
-                }}
-                className="focus:outline-none focus:ring-2"
-              >
-                <option value="DESC">{t('transactions.sortOptions.descending')}</option>
-                <option value="ASC">{t('transactions.sortOptions.ascending')}</option>
-              </select>
+              <div className="flex gap-2 w-full sm:w-auto">
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as any)}
+                  style={{
+                    backgroundColor: colors.background.secondary,
+                    color: colors.text.primary,
+                    borderColor: colors.border.light,
+                    padding: '0.5rem 0.75rem',
+                    borderRadius: '0.375rem',
+                    border: `1px solid ${colors.border.light}`,
+                    cursor: 'pointer',
+                    fontSize: '0.875rem',
+                  }}
+                  className="focus:outline-none focus:ring-2 flex-1 sm:flex-initial"
+                >
+                  <option value="date">{t('transactions.sortOptions.date')}</option>
+                  <option value="amount">{t('transactions.sortOptions.amount')}</option>
+                  <option value="category">{t('transactions.sortOptions.category')}</option>
+                  <option value="type">{t('transactions.sortOptions.type')}</option>
+                  <option value="description">{t('transactions.sortOptions.description')}</option>
+                </select>
+                <select
+                  value={sortOrder}
+                  onChange={(e) => setSortOrder(e.target.value as any)}
+                  style={{
+                    backgroundColor: colors.background.secondary,
+                    color: colors.text.primary,
+                    borderColor: colors.border.light,
+                    padding: '0.5rem 0.75rem',
+                    borderRadius: '0.375rem',
+                    border: `1px solid ${colors.border.light}`,
+                    cursor: 'pointer',
+                    fontSize: '0.875rem',
+                  }}
+                  className="focus:outline-none focus:ring-2 flex-1 sm:flex-initial"
+                >
+                  <option value="DESC">{t('transactions.sortOptions.descending')}</option>
+                  <option value="ASC">{t('transactions.sortOptions.ascending')}</option>
+                </select>
+              </div>
             </div>
           </div>
 
@@ -393,16 +395,16 @@ export default function TransactionsPage() {
                         loadTransactions(page);
                       }}
                     />
-                    <div className="flex items-center justify-center gap-4" style={{ color: colors.text.secondary }}>
-                      <Text variant="caption" className="text-sm">
+                    <div className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-4 text-center" style={{ color: colors.text.secondary }}>
+                      <Text variant="caption" className="text-sm text-center">
                         {t('transactions.showing', {
                           start: ((currentPage - 1) * ITEMS_PER_PAGE) + 1,
                           end: Math.min(currentPage * ITEMS_PER_PAGE, totalElements),
                           total: totalElements
                         })}
                       </Text>
-                      <Text variant="caption" className="text-sm">
-                        • {t('transactions.perPage', { perPage: ITEMS_PER_PAGE })}
+                      <Text variant="caption" className="text-sm text-center">
+                        <span className="hidden sm:inline">•</span> {t('transactions.perPage', { perPage: ITEMS_PER_PAGE })}
                       </Text>
                     </div>
                   </div>

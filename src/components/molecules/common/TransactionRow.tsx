@@ -74,32 +74,32 @@ export const TransactionRow: React.FC<TransactionRowProps> = ({
 
   return (
     <div
-      className="flex items-center justify-between p-4 rounded-lg border"
+      className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-lg border gap-3 sm:gap-4"
       style={{
         borderColor: colors.border.light,
         backgroundColor: colors.surface.primary,
       }}
     >
-      <div className="flex items-center gap-4 flex-1">
+      <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
         <div
-          className="p-3 rounded-lg flex items-center justify-center"
+          className="p-3 rounded-lg flex items-center justify-center flex-shrink-0"
           style={{
             backgroundColor: colors.surface.secondary,
           }}
         >
           {icon || getCategoryIcon(category)}
         </div>
-        <div className="flex-1">
-          <p className="font-semibold" style={{ color: colors.text.primary }}>
+        <div className="flex-1 min-w-0">
+          <p className="font-semibold truncate text-sm sm:text-base" style={{ color: colors.text.primary }}>
             {t.has(`categories.${title}`) ? t(`categories.${title}`) : title}
           </p>
-          <div className="flex items-center gap-2">
-            <Text className="text-xs" style={{ color: colors.text.secondary }}>
+          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mt-0.5">
+            <span className="text-xs whitespace-nowrap" style={{ color: colors.text.secondary }}>
               {formatDate(date)}
-            </Text>
+            </span>
             {normalizedType === 'expense' && (
               <span
-                className="text-xs px-2 py-1 rounded"
+                className="text-[10px] sm:text-xs px-1.5 py-0.5 rounded whitespace-nowrap truncate max-w-[120px]"
                 style={{
                   backgroundColor: colors.surface.secondary,
                   color: colors.text.secondary,
@@ -111,9 +111,9 @@ export const TransactionRow: React.FC<TransactionRowProps> = ({
           </div>
         </div>
       </div>
-      <div className="flex items-center gap-4">
+      <div className="flex items-center justify-between sm:justify-end gap-4 border-t sm:border-t-0 pt-2 sm:pt-0" style={{ borderTopColor: `${colors.border.light}60` }}>
         <p
-          className="font-bold text-lg min-w-24 text-right"
+          className="font-bold text-base sm:text-lg text-left sm:text-right sm:min-w-24"
           style={{ color: amountColor }}
         >
           {amountPrefix}{formatVietnamsePrice(Math.abs(amount))}
