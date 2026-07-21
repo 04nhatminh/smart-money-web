@@ -178,7 +178,31 @@
     "all": "Tất cả",
     "unread": "Chưa đọc",
     "noUnreadNotifications": "Không Có Thông Báo Chưa Đọc",
-    "noUnreadNotificationsDesc": "Bạn không có thông báo chưa đọc nào."
+    "noUnreadNotificationsDesc": "Bạn không có thông báo chưa đọc nào.",
+    "suggestion": {
+      "raise_budget": "Ngân sách {category} của bạn sắp bị vượt — chúng tôi có một gợi ý.",
+      "create_budget": "Chi tiêu cho {category} tăng vọt tháng này — bạn muốn đặt ngân sách cho mục này?",
+      "set_category_limit": "Chi tiêu {category} của bạn đang tăng dần — bạn muốn đặt ngân sách cho mục này?",
+      "reduce_budget": "Bạn liên tục chi dưới ngân sách {category} — bạn muốn giảm bớt không?",
+      "contribute_to_project": "Tháng này bạn có tiền dư — góp một phần vào \"{projectName}\"?",
+      "rebalance_budgets": "Tổng ngân sách của bạn vượt quá thu nhập — bạn muốn cân đối lại không?",
+      "reallocate_budget": "Ngân sách {category} có thể bị vượt — bù từ các ngân sách bạn chưa dùng?",
+      "review_subscription": "\"{description}\" vừa tăng giá — bạn muốn xem lại không?",
+      "increase_contribution": "\"{projectName}\" đang chậm tiến độ — góp thêm một chút để bắt kịp?",
+      "create_project": "Tháng này bạn có tiền dư — bắt đầu một mục tiêu tiết kiệm cho khoản đó nhé?"
+    },
+    "insight": {
+      "large_transaction": "Đây là một khoản chi {category} lớn — chúng tôi chỉ nhắc bạn lưu ý.",
+      "duplicate_charge": "Có vẻ là một khoản chi {category} trùng lặp — bạn nên kiểm tra.",
+      "income_drop": "Thu nhập tháng trước của bạn giảm đáng kể — hãy xem qua.",
+      "cashflow_negative": "Tháng trước bạn chi nhiều hơn thu — hãy xem qua.",
+      "project_milestone": "Bạn đã đạt một cột mốc của \"{projectName}\" — làm tốt lắm!",
+      "good_month": "Tháng trước mọi ngân sách đều nằm trong giới hạn — tuyệt vời!"
+    },
+    "digest": {
+      "pending_suggestions": "Bạn có các gợi ý đang chờ xem xét.",
+      "weekly": "Bạn có {count} thông tin chi tiêu đáng chú ý trong tuần này."
+    }
   },
   "profile": {
     "editProfile": "Chỉnh Sửa Hồ Sơ",

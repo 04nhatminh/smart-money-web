@@ -112,12 +112,25 @@ export default function NotificationsPage() {
   };
 
   const parseNotificationContent = (content: string) => {
-    if (content.startsWith('notification.notification_done|')) {
-      const parts = content.split('|');
-      if (parts.length >= 4) {
-        const typeKey = parts[1];
-        const amount = parts[2];
-        const category = parts[3];
+    if (!content) return '';
+
+    if (!content.startsWith('notification.')) {
+      const inviteRegex = /You've been invited to join group "(.*)"\. Tap to accept\./;
+      const match = content.match(inviteRegex);
+      if (match) {
+        const groupName = match[1];
+        return t('notifications.inviteDescription', { groupName }) || `You've been invited to join group "${groupName}". Tap to accept.`;
+      }
+      return content;
+    }
+
+    const [key, ...args] = content.split('|');
+
+    if (key === 'notification.notification_done') {
+      if (args.length >= 3) {
+        const typeKey = args[0];
+        const amount = args[1];
+        const category = args[2];
 
         const typeTranslated = typeKey === 'notification.expense'
           ? (t('notifications.expense') || 'Expense')
@@ -134,11 +147,48 @@ export default function NotificationsPage() {
       }
     }
 
-    const inviteRegex = /You've been invited to join group "(.*)"\. Tap to accept\./;
-    const match = content.match(inviteRegex);
-    if (match) {
-      const groupName = match[1];
-      return t('notifications.inviteDescription', { groupName }) || `You've been invited to join group "${groupName}". Tap to accept.`;
+    let params: Record<string, string> = {};
+
+    switch (key) {
+      case 'notification.suggestion.raise_budget':
+      case 'notification.suggestion.create_budget':
+      case 'notification.suggestion.set_category_limit':
+      case 'notification.suggestion.reduce_budget':
+      case 'notification.suggestion.reallocate_budget':
+      case 'notification.insight.large_transaction':
+      case 'notification.insight.duplicate_charge': {
+        const categoryKey = args[0] || '';
+        params = {
+          category: t(`categories.${categoryKey}`) || categoryKey,
+        };
+        break;
+      }
+      case 'notification.suggestion.contribute_to_project':
+      case 'notification.suggestion.increase_contribution':
+      case 'notification.insight.project_milestone': {
+        params = { projectName: args[0] || '' };
+        break;
+      }
+      case 'notification.suggestion.review_subscription': {
+        params = { description: args[0] || '' };
+        break;
+      }
+      case 'notification.digest.weekly': {
+        params = { count: args[0] || '0' };
+        break;
+      }
+      default:
+        break;
+    }
+
+    const translationKey = key.replace(/^notification\./, 'notifications.');
+    try {
+      const translated = t(translationKey, params);
+      if (translated && translated !== translationKey) {
+        return translated;
+      }
+    } catch {
+      // Fallback
     }
 
     return content;
