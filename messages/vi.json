@@ -611,7 +611,7 @@
     "savingPaceOptions": {
       "RELAXED": "Thư thả (Tích lũy ít, chi tiêu thoải mái)",
       "BALANCED": "Cân bằng (Tốc độ tích lũy vừa phải)",
-      "AGGRESIVE": "Quyết liệt (Tích lũy tối đa, chi tiêu nghiêm ngặt)"
+      "AGGRESSIVE": "Quyết liệt (Tích lũy tối đa, chi tiêu nghiêm ngặt)"
     },
     "interventionLevelOptions": {
       "NOTIFY": "Thông báo (Chỉ nhận cảnh báo thụ động)",

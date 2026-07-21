@@ -611,7 +611,7 @@
     "savingPaceOptions": {
       "RELAXED": "Relaxed (Save less, spend comfortably)",
       "BALANCED": "Balanced (Standard saving rate)",
-      "AGGRESIVE": "Aggressive (High saving rate, strict spending)"
+      "AGGRESSIVE": "Aggressive (High saving rate, strict spending)"
     },
     "interventionLevelOptions": {
       "NOTIFY": "Notify (Receive passive alerts)",
