@@ -601,7 +601,10 @@
     "budgets": "Budgets",
     "analysis": "Analysis",
     "projects": "Projects",
-    "profile": "Profile"
+    "profile": "Profile",
+    "collapse": "Collapse sidebar",
+    "expand": "Expand sidebar",
+    "menu": "Navigation"
   },
   "categories": {
     "FOOD": "Food & Beverage",

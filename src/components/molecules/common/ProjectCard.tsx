@@ -158,7 +158,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
         {onViewDetails && (
           <button
             onClick={() => onViewDetails(project.projectId)}
-            className="flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-1"
+            className="flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-1 hover:cursor-pointer"
             style={{
               backgroundColor: colors.interactive.primary + '20',
               color: colors.interactive.primary,
@@ -176,7 +176,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
         {onContribute && project.status === 'ACTIVE' && (
           <button
             onClick={() => onContribute(project.projectId)}
-            className="flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
+            className="flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors hover:cursor-pointer"
             style={{
               backgroundColor: colors.interactive.primary,
               color: 'white',

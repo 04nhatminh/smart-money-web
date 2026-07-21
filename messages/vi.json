@@ -601,7 +601,10 @@
     "budgets": "Ngân sách",
     "analysis": "Phân tích",
     "projects": "Kế Hoạch Tiết Kiệm",
-    "profile": "Hồ sơ"
+    "profile": "Hồ sơ",
+    "collapse": "Thu nhỏ thanh bên",
+    "expand": "Mở rộng thanh bên",
+    "menu": "Danh mục"
   },
   "categories": {
     "FOOD": "Ăn uống",
