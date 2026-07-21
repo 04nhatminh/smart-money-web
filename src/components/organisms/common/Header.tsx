@@ -15,7 +15,7 @@ import { API_ENDPOINTS } from '@/constants/api';
 import { NavItem } from './Sidebar';
 
 interface HeaderProps {
-  navItems?: NavItem[];
+  navItems?: Partial<NavItem>[];
   appName?: string;
   showSidebarToggle?: boolean;
   onToggleSidebar?: () => void;
