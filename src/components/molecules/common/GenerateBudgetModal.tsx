@@ -4,7 +4,6 @@ import React, { useState, useEffect } from 'react';
 import { Button, Heading, Text } from '@/components/atoms';
 import { useTheme } from '@/context/ThemeContext';
 import { useAuth } from '@/context/AuthContext';
-import { useWebSocket } from '@/context/WebSocketContext';
 import { apiClient } from '@/lib/api-client';
 import { API_ENDPOINTS } from '@/constants/api';
 import { formatVietnamsePrice } from '@/lib/format';
@@ -33,7 +32,6 @@ export const GenerateBudgetModal: React.FC<GenerateBudgetModalProps> = ({
 }) => {
   const { colors } = useTheme();
   const { user, updateUser } = useAuth();
-  const { subscribe } = useWebSocket();
   const { getUserFinancial } = useUserFinancial();
   const { listBudgets } = useBudgets();
   const locale = useLocale();
@@ -141,100 +139,47 @@ export const GenerateBudgetModal: React.FC<GenerateBudgetModalProps> = ({
     }
   }, [isOpen, user]);
 
-  // Handle WebSocket subscription
-  useEffect(() => {
-    if (!jobId || step !== 'LOADING') return;
-
-    setLoadingStatus('AI is analyzing your profile and transactions...');
-
-    const unsubscribe = subscribe(jobId, (data) => {
-      if ((data.status === 'SUCCESS' || data.status === 'COMPLETED') && data.result) {
-        let resultObj = data.result;
-        if (typeof resultObj === 'string') {
-          try {
-            resultObj = JSON.parse(resultObj);
-          } catch (e) {
-            console.error('Failed to parse WS result string:', e);
-          }
-        }
-        setTotalBudget(resultObj.totalBudget || 0);
-        setSuggestions(resultObj.categories || []);
-        setReason(resultObj.reason || resultObj.explanation || resultObj.message || null);
-        setStep('SUGGESTION');
-      } else if (data.status === 'FAILED' || data.status === 'ERROR') {
-        setErrorMsg(data.error || 'AI budget allocation failed. Please try again.');
-        setStep('ERROR');
-      } else {
-        setLoadingStatus(data.statusMessage || 'Processing budget allocation...');
-      }
-    });
-
-    // Timeout fallback after 60 seconds
-    const timer = setTimeout(() => {
-      if (step === 'LOADING') {
-        setErrorMsg('Request timed out. Please check your network connection.');
-        setStep('ERROR');
-        unsubscribe();
-      }
-    }, 60000);
-
-    // Polling fallback in case WS fails or message is missed
-    const pollInterval = setInterval(async () => {
-      try {
-        const response = await apiClient.get<any>(`/api/v1/ai/${jobId}`);
-        const data = response.data || response;
-
-        if (data) {
-          if ((data.status === 'SUCCESS' || data.status === 'COMPLETED') && data.result) {
-            let resultObj = data.result;
-            if (typeof resultObj === 'string') {
-              try {
-                resultObj = JSON.parse(resultObj);
-              } catch (e) {
-                console.error('Failed to parse polled result string:', e);
-              }
-            }
-            setTotalBudget(resultObj.totalBudget || 0);
-            setSuggestions(resultObj.categories || []);
-            setReason(resultObj.reason || resultObj.explanation || resultObj.message || null);
-            setStep('SUGGESTION');
-          } else if (data.status === 'FAILED' || data.status === 'ERROR') {
-            setErrorMsg(data.error || 'AI budget allocation failed. Please try again.');
-            setStep('ERROR');
-          } else if (data.statusMessage) {
-            setLoadingStatus(data.statusMessage);
-          }
-        }
-      } catch (err) {
-        console.error('[GenerateBudgetModal] Error polling job status:', err);
-      }
-    }, 3000);
-
-    return () => {
-      unsubscribe();
-      clearTimeout(timer);
-      clearInterval(pollInterval);
-    };
-  }, [jobId, step]);
-
   const handleGenerateClick = async () => {
     setStep('LOADING');
     setErrorMsg(null);
-    setLoadingStatus('Creating budget allocation request...');
+    setLoadingStatus('Calculating budget allocation plan...');
 
     try {
-      const response = await apiClient.post<any>(API_ENDPOINTS.ai.generateBudget, {});
-
+      const response = await apiClient.post<any>(API_ENDPOINTS.budgets.computeAllocation, {});
       const payload = response.data || response;
-      if (payload && payload.jobId) {
-        setJobId(payload.jobId);
-      } else if (payload && payload.data && payload.data.jobId) {
-        setJobId(payload.data.jobId);
+
+      const planData = payload.allocations ? payload : (payload.data || payload);
+      if (planData && Array.isArray(planData.allocations)) {
+        const allocations = planData.allocations || [];
+        const envelope = planData.envelope ?? planData.safeSpending ?? 0;
+
+        const totalAmt = allocations.reduce((acc: number, item: any) => acc + (Number(item.amount) || 0), 0);
+
+        const categorySuggestions: BudgetCategorySuggestion[] = allocations.map((item: any) => {
+          const amt = Number(item.amount) || 0;
+          return {
+            category: item.category,
+            amount: amt,
+            ratio: totalAmt > 0 ? (amt / totalAmt) * 100 : 0,
+          };
+        });
+
+        setTotalBudget(envelope || totalAmt);
+        setSuggestions(categorySuggestions);
+        setReason(
+          planData.coldStart
+            ? 'Based on general budget template (cold start).'
+            : planData.overCommitted
+            ? 'Your commitments equal or exceed your target envelope.'
+            : 'Based on your transaction history and financial commitments.'
+        );
+        setStep('SUGGESTION');
       } else {
-        throw new Error('Invalid response format: missing jobId');
+        throw new Error(payload?.message || 'Failed to compute budget allocation');
       }
-    } catch (err) {
-      setErrorMsg(err instanceof Error ? err.message : 'Failed to initiate AI budget generation');
+    } catch (err: any) {
+      const msg = err instanceof Error ? err.message : 'Failed to calculate budget allocation';
+      setErrorMsg(msg);
       setStep('ERROR');
     }
   };

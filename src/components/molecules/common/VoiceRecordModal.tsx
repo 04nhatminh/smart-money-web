@@ -200,6 +200,41 @@ export const VoiceRecordModal: React.FC<VoiceRecordModalProps> = ({ isOpen, onCl
     };
   }, []);
 
+  // Polling fallback in case WS fails or message is missed
+  useEffect(() => {
+    if (!jobId || state !== 'processing') return;
+
+    const pollInterval = setInterval(async () => {
+      try {
+        const response = await apiClient.get<any>(`/api/v1/ai/${jobId}`);
+        const data = response.data || response;
+
+        if (data) {
+          if (data.status === 'SUCCESS' || data.status === 'COMPLETED' || data.result) {
+            clearInterval(pollInterval);
+            if (onAIResultReceived) {
+              onAIResultReceived(data, 'voice');
+              handleSuccessClose();
+            } else {
+              setAiResult(data);
+              setState('success');
+            }
+          } else if (data.status === 'FAILED' || data.status === 'ERROR' || data.error) {
+            clearInterval(pollInterval);
+            setError(data.error || 'Failed to analyze voice. Please try again.');
+            setState('recorded');
+          }
+        }
+      } catch (err) {
+        console.error('[VoiceRecordModal] Error polling job status:', err);
+      }
+    }, 2500);
+
+    return () => {
+      clearInterval(pollInterval);
+    };
+  }, [jobId, state]);
+
   if (!isOpen) return null;
 
   const formatTime = (seconds: number) => {

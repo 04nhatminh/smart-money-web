@@ -40,6 +40,7 @@ export const API_ENDPOINTS = {
     list: '/api/v1/budgets',
     create: '/api/v1/budgets',
     createBulk: '/api/v1/budgets/bulk',
+    computeAllocation: '/api/v1/budgets/allocation/compute',
     getById: (id: string) => `/api/v1/budgets/${id}`,
     update: (id: string) => `/api/v1/budgets/${id}`,
     delete: (id: string) => `/api/v1/budgets/${id}`,
