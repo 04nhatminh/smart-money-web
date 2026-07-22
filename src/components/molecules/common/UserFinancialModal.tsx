@@ -285,7 +285,7 @@ export const UserFinancialModal: React.FC<UserFinancialModalProps> = ({
               >
                 <option value="RELAXED">{t('financialSetup.savingPaceOptions.RELAXED')}</option>
                 <option value="BALANCED">{t('financialSetup.savingPaceOptions.BALANCED')}</option>
-                <option value="AGGRESIVE">{t('financialSetup.savingPaceOptions.AGGRESIVE')}</option>
+                <option value="AGGRESSIVE">{t('financialSetup.savingPaceOptions.AGGRESSIVE')}</option>
               </select>
               <Text style={{ color: colors.text.secondary }} className="text-xs">
                 {t('financialSetup.savingPaceHint')}

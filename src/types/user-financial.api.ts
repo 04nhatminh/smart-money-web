@@ -1,4 +1,4 @@
-export type SavingPace = 'RELAXED' | 'BALANCED' | 'AGGRESIVE';
+export type SavingPace = 'RELAXED' | 'BALANCED' | 'AGGRESSIVE';
 export type InterventionLevel = 'NOTIFY' | 'GENTLE' | 'HARD';
 export type FocusMode = 'SAVE_MORE' | 'REDUCE_SPENDING' | 'TRACK_ONLY';
 
