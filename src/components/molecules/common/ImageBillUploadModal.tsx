@@ -170,6 +170,41 @@ export const ImageBillUploadModal: React.FC<ImageBillUploadModalProps> = ({ isOp
     };
   }, []);
 
+  // Polling fallback in case WS fails or message is missed
+  useEffect(() => {
+    if (!jobId || uploadState !== 'processing') return;
+
+    const pollInterval = setInterval(async () => {
+      try {
+        const response = await apiClient.get<any>(`/api/v1/ai/${jobId}`);
+        const data = response.data || response;
+
+        if (data) {
+          if (data.status === 'SUCCESS' || data.status === 'COMPLETED' || data.result) {
+            clearInterval(pollInterval);
+            if (onAIResultReceived) {
+              onAIResultReceived(data, 'image');
+              handleSuccessClose();
+            } else {
+              setAiResult(data);
+              setUploadState('success');
+            }
+          } else if (data.status === 'FAILED' || data.status === 'ERROR' || data.error) {
+            clearInterval(pollInterval);
+            setError(data.error || 'Failed to analyze receipt. Please try again.');
+            setUploadState('idle');
+          }
+        }
+      } catch (err) {
+        console.error('[ImageBillUploadModal] Error polling job status:', err);
+      }
+    }, 2500);
+
+    return () => {
+      clearInterval(pollInterval);
+    };
+  }, [jobId, uploadState]);
+
   if (!isOpen) return null;
 
   const handleReset = () => {

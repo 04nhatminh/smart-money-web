@@ -47,7 +47,8 @@ const CATEGORY_MAP: { [key: string]: string } = {
 /**
  * Normalizes category from AI result to match FE categories
  */
-function normalizeCategoryFromAI(category: string): string {
+function normalizeCategoryFromAI(category?: string): string {
+  if (!category) return 'OTHER';
   const normalized = category.toUpperCase().trim();
   
   // Direct match
@@ -103,23 +104,83 @@ export function transformAIResultToFormData(
   aiResult: AIAnalysisResult | Record<string, any>,
   source: 'voice' | 'image' = 'voice'
 ): TransactionFormData {
-  // Determine transaction type
-  const transactionType = aiResult.type === 'INCOME' ? 'INCOME' : 'EXPENSE';
-  
-  // Get amount - prefer expense if available, otherwise income
-  const amount = aiResult.expense || aiResult.income || '0';
-  
-  // For image: use category as description to avoid long text
-  // For voice: use the transcribed text as description
-  const description = source === 'image' 
-    ? normalizeCategoryFromAI(aiResult.category)
-    : (aiResult.text || '');
-  
+  if (!aiResult) {
+    return {
+      amount: '0',
+      type: 'EXPENSE',
+      category: 'OTHER',
+      description: '',
+      date: getCurrentDateTime(),
+    };
+  }
+
+  // Unwrap nested result object or JSON string if present
+  let payload: Record<string, any> = { ...aiResult };
+  if (payload.result) {
+    if (typeof payload.result === 'string') {
+      try {
+        const parsed = JSON.parse(payload.result);
+        if (parsed && typeof parsed === 'object') {
+          payload = { ...payload, ...parsed };
+        }
+      } catch (e) {
+        // ignore parse error
+      }
+    } else if (typeof payload.result === 'object') {
+      payload = { ...payload, ...payload.result };
+    }
+  } else if (payload.data && typeof payload.data === 'object') {
+    payload = { ...payload, ...payload.data };
+  }
+
+  // Handle transactions array if provided (e.g. from Voice AI or multi-item OCR)
+  let firstTx: Record<string, any> = {};
+  if (Array.isArray(payload.transactions) && payload.transactions.length > 0) {
+    firstTx = payload.transactions[0] || {};
+  } else if (typeof payload.transactions === 'string') {
+    try {
+      const parsedTx = JSON.parse(payload.transactions);
+      if (Array.isArray(parsedTx) && parsedTx.length > 0) {
+        firstTx = parsedTx[0] || {};
+      }
+    } catch (e) {
+      // ignore parse error
+    }
+  }
+
+  const rawType = firstTx.type || payload.type;
+  const transactionType: 'INCOME' | 'EXPENSE' =
+    String(rawType).toUpperCase() === 'INCOME' ? 'INCOME' : 'EXPENSE';
+
+  const rawCategory = firstTx.category || payload.category || 'OTHER';
+  const category = normalizeCategoryFromAI(String(rawCategory));
+
+  const amountValue =
+    firstTx.expense ??
+    firstTx.income ??
+    firstTx.amount ??
+    payload.expense ??
+    payload.income ??
+    payload.amount ??
+    '0';
+
+  const transcribedText = payload.text || firstTx.text || '';
+  const txDescription = firstTx.description || payload.description || '';
+
+  let description = '';
+  if (source === 'image') {
+    description = txDescription || category;
+  } else {
+    // For voice, prefer transcribed text or transaction description
+    description = transcribedText || txDescription || category;
+  }
+
   return {
-    amount: formatAmountForForm(amount),
+    amount: formatAmountForForm(amountValue),
     type: transactionType,
-    category: normalizeCategoryFromAI(aiResult.category),
+    category,
     description,
     date: getCurrentDateTime(),
   };
 }
+
