@@ -200,38 +200,44 @@ export const VoiceRecordModal: React.FC<VoiceRecordModalProps> = ({ isOpen, onCl
     };
   }, []);
 
-  // Polling fallback in case WS fails or message is missed
+  // Smart delayed Polling fallback in case WS fails or message is delayed
   useEffect(() => {
     if (!jobId || state !== 'processing') return;
 
-    const pollInterval = setInterval(async () => {
-      try {
-        const response = await apiClient.get<any>(`/api/v1/ai/${jobId}`);
-        const data = response.data || response;
+    let pollInterval: NodeJS.Timeout | null = null;
 
-        if (data) {
-          if (data.status === 'SUCCESS' || data.status === 'COMPLETED' || data.result) {
-            clearInterval(pollInterval);
-            if (onAIResultReceived) {
-              onAIResultReceived(data, 'voice');
-              handleSuccessClose();
-            } else {
-              setAiResult(data);
-              setState('success');
+    // Wait 4 seconds before starting HTTP polling to give WebSocket priority
+    const fallbackTimer = setTimeout(() => {
+      pollInterval = setInterval(async () => {
+        try {
+          const response = await apiClient.get<any>(`/api/v1/ai/${jobId}`);
+          const data = response.data || response;
+
+          if (data) {
+            if (data.status === 'SUCCESS' || data.status === 'COMPLETED' || data.result) {
+              if (pollInterval) clearInterval(pollInterval);
+              if (onAIResultReceived) {
+                onAIResultReceived(data, 'voice');
+                handleSuccessClose();
+              } else {
+                setAiResult(data);
+                setState('success');
+              }
+            } else if (data.status === 'FAILED' || data.status === 'ERROR' || data.error) {
+              if (pollInterval) clearInterval(pollInterval);
+              setError(data.error || 'Failed to analyze voice. Please try again.');
+              setState('recorded');
             }
-          } else if (data.status === 'FAILED' || data.status === 'ERROR' || data.error) {
-            clearInterval(pollInterval);
-            setError(data.error || 'Failed to analyze voice. Please try again.');
-            setState('recorded');
           }
+        } catch (err) {
+          console.error('[VoiceRecordModal] Error polling job status:', err);
         }
-      } catch (err) {
-        console.error('[VoiceRecordModal] Error polling job status:', err);
-      }
-    }, 2500);
+      }, 2500);
+    }, 4000);
 
     return () => {
-      clearInterval(pollInterval);
+      clearTimeout(fallbackTimer);
+      if (pollInterval) clearInterval(pollInterval);
     };
   }, [jobId, state]);
 

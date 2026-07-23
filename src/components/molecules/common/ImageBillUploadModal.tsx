@@ -84,7 +84,7 @@ export const ImageBillUploadModal: React.FC<ImageBillUploadModalProps> = ({ isOp
       setJobId(id);
       setUploadState('processing');
 
-      // Subscribe to WebSocket for AI result
+      // Subscribe to WebSocket as primary transport for AI result
       if (unsubscribeRef.current) {
         unsubscribeRef.current();
       }
@@ -170,38 +170,44 @@ export const ImageBillUploadModal: React.FC<ImageBillUploadModalProps> = ({ isOp
     };
   }, []);
 
-  // Polling fallback in case WS fails or message is missed
+  // Smart delayed Polling fallback in case WS fails or message is delayed
   useEffect(() => {
     if (!jobId || uploadState !== 'processing') return;
 
-    const pollInterval = setInterval(async () => {
-      try {
-        const response = await apiClient.get<any>(`/api/v1/ai/${jobId}`);
-        const data = response.data || response;
+    let pollInterval: NodeJS.Timeout | null = null;
 
-        if (data) {
-          if (data.status === 'SUCCESS' || data.status === 'COMPLETED' || data.result) {
-            clearInterval(pollInterval);
-            if (onAIResultReceived) {
-              onAIResultReceived(data, 'image');
-              handleSuccessClose();
-            } else {
-              setAiResult(data);
-              setUploadState('success');
+    // Wait 4 seconds before starting HTTP polling to give WebSocket priority
+    const fallbackTimer = setTimeout(() => {
+      pollInterval = setInterval(async () => {
+        try {
+          const response = await apiClient.get<any>(`/api/v1/ai/${jobId}`);
+          const data = response.data || response;
+
+          if (data) {
+            if (data.status === 'SUCCESS' || data.status === 'COMPLETED' || data.result) {
+              if (pollInterval) clearInterval(pollInterval);
+              if (onAIResultReceived) {
+                onAIResultReceived(data, 'image');
+                handleSuccessClose();
+              } else {
+                setAiResult(data);
+                setUploadState('success');
+              }
+            } else if (data.status === 'FAILED' || data.status === 'ERROR' || data.error) {
+              if (pollInterval) clearInterval(pollInterval);
+              setError(data.error || 'Failed to analyze receipt. Please try again.');
+              setUploadState('idle');
             }
-          } else if (data.status === 'FAILED' || data.status === 'ERROR' || data.error) {
-            clearInterval(pollInterval);
-            setError(data.error || 'Failed to analyze receipt. Please try again.');
-            setUploadState('idle');
           }
+        } catch (err) {
+          console.error('[ImageBillUploadModal] Error polling job status:', err);
         }
-      } catch (err) {
-        console.error('[ImageBillUploadModal] Error polling job status:', err);
-      }
-    }, 2500);
+      }, 2500);
+    }, 4000);
 
     return () => {
-      clearInterval(pollInterval);
+      clearTimeout(fallbackTimer);
+      if (pollInterval) clearInterval(pollInterval);
     };
   }, [jobId, uploadState]);
 

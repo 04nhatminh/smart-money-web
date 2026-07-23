@@ -1,5 +1,6 @@
 // Auth utilities
 export const AUTH_TOKEN_KEY = 'token';
+export const AUTH_REFRESH_TOKEN_KEY = 'refreshToken';
 export const AUTH_USER_KEY = 'user';
 
 export interface User {
@@ -117,10 +118,39 @@ export function removeUser(): void {
 }
 
 /**
+ * Save refresh token to localStorage
+ */
+export function setRefreshToken(refreshToken: string): void {
+  if (typeof window !== 'undefined') {
+    localStorage.setItem(AUTH_REFRESH_TOKEN_KEY, refreshToken);
+  }
+}
+
+/**
+ * Get refresh token from localStorage
+ */
+export function getRefreshToken(): string | null {
+  if (typeof window !== 'undefined') {
+    return localStorage.getItem(AUTH_REFRESH_TOKEN_KEY);
+  }
+  return null;
+}
+
+/**
+ * Remove refresh token from localStorage
+ */
+export function removeRefreshToken(): void {
+  if (typeof window !== 'undefined') {
+    localStorage.removeItem(AUTH_REFRESH_TOKEN_KEY);
+  }
+}
+
+/**
  * Clear all auth data
  */
 export function clearAuth(): void {
   removeToken();
+  removeRefreshToken();
   removeUser();
   removeCookie('income_setup_completed');
   removeCookie('financial_setup_completed');
