@@ -596,7 +596,7 @@ export default function TransactionsPage() {
                   </div>
                 )}
                 {/* Pagination */}
-                <div className="mt-6 pt-4 border-t" style={{ borderColor: colors.text.secondary }}>
+                <div className="mt-6 pt-4 border-t" style={{ borderColor: colors.border.light }}>
                   <div className="space-y-3">
                     <Pagination
                       currentPage={currentPage}
