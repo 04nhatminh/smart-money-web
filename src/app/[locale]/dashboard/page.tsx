@@ -31,7 +31,7 @@ const PieTooltipCustom = ({ active, payload }: any) => {
         ? '0 4px 20px rgba(54, 41, 183, 0.15)'
         : '0 4px 20px rgba(0, 0, 0, 0.5)',
     }}>
-      <p style={{ color: colors.text.primary, fontWeight: 700, fontSize: 13 }}>{t(`categories.${d.category}`)}</p>
+      <p style={{ color: colors.text.primary, fontWeight: 700, fontSize: 13 }}>{t.has(`categories.${d.category}`) ? t(`categories.${d.category}`) : d.category}</p>
       <p style={{ color: colors.interactive.primary, fontSize: 12, fontWeight: 600 }}>{(d.percentage).toFixed(1)}%</p>
       <p style={{ color: colors.text.secondary, fontSize: 12 }}>{d.count || 0} {t('analysis.table.transactions').toLowerCase()}</p>
     </div>
@@ -273,7 +273,7 @@ export default function DashboardPage() {
                           <div className="flex items-center gap-2 min-w-0">
                             <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: CHART_COLORS[idx % CHART_COLORS.length] }} />
                             <span className="truncate font-medium" style={{ color: colors.text.primary }}>
-                              {t(`categories.${item.category}`)}
+                              {t.has(`categories.${item.category}`) ? t(`categories.${item.category}`) : item.category}
                             </span>
                           </div>
                           <span className="font-semibold" style={{ color: colors.text.secondary }}>

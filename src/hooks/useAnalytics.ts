@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react';
 import { apiClient } from '@/lib/api-client';
+import { clearAuth } from '@/lib/auth';
 import { API_ENDPOINTS } from '@/constants/api';
 
 export interface MonthlyStatItem {
@@ -48,10 +49,12 @@ export const useAnalytics = () => {
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Failed to fetch analytics';
       // Handle 401 per guideline resilience spec
-      if (msg.toLowerCase().includes('401') || msg.toLowerCase().includes('unauthorized')) {
+      if ((err as any)?.status === 401 || msg.toLowerCase().includes('401') || msg.toLowerCase().includes('unauthorized')) {
         if (typeof window !== 'undefined') {
-          localStorage.removeItem('token');
-          window.location.href = '/login?error=session_expired';
+          clearAuth();
+          const pathParts = window.location.pathname.split('/');
+          const locale = pathParts[1] && ['vi', 'en'].includes(pathParts[1]) ? pathParts[1] : 'en';
+          window.location.href = `/${locale}/login?error=session_expired`;
         }
       }
       setError(msg);

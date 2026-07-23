@@ -564,6 +564,7 @@
     "spentLimit": "Spent / Limit",
     "used": "{percent}% used",
     "remainingAmount": "{amount} remaining",
+    "overspent": "{amount} overspent",
     "status": {
       "SAFE": "Safe",
       "CAUTION": "Caution",
@@ -585,6 +586,9 @@
     "unreadCount": "You have {count} unread notifications",
     "unreadCountOne": "You have {count} unread notification",
     "allCaughtUp": "You are all caught up!",
+    "markAllRead": "Mark all as read",
+    "emptyStateTitle": "No notifications yet",
+    "emptyStateMessage": "We'll notify you when important events occur in your account.",
     "mockWelcome": "Welcome to SmartMoney!",
     "mockUpdated": "Your profile information has been updated successfully.",
     "mockConfirmed": "Your recent transaction has been confirmed.",
@@ -617,7 +621,13 @@
     "SHOPPING": "Shopping",
     "OTHER": "Other",
     "FOOD_AND_BEVERAGE": "Food & Beverage",
-    "FOOD_BEV": "Food & Beverage"
+    "FOOD_BEV": "Food & Beverage",
+    "SALARY": "Salary",
+    "BONUS": "Bonus",
+    "INVESTMENT": "Investment",
+    "GIFT": "Gift",
+    "PROJECT_CONTRIBUTION": "Project Contribution",
+    "PROJECT_REFUND": "Project Refund"
   },
   "financialSetup": {
     "title": "Financial Setup",

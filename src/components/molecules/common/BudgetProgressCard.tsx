@@ -61,7 +61,7 @@ export const BudgetProgressCard: React.FC<BudgetProgressCardProps> = ({
           </div>
           <div className="flex-1">
             <Text className="font-semibold text-base" style={{ color: colors.text.primary }}>
-              {t(`categories.${budget.category}`)}
+              {t.has(`categories.${budget.category}`) ? t(`categories.${budget.category}`) : budget.category}
             </Text>
             <Text className="text-xs" style={{ color: colors.text.tertiary }}>
               {new Date(budget.year, budget.month - 1).toLocaleString('default', {

@@ -154,6 +154,7 @@ async function handleResponse<T>(
   if (!response.ok) {
     const errorMessage = extractErrorMessage(data);
     const error = new Error(errorMessage);
+    (error as any).status = response.status;
     (error as any).data = data;
     throw error;
   }
@@ -161,6 +162,7 @@ async function handleResponse<T>(
   if (data && data.success === false) {
     const errorMessage = extractErrorMessage(data);
     const error = new Error(errorMessage);
+    (error as any).status = response.status || 400;
     (error as any).data = data;
     throw error;
   }

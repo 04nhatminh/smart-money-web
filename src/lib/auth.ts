@@ -55,31 +55,52 @@ export function removeCookie(name: string): void {
 }
 
 /**
- * Save token to localStorage
+ * Helper to check if JWT token is expired
+ */
+export function isTokenExpired(token: string): boolean {
+  try {
+    const parts = token.split('.');
+    if (parts.length !== 3) return false;
+    const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+    if (payload && typeof payload.exp === 'number') {
+      const now = Math.floor(Date.now() / 1000);
+      return payload.exp <= now;
+    }
+    return false;
+  } catch (e) {
+    return false;
+  }
+}
+
+/**
+ * Save token to localStorage and cookie
  */
 export function setToken(token: string): void {
   if (typeof window !== 'undefined') {
     localStorage.setItem(AUTH_TOKEN_KEY, token);
   }
+  setCookie(AUTH_TOKEN_KEY, token, 7);
 }
 
 /**
- * Get token from localStorage
+ * Get token from localStorage or cookie
  */
 export function getToken(): string | null {
   if (typeof window !== 'undefined') {
-    return localStorage.getItem(AUTH_TOKEN_KEY);
+    const token = localStorage.getItem(AUTH_TOKEN_KEY);
+    if (token) return token;
   }
-  return null;
+  return getCookie(AUTH_TOKEN_KEY);
 }
 
 /**
- * Remove token from localStorage
+ * Remove token from localStorage and cookie
  */
 export function removeToken(): void {
   if (typeof window !== 'undefined') {
     localStorage.removeItem(AUTH_TOKEN_KEY);
   }
+  removeCookie(AUTH_TOKEN_KEY);
 }
 
 /**
@@ -118,31 +139,34 @@ export function removeUser(): void {
 }
 
 /**
- * Save refresh token to localStorage
+ * Save refresh token to localStorage and cookie
  */
 export function setRefreshToken(refreshToken: string): void {
   if (typeof window !== 'undefined') {
     localStorage.setItem(AUTH_REFRESH_TOKEN_KEY, refreshToken);
   }
+  setCookie(AUTH_REFRESH_TOKEN_KEY, refreshToken, 7);
 }
 
 /**
- * Get refresh token from localStorage
+ * Get refresh token from localStorage or cookie
  */
 export function getRefreshToken(): string | null {
   if (typeof window !== 'undefined') {
-    return localStorage.getItem(AUTH_REFRESH_TOKEN_KEY);
+    const refreshToken = localStorage.getItem(AUTH_REFRESH_TOKEN_KEY);
+    if (refreshToken) return refreshToken;
   }
-  return null;
+  return getCookie(AUTH_REFRESH_TOKEN_KEY);
 }
 
 /**
- * Remove refresh token from localStorage
+ * Remove refresh token from localStorage and cookie
  */
 export function removeRefreshToken(): void {
   if (typeof window !== 'undefined') {
     localStorage.removeItem(AUTH_REFRESH_TOKEN_KEY);
   }
+  removeCookie(AUTH_REFRESH_TOKEN_KEY);
 }
 
 /**
@@ -157,8 +181,14 @@ export function clearAuth(): void {
 }
 
 /**
- * Check if user is authenticated
+ * Check if user is authenticated (token exists and neither access token nor refresh token are expired)
  */
 export function isAuthenticated(): boolean {
-  return getToken() !== null;
+  const token = getToken();
+  const refreshToken = getRefreshToken();
+  if (!token) return false;
+  if (isTokenExpired(token) && (!refreshToken || isTokenExpired(refreshToken))) {
+    return false;
+  }
+  return true;
 }

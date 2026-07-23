@@ -564,6 +564,7 @@
     "spentLimit": "Đã tiêu / Hạn mức",
     "used": "Đã dùng {percent}%",
     "remainingAmount": "Còn lại {amount}",
+    "overspent": "Vượt quá {amount}",
     "status": {
       "SAFE": "An toàn",
       "CAUTION": "Cẩn trọng",
@@ -617,7 +618,13 @@
     "SHOPPING": "Mua sắm",
     "OTHER": "Khác",
     "FOOD_AND_BEVERAGE": "Ăn uống",
-    "FOOD_BEV": "Ăn uống"
+    "FOOD_BEV": "Ăn uống",
+    "SALARY": "Lương",
+    "BONUS": "Tiền thưởng",
+    "INVESTMENT": "Đầu tư",
+    "GIFT": "Quà tặng",
+    "PROJECT_CONTRIBUTION": "Đóng góp dự án",
+    "PROJECT_REFUND": "Hoàn tiền dự án"
   },
   "financialSetup": {
     "title": "Thiết lập Tài chính",
