@@ -307,8 +307,8 @@ export default function DashboardPage() {
                 )}
               </div>
 
-              {/* Mini Donut Chart */}
-              <div className="h-48 md:h-56 w-full flex items-center justify-center">
+              {/* Donut Chart matching Analysis Page layout */}
+              <div className="h-64 sm:h-72 w-full flex items-center justify-center">
                 {sortedCategoryProportions && sortedCategoryProportions.length > 0 ? (
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
@@ -316,10 +316,10 @@ export default function DashboardPage() {
                         data={sortedCategoryProportions}
                         cx="50%"
                         cy="50%"
-                        innerRadius={60}
-                        outerRadius={100}
+                        innerRadius={55}
+                        outerRadius={90}
                         dataKey="percentage"
-                        paddingAngle={1}
+                        paddingAngle={1.5}
                       >
                         {sortedCategoryProportions.map((entry: any, index: number) => (
                           <Cell key={entry.category} fill={CHART_COLORS[index % CHART_COLORS.length]} />

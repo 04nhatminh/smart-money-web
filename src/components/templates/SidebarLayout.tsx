@@ -16,7 +16,6 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({
   navItems = [],
 }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
@@ -46,13 +45,12 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({
       <div className="flex flex-col min-h-screen">
         <Header
           navItems={navItems}
-          showSidebarToggle={true}
-          onToggleSidebar={() => setIsMobileOpen((prev) => !prev)}
+          showSidebarToggle={false}
         />
         <div className="flex flex-1 pt-6 sm:pt-10">
           <Sidebar
-            isOpen={isMobileOpen}
-            onClose={() => setIsMobileOpen(false)}
+            isOpen={false}
+            onClose={() => {}}
             isCollapsed={isCollapsed}
             onToggleCollapse={toggleCollapse}
             isMounted={isMounted}
