@@ -55,7 +55,7 @@ import {
 const CHART_COLORS = ['#5044d5', '#10B981', '#EF4444', '#F59E0B', '#8B5CF6', '#EC4899', '#06B6D4'];
 
 export default function DashboardPage() {
-  const { user, isAuthenticated, isInitializing } = useAuth();
+  const { user, isAuthenticated, isInitializing, isLoading: authIsLoading } = useAuth();
   const router = useRouter();
   const locale = useLocale();
   const t = useTranslations();
@@ -139,7 +139,7 @@ export default function DashboardPage() {
 
   // Check onboarding status
   useEffect(() => {
-    if (isAuthenticated && user) {
+    if (!isInitializing && !authIsLoading && isAuthenticated && user) {
       const financialCookie = getCookie('financial_setup_completed');
       const financialDone = user.financialSetupCompleted || financialCookie === 'true';
 
@@ -147,7 +147,7 @@ export default function DashboardPage() {
         setShowFinancialPrompt(true);
       }
     }
-  }, [isAuthenticated, user]);
+  }, [isInitializing, authIsLoading, isAuthenticated, user]);
 
   // Derived calculations for Financial Summary Card
   const { totalIncome, totalExpenses, netSavings } = useMemo(() => {
