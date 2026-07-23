@@ -19,18 +19,7 @@ interface TransactionRowProps {
   amount: number;
   type: 'income' | 'expense' | 'INCOME' | 'EXPENSE';
   icon?: React.ReactNode;
-  onEdit?: (id: string) => void;
-  onDelete?: (id: string) => void;
-}
-
-interface TransactionRowProps {
-  id: string;
-  title: string;
-  category: string;
-  date: string;
-  amount: number;
-  type: 'income' | 'expense' | 'INCOME' | 'EXPENSE';
-  icon?: React.ReactNode;
+  showTimeOnly?: boolean;
   onEdit?: (id: string) => void;
   onDelete?: (id: string) => void;
 }
@@ -43,6 +32,7 @@ export const TransactionRow: React.FC<TransactionRowProps> = ({
   amount,
   type,
   icon,
+  showTimeOnly = false,
   onEdit,
   onDelete,
 }) => {
@@ -51,18 +41,28 @@ export const TransactionRow: React.FC<TransactionRowProps> = ({
 
   const formatDate = (dateString: string) => {
     try {
-      // Parse format: dd/mm/yyyy hh:mm
+      // Parse format: dd/mm/yyyy hh:mm or ISO
       const regex = /^(\d{2})\/(\d{2})\/(\d{4})\s(\d{2}):(\d{2})$/;
       const match = dateString.match(regex);
 
-      if (!match) {
-        return dateString;
+      if (match) {
+        const [, day, month, year, hour, minute] = match;
+        if (showTimeOnly) {
+          return `${hour}:${minute}`;
+        }
+        return `${day}/${month}/${year} ${hour}:${minute}`;
       }
 
-      const [, day, month, year, hour, minute] = match;
+      // Fallback parse Date object if ISO string
+      const d = new Date(dateString);
+      if (!isNaN(d.getTime())) {
+        if (showTimeOnly) {
+          return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+        }
+        return d.toLocaleString([], { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false });
+      }
 
-      // Return in dd/mm/yyyy hh:mm format
-      return `${day}/${month}/${year} ${hour}:${minute}`;
+      return dateString;
     } catch {
       return dateString;
     }
@@ -72,9 +72,32 @@ export const TransactionRow: React.FC<TransactionRowProps> = ({
   const amountColor = normalizedType === 'income' ? '#10B981' : '#EF4444';
   const amountPrefix = normalizedType === 'income' ? '+' : '-';
 
+  // Category & Type Icon background tints
+  const getCategoryTint = () => {
+    if (normalizedType === 'income') {
+      return { bg: '#10B98118', text: '#10B981' };
+    }
+    const catLower = (category || '').toLowerCase();
+    if (catLower.includes('food') || catLower.includes('dining') || catLower.includes('ăn')) {
+      return { bg: '#F59E0B18', text: '#D97706' };
+    }
+    if (catLower.includes('cloth') || catLower.includes('shop') || catLower.includes('sắm')) {
+      return { bg: '#EC489918', text: '#DB2777' };
+    }
+    if (catLower.includes('project') || catLower.includes('dự án')) {
+      return { bg: '#8B5CF618', text: '#7C3AED' };
+    }
+    if (catLower.includes('bill') || catLower.includes('util') || catLower.includes('điện')) {
+      return { bg: '#3B82F618', text: '#2563EB' };
+    }
+    return { bg: `${colors.interactive.primary}15`, text: colors.interactive.primary };
+  };
+
+  const tint = getCategoryTint();
+
   return (
     <div
-      className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-lg border gap-3 sm:gap-4"
+      className="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 sm:p-4 rounded-xl border gap-3 sm:gap-4 transition-colors hover:shadow-sm"
       style={{
         borderColor: colors.border.light,
         backgroundColor: colors.surface.primary,
@@ -82,30 +105,31 @@ export const TransactionRow: React.FC<TransactionRowProps> = ({
     >
       <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
         <div
-          className="p-3 rounded-lg flex items-center justify-center flex-shrink-0"
+          className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 text-xl font-bold"
           style={{
-            backgroundColor: colors.surface.secondary,
+            backgroundColor: tint.bg,
+            color: tint.text,
           }}
         >
           {icon || getCategoryIcon(category)}
         </div>
         <div className="flex-1 min-w-0">
-          <p className="font-semibold truncate text-sm sm:text-base" style={{ color: colors.text.primary }}>
+          <p className="font-bold truncate text-sm sm:text-base" style={{ color: colors.text.primary }}>
             {t.has(`categories.${title}`) ? t(`categories.${title}`) : title}
           </p>
           <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mt-0.5">
-            <span className="text-xs whitespace-nowrap" style={{ color: colors.text.secondary }}>
+            <span className="text-xs font-medium whitespace-nowrap" style={{ color: colors.text.secondary }}>
               {formatDate(date)}
             </span>
             {normalizedType === 'expense' && (
               <span
-                className="text-[10px] sm:text-xs px-1.5 py-0.5 rounded whitespace-nowrap truncate max-w-[120px]"
+                className="text-[10px] sm:text-xs font-semibold px-2 py-0.5 rounded-md whitespace-nowrap truncate max-w-[140px]"
                 style={{
-                  backgroundColor: colors.surface.secondary,
+                  backgroundColor: `${colors.surface.secondary}`,
                   color: colors.text.secondary,
                 }}
               >
-                {t(`categories.${category}`)}
+                {t.has(`categories.${category}`) ? t(`categories.${category}`) : category}
               </span>
             )}
           </div>
@@ -113,12 +137,12 @@ export const TransactionRow: React.FC<TransactionRowProps> = ({
       </div>
       <div className="flex items-center justify-between sm:justify-end gap-4 border-t sm:border-t-0 pt-2 sm:pt-0" style={{ borderTopColor: `${colors.border.light}60` }}>
         <p
-          className="font-bold text-base sm:text-lg text-left sm:text-right sm:min-w-24"
+          className="font-bold text-base sm:text-lg text-left sm:text-right sm:min-w-24 tracking-tight"
           style={{ color: amountColor }}
         >
           {amountPrefix}{formatVietnamsePrice(Math.abs(amount))}
         </p>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
           {onEdit && (
             <button
               onClick={() => onEdit(id)}

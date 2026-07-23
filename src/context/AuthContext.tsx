@@ -8,7 +8,7 @@ import {
   ReactNode,
   useEffect,
 } from 'react';
-import { User, getToken, setToken, getRefreshToken, setRefreshToken, setUser, getUser, clearAuth } from '@/lib/auth';
+import { User, getToken, setToken, getRefreshToken, setRefreshToken, setUser, getUser, clearAuth, isTokenExpired } from '@/lib/auth';
 import { apiClient } from '@/lib/api-client';
 import { API_ENDPOINTS } from '@/constants/api';
 import { LoginResponse } from '@/types/api';
@@ -43,20 +43,34 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isInitializing, setIsInitializing] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Initialize auth state from localStorage and refresh session if possible
+  // Initialize auth state from localStorage and refresh session if necessary
   useEffect(() => {
     const initAuth = async () => {
       const savedToken = getToken();
       const savedRefreshToken = getRefreshToken();
       const savedUser = getUser();
 
-      if (savedRefreshToken) {
+      if (savedToken && savedUser && !isTokenExpired(savedToken)) {
+        // If current access token is valid, use it directly without unnecessarily calling refresh API
+        setAuthToken(savedToken);
+        setAuthUser(savedUser);
+      } else if (savedRefreshToken && !isTokenExpired(savedRefreshToken)) {
+        // If access token is expired/missing but refresh token exists, attempt refresh
         try {
           await refreshAuth();
         } catch (error) {
           console.error('[AuthContext] Session initialization refresh failed:', error);
+          if (savedToken && savedUser) {
+            setAuthToken(savedToken);
+            setAuthUser(savedUser);
+          } else {
+            clearAuth();
+            setAuthToken(null);
+            setAuthUser(null);
+          }
         }
       } else if (savedToken && savedUser) {
+        // Fallback to saved token & user if refresh token is absent
         setAuthToken(savedToken);
         setAuthUser(savedUser);
       } else {

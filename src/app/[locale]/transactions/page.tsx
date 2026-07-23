@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { useAuth } from '@/context/AuthContext';
@@ -10,7 +10,7 @@ import { Card, StatCard, TransactionRow, CreateTransactionModal, EditTransaction
 import { useTheme } from '@/context/ThemeContext';
 import { useTransactions, type TransactionFilters } from '@/hooks/useTransactions';
 import { transformAIResultToFormData } from '@/lib/ai-result-transformer';
-import { MdAdd, MdFileDownload } from 'react-icons/md';
+import { MdAdd, MdFileDownload, MdCalendarToday } from 'react-icons/md';
 import { MdAccountBalanceWallet, MdTrendingUp, MdTrendingDown, MdRefresh, MdSort } from 'react-icons/md';
 import { formatVietnamsePrice } from '@/lib/format';
 
@@ -218,6 +218,87 @@ export default function TransactionsPage() {
       })
     : displayTransactions;
 
+  // Group transactions by Date
+  const groupedTransactions = useMemo(() => {
+    if (!filteredTransactions || filteredTransactions.length === 0) return [];
+
+    const groups: {
+      dateKey: string;
+      dateLabel: string;
+      items: typeof filteredTransactions;
+      totalIncome: number;
+      totalExpense: number;
+    }[] = [];
+
+    const groupMap = new Map<string, typeof filteredTransactions>();
+
+    filteredTransactions.forEach((tx) => {
+      let dateKey = tx.date;
+      let dateLabel = tx.date;
+
+      // Parse format: dd/mm/yyyy hh:mm or ISO
+      const regex = /^(\d{2})\/(\d{2})\/(\d{4})/;
+      const match = tx.date.match(regex);
+
+      if (match) {
+        const [, day, month, year] = match;
+        dateKey = `${year}-${month}-${day}`;
+
+        const today = new Date();
+        const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+
+        const yesterday = new Date(today);
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yesterdayStr = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, '0')}-${String(yesterday.getDate()).padStart(2, '0')}`;
+
+        if (dateKey === todayStr) {
+          dateLabel = locale === 'vi' ? `Hôm nay (${day}/${month}/${year})` : `Today (${day}/${month}/${year})`;
+        } else if (dateKey === yesterdayStr) {
+          dateLabel = locale === 'vi' ? `Hôm qua (${day}/${month}/${year})` : `Yesterday (${day}/${month}/${year})`;
+        } else {
+          dateLabel = `${day}/${month}/${year}`;
+        }
+      } else {
+        const d = new Date(tx.date);
+        if (!isNaN(d.getTime())) {
+          const year = d.getFullYear();
+          const month = String(d.getMonth() + 1).padStart(2, '0');
+          const day = String(d.getDate()).padStart(2, '0');
+          dateKey = `${year}-${month}-${day}`;
+          dateLabel = d.toLocaleDateString(locale === 'vi' ? 'vi-VN' : 'en-US', {
+            weekday: 'short',
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+          });
+        }
+      }
+
+      if (!groupMap.has(dateKey)) {
+        const newArr: typeof filteredTransactions = [];
+        groupMap.set(dateKey, newArr);
+        groups.push({
+          dateKey,
+          dateLabel,
+          items: newArr,
+          totalIncome: 0,
+          totalExpense: 0,
+        });
+      }
+
+      const group = groups.find((g) => g.dateKey === dateKey)!;
+      group.items.push(tx);
+      const isIncome = tx.type.toLowerCase() === 'income';
+      if (isIncome) {
+        group.totalIncome += Math.abs(tx.amount);
+      } else {
+        group.totalExpense += Math.abs(tx.amount);
+      }
+    });
+
+    return groups;
+  }, [filteredTransactions, locale]);
+
   // Stats are retrieved directly from the backend via totalBalance, totalIncome, totalExpenses state variables
 
   if (isInitializing) {
@@ -371,19 +452,74 @@ export default function TransactionsPage() {
               </div>
             ) : filteredTransactions.length > 0 ? (
               <>
-                {filteredTransactions.map((transaction) => (
-                  <TransactionRow
-                    key={transaction.id}
-                    id={transaction.id}
-                    title={transaction.title}
-                    category={transaction.category}
-                    date={transaction.date}
-                    amount={transaction.amount}
-                    type={transaction.type}
-                    onEdit={handleEditClick}
-                    onDelete={handleDeleteClick}
-                  />
-                ))}
+                {sortBy === 'date' ? (
+                  <div className="space-y-6">
+                    {groupedTransactions.map((group) => (
+                      <div key={group.dateKey} className="space-y-2.5">
+                        {/* Date Group Header - Minimal Line Divider */}
+                        <div className="flex items-center gap-3 pt-3 pb-1">
+                          <div className="flex items-center gap-2 font-bold text-xs sm:text-sm whitespace-nowrap" style={{ color: colors.text.secondary }}>
+                            <MdCalendarToday className="w-4 h-4" style={{ color: colors.interactive.primary }} />
+                            <span>{group.dateLabel}</span>
+                          </div>
+
+                          {/* Horizontal Line Divider */}
+                          <div className="flex-1 h-[1px]" style={{ backgroundColor: `${colors.border.light}` }} />
+
+                          {/* Daily Totals */}
+                          <div className="flex items-center gap-2 sm:gap-3 text-xs font-bold whitespace-nowrap">
+                            {group.totalIncome > 0 && (
+                              <span style={{ color: '#10B981' }}>
+                                +{formatVietnamsePrice(group.totalIncome)}
+                              </span>
+                            )}
+                            {group.totalExpense > 0 && (
+                              <span style={{ color: '#EF4444' }}>
+                                -{formatVietnamsePrice(group.totalExpense)}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Grouped Rows */}
+                        <div className="space-y-2">
+                          {group.items.map((transaction) => (
+                            <TransactionRow
+                              key={transaction.id}
+                              id={transaction.id}
+                              title={transaction.title}
+                              category={transaction.category}
+                              date={transaction.date}
+                              amount={transaction.amount}
+                              type={transaction.type}
+                              showTimeOnly={true}
+                              onEdit={handleEditClick}
+                              onDelete={handleDeleteClick}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  /* Flat list when sorting by Amount, Category, Type, etc. */
+                  <div className="space-y-2.5">
+                    {filteredTransactions.map((transaction) => (
+                      <TransactionRow
+                        key={transaction.id}
+                        id={transaction.id}
+                        title={transaction.title}
+                        category={transaction.category}
+                        date={transaction.date}
+                        amount={transaction.amount}
+                        type={transaction.type}
+                        showTimeOnly={false}
+                        onEdit={handleEditClick}
+                        onDelete={handleDeleteClick}
+                      />
+                    ))}
+                  </div>
+                )}
                 {/* Pagination */}
                 <div className="mt-6 pt-4 border-t" style={{ borderColor: colors.text.secondary }}>
                   <div className="space-y-3">
