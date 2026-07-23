@@ -604,6 +604,7 @@ export default function TransactionsPage() {
                       onPageChange={(page) => {
                         setCurrentPage(page);
                         loadTransactions(page);
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
                       }}
                     />
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-4 text-center" style={{ color: colors.text.secondary }}>

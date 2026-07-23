@@ -97,7 +97,7 @@ export const TransactionRow: React.FC<TransactionRowProps> = ({
 
   return (
     <div
-      className="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 sm:p-4 rounded-xl border gap-3 sm:gap-4 transition-colors hover:shadow-sm"
+      className="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 sm:p-4 rounded-xl border gap-3 sm:gap-4 transition-colors hover:shadow-sm w-full max-w-full min-w-0 overflow-hidden"
       style={{
         borderColor: colors.border.light,
         backgroundColor: colors.surface.primary,
@@ -113,11 +113,11 @@ export const TransactionRow: React.FC<TransactionRowProps> = ({
         >
           {icon || getCategoryIcon(category)}
         </div>
-        <div className="flex-1 min-w-0">
-          <p className="font-bold truncate text-sm sm:text-base" style={{ color: colors.text.primary }}>
+        <div className="flex-1 min-w-0 overflow-hidden">
+          <p className="font-bold text-sm sm:text-base break-words line-clamp-2" style={{ color: colors.text.primary }}>
             {t.has(`categories.${title}`) ? t(`categories.${title}`) : title}
           </p>
-          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mt-0.5">
+          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mt-0.5 min-w-0">
             <span className="text-xs font-medium whitespace-nowrap" style={{ color: colors.text.secondary }}>
               {formatDate(date)}
             </span>
@@ -135,14 +135,14 @@ export const TransactionRow: React.FC<TransactionRowProps> = ({
           </div>
         </div>
       </div>
-      <div className="flex items-center justify-between sm:justify-end gap-4 border-t sm:border-t-0 pt-2 sm:pt-0" style={{ borderTopColor: `${colors.border.light}60` }}>
+      <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-4 border-t sm:border-t-0 pt-2 sm:pt-0 shrink-0" style={{ borderTopColor: `${colors.border.light}60` }}>
         <p
-          className="font-bold text-base sm:text-lg text-left sm:text-right sm:min-w-24 tracking-tight"
+          className="font-bold text-base sm:text-lg text-left sm:text-right sm:min-w-24 tracking-tight shrink-0"
           style={{ color: amountColor }}
         >
           {amountPrefix}{formatVietnamsePrice(Math.abs(amount))}
         </p>
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1.5 shrink-0">
           {onEdit && (
             <button
               onClick={() => onEdit(id)}
