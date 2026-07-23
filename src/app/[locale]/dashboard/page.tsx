@@ -12,7 +12,8 @@ import { useTransactions } from '@/hooks/useTransactions';
 import { useAnalytics } from '@/hooks/useAnalytics';
 import { useBudgets } from '@/hooks/useBudgets';
 import { useProjects } from '@/hooks/useProjects';
-import { getCookie } from '@/lib/auth';
+import { useUserFinancial } from '@/hooks/useUserFinancial';
+import { getCookie, setCookie } from '@/lib/auth';
 
 const PieTooltipCustom = ({ active, payload }: any) => {
   const t = useTranslations();
@@ -137,17 +138,37 @@ export default function DashboardPage() {
     }
   }, [isAuthenticated]);
 
+  const { getUserFinancial } = useUserFinancial();
+
   // Check onboarding status
   useEffect(() => {
-    if (!isInitializing && !authIsLoading && isAuthenticated && user) {
-      const financialCookie = getCookie('financial_setup_completed');
-      const financialDone = user.financialSetupCompleted || financialCookie === 'true';
+    let isMounted = true;
+    const checkOnboarding = async () => {
+      if (!isInitializing && !authIsLoading && isAuthenticated && user) {
+        const financialCookie = getCookie('financial_setup_completed');
+        const financialDone = user.financialSetupCompleted || financialCookie === 'true';
 
-      if (!financialDone) {
-        setShowFinancialPrompt(true);
+        if (financialDone) {
+          return;
+        }
+
+        // Verify with financial API directly to handle case where user model in auth state is missing the flag
+        const res = await getUserFinancial();
+        if (isMounted) {
+          if (res.success && res.data) {
+            setCookie('financial_setup_completed', 'true');
+          } else {
+            setShowFinancialPrompt(true);
+          }
+        }
       }
-    }
-  }, [isInitializing, authIsLoading, isAuthenticated, user]);
+    };
+
+    checkOnboarding();
+    return () => {
+      isMounted = false;
+    };
+  }, [isInitializing, authIsLoading, isAuthenticated, user, getUserFinancial]);
 
   // Derived calculations for Financial Summary Card
   const { totalIncome, totalExpenses, netSavings } = useMemo(() => {
