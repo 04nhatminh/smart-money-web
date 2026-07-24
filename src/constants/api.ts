@@ -127,4 +127,15 @@ export const API_ENDPOINTS = {
     pendingSponsorshipRequests: '/api/v1/group-projects/sponsorship/pending',
     respondSponsorshipRequest: (id: string) => `/api/v1/group-projects/sponsorship/${id}/respond`,
   },
+
+  // Insights (Adaptive Engine)
+  insights: {
+    list: '/api/v1/insights',
+  },
+
+  // Suggestions (Adaptive Engine)
+  suggestions: {
+    list: '/api/v1/suggestions',
+    respond: (id: string) => `/api/v1/suggestions/${id}/respond`,
+  },
 } as const;

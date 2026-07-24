@@ -14,6 +14,8 @@ import { useBudgets } from '@/hooks/useBudgets';
 import { useProjects } from '@/hooks/useProjects';
 import { useUserFinancial } from '@/hooks/useUserFinancial';
 import { getCookie, setCookie } from '@/lib/auth';
+import { InsightsPreviewWidget } from '@/components/organisms/insights/InsightsPreviewWidget';
+import { PendingSuggestionsWidget } from '@/components/organisms/suggestions/PendingSuggestionsWidget';
 
 const PieTooltipCustom = ({ active, payload }: any) => {
   const t = useTranslations();
@@ -237,6 +239,12 @@ export default function DashboardPage() {
           <Text style={{ color: colors.text.secondary }} className="text-sm sm:text-base">
             {t('dashboard.overviewSubtitle')}
           </Text>
+        </div>
+
+        {/* AI Suggestions Banner & Insights Preview Widgets */}
+        <div className="space-y-4">
+          <PendingSuggestionsWidget />
+          <InsightsPreviewWidget />
         </div>
 
         {/* 2x2 Grid Layout for Overview Cards */}

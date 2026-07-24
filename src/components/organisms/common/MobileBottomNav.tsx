@@ -4,7 +4,7 @@ import React from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { useTheme } from '@/context/ThemeContext';
-import { MdDashboard, MdPersonOutline, MdPieChart, MdFolderOpen, MdInsights, MdSwapHoriz } from 'react-icons/md';
+import { MdDashboard, MdPersonOutline, MdPieChart, MdFolderOpen, MdInsights, MdLightbulb, MdBarChart, MdSwapHoriz } from 'react-icons/md';
 
 export const MobileBottomNav: React.FC = () => {
   const router = useRouter();

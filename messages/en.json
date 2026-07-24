@@ -22,6 +22,8 @@
     "info": "Information",
     "theme": "Theme",
     "settings": "Settings",
+    "refresh": "Refresh",
+    "retry": "Retry",
     "links": "Links",
     "features": "Features",
     "contact": "Contact",
@@ -603,7 +605,9 @@
     "dashboard": "Dashboard",
     "transactions": "Transactions",
     "budgets": "Budgets",
-    "analysis": "Analysis",
+    "analysis": "Reports & Analysis",
+    "insights": "Insights",
+    "suggestions": "AI Suggestions",
     "projects": "Projects",
     "profile": "Profile",
     "collapse": "Collapse sidebar",
@@ -722,5 +726,169 @@
     "mismatchMessage": "This invitation was sent to a different account. You are currently logged in as {email}.",
     "switchAccount": "Log Out & Switch Account",
     "openInMobileApp": "Open in SmartMoney Mobile App"
+  },
+  "insights": {
+    "title": "Smart Insights",
+    "subtitle": "Automatic financial movement updates powered by Adaptive Engine",
+    "selectMonth": "Month:",
+    "empty_title": "No insights yet",
+    "empty_subtitle": "Insights will appear continuously as your spending history grows.",
+    "severity": {
+      "critical": "Critical Attention ({count})",
+      "warn": "Trend Warning ({count})",
+      "info": "General Info ({count})"
+    },
+    "badge": {
+      "critical": "Critical",
+      "warn": "Warning",
+      "info": "Info"
+    }
+  },
+  "suggestions": {
+    "title": "AI Suggestions & Recommendations",
+    "subtitle": "Personalized financial action suggestions tailored for you",
+    "see_all": "See all",
+    "reviewNow": "Review now",
+    "aiSuggestionsCount": "AI Suggestions ({count})",
+    "viewDetail": "View Details & Action",
+    "whyAsking": "Why we are suggesting this",
+    "budgetAdjustments": "Budget Adjustment Details",
+    "proposedValue": "Proposed Value:",
+    "accept": "Accept & Apply",
+    "accepting": "Applying...",
+    "dismiss": "Dismiss",
+    "dismissing": "Dismissing...",
+    "empty_title": "No suggestions in this tab",
+    "empty_subtitle": "When opportunities to optimize budget or savings are detected, new suggestions will appear here.",
+    "tabs": {
+      "pending": "Pending",
+      "accepted": "Accepted",
+      "dismissed": "Dismissed",
+      "expired": "Expired"
+    },
+    "status": {
+      "pending": "Pending",
+      "accepted": "Applied",
+      "dismissed": "Dismissed",
+      "expired": "Expired"
+    },
+    "table": {
+      "category": "Category",
+      "currentLimit": "Current Limit",
+      "newLimit": "New Limit"
+    }
+  },
+  "insight": {
+    "overspend_anomaly": {
+      "food": "You spent {actual} on food this month — significantly higher than your typical {baseline}.",
+      "transportation": "You spent {actual} on transportation this month — significantly higher than your typical {baseline}.",
+      "clothing": "You spent {actual} on clothing this month — significantly higher than your typical {baseline}.",
+      "utilities": "You spent {actual} on utilities this month — significantly higher than your typical {baseline}.",
+      "entertainment": "You spent {actual} on entertainment this month — significantly higher than your typical {baseline}.",
+      "health": "You spent {actual} on health this month — significantly higher than your typical {baseline}.",
+      "education": "You spent {actual} on education this month — significantly higher than your typical {baseline}.",
+      "shopping": "You spent {actual} on shopping this month — significantly higher than your typical {baseline}.",
+      "other": "Your other spending this month is {actual} — significantly higher than your typical {baseline}."
+    },
+    "budget_pace": {
+      "food": "At this pace, food spending will reach {projectedEndOfMonth} by month end — exceeding your {limit} budget.",
+      "transportation": "At this pace, transportation spending will reach {projectedEndOfMonth} by month end — exceeding your {limit} budget.",
+      "clothing": "At this pace, clothing spending will reach {projectedEndOfMonth} by month end — exceeding your {limit} budget.",
+      "utilities": "At this pace, utilities spending will reach {projectedEndOfMonth} by month end — exceeding your {limit} budget.",
+      "entertainment": "At this pace, entertainment spending will reach {projectedEndOfMonth} by month end — exceeding your {limit} budget.",
+      "health": "At this pace, health spending will reach {projectedEndOfMonth} by month end — exceeding your {limit} budget.",
+      "education": "At this pace, education spending will reach {projectedEndOfMonth} by month end — exceeding your {limit} budget.",
+      "shopping": "At this pace, shopping spending will reach {projectedEndOfMonth} by month end — exceeding your {limit} budget.",
+      "other": "At this pace, other spending will reach {projectedEndOfMonth} by month end — exceeding your {limit} budget."
+    },
+    "category_trend": {
+      "food": "Food spending has increased steadily for {sampleMonths} months — currently averaging {meanMonthly} per month.",
+      "transportation": "Transportation spending has increased steadily for {sampleMonths} months — currently averaging {meanMonthly} per month.",
+      "clothing": "Clothing spending has increased steadily for {sampleMonths} months — currently averaging {meanMonthly} per month.",
+      "utilities": "Utilities spending has increased steadily for {sampleMonths} months — currently averaging {meanMonthly} per month.",
+      "entertainment": "Entertainment spending has increased steadily for {sampleMonths} months — currently averaging {meanMonthly} per month.",
+      "health": "Health spending has increased steadily for {sampleMonths} months — currently averaging {meanMonthly} per month.",
+      "education": "Education spending has increased steadily for {sampleMonths} months — currently averaging {meanMonthly} per month.",
+      "shopping": "Shopping spending has increased steadily for {sampleMonths} months — currently averaging {meanMonthly} per month.",
+      "other": "Other spending has increased steadily for {sampleMonths} months — currently averaging {meanMonthly} per month."
+    },
+    "recurring": {
+      "food": "\"{description}\" appears to be a recurring expense of around {monthlyAmount} every month.",
+      "transportation": "\"{description}\" appears to be a recurring expense of around {monthlyAmount} every month.",
+      "clothing": "\"{description}\" appears to be a recurring expense of around {monthlyAmount} every month.",
+      "utilities": "\"{description}\" appears to be a recurring expense of around {monthlyAmount} every month.",
+      "entertainment": "\"{description}\" appears to be a recurring expense of around {monthlyAmount} every month.",
+      "health": "\"{description}\" appears to be a recurring expense of around {monthlyAmount} every month.",
+      "education": "\"{description}\" appears to be a recurring expense of around {monthlyAmount} every month.",
+      "shopping": "\"{description}\" appears to be a recurring expense of around {monthlyAmount} every month.",
+      "other": "\"{description}\" appears to be a recurring expense of around {monthlyAmount} every month."
+    },
+    "savings_capacity": "After recurring expenses and budgets, you have about {disposable} left for savings this month.",
+    "budget_over_income": "Your total committed budget of {committedBudgets} exceeds your monthly income of {income}.",
+    "budget_underspend": {
+      "food": "You consistently spend below your food budget — consider lowering it to around {medianActual}.",
+      "transportation": "You consistently spend below your transportation budget — consider lowering it to around {medianActual}.",
+      "clothing": "You consistently spend below your clothing budget — consider lowering it to around {medianActual}.",
+      "utilities": "You consistently spend below your utilities budget — consider lowering it to around {medianActual}.",
+      "entertainment": "You consistently spend below your entertainment budget — consider lowering it to around {medianActual}.",
+      "health": "You consistently spend below your health budget — consider lowering it to around {medianActual}.",
+      "education": "You consistently spend below your education budget — consider lowering it to around {medianActual}.",
+      "shopping": "You consistently spend below your shopping budget — consider lowering it to around {medianActual}.",
+      "other": "You consistently spend below your other budget — consider lowering it to around {medianActual}."
+    },
+    "subscription_price_hike": {
+      "food": "\"{description}\" increased from {previousAmount} to {newAmount}.",
+      "transportation": "\"{description}\" increased from {previousAmount} to {newAmount}.",
+      "clothing": "\"{description}\" increased from {previousAmount} to {newAmount}.",
+      "utilities": "\"{description}\" increased from {previousAmount} to {newAmount}.",
+      "entertainment": "\"{description}\" increased from {previousAmount} to {newAmount}.",
+      "health": "\"{description}\" increased from {previousAmount} to {newAmount}.",
+      "education": "\"{description}\" increased from {previousAmount} to {newAmount}.",
+      "shopping": "\"{description}\" increased from {previousAmount} to {newAmount}.",
+      "other": "\"{description}\" increased from {previousAmount} to {newAmount}."
+    },
+    "project_off_track": "\"{projectName}\" is off track — requires about {requiredMonthly} per month to finish by {deadline}."
+  },
+  "suggestion": {
+    "raise_budget": {
+      "title": "Increase Budget",
+      "ask": "Increase {category} budget to {resolvedValue}?"
+    },
+    "create_budget": {
+      "title": "New Budget",
+      "ask": "Set {category} budget to {resolvedValue} for this month?"
+    },
+    "contribute_to_project": {
+      "title": "Contribute to Goal",
+      "ask": "Contribute {resolvedValue} to \"{projectName}\"?"
+    },
+    "set_category_limit": {
+      "title": "Set Category Limit",
+      "ask": "Set {category} budget limit to {resolvedValue} for this month?"
+    },
+    "reduce_budget": {
+      "title": "Reduce Budget",
+      "ask": "Reduce {category} budget to {resolvedValue}?"
+    },
+    "rebalance_budgets": {
+      "title": "Rebalance Budgets",
+      "ask": "Your total budgets exceed income — trim to fit ({resolvedValue} total)?"
+    },
+    "reallocate_budget": {
+      "title": "Reallocate Budget",
+      "ask": "Budget for {category} is near its limit — offset from unused budgets ({resolvedValue} reallocated)?"
+    },
+    "review_subscription": {
+      "title": "Review Subscription",
+      "ask": "\"{description}\" went up from {previousAmount} to {newAmount} — have you reviewed it?"
+    },
+    "increase_contribution": {
+      "title": "Catch Up Goal",
+      "ask": "\"{projectName}\" is behind schedule — contribute an extra {resolvedValue} this month to catch up?"
+    },
+    "create_project": {
+      "title": "Start Savings Goal",
+      "ask": "You have surplus funds this month — start a savings goal with {resolvedValue}?"
+    }
   }
 }
