@@ -8,7 +8,7 @@ import {
   ReactNode,
   useEffect,
 } from 'react';
-import { User, getToken, setToken, setUser, getUser, clearAuth } from '@/lib/auth';
+import { User, getToken, setToken, getRefreshToken, setRefreshToken, setUser, getUser, clearAuth, isTokenExpired } from '@/lib/auth';
 import { apiClient } from '@/lib/api-client';
 import { API_ENDPOINTS } from '@/constants/api';
 import { LoginResponse } from '@/types/api';
@@ -43,18 +43,47 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isInitializing, setIsInitializing] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Initialize auth state from localStorage
+  // Initialize auth state from localStorage and refresh session if necessary
   useEffect(() => {
-    const savedToken = getToken();
-    const savedUser = getUser();
-    if (savedToken) {
-      setAuthToken(savedToken);
-    }
-    if (savedUser) {
-      setAuthUser(savedUser);
-    }
-    setIsInitializing(false);
-    setIsLoading(false);
+    const initAuth = async () => {
+      const savedToken = getToken();
+      const savedRefreshToken = getRefreshToken();
+      const savedUser = getUser();
+
+      if (savedToken && savedUser && !isTokenExpired(savedToken)) {
+        // If current access token is valid, use it directly without unnecessarily calling refresh API
+        setAuthToken(savedToken);
+        setAuthUser(savedUser);
+      } else if (savedRefreshToken && !isTokenExpired(savedRefreshToken)) {
+        // If access token is expired/missing but refresh token exists, attempt refresh
+        try {
+          await refreshAuth();
+        } catch (error) {
+          console.error('[AuthContext] Session initialization refresh failed:', error);
+          if (savedToken && savedUser) {
+            setAuthToken(savedToken);
+            setAuthUser(savedUser);
+          } else {
+            clearAuth();
+            setAuthToken(null);
+            setAuthUser(null);
+          }
+        }
+      } else if (savedToken && savedUser) {
+        // Fallback to saved token & user if refresh token is absent
+        setAuthToken(savedToken);
+        setAuthUser(savedUser);
+      } else {
+        clearAuth();
+        setAuthToken(null);
+        setAuthUser(null);
+      }
+
+      setIsInitializing(false);
+      setIsLoading(false);
+    };
+
+    initAuth();
   }, []);
 
   const login = useCallback(
@@ -69,18 +98,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           }
         );
 
-        // Handle API response format: { success, message, data: { accessToken, user } } OR { success, data: { accessToken, user } }
-        // apiClient.post returns response data directly (not wrapped in .data)
+        // Handle API response format: { success, message, data: { accessToken, refreshToken, user } }
         if (!response) {
           throw new Error('No response from API');
         }
 
-        // Check if response has nested data object (for login/social login)
         const loginData = response.data || response;
 
         if (loginData.accessToken && loginData.user) {
           setToken(loginData.accessToken);
           setAuthToken(loginData.accessToken);
+          if (loginData.refreshToken) {
+            setRefreshToken(loginData.refreshToken);
+          }
           setUser(loginData.user);
           setAuthUser(loginData.user);
         } else {
@@ -101,7 +131,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       try {
         setIsLoading(true);
 
-        // Create FormData for multipart/form-data request
         const formData = new FormData();
         formData.append('username', username);
         formData.append('fullName', fullName);
@@ -116,14 +145,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           formData
         );
 
-        // Handle API response format: { success, message }
-        // apiClient.post returns response data directly (not wrapped in .data)
-        // Registration doesn't log in the user - they must verify email first
         if (!response || response.success !== true) {
           throw new Error(response?.message || 'Registration failed');
         }
-
-        // Registration successful - user will verify email on the next page
       } catch (error) {
         const errorMsg = error instanceof Error ? error.message : 'Registration failed';
         console.error('[AuthContext] Registration error:', errorMsg);
@@ -139,6 +163,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     clearAuth();
     setAuthToken(null);
     setAuthUser(null);
+    if (typeof window !== 'undefined') {
+      const pathParts = window.location.pathname.split('/');
+      const locale = pathParts[1] && ['vi', 'en'].includes(pathParts[1]) ? pathParts[1] : 'en';
+      if (!window.location.pathname.includes('/login') && !window.location.pathname.includes('/register')) {
+        window.location.href = `/${locale}/login`;
+      }
+    }
   }, []);
 
   const loginWithGoogle = useCallback(
@@ -157,17 +188,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           }
         );
 
-        // Handle API response format: { success, message, data: { accessToken, user } }
         if (!response) {
           throw new Error('No response from API');
         }
 
-        // Check if response has nested data object
         const loginData = response.data || response;
 
         if (loginData.accessToken && loginData.user) {
           setToken(loginData.accessToken);
           setAuthToken(loginData.accessToken);
+          if (loginData.refreshToken) {
+            setRefreshToken(loginData.refreshToken);
+          }
           setUser(loginData.user);
           setAuthUser(loginData.user);
         } else {
@@ -194,17 +226,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           }
         );
 
-        // Handle API response format: { success, message, data: { accessToken, user } }
         if (!response) {
           throw new Error('No response from API');
         }
 
-        // Check if response has nested data object
         const loginData = response.data || response;
 
         if (loginData.accessToken && loginData.user) {
           setToken(loginData.accessToken);
           setAuthToken(loginData.accessToken);
+          if (loginData.refreshToken) {
+            setRefreshToken(loginData.refreshToken);
+          }
           setUser(loginData.user);
           setAuthUser(loginData.user);
         } else {
@@ -222,12 +255,39 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const refreshAuth = useCallback(async () => {
     try {
-      const currentToken = getToken();
-      if (!currentToken) {
-        throw new Error('No token found');
+      const refreshToken = getRefreshToken();
+      if (!refreshToken) {
+        throw new Error('No refresh token found');
       }
-      // You might need to implement a refresh endpoint
-      // For now, we'll just validate the token is still there
+
+      const response = await apiClient.post<any>(
+        API_ENDPOINTS.auth.refresh,
+        { refreshToken }
+      );
+
+      if (!response) {
+        throw new Error('No response from refresh API');
+      }
+
+      const refreshData = response.data || response;
+
+      if (refreshData && refreshData.accessToken) {
+        setToken(refreshData.accessToken);
+        setAuthToken(refreshData.accessToken);
+
+        if (refreshData.refreshToken) {
+          setRefreshToken(refreshData.refreshToken);
+        }
+
+        if (refreshData.user) {
+          setUser(refreshData.user);
+          setAuthUser(refreshData.user);
+        }
+
+        return refreshData.accessToken;
+      } else {
+        throw new Error('Invalid response format from refresh API');
+      }
     } catch (error) {
       logout();
       throw error;

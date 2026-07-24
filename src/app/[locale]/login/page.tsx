@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useEffect, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { LoginForm } from '@/components/molecules/auth';
 import { CenteredLayout } from '@/components/templates';
@@ -9,18 +9,28 @@ import { Heading } from '@/components/atoms';
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
 
-export default function LoginPage() {
+function LoginContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const locale = useLocale();
   const t = useTranslations();
   const { isAuthenticated, isInitializing } = useAuth();
   const { colors } = useTheme();
 
+  const redirectParam = searchParams.get('redirect');
+
+  const getTargetUrl = () => {
+    if (redirectParam && redirectParam.startsWith('/')) {
+      return redirectParam;
+    }
+    return `/${locale}/dashboard`;
+  };
+
   useEffect(() => {
     if (!isInitializing && isAuthenticated) {
-      router.push(`/${locale}/dashboard`);
+      router.push(getTargetUrl());
     }
-  }, [isAuthenticated, isInitializing, router, locale]);
+  }, [isAuthenticated, isInitializing, router, redirectParam, locale]);
 
   if (isInitializing) {
     return (
@@ -36,10 +46,25 @@ export default function LoginPage() {
         {/* Form */}
         <LoginForm
           onSuccess={() => {
-            router.push(`/${locale}/dashboard`);
+            router.push(getTargetUrl());
           }}
         />
       </div>
     </CenteredLayout>
+  );
+}
+
+export default function LoginPage() {
+  const t = useTranslations();
+  return (
+    <Suspense
+      fallback={
+        <CenteredLayout hideHeader hideFooter showBackButton>
+          <Heading level={2}>{t('common.loading')}</Heading>
+        </CenteredLayout>
+      }
+    >
+      <LoginContent />
+    </Suspense>
   );
 }

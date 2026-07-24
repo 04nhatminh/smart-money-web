@@ -1,4 +1,4 @@
-import { getToken } from './auth';
+import { getToken, getRefreshToken, setToken, setRefreshToken, clearAuth } from './auth';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
 
@@ -17,12 +17,10 @@ const getHeaders = () => {
 
 // Helper function to extract error message from response
 const extractErrorMessage = (data: any): string => {
-  // If there's a message field, use it
   if (data?.message) {
     return data.message;
   }
 
-  // If there's an errors object with field-specific errors
   if (data?.errors && typeof data.errors === 'object') {
     const errorMessages = Object.entries(data.errors)
       .map(([field, error]: [string, any]) => {
@@ -44,6 +42,134 @@ const extractErrorMessage = (data: any): string => {
   return 'An error occurred';
 };
 
+let isRefreshing = false;
+let failedQueue: Array<{ resolve: (token: string) => void; reject: (err: any) => void }> = [];
+
+const processQueue = (error: any, token: string | null = null) => {
+  failedQueue.forEach((prom) => {
+    if (error) {
+      prom.reject(error);
+    } else if (token) {
+      prom.resolve(token);
+    }
+  });
+  failedQueue = [];
+};
+
+const handleUnauthorized = () => {
+  clearAuth();
+  if (typeof window !== 'undefined') {
+    const pathParts = window.location.pathname.split('/');
+    const locale = pathParts[1] && ['vi', 'en'].includes(pathParts[1]) ? pathParts[1] : 'en';
+    if (!window.location.pathname.includes('/login') && !window.location.pathname.includes('/register')) {
+      window.location.href = `/${locale}/login`;
+    }
+  }
+};
+
+const tryRefreshToken = async (): Promise<string> => {
+  const refreshToken = getRefreshToken();
+  if (!refreshToken) {
+    handleUnauthorized();
+    throw new Error('No refresh token available');
+  }
+
+  try {
+    const response = await fetch(`${API_URL}/api/v1/auth/refresh-token`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ refreshToken }),
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      handleUnauthorized();
+      throw new Error('Refresh token invalid or expired');
+    }
+
+    const data = await response.json();
+    const refreshData = data.data || data;
+
+    if (refreshData && refreshData.accessToken) {
+      setToken(refreshData.accessToken);
+      if (refreshData.refreshToken) {
+        setRefreshToken(refreshData.refreshToken);
+      }
+      return refreshData.accessToken;
+    } else {
+      handleUnauthorized();
+      throw new Error('Invalid token response from refresh endpoint');
+    }
+  } catch (err) {
+    handleUnauthorized();
+    throw err;
+  }
+};
+
+async function handleResponse<T>(
+  response: Response,
+  endpoint: string,
+  retryFn: () => Promise<T>
+): Promise<T> {
+  const isAuthEndpoint =
+    endpoint.includes('/api/v1/auth/login') ||
+    endpoint.includes('/api/v1/auth/refresh-token') ||
+    endpoint.includes('/api/v1/auth/register');
+
+  if (response.status === 401 && !isAuthEndpoint) {
+    if (isRefreshing) {
+      await new Promise<string>((resolve, reject) => {
+        failedQueue.push({ resolve, reject });
+      });
+      return retryFn();
+    }
+
+    isRefreshing = true;
+
+    try {
+      const newToken = await tryRefreshToken();
+      processQueue(null, newToken);
+      isRefreshing = false;
+      return retryFn();
+    } catch (refreshErr) {
+      processQueue(refreshErr, null);
+      isRefreshing = false;
+      throw refreshErr;
+    }
+  }
+
+  // Handle empty response body
+  let data: any;
+  const contentType = response.headers.get('content-type');
+  const contentLength = response.headers.get('content-length');
+
+  if (contentLength === '0' || !contentType?.includes('application/json')) {
+    data = {};
+  } else {
+    data = await response.json();
+  }
+
+  if (!response.ok) {
+    const errorMessage = extractErrorMessage(data);
+    const error = new Error(errorMessage);
+    (error as any).status = response.status;
+    (error as any).data = data;
+    throw error;
+  }
+
+  if (data && data.success === false) {
+    const errorMessage = extractErrorMessage(data);
+    const error = new Error(errorMessage);
+    (error as any).status = response.status || 400;
+    (error as any).data = data;
+    throw error;
+  }
+
+  return data;
+}
+
 export const apiClient = {
   async get<T>(endpoint: string): Promise<T> {
     try {
@@ -53,34 +179,7 @@ export const apiClient = {
         credentials: 'include',
       });
 
-      // Handle empty response body
-      let data: any;
-      const contentType = response.headers.get('content-type');
-      const contentLength = response.headers.get('content-length');
-
-      if (contentLength === '0' || !contentType?.includes('application/json')) {
-        // Empty response or non-JSON response
-        data = {};
-      } else {
-        data = await response.json();
-      }
-
-      if (!response.ok) {
-        const errorMessage = extractErrorMessage(data);
-        const error = new Error(errorMessage);
-        (error as any).data = data;
-        throw error;
-      }
-
-      // Even if HTTP status is 200, check if API indicates failure
-      if (data && data.success === false) {
-        const errorMessage = extractErrorMessage(data);
-        const error = new Error(errorMessage);
-        (error as any).data = data;
-        throw error;
-      }
-
-      return data;
+      return await handleResponse<T>(response, endpoint, () => apiClient.get<T>(endpoint));
     } catch (error) {
       throw error;
     }
@@ -90,13 +189,11 @@ export const apiClient = {
     try {
       const headers = { ...getHeaders(), ...(config?.headers || {}) };
 
-      // Check if body is FormData (for multipart/form-data)
       const isFormData = body instanceof FormData;
       let fetchBody: string | FormData;
 
       if (isFormData) {
         fetchBody = body;
-        // Remove Content-Type header for FormData - browser will set it with boundary
         delete headers['Content-Type'];
       } else {
         const jsonBody = JSON.stringify(body);
@@ -110,35 +207,7 @@ export const apiClient = {
         credentials: 'include',
       });
 
-      // Handle empty response body
-      let data: any;
-      const contentType = response.headers.get('content-type');
-      const contentLength = response.headers.get('content-length');
-
-      if (contentLength === '0' || !contentType?.includes('application/json')) {
-        // Empty response or non-JSON response
-        data = {};
-      } else {
-        data = await response.json();
-      }
-
-      // Check if response is not ok OR if the API returns success: false
-      if (!response.ok) {
-        const errorMessage = extractErrorMessage(data);
-        const error = new Error(errorMessage);
-        (error as any).data = data;
-        throw error;
-      }
-
-      // Even if HTTP status is 200, check if API indicates failure
-      if (data && data.success === false) {
-        const errorMessage = extractErrorMessage(data);
-        const error = new Error(errorMessage);
-        (error as any).data = data;
-        throw error;
-      }
-
-      return data;
+      return await handleResponse<T>(response, endpoint, () => apiClient.post<T>(endpoint, body, config));
     } catch (error) {
       throw error;
     }
@@ -153,34 +222,7 @@ export const apiClient = {
         credentials: 'include',
       });
 
-      // Handle empty response body
-      let data: any;
-      const contentType = response.headers.get('content-type');
-      const contentLength = response.headers.get('content-length');
-
-      if (contentLength === '0' || !contentType?.includes('application/json')) {
-        // Empty response or non-JSON response
-        data = {};
-      } else {
-        data = await response.json();
-      }
-
-      if (!response.ok) {
-        const errorMessage = extractErrorMessage(data);
-        const error = new Error(errorMessage);
-        (error as any).data = data;
-        throw error;
-      }
-
-      // Even if HTTP status is 200, check if API indicates failure
-      if (data && data.success === false) {
-        const errorMessage = extractErrorMessage(data);
-        const error = new Error(errorMessage);
-        (error as any).data = data;
-        throw error;
-      }
-
-      return data;
+      return await handleResponse<T>(response, endpoint, () => apiClient.put<T>(endpoint, body));
     } catch (error) {
       throw error;
     }
@@ -195,34 +237,7 @@ export const apiClient = {
         credentials: 'include',
       });
 
-      // Handle empty response body
-      let data: any;
-      const contentType = response.headers.get('content-type');
-      const contentLength = response.headers.get('content-length');
-
-      if (contentLength === '0' || !contentType?.includes('application/json')) {
-        // Empty response or non-JSON response
-        data = {};
-      } else {
-        data = await response.json();
-      }
-
-      if (!response.ok) {
-        const errorMessage = extractErrorMessage(data);
-        const error = new Error(errorMessage);
-        (error as any).data = data;
-        throw error;
-      }
-
-      // Even if HTTP status is 200, check if API indicates failure
-      if (data && data.success === false) {
-        const errorMessage = extractErrorMessage(data);
-        const error = new Error(errorMessage);
-        (error as any).data = data;
-        throw error;
-      }
-
-      return data;
+      return await handleResponse<T>(response, endpoint, () => apiClient.patch<T>(endpoint, body));
     } catch (error) {
       throw error;
     }
@@ -247,33 +262,7 @@ export const apiClient = {
         body: formData,
       });
 
-      // Handle empty response body
-      let data: any;
-      const contentType = response.headers.get('content-type');
-      const contentLength = response.headers.get('content-length');
-
-      if (contentLength === '0' || !contentType?.includes('application/json')) {
-        // Empty response or non-JSON response
-        data = {};
-      } else {
-        data = await response.json();
-      }
-
-      if (!response.ok) {
-        const errorMessage = extractErrorMessage(data);
-        const error = new Error(errorMessage);
-        (error as any).data = data;
-        throw error;
-      }
-
-      if (data && data.success === false) {
-        const errorMessage = extractErrorMessage(data);
-        const error = new Error(errorMessage);
-        (error as any).data = data;
-        throw error;
-      }
-
-      return data;
+      return await handleResponse<T>(response, endpoint, () => apiClient.postFormData<T>(endpoint, body));
     } catch (error) {
       throw error;
     }
@@ -294,33 +283,7 @@ export const apiClient = {
         credentials: 'include',
       });
 
-      // Handle empty response body
-      let data: any;
-      const contentType = response.headers.get('content-type');
-      const contentLength = response.headers.get('content-length');
-
-      if (contentLength === '0' || !contentType?.includes('application/json')) {
-        // Empty response or non-JSON response
-        data = {};
-      } else {
-        data = await response.json();
-      }
-
-      if (!response.ok) {
-        const errorMessage = extractErrorMessage(data);
-        const error = new Error(errorMessage);
-        (error as any).data = data;
-        throw error;
-      }
-
-      if (data && data.success === false) {
-        const errorMessage = extractErrorMessage(data);
-        const error = new Error(errorMessage);
-        (error as any).data = data;
-        throw error;
-      }
-
-      return data;
+      return await handleResponse<T>(response, endpoint, () => apiClient.putFormData<T>(endpoint, body));
     } catch (error) {
       throw error;
     }
@@ -333,34 +296,7 @@ export const apiClient = {
         headers: getHeaders(),
       });
 
-      // Handle empty response body
-      let data: any;
-      const contentType = response.headers.get('content-type');
-      const contentLength = response.headers.get('content-length');
-
-      if (contentLength === '0' || !contentType?.includes('application/json')) {
-        // Empty response or non-JSON response
-        data = {};
-      } else {
-        data = await response.json();
-      }
-
-      if (!response.ok) {
-        const errorMessage = extractErrorMessage(data);
-        const error = new Error(errorMessage);
-        (error as any).data = data;
-        throw error;
-      }
-
-      // Even if HTTP status is 200, check if API indicates failure
-      if (data && data.success === false) {
-        const errorMessage = extractErrorMessage(data);
-        const error = new Error(errorMessage);
-        (error as any).data = data;
-        throw error;
-      }
-
-      return data;
+      return await handleResponse<T>(response, endpoint, () => apiClient.delete<T>(endpoint));
     } catch (error) {
       throw error;
     }

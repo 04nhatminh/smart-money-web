@@ -136,7 +136,7 @@ export default function NotificationsPage() {
           ? (t('notifications.expense') || 'Expense')
           : (t('notifications.income') || 'Income');
 
-        const categoryTranslated = t(`categories.${category}`) || category;
+        const categoryTranslated = t.has(`categories.${category}`) ? t(`categories.${category}`) : category;
         const formattedAmount = Number(amount).toLocaleString(locale === 'vi' ? 'vi-VN' : 'en-US');
 
         return t('notifications.notification_done', {
@@ -159,7 +159,7 @@ export default function NotificationsPage() {
       case 'notification.insight.duplicate_charge': {
         const categoryKey = args[0] || '';
         params = {
-          category: t(`categories.${categoryKey}`) || categoryKey,
+          category: (categoryKey && t.has(`categories.${categoryKey}`)) ? t(`categories.${categoryKey}`) : categoryKey,
         };
         break;
       }

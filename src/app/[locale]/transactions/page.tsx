@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { useAuth } from '@/context/AuthContext';
@@ -10,7 +10,7 @@ import { Card, StatCard, TransactionRow, CreateTransactionModal, EditTransaction
 import { useTheme } from '@/context/ThemeContext';
 import { useTransactions, type TransactionFilters } from '@/hooks/useTransactions';
 import { transformAIResultToFormData } from '@/lib/ai-result-transformer';
-import { MdAdd, MdFileDownload } from 'react-icons/md';
+import { MdAdd, MdFileDownload, MdCalendarToday, MdArrowDownward, MdArrowUpward, MdExpandMore, MdAttachMoney, MdCategory, MdOutlineSwapHoriz, MdShortText, MdCheck } from 'react-icons/md';
 import { MdAccountBalanceWallet, MdTrendingUp, MdTrendingDown, MdRefresh, MdSort } from 'react-icons/md';
 import { formatVietnamsePrice } from '@/lib/format';
 
@@ -60,6 +60,19 @@ export default function TransactionsPage() {
 
   const [sortBy, setSortBy] = useState<'date' | 'amount' | 'category' | 'type' | 'description'>('date');
   const [sortOrder, setSortOrder] = useState<'ASC' | 'DESC'>('DESC');
+  const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false);
+  const sortDropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (sortDropdownRef.current && !sortDropdownRef.current.contains(event.target as Node)) {
+        setIsSortDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   const [isMethodModalOpen, setIsMethodModalOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
@@ -218,6 +231,87 @@ export default function TransactionsPage() {
       })
     : displayTransactions;
 
+  // Group transactions by Date
+  const groupedTransactions = useMemo(() => {
+    if (!filteredTransactions || filteredTransactions.length === 0) return [];
+
+    const groups: {
+      dateKey: string;
+      dateLabel: string;
+      items: typeof filteredTransactions;
+      totalIncome: number;
+      totalExpense: number;
+    }[] = [];
+
+    const groupMap = new Map<string, typeof filteredTransactions>();
+
+    filteredTransactions.forEach((tx) => {
+      let dateKey = tx.date;
+      let dateLabel = tx.date;
+
+      // Parse format: dd/mm/yyyy hh:mm or ISO
+      const regex = /^(\d{2})\/(\d{2})\/(\d{4})/;
+      const match = tx.date.match(regex);
+
+      if (match) {
+        const [, day, month, year] = match;
+        dateKey = `${year}-${month}-${day}`;
+
+        const today = new Date();
+        const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+
+        const yesterday = new Date(today);
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yesterdayStr = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, '0')}-${String(yesterday.getDate()).padStart(2, '0')}`;
+
+        if (dateKey === todayStr) {
+          dateLabel = locale === 'vi' ? `Hôm nay (${day}/${month}/${year})` : `Today (${day}/${month}/${year})`;
+        } else if (dateKey === yesterdayStr) {
+          dateLabel = locale === 'vi' ? `Hôm qua (${day}/${month}/${year})` : `Yesterday (${day}/${month}/${year})`;
+        } else {
+          dateLabel = `${day}/${month}/${year}`;
+        }
+      } else {
+        const d = new Date(tx.date);
+        if (!isNaN(d.getTime())) {
+          const year = d.getFullYear();
+          const month = String(d.getMonth() + 1).padStart(2, '0');
+          const day = String(d.getDate()).padStart(2, '0');
+          dateKey = `${year}-${month}-${day}`;
+          dateLabel = d.toLocaleDateString(locale === 'vi' ? 'vi-VN' : 'en-US', {
+            weekday: 'short',
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+          });
+        }
+      }
+
+      if (!groupMap.has(dateKey)) {
+        const newArr: typeof filteredTransactions = [];
+        groupMap.set(dateKey, newArr);
+        groups.push({
+          dateKey,
+          dateLabel,
+          items: newArr,
+          totalIncome: 0,
+          totalExpense: 0,
+        });
+      }
+
+      const group = groups.find((g) => g.dateKey === dateKey)!;
+      group.items.push(tx);
+      const isIncome = tx.type.toLowerCase() === 'income';
+      if (isIncome) {
+        group.totalIncome += Math.abs(tx.amount);
+      } else {
+        group.totalExpense += Math.abs(tx.amount);
+      }
+    });
+
+    return groups;
+  }, [filteredTransactions, locale]);
+
   // Stats are retrieved directly from the backend via totalBalance, totalIncome, totalExpenses state variables
 
   if (isInitializing) {
@@ -297,60 +391,122 @@ export default function TransactionsPage() {
               </Text>
             </div>
 
-            {/* Transaction Filter Component */}
-            <TransactionFilter
-              onFilterChange={setFilterState}
-              initialFilters={filterState}
-            />
-
-            {/* Sort Options */}
-            <div className="mt-4 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
-              <div className="flex items-center gap-2">
-                <MdSort className="w-5 h-5" style={{ color: colors.text.secondary }} />
-                <Text style={{ color: colors.text.secondary }} className="text-sm font-medium">
-                  {t('transactions.sortBy')}
-                </Text>
+            {/* Transaction Search, Filter & Sort Toolbar */}
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 sm:gap-4 p-3.5 sm:p-4 rounded-2xl border" style={{ backgroundColor: `${colors.surface.secondary}40`, borderColor: colors.border.light }}>
+              {/* Search & Filter Component */}
+              <div className="flex-1 min-w-0">
+                <TransactionFilter
+                  onFilterChange={setFilterState}
+                  initialFilters={filterState}
+                />
               </div>
-              <div className="flex gap-2 w-full sm:w-auto">
-                <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value as any)}
+
+              {/* Custom Sort Bar */}
+              <div className="flex items-center gap-2 pt-2 lg:pt-0 border-t lg:border-t-0" style={{ borderTopColor: `${colors.border.light}80` }}>
+                <div className="flex items-center gap-1.5 text-xs font-semibold whitespace-nowrap pl-1" style={{ color: colors.text.secondary }}>
+                  <MdSort className="w-4 h-4" style={{ color: colors.interactive.primary }} />
+                  <span>{t('transactions.sortBy')}:</span>
+                </div>
+
+                {/* Custom Popover Dropdown for Sort Field */}
+                <div className="relative" ref={sortDropdownRef}>
+                  <button
+                    type="button"
+                    onClick={() => setIsSortDropdownOpen(!isSortDropdownOpen)}
+                    className="flex items-center justify-between gap-2 px-3 py-2 text-xs sm:text-sm font-semibold rounded-xl border transition-all cursor-pointer hover:shadow-sm"
+                    style={{
+                      backgroundColor: colors.surface.primary,
+                      color: colors.text.primary,
+                      borderColor: colors.border.light,
+                    }}
+                  >
+                    <div className="flex items-center gap-1.5">
+                      {sortBy === 'date' && <MdCalendarToday className="w-4 h-4 text-primary" />}
+                      {sortBy === 'amount' && <MdAttachMoney className="w-4 h-4 text-emerald-500" />}
+                      {sortBy === 'category' && <MdCategory className="w-4 h-4 text-purple-500" />}
+                      {sortBy === 'type' && <MdOutlineSwapHoriz className="w-4 h-4 text-blue-500" />}
+                      {sortBy === 'description' && <MdShortText className="w-4 h-4 text-amber-500" />}
+                      <span>
+                        {sortBy === 'date' && t('transactions.sortOptions.date')}
+                        {sortBy === 'amount' && t('transactions.sortOptions.amount')}
+                        {sortBy === 'category' && t('transactions.sortOptions.category')}
+                        {sortBy === 'type' && t('transactions.sortOptions.type')}
+                        {sortBy === 'description' && t('transactions.sortOptions.description')}
+                      </span>
+                    </div>
+                    <MdExpandMore
+                      className={`w-4 h-4 transition-transform duration-200 ${isSortDropdownOpen ? 'rotate-180' : ''}`}
+                      style={{ color: colors.text.secondary }}
+                    />
+                  </button>
+
+                  {/* Dropdown Popover Menu */}
+                  {isSortDropdownOpen && (
+                    <div
+                      className="absolute right-0 mt-1.5 w-44 rounded-2xl shadow-xl border p-1.5 z-50 animate-in fade-in zoom-in-95"
+                      style={{
+                        backgroundColor: colors.surface.primary,
+                        borderColor: colors.border.light,
+                      }}
+                    >
+                      {[
+                        { value: 'date', label: t('transactions.sortOptions.date'), icon: <MdCalendarToday className="w-4 h-4 text-primary" /> },
+                        { value: 'amount', label: t('transactions.sortOptions.amount'), icon: <MdAttachMoney className="w-4 h-4 text-emerald-500" /> },
+                        { value: 'category', label: t('transactions.sortOptions.category'), icon: <MdCategory className="w-4 h-4 text-purple-500" /> },
+                        { value: 'type', label: t('transactions.sortOptions.type'), icon: <MdOutlineSwapHoriz className="w-4 h-4 text-blue-500" /> },
+                        { value: 'description', label: t('transactions.sortOptions.description'), icon: <MdShortText className="w-4 h-4 text-amber-500" /> },
+                      ].map((option) => {
+                        const isSelected = sortBy === option.value;
+                        return (
+                          <button
+                            key={option.value}
+                            type="button"
+                            onClick={() => {
+                              setSortBy(option.value as any);
+                              setIsSortDropdownOpen(false);
+                            }}
+                            className="w-full flex items-center justify-between px-3 py-2 text-xs sm:text-sm font-medium rounded-xl transition-colors hover:cursor-pointer"
+                            style={{
+                              backgroundColor: isSelected ? `${colors.interactive.primary}15` : 'transparent',
+                              color: isSelected ? colors.interactive.primary : colors.text.primary,
+                            }}
+                          >
+                            <div className="flex items-center gap-2">
+                              {option.icon}
+                              <span>{option.label}</span>
+                            </div>
+                            {isSelected && <MdCheck className="w-4 h-4" style={{ color: colors.interactive.primary }} />}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+
+                {/* Interactive Sort Order Direction Toggle Button */}
+                <button
+                  type="button"
+                  onClick={() => setSortOrder(sortOrder === 'DESC' ? 'ASC' : 'DESC')}
+                  title={sortOrder === 'DESC' ? t('transactions.sortOptions.descending') : t('transactions.sortOptions.ascending')}
+                  className="flex items-center gap-1.5 px-3 py-2 text-xs sm:text-sm font-semibold rounded-xl border transition-all hover:bg-opacity-80 cursor-pointer whitespace-nowrap"
                   style={{
-                    backgroundColor: colors.background.secondary,
+                    backgroundColor: colors.surface.primary,
                     color: colors.text.primary,
                     borderColor: colors.border.light,
-                    padding: '0.5rem 0.75rem',
-                    borderRadius: '0.375rem',
-                    border: `1px solid ${colors.border.light}`,
-                    cursor: 'pointer',
-                    fontSize: '0.875rem',
                   }}
-                  className="focus:outline-none focus:ring-2 flex-1 sm:flex-initial"
                 >
-                  <option value="date">{t('transactions.sortOptions.date')}</option>
-                  <option value="amount">{t('transactions.sortOptions.amount')}</option>
-                  <option value="category">{t('transactions.sortOptions.category')}</option>
-                  <option value="type">{t('transactions.sortOptions.type')}</option>
-                  <option value="description">{t('transactions.sortOptions.description')}</option>
-                </select>
-                <select
-                  value={sortOrder}
-                  onChange={(e) => setSortOrder(e.target.value as any)}
-                  style={{
-                    backgroundColor: colors.background.secondary,
-                    color: colors.text.primary,
-                    borderColor: colors.border.light,
-                    padding: '0.5rem 0.75rem',
-                    borderRadius: '0.375rem',
-                    border: `1px solid ${colors.border.light}`,
-                    cursor: 'pointer',
-                    fontSize: '0.875rem',
-                  }}
-                  className="focus:outline-none focus:ring-2 flex-1 sm:flex-initial"
-                >
-                  <option value="DESC">{t('transactions.sortOptions.descending')}</option>
-                  <option value="ASC">{t('transactions.sortOptions.ascending')}</option>
-                </select>
+                  {sortOrder === 'DESC' ? (
+                    <>
+                      <MdArrowDownward className="w-4 h-4 text-emerald-500" />
+                      <span className="hidden sm:inline">{t('transactions.sortOptions.descending')}</span>
+                    </>
+                  ) : (
+                    <>
+                      <MdArrowUpward className="w-4 h-4 text-indigo-500" />
+                      <span className="hidden sm:inline">{t('transactions.sortOptions.ascending')}</span>
+                    </>
+                  )}
+                </button>
               </div>
             </div>
           </div>
@@ -371,21 +527,76 @@ export default function TransactionsPage() {
               </div>
             ) : filteredTransactions.length > 0 ? (
               <>
-                {filteredTransactions.map((transaction) => (
-                  <TransactionRow
-                    key={transaction.id}
-                    id={transaction.id}
-                    title={transaction.title}
-                    category={transaction.category}
-                    date={transaction.date}
-                    amount={transaction.amount}
-                    type={transaction.type}
-                    onEdit={handleEditClick}
-                    onDelete={handleDeleteClick}
-                  />
-                ))}
+                {sortBy === 'date' ? (
+                  <div className="space-y-6">
+                    {groupedTransactions.map((group) => (
+                      <div key={group.dateKey} className="space-y-2.5">
+                        {/* Date Group Header - Minimal Line Divider */}
+                        <div className="flex items-center gap-3 pt-3 pb-1">
+                          <div className="flex items-center gap-2 font-bold text-xs sm:text-sm whitespace-nowrap" style={{ color: colors.text.secondary }}>
+                            <MdCalendarToday className="w-4 h-4" style={{ color: colors.interactive.primary }} />
+                            <span>{group.dateLabel}</span>
+                          </div>
+
+                          {/* Horizontal Line Divider */}
+                          <div className="flex-1 h-[1px]" style={{ backgroundColor: `${colors.border.light}` }} />
+
+                          {/* Daily Totals */}
+                          <div className="flex items-center gap-2 sm:gap-3 text-xs font-bold whitespace-nowrap">
+                            {group.totalIncome > 0 && (
+                              <span style={{ color: '#10B981' }}>
+                                +{formatVietnamsePrice(group.totalIncome)}
+                              </span>
+                            )}
+                            {group.totalExpense > 0 && (
+                              <span style={{ color: '#EF4444' }}>
+                                -{formatVietnamsePrice(group.totalExpense)}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Grouped Rows */}
+                        <div className="space-y-2">
+                          {group.items.map((transaction) => (
+                            <TransactionRow
+                              key={transaction.id}
+                              id={transaction.id}
+                              title={transaction.title}
+                              category={transaction.category}
+                              date={transaction.date}
+                              amount={transaction.amount}
+                              type={transaction.type}
+                              showTimeOnly={true}
+                              onEdit={handleEditClick}
+                              onDelete={handleDeleteClick}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  /* Flat list when sorting by Amount, Category, Type, etc. */
+                  <div className="space-y-2.5">
+                    {filteredTransactions.map((transaction) => (
+                      <TransactionRow
+                        key={transaction.id}
+                        id={transaction.id}
+                        title={transaction.title}
+                        category={transaction.category}
+                        date={transaction.date}
+                        amount={transaction.amount}
+                        type={transaction.type}
+                        showTimeOnly={false}
+                        onEdit={handleEditClick}
+                        onDelete={handleDeleteClick}
+                      />
+                    ))}
+                  </div>
+                )}
                 {/* Pagination */}
-                <div className="mt-6 pt-4 border-t" style={{ borderColor: colors.text.secondary }}>
+                <div className="mt-6 pt-4 border-t" style={{ borderColor: colors.border.light }}>
                   <div className="space-y-3">
                     <Pagination
                       currentPage={currentPage}
@@ -393,6 +604,7 @@ export default function TransactionsPage() {
                       onPageChange={(page) => {
                         setCurrentPage(page);
                         loadTransactions(page);
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
                       }}
                     />
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-4 text-center" style={{ color: colors.text.secondary }}>

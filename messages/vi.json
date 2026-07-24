@@ -564,6 +564,7 @@
     "spentLimit": "Đã tiêu / Hạn mức",
     "used": "Đã dùng {percent}%",
     "remainingAmount": "Còn lại {amount}",
+    "overspent": "Vượt quá {amount}",
     "status": {
       "SAFE": "An toàn",
       "CAUTION": "Cẩn trọng",
@@ -617,7 +618,13 @@
     "SHOPPING": "Mua sắm",
     "OTHER": "Khác",
     "FOOD_AND_BEVERAGE": "Ăn uống",
-    "FOOD_BEV": "Ăn uống"
+    "FOOD_BEV": "Ăn uống",
+    "SALARY": "Lương",
+    "BONUS": "Tiền thưởng",
+    "INVESTMENT": "Đầu tư",
+    "GIFT": "Quà tặng",
+    "PROJECT_CONTRIBUTION": "Đóng góp dự án",
+    "PROJECT_REFUND": "Hoàn tiền dự án"
   },
   "financialSetup": {
     "title": "Thiết lập Tài chính",
@@ -697,5 +704,19 @@
     "addressVal": "Khu Công nghệ cao Hòa Lạc, Thạch Thất, Hà Nội",
     "workingHoursLabel": "Thời gian làm việc",
     "workingHoursVal": "Thứ 2 - Thứ 6: 8:00 - 17:30"
+  },
+  "invites": {
+    "title": "Lời mời tham gia nhóm",
+    "subtitle": "Bạn đã nhận được lời mời tham gia nhóm tiết kiệm trên SmartMoney",
+    "processing": "Đang xác thực và tham gia nhóm...",
+    "successTitle": "Tham gia nhóm thành công!",
+    "successMessage": "Bạn đã trở thành thành viên của nhóm. Hãy bắt đầu quản lý tài chính cùng nhau!",
+    "errorTitle": "Không thể tham gia nhóm",
+    "invalidToken": "Liên kết mời không hợp lệ hoặc đã hết hạn.",
+    "goToDashboard": "Về Bảng Điều Khiển",
+    "loginToJoin": "Đang chuyển hướng tới trang đăng nhập...",
+    "mismatchTitle": "Lời mời dành cho tài khoản khác",
+    "mismatchMessage": "Lời mời này được gửi cho một tài khoản khác. Bạn đang đăng nhập với email {email}.",
+    "switchAccount": "Đăng xuất & Đổi tài khoản"
   }
 }

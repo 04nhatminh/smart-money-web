@@ -170,21 +170,31 @@ export const TransactionFilter: React.FC<TransactionFilterProps> = ({
         {/* Search Input */}
         <div className="flex-1 relative">
           <div
-            className="flex items-center px-4 py-2.5 rounded-lg border"
+            className="flex items-center px-3.5 py-2 rounded-xl border transition-all focus-within:ring-2 focus-within:ring-primary/20"
             style={{
-              backgroundColor: colors.surface.secondary,
+              backgroundColor: colors.surface.primary,
               borderColor: colors.border.light,
             }}
           >
-            <MdSearch className="w-5 h-5 mr-2" style={{ color: colors.text.secondary }} />
+            <MdSearch className="w-4 h-4 sm:w-5 sm:h-5 mr-2 flex-shrink-0" style={{ color: colors.text.secondary }} />
             <input
               type="text"
               placeholder={t('transactions.searchPlaceholder')}
               value={search}
               onChange={(e) => handleSearchChange(e.target.value)}
-              className="flex-1 bg-transparent outline-none text-sm"
+              className="flex-1 bg-transparent outline-none text-xs sm:text-sm font-medium"
               style={{ color: colors.text.primary }}
             />
+            {search && (
+              <button
+                type="button"
+                onClick={() => handleSearchChange('')}
+                className="p-1 rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+                style={{ color: colors.text.secondary }}
+              >
+                <MdClose className="w-3.5 h-3.5" />
+              </button>
+            )}
           </div>
         </div>
 
@@ -202,20 +212,16 @@ export const TransactionFilter: React.FC<TransactionFilterProps> = ({
             setEndTime(end.time);
             setIsModalOpen(true);
           }}
-          className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg font-medium transition-all whitespace-nowrap hover:opacity-90 hover:cursor-pointer w-full sm:w-auto"
+          className="flex items-center justify-center gap-2 px-4 py-2 rounded-xl font-semibold text-xs sm:text-sm transition-all whitespace-nowrap hover:shadow-sm hover:cursor-pointer w-full sm:w-auto"
           style={{
             backgroundColor: colors.interactive.primary,
             color: 'white',
-            border: `1px solid ${colors.interactive.primary}`,
           }}
         >
-          <MdFilterList className="w-5 h-5" />
-          {t('transactions.filterBtn')}
+          <MdFilterList className="w-4 h-4 sm:w-5 sm:h-5" />
+          <span>{t('transactions.filterBtn')}</span>
           {hasActiveFilters && (
-            <span className="ml-1 px-2 py-0.5 text-xs rounded-full font-semibold" style={{
-              backgroundColor: 'rgba(0, 0, 0, 0.3)',
-              color: 'white',
-            }}>
+            <span className="ml-0.5 px-2 py-0.5 text-[10px] sm:text-xs rounded-full font-bold bg-white/20 text-white">
               {Object.values(modalFilters).filter((v) => v).length}
             </span>
           )}

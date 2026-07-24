@@ -6,7 +6,7 @@ export const API_ENDPOINTS = {
     login: '/api/v1/auth/login',
     logout: '/api/v1/auth/logout',
     register: '/api/v1/auth/register',
-    refresh: '/api/v1/auth/refresh',
+    refresh: '/api/v1/auth/refresh-token',
     loginGoogle: '/api/v1/auth/login/google',
     loginFacebook: '/api/v1/auth/login/facebook',
     verifyEmail: '/api/v1/auth/verify-email',

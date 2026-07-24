@@ -85,7 +85,7 @@ export const PieTooltipCustom = ({ active, payload }: any) => {
         ? '0 4px 20px rgba(54, 41, 183, 0.15)'
         : '0 4px 20px rgba(0, 0, 0, 0.5)',
     }}>
-      <p style={{ color: colors.text.primary, fontWeight: 700, fontSize: 13 }}>{t(`categories.${d.category}`)}</p>
+      <p style={{ color: colors.text.primary, fontWeight: 700, fontSize: 13 }}>{t.has(`categories.${d.category}`) ? t(`categories.${d.category}`) : d.category}</p>
       <p style={{ color: colors.interactive.primary, fontSize: 12, fontWeight: 600 }}>{(d.percentage).toFixed(1)}%</p>
       <p style={{ color: colors.text.secondary, fontSize: 12 }}>{d.count} {t('analysis.table.transactions').toLowerCase()}</p>
     </div>
@@ -694,10 +694,10 @@ export default function AnalysisPage() {
                               >
                                 <div className="min-w-0 pr-2">
                                   <div className="font-semibold truncate" style={{ color: colors.text.primary }}>
-                                    {tx.description || t(`categories.${tx.category}`)}
+                                    {tx.description || (t.has(`categories.${tx.category}`) ? t(`categories.${tx.category}`) : tx.category)}
                                   </div>
                                   <div className="text-[10px]" style={{ color: colors.text.secondary }}>
-                                    {t(`categories.${tx.category}`)}
+                                    {t.has(`categories.${tx.category}`) ? t(`categories.${tx.category}`) : tx.category}
                                   </div>
                                 </div>
                                 <span className={`font-bold shrink-0 ${tx.type === 'INCOME' ? 'text-emerald-500' : 'text-rose-500'}`}>
@@ -787,7 +787,7 @@ export default function AnalysisPage() {
                               style={{ backgroundColor: CHART_COLORS[index % CHART_COLORS.length] }}
                             />
                             <Text variant="caption" style={{ fontSize: 11, color: colors.text.secondary }} className="truncate">
-                              {t(`categories.${entry.category}`)} — <strong>{(entry.percentage).toFixed(0)}%</strong>
+                              {(t.has(`categories.${entry.category}`) ? t(`categories.${entry.category}`) : entry.category)} — <strong>{(entry.percentage).toFixed(0)}%</strong>
                             </Text>
                           </div>
                         ))}
@@ -868,7 +868,7 @@ export default function AnalysisPage() {
                                   className="w-3 h-3 rounded-full"
                                   style={{ backgroundColor: CHART_COLORS[index % CHART_COLORS.length] }}
                                 />
-                                <Text style={{ fontWeight: 600, color: colors.text.primary }}>{t(`categories.${cat.category}`)}</Text>
+                                <Text style={{ fontWeight: 600, color: colors.text.primary }}>{t.has(`categories.${cat.category}`) ? t(`categories.${cat.category}`) : cat.category}</Text>
                               </div>
                             </td>
                             <td className="px-6 py-4">

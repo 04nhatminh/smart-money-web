@@ -12,7 +12,8 @@ import { useTransactions } from '@/hooks/useTransactions';
 import { useAnalytics } from '@/hooks/useAnalytics';
 import { useBudgets } from '@/hooks/useBudgets';
 import { useProjects } from '@/hooks/useProjects';
-import { getCookie } from '@/lib/auth';
+import { useUserFinancial } from '@/hooks/useUserFinancial';
+import { getCookie, setCookie } from '@/lib/auth';
 
 const PieTooltipCustom = ({ active, payload }: any) => {
   const t = useTranslations();
@@ -31,7 +32,7 @@ const PieTooltipCustom = ({ active, payload }: any) => {
         ? '0 4px 20px rgba(54, 41, 183, 0.15)'
         : '0 4px 20px rgba(0, 0, 0, 0.5)',
     }}>
-      <p style={{ color: colors.text.primary, fontWeight: 700, fontSize: 13 }}>{t(`categories.${d.category}`)}</p>
+      <p style={{ color: colors.text.primary, fontWeight: 700, fontSize: 13 }}>{t.has(`categories.${d.category}`) ? t(`categories.${d.category}`) : d.category}</p>
       <p style={{ color: colors.interactive.primary, fontSize: 12, fontWeight: 600 }}>{(d.percentage).toFixed(1)}%</p>
       <p style={{ color: colors.text.secondary, fontSize: 12 }}>{d.count || 0} {t('analysis.table.transactions').toLowerCase()}</p>
     </div>
@@ -55,7 +56,7 @@ import {
 const CHART_COLORS = ['#5044d5', '#10B981', '#EF4444', '#F59E0B', '#8B5CF6', '#EC4899', '#06B6D4'];
 
 export default function DashboardPage() {
-  const { user, isAuthenticated, isInitializing } = useAuth();
+  const { user, isAuthenticated, isInitializing, isLoading: authIsLoading } = useAuth();
   const router = useRouter();
   const locale = useLocale();
   const t = useTranslations();
@@ -137,17 +138,37 @@ export default function DashboardPage() {
     }
   }, [isAuthenticated]);
 
+  const { getUserFinancial } = useUserFinancial();
+
   // Check onboarding status
   useEffect(() => {
-    if (isAuthenticated && user) {
-      const financialCookie = getCookie('financial_setup_completed');
-      const financialDone = user.financialSetupCompleted || financialCookie === 'true';
+    let isMounted = true;
+    const checkOnboarding = async () => {
+      if (!isInitializing && !authIsLoading && isAuthenticated && user) {
+        const financialCookie = getCookie('financial_setup_completed');
+        const financialDone = user.financialSetupCompleted || financialCookie === 'true';
 
-      if (!financialDone) {
-        setShowFinancialPrompt(true);
+        if (financialDone) {
+          return;
+        }
+
+        // Verify with financial API directly to handle case where user model in auth state is missing the flag
+        const res = await getUserFinancial();
+        if (isMounted) {
+          if (res.success && res.data) {
+            setCookie('financial_setup_completed', 'true');
+          } else {
+            setShowFinancialPrompt(true);
+          }
+        }
       }
-    }
-  }, [isAuthenticated, user]);
+    };
+
+    checkOnboarding();
+    return () => {
+      isMounted = false;
+    };
+  }, [isInitializing, authIsLoading, isAuthenticated, user, getUserFinancial]);
 
   // Derived calculations for Financial Summary Card
   const { totalIncome, totalExpenses, netSavings } = useMemo(() => {
@@ -273,7 +294,7 @@ export default function DashboardPage() {
                           <div className="flex items-center gap-2 min-w-0">
                             <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: CHART_COLORS[idx % CHART_COLORS.length] }} />
                             <span className="truncate font-medium" style={{ color: colors.text.primary }}>
-                              {t(`categories.${item.category}`)}
+                              {t.has(`categories.${item.category}`) ? t(`categories.${item.category}`) : item.category}
                             </span>
                           </div>
                           <span className="font-semibold" style={{ color: colors.text.secondary }}>
@@ -286,8 +307,8 @@ export default function DashboardPage() {
                 )}
               </div>
 
-              {/* Mini Donut Chart */}
-              <div className="h-48 md:h-56 w-full flex items-center justify-center">
+              {/* Donut Chart matching Analysis Page layout */}
+              <div className="h-64 sm:h-72 w-full flex items-center justify-center">
                 {sortedCategoryProportions && sortedCategoryProportions.length > 0 ? (
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
@@ -295,10 +316,10 @@ export default function DashboardPage() {
                         data={sortedCategoryProportions}
                         cx="50%"
                         cy="50%"
-                        innerRadius={60}
-                        outerRadius={100}
+                        innerRadius={55}
+                        outerRadius={90}
                         dataKey="percentage"
-                        paddingAngle={1}
+                        paddingAngle={1.5}
                       >
                         {sortedCategoryProportions.map((entry: any, index: number) => (
                           <Cell key={entry.category} fill={CHART_COLORS[index % CHART_COLORS.length]} />
