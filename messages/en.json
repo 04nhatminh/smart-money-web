@@ -720,6 +720,7 @@
     "loginToJoin": "Redirecting to login page...",
     "mismatchTitle": "Invitation for another account",
     "mismatchMessage": "This invitation was sent to a different account. You are currently logged in as {email}.",
-    "switchAccount": "Log Out & Switch Account"
+    "switchAccount": "Log Out & Switch Account",
+    "openInMobileApp": "Open in SmartMoney Mobile App"
   }
 }
