@@ -3,7 +3,7 @@
 import React, { useEffect, useState, useCallback, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
-import { MdGroup, MdCheckCircle, MdError, MdArrowForward } from 'react-icons/md';
+import { MdGroup, MdCheckCircle, MdError, MdArrowForward, MdLogout } from 'react-icons/md';
 import { CenteredLayout } from '@/components/templates';
 import { Heading, Text, Button } from '@/components/atoms';
 import { useAuth } from '@/context/AuthContext';
@@ -16,7 +16,7 @@ function GroupInviteContent() {
   const locale = useLocale();
   const t = useTranslations('invites');
   const tCommon = useTranslations('common');
-  const { isAuthenticated, isInitializing } = useAuth();
+  const { user, logout, isAuthenticated, isInitializing } = useAuth();
   const { acceptGroupInvite } = useGroups();
   const { colors, colorScheme } = useTheme();
 
@@ -58,6 +58,16 @@ function GroupInviteContent() {
       }
     }
   }, [isAuthenticated, isInitializing, status, token, handleAcceptInvite, t]);
+
+  const handleSwitchAccount = () => {
+    logout();
+    const currentUrl = `/${locale}/invites/group${token ? `?token=${token}` : ''}`;
+    const loginUrl = `/${locale}/login?redirect=${encodeURIComponent(currentUrl)}`;
+    router.push(loginUrl);
+  };
+
+  const isUserMismatch = errorMessage?.toLowerCase().includes('not issued to you') ||
+    errorMessage?.toLowerCase().includes('mismatch');
 
   if (isInitializing || !isAuthenticated) {
     return (
@@ -143,26 +153,57 @@ function GroupInviteContent() {
         {/* Error State */}
         {status === 'error' && (
           <div className="py-4 space-y-6 animate-fadeIn">
-            <div className="flex justify-center text-red-500">
+            <div className="flex justify-center text-amber-500">
               <MdError size={56} />
             </div>
-            <div>
-              <Heading level={3} className="text-red-600 dark:text-red-400 mb-2">
-                {t('errorTitle')}
-              </Heading>
-              <Text className="text-sm" style={{ color: colors.text?.secondary }}>
-                {errorMessage || t('invalidToken')}
-              </Text>
-            </div>
 
-            <Button
-              variant="secondary"
-              className="w-full py-3 text-base font-semibold flex items-center justify-center gap-2"
-              onClick={() => router.push(`/${locale}/dashboard`)}
-            >
-              <span>{t('goToDashboard')}</span>
-              <MdArrowForward size={20} />
-            </Button>
+            {isUserMismatch ? (
+              <div className="space-y-4">
+                <Heading level={3} className="text-amber-600 dark:text-amber-400 mb-2">
+                  {t('mismatchTitle')}
+                </Heading>
+                <Text className="text-sm" style={{ color: colors.text?.secondary }}>
+                  {t('mismatchMessage', { email: user?.email || user?.username || '' })}
+                </Text>
+
+                <div className="pt-2 space-y-3">
+                  <Button
+                    variant="primary"
+                    className="w-full py-3 text-base font-semibold flex items-center justify-center gap-2"
+                    onClick={handleSwitchAccount}
+                  >
+                    <MdLogout size={20} />
+                    <span>{t('switchAccount')}</span>
+                  </Button>
+
+                  <Button
+                    variant="secondary"
+                    className="w-full py-3 text-base font-semibold flex items-center justify-center gap-2"
+                    onClick={() => router.push(`/${locale}/dashboard`)}
+                  >
+                    <span>{t('goToDashboard')}</span>
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <Heading level={3} className="text-red-600 dark:text-red-400 mb-2">
+                  {t('errorTitle')}
+                </Heading>
+                <Text className="text-sm" style={{ color: colors.text?.secondary }}>
+                  {errorMessage || t('invalidToken')}
+                </Text>
+
+                <Button
+                  variant="secondary"
+                  className="w-full py-3 text-base font-semibold flex items-center justify-center gap-2"
+                  onClick={() => router.push(`/${locale}/dashboard`)}
+                >
+                  <span>{t('goToDashboard')}</span>
+                  <MdArrowForward size={20} />
+                </Button>
+              </div>
+            )}
           </div>
         )}
       </div>

@@ -714,6 +714,9 @@
     "errorTitle": "Không thể tham gia nhóm",
     "invalidToken": "Liên kết mời không hợp lệ hoặc đã hết hạn.",
     "goToDashboard": "Về Bảng Điều Khiển",
-    "loginToJoin": "Đang chuyển hướng tới trang đăng nhập..."
+    "loginToJoin": "Đang chuyển hướng tới trang đăng nhập...",
+    "mismatchTitle": "Lời mời dành cho tài khoản khác",
+    "mismatchMessage": "Lời mời này được gửi cho một tài khoản khác. Bạn đang đăng nhập với email {email}.",
+    "switchAccount": "Đăng xuất & Đổi tài khoản"
   }
 }
