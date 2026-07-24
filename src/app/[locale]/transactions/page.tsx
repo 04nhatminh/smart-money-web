@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { useAuth } from '@/context/AuthContext';
 import { SidebarLayout } from '@/components/templates';
-import { Heading, Text, Button } from '@/components/atoms';
+import { Heading, Text, Button, Skeleton } from '@/components/atoms';
 import { Card, StatCard, TransactionRow, CreateTransactionModal, EditTransactionModal, TransactionMethodModal, ImageBillUploadModal, VoiceRecordModal, TransactionFilter, Pagination, ExcelImportModal, ExcelExportModal, type TransactionFilterState } from '@/components/molecules/common';
 import { useTheme } from '@/context/ThemeContext';
 import { useTransactions, type TransactionFilters } from '@/hooks/useTransactions';
@@ -514,16 +514,23 @@ export default function TransactionsPage() {
           {/* Transaction List */}
           <div className="space-y-3 mt-6">
             {isLoading ? (
-              <div className="flex items-center justify-center py-12">
-                <div className="flex flex-col items-center gap-3">
-                  <MdRefresh 
-                    className="w-8 h-8 animate-spin" 
-                    style={{ color: colors.interactive.primary }}
-                  />
-                  <Text style={{ color: colors.text.secondary }} className="text-sm">
-                    {t('transactions.loadingTransactions')}
-                  </Text>
-                </div>
+              <div className="space-y-3">
+                {[1, 2, 3, 4, 5, 6].map((i) => (
+                  <div
+                    key={i}
+                    className="p-4 rounded-xl border flex items-center justify-between gap-4"
+                    style={{ borderColor: colors.border.light, backgroundColor: colors.surface.primary }}
+                  >
+                    <div className="flex items-center gap-3">
+                      <Skeleton variant="circular" width={40} height={40} />
+                      <div className="space-y-1.5">
+                        <Skeleton height={18} width={140} />
+                        <Skeleton height={12} width={90} />
+                      </div>
+                    </div>
+                    <Skeleton height={20} width={80} />
+                  </div>
+                ))}
               </div>
             ) : filteredTransactions.length > 0 ? (
               <>

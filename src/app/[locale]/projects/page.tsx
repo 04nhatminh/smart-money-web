@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { useAuth } from '@/context/AuthContext';
 import { SidebarLayout } from '@/components/templates';
-import { Heading, Text, Button, Alert } from '@/components/atoms';
+import { Heading, Text, Button, Alert, Skeleton } from '@/components/atoms';
 import {
   ProjectCard,
   CreateProjectModal,
@@ -424,7 +424,26 @@ export default function ProjectsPage() {
             </div>
 
             {/* Projects Grid */}
-            {filteredProjects.length === 0 ? (
+            {projectsLoading ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {[1, 2, 3, 4, 5, 6].map((i) => (
+                  <div key={i} className="p-5 rounded-2xl border bg-white space-y-3 shadow-xs">
+                    <div className="flex justify-between items-center">
+                      <Skeleton height={22} width="60%" />
+                      <Skeleton height={20} width="25%" variant="circular" />
+                    </div>
+                    <Skeleton height={14} width="40%" />
+                    <div className="pt-2">
+                      <Skeleton height={8} width="100%" />
+                    </div>
+                    <div className="flex justify-between pt-2">
+                      <Skeleton height={18} width="35%" />
+                      <Skeleton height={18} width="35%" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : filteredProjects.length === 0 ? (
               <div
                 className="rounded-lg p-12 text-center border bg-white"
                 style={{
@@ -470,7 +489,29 @@ export default function ProjectsPage() {
         {/* Groups Tab */}
         {activeTab === 'groups' && (
           <div className="space-y-6">
-            {groups.length === 0 ? (
+            {groupsLoading ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {[1, 2, 3].map((i) => (
+                  <div
+                    key={i}
+                    className="border rounded-2xl p-5 bg-white shadow-sm flex flex-col justify-between h-[180px]"
+                    style={{ borderColor: colors.border.light }}
+                  >
+                    <div>
+                      <div className="flex justify-between items-start gap-2">
+                        <Skeleton height={22} width="65%" />
+                        <Skeleton height={20} width="25%" />
+                      </div>
+                      <Skeleton height={14} width="85%" className="mt-3" />
+                    </div>
+                    <div className="flex items-center justify-between border-t pt-3 mt-4" style={{ borderColor: colors.border.light }}>
+                      <Skeleton height={18} width="30%" />
+                      <Skeleton height={18} width="20%" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : groups.length === 0 ? (
               <div
                 className="rounded-lg p-12 text-center border bg-white"
                 style={{ borderColor: colors.border.light }}

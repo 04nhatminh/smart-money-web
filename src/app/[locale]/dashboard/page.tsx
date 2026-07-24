@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { useAuth } from '@/context/AuthContext';
 import { SidebarLayout } from '@/components/templates';
-import { Heading, Text, Button } from '@/components/atoms';
+import { Heading, Text, Button, Skeleton } from '@/components/atoms';
 import { Card, StatCard, UserFinancialModal, GenerateBudgetModal, CreateProjectModal, CreateGroupModal } from '@/components/molecules/common';
 import { useTheme } from '@/context/ThemeContext';
 import { useTransactions } from '@/hooks/useTransactions';
@@ -272,22 +272,34 @@ export default function DashboardPage() {
                   <Text className="text-xs font-semibold uppercase tracking-wider" style={{ color: colors.text.secondary }}>
                     {t('dashboard.netSpendingSavings')}
                   </Text>
-                  <Text className="text-3xl font-black mt-1" style={{ color: netSavings >= 0 ? '#10B981' : '#EF4444' }}>
-                    {formatVietnamsePrice(netSavings)}
-                  </Text>
+                  {isLoading ? (
+                    <Skeleton height={36} width="65%" className="mt-1" />
+                  ) : (
+                    <Text className="text-3xl font-black mt-1" style={{ color: netSavings >= 0 ? '#10B981' : '#EF4444' }}>
+                      {formatVietnamsePrice(netSavings)}
+                    </Text>
+                  )}
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <Text className="text-xs font-medium" style={{ color: colors.text.secondary }}>{t('dashboard.income')}</Text>
-                    <Text className="text-base font-bold mt-0.5" style={{ color: '#10B981' }}>
-                      {formatVietnamsePrice(totalIncome)}
-                    </Text>
+                    {isLoading ? (
+                      <Skeleton height={20} width="80%" className="mt-1" />
+                    ) : (
+                      <Text className="text-base font-bold mt-0.5" style={{ color: '#10B981' }}>
+                        {formatVietnamsePrice(totalIncome)}
+                      </Text>
+                    )}
                   </div>
                   <div>
                     <Text className="text-xs font-medium" style={{ color: colors.text.secondary }}>{t('dashboard.expense')}</Text>
-                    <Text className="text-base font-bold mt-0.5" style={{ color: '#EF4444' }}>
-                      {formatVietnamsePrice(totalExpenses)}
-                    </Text>
+                    {isLoading ? (
+                      <Skeleton height={20} width="80%" className="mt-1" />
+                    ) : (
+                      <Text className="text-base font-bold mt-0.5" style={{ color: '#EF4444' }}>
+                        {formatVietnamsePrice(totalExpenses)}
+                      </Text>
+                    )}
                   </div>
                 </div>
 
@@ -362,7 +374,19 @@ export default function DashboardPage() {
             </div>
 
             <div className="space-y-3">
-              {transactions.length > 0 ? (
+              {isLoading ? (
+                <div className="space-y-2.5">
+                  {[1, 2, 3, 4].map((i) => (
+                    <div key={i} className="flex items-center justify-between p-2 rounded-lg" style={{ backgroundColor: `${colors.background.secondary}60` }}>
+                      <div className="space-y-1 flex-1 pr-4">
+                        <Skeleton height={16} width="75%" />
+                        <Skeleton height={12} width="45%" className="mt-1" />
+                      </div>
+                      <Skeleton height={18} width="25%" />
+                    </div>
+                  ))}
+                </div>
+              ) : transactions.length > 0 ? (
                 transactions.map((tx: any) => (
                   <div key={tx.id} className="flex items-center justify-between p-2 rounded-lg transition-colors" style={{ backgroundColor: `${colors.background.secondary}60` }}>
                     <div className="min-w-0 flex-1 pr-2">
@@ -403,7 +427,19 @@ export default function DashboardPage() {
             </div>
 
             <div className="space-y-4">
-              {budgets.length > 0 ? (
+              {isLoading ? (
+                <div className="space-y-4">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="space-y-2">
+                      <div className="flex justify-between">
+                        <Skeleton height={14} width="40%" />
+                        <Skeleton height={14} width="30%" />
+                      </div>
+                      <Skeleton height={8} width="100%" />
+                    </div>
+                  ))}
+                </div>
+              ) : budgets.length > 0 ? (
                 budgets.slice(0, 3).map((budget: any) => {
                   const percent = Math.min((budget.spent / budget.amountLimit) * 100, 100);
                   const isOver = budget.spent > budget.amountLimit;
@@ -476,7 +512,19 @@ export default function DashboardPage() {
             </div>
 
             <div className="space-y-4">
-              {projects.length > 0 ? (
+              {isLoading ? (
+                <div className="space-y-4">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="space-y-2">
+                      <div className="flex justify-between">
+                        <Skeleton height={14} width="45%" />
+                        <Skeleton height={14} width="25%" />
+                      </div>
+                      <Skeleton height={8} width="100%" />
+                    </div>
+                  ))}
+                </div>
+              ) : projects.length > 0 ? (
                 projects.slice(0, 3).map((project: any) => {
                   const currentSaved = project.currentAmount || 0;
                   const target = project.targetAmount || 1;
