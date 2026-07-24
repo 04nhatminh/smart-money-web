@@ -16,7 +16,6 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({
   navItems = [],
 }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
@@ -46,13 +45,12 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({
       <div className="flex flex-col min-h-screen">
         <Header
           navItems={navItems}
-          showSidebarToggle={true}
-          onToggleSidebar={() => setIsMobileOpen((prev) => !prev)}
+          showSidebarToggle={false}
         />
         <div className="flex flex-1 pt-6 sm:pt-10">
           <Sidebar
-            isOpen={isMobileOpen}
-            onClose={() => setIsMobileOpen(false)}
+            isOpen={false}
+            onClose={() => {}}
             isCollapsed={isCollapsed}
             onToggleCollapse={toggleCollapse}
             isMounted={isMounted}
@@ -60,9 +58,9 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({
           <div
             className={`flex-1 flex flex-col ${transitionClass} ${
               isCollapsed ? 'lg:ml-20' : 'lg:ml-64'
-            } ml-0`}
+            } ml-0 min-w-0 max-w-full overflow-x-hidden`}
           >
-            <main className="flex-1 px-4 sm:px-6 lg:px-8 py-8 pb-24 lg:pb-8">
+            <main className="flex-1 px-4 sm:px-6 lg:px-8 py-8 pb-24 lg:pb-8 min-w-0 max-w-full">
               {children}
             </main>
             <Footer />

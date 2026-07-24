@@ -43,7 +43,7 @@ const LanguageToggleContent: React.FC = () => {
         size="sm"
         onClick={toggleLanguage}
         disabled={isLoading}
-        className="w-[130px]"
+        className="w-auto px-2 sm:px-3 sm:w-[130px]"
       >
         {isLoading ? '...' : (locale === 'en' ? '🇺🇸 English' : '🇻🇳 Tiếng Việt')}
       </Button>
