@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { useAuth } from '@/context/AuthContext';
 import { SidebarLayout } from '@/components/templates';
-import { Heading, Text, Button } from '@/components/atoms';
+import { Heading, Text, Button, Skeleton } from '@/components/atoms';
 import { LogoutButton } from '@/components/molecules/auth';
 import { Card, UserFinancialModal } from '@/components/molecules/common';
 import { useTheme } from '@/context/ThemeContext';
@@ -186,7 +186,16 @@ export default function ProfilePage() {
             </Button>
           </div>
 
-          {userFinancial ? (
+          {isLoadingFinancial ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="space-y-2">
+                  <Skeleton height={14} width="40%" />
+                  <Skeleton height={24} width="60%" />
+                </div>
+              ))}
+            </div>
+          ) : userFinancial ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <p className="text-sm font-medium mb-2" style={{ color: colors.text.secondary }}>
