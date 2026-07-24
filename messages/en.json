@@ -707,5 +707,16 @@
     "addressVal": "Hoa Lac High Tech Park, Thach That, Hanoi",
     "workingHoursLabel": "Working Hours",
     "workingHoursVal": "Monday - Friday: 8:00 AM - 5:30 PM"
+  },
+  "invites": {
+    "title": "Group Invitation",
+    "subtitle": "You've been invited to join a savings group on SmartMoney",
+    "processing": "Verifying and joining group...",
+    "successTitle": "Successfully Joined Group!",
+    "successMessage": "You are now a member of the group. Start managing finances together!",
+    "errorTitle": "Failed to Join Group",
+    "invalidToken": "The invitation link is invalid or has expired.",
+    "goToDashboard": "Go to Dashboard",
+    "loginToJoin": "Redirecting to login page..."
   }
 }
