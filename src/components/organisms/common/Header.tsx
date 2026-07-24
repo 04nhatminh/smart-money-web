@@ -13,6 +13,7 @@ import { apiClient } from '@/lib/api-client';
 import { HealthCheckResponse } from '@/types/api';
 import { API_ENDPOINTS } from '@/constants/api';
 import { NavItem } from './Sidebar';
+import { MdLightbulb } from 'react-icons/md';
 
 interface HeaderProps {
   navItems?: Partial<NavItem>[];
@@ -34,6 +35,7 @@ export const Header: React.FC<HeaderProps> = ({
   const { token, isInitializing, user, logout } = useAuth();
   const [openUserMenu, setOpenUserMenu] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [pendingSuggestionsCount, setPendingSuggestionsCount] = useState(0);
 
   const fetchUnreadCount = async () => {
     if (!token || !user) {
@@ -55,11 +57,30 @@ export const Header: React.FC<HeaderProps> = ({
     }
   };
 
+  const fetchPendingSuggestionsCount = async () => {
+    if (!token || !user) {
+      setPendingSuggestionsCount(0);
+      return;
+    }
+    try {
+      const res = await apiClient.get<any>(`${API_ENDPOINTS.suggestions.list}?status=PENDING`);
+      if (res && res.success && Array.isArray(res.data)) {
+        setPendingSuggestionsCount(res.data.length);
+      } else if (res && Array.isArray(res.data?.data)) {
+        setPendingSuggestionsCount(res.data.data.length);
+      }
+    } catch (err) {
+      // silent
+    }
+  };
+
   useEffect(() => {
     fetchUnreadCount();
+    fetchPendingSuggestionsCount();
 
     const handleNotificationsChanged = () => {
       fetchUnreadCount();
+      fetchPendingSuggestionsCount();
     };
 
     window.addEventListener('notifications-changed', handleNotificationsChanged);
@@ -177,6 +198,29 @@ export const Header: React.FC<HeaderProps> = ({
 
             {showUserActions && (
               <div className="flex gap-2 sm:gap-4 items-center">
+                {/* AI Suggestions Shortcut Button */}
+                <button
+                  onClick={() => router.push(`/${locale}/suggestions`)}
+                  className="p-2 rounded-lg transition-colors duration-200 flex items-center justify-center relative hover:cursor-pointer"
+                  style={{
+                    backgroundColor: `${colors.interactive.primary}10`,
+                    color: colors.interactive.primary,
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = `${colors.interactive.primary}20`}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = `${colors.interactive.primary}10`}
+                  title={t('suggestions.title') || 'Gợi ý AI'}
+                >
+                  <MdLightbulb className="w-6 h-6" />
+                  {pendingSuggestionsCount > 0 && (
+                    <span
+                      className="absolute -top-1 -right-1 min-w-[20px] h-5 px-1.5 rounded-full text-[10px] font-bold flex items-center justify-center text-white"
+                      style={{ backgroundColor: '#F59E0B' }}
+                    >
+                      {pendingSuggestionsCount > 99 ? '99+' : pendingSuggestionsCount}
+                    </span>
+                  )}
+                </button>
+
                 {/* Notification Bell */}
                 <button
                   onClick={handleNotificationClick}

@@ -4,5 +4,7 @@ export { Heading } from './Heading';
 export { Input } from './Input';
 export { ScrollReveal } from './ScrollReveal';
 export { Alert } from './Alert';
+export { Skeleton } from './Skeleton';
+
 
 

@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { useAuth } from '@/context/AuthContext';
 import { SidebarLayout } from '@/components/templates';
-import { Heading, Text, Button, Alert } from '@/components/atoms';
+import { Heading, Text, Button, Alert, Skeleton } from '@/components/atoms';
 import { BudgetProgressCard, DatePeriodSelector, GenerateBudgetModal } from '@/components/molecules/common';
 import { useTheme } from '@/context/ThemeContext';
 import { useBudgets } from '@/hooks/useBudgets';
@@ -146,9 +146,13 @@ export default function BudgetsPage() {
             <Text className="text-sm font-medium" style={{ color: colors.text.secondary }}>
               {t('budgets.totalBudget')}
             </Text>
-            <Text className="text-2xl font-bold mt-2" style={{ color: colors.text.primary }}>
-              {formatVietnamsePrice(totalLimit)}
-            </Text>
+            {isLoading ? (
+              <Skeleton height={28} width="60%" className="mt-2" />
+            ) : (
+              <Text className="text-2xl font-bold mt-2" style={{ color: colors.text.primary }}>
+                {formatVietnamsePrice(totalLimit)}
+              </Text>
+            )}
           </div>
 
           <div
@@ -161,9 +165,13 @@ export default function BudgetsPage() {
             <Text className="text-sm font-medium" style={{ color: colors.text.secondary }}>
               {t('budgets.totalSpent')}
             </Text>
-            <Text className="text-2xl font-bold mt-2" style={{ color: '#EF4444' }}>
-              {formatVietnamsePrice(totalSpent)}
-            </Text>
+            {isLoading ? (
+              <Skeleton height={28} width="60%" className="mt-2" />
+            ) : (
+              <Text className="text-2xl font-bold mt-2" style={{ color: '#EF4444' }}>
+                {formatVietnamsePrice(totalSpent)}
+              </Text>
+            )}
           </div>
 
           <div
@@ -176,16 +184,36 @@ export default function BudgetsPage() {
             <Text className="text-sm font-medium" style={{ color: colors.text.secondary }}>
               {t('budgets.remaining')}
             </Text>
-            <Text className="text-2xl font-bold mt-2" style={{ color: '#10B981' }}>
-              {formatVietnamsePrice(totalRemaining)}
-            </Text>
+            {isLoading ? (
+              <Skeleton height={28} width="60%" className="mt-2" />
+            ) : (
+              <Text className="text-2xl font-bold mt-2" style={{ color: '#10B981' }}>
+                {formatVietnamsePrice(totalRemaining)}
+              </Text>
+            )}
           </div>
         </div>
 
         {/* Budgets Grid */}
         {isLoading ? (
-          <div className="text-center py-8">
-            <Text style={{ color: colors.text.secondary }}>{t('budgets.loadingBudgets')}</Text>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div
+                key={i}
+                className="p-5 rounded-2xl border bg-white space-y-4 shadow-xs"
+                style={{ borderColor: colors.border.light }}
+              >
+                <div className="flex justify-between items-center">
+                  <Skeleton height={20} width="50%" />
+                  <Skeleton height={24} width="25%" />
+                </div>
+                <Skeleton height={12} width="100%" />
+                <div className="flex justify-between pt-2">
+                  <Skeleton height={16} width="35%" />
+                  <Skeleton height={16} width="35%" />
+                </div>
+              </div>
+            ))}
           </div>
         ) : budgets.length === 0 ? (
           <div

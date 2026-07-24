@@ -99,9 +99,25 @@ function GroupInviteContent() {
         <Heading level={2} className="mb-2">
           {t('title')}
         </Heading>
-        <Text className="mb-8 text-sm" style={{ color: colors.text?.secondary }}>
+        <Text className="mb-6 text-sm" style={{ color: colors.text?.secondary }}>
           {t('subtitle')}
         </Text>
+
+        {token && (
+          <div className="mb-6">
+            <a
+              href={`smartmoney://group-invite?token=${token}`}
+              className="inline-flex items-center justify-center gap-2 text-xs font-semibold px-4 py-2 rounded-full border transition-all hover:opacity-80"
+              style={{
+                borderColor: colors.interactive?.primary || '#6366f1',
+                color: colors.interactive?.primary || '#6366f1',
+                backgroundColor: colorScheme === 'dark' ? 'rgba(99, 102, 241, 0.1)' : '#eef2ff'
+              }}
+            >
+              <span>{t('openInMobileApp')}</span>
+            </a>
+          </div>
+        )}
 
         {/* Loading State */}
         {status === 'loading' && (

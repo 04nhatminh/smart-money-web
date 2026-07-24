@@ -6,7 +6,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
 import { LogoutButton } from '@/components/molecules/auth';
-import { MdDashboard, MdPersonOutline, MdPieChart, MdFolderOpen, MdInsights, MdSwapHoriz, MdChevronLeft, MdChevronRight } from 'react-icons/md';
+import { MdDashboard, MdPersonOutline, MdPieChart, MdFolderOpen, MdInsights, MdLightbulb, MdBarChart, MdSwapHoriz, MdChevronLeft, MdChevronRight } from 'react-icons/md';
 
 export interface NavItem {
   id: string;

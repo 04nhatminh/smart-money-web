@@ -22,6 +22,8 @@
     "info": "Thông tin",
     "theme": "Chủ đề",
     "settings": "Cài đặt",
+    "refresh": "Làm mới",
+    "retry": "Thử lại",
     "links": "Liên kết",
     "features": "Tính năng",
     "contact": "Liên hệ",
@@ -600,7 +602,9 @@
     "dashboard": "Bảng điều khiển",
     "transactions": "Giao dịch",
     "budgets": "Ngân sách",
-    "analysis": "Phân tích",
+    "analysis": "Báo cáo & Phân tích",
+    "insights": "Insights",
+    "suggestions": "Gợi ý AI",
     "projects": "Kế Hoạch Tiết Kiệm",
     "profile": "Hồ sơ",
     "collapse": "Thu nhỏ thanh bên",
@@ -717,6 +721,171 @@
     "loginToJoin": "Đang chuyển hướng tới trang đăng nhập...",
     "mismatchTitle": "Lời mời dành cho tài khoản khác",
     "mismatchMessage": "Lời mời này được gửi cho một tài khoản khác. Bạn đang đăng nhập với email {email}.",
-    "switchAccount": "Đăng xuất & Đổi tài khoản"
+    "switchAccount": "Đăng xuất & Đổi tài khoản",
+    "openInMobileApp": "Mở trong ứng dụng SmartMoney (Mobile)"
+  },
+  "insights": {
+    "title": "Phân tích thông minh",
+    "subtitle": "Cập nhật tình hình biến động tài chính tự động từ Adaptive Engine",
+    "selectMonth": "Tháng:",
+    "empty_title": "Chưa có phân tích mới",
+    "empty_subtitle": "Hệ thống sẽ liên tục theo dõi và cung cấp phân tích tài chính thông minh khi lịch sử chi tiêu của bạn phong phú hơn.",
+    "severity": {
+      "critical": "Cần chú ý gấp ({count})",
+      "warn": "Cảnh báo xu hướng ({count})",
+      "info": "Thông tin tổng hợp ({count})"
+    },
+    "badge": {
+      "critical": "Khẩn cấp",
+      "warn": "Cảnh báo",
+      "info": "Thông tin"
+    }
+  },
+  "suggestions": {
+    "title": "Gợi ý AI & Khuyến nghị",
+    "subtitle": "Danh sách gợi ý hành động tài chính được cá nhân hóa cho bạn",
+    "see_all": "Xem tất cả",
+    "reviewNow": "Duyệt ngay",
+    "aiSuggestionsCount": "Gợi ý AI ({count})",
+    "viewDetail": "Xem chi tiết & Thao tác",
+    "whyAsking": "Lý do đưa ra gợi ý này",
+    "budgetAdjustments": "Chi tiết điều chỉnh ngân sách",
+    "proposedValue": "Giá trị đề xuất:",
+    "accept": "Chấp nhận & Áp dụng",
+    "accepting": "Đang áp dụng...",
+    "dismiss": "Bỏ qua",
+    "dismissing": "Đang bỏ qua...",
+    "empty_title": "Không có gợi ý nào ở mục này",
+    "empty_subtitle": "Khi hệ thống phát hiện cơ hội tối ưu ngân sách hoặc tiết kiệm, các gợi ý mới sẽ xuất hiện tại đây.",
+    "tabs": {
+      "pending": "Đang chờ",
+      "accepted": "Đã chấp nhận",
+      "dismissed": "Đã bỏ qua",
+      "expired": "Đã hết hạn"
+    },
+    "status": {
+      "pending": "Đang chờ",
+      "accepted": "Đã áp dụng",
+      "dismissed": "Đã bỏ qua",
+      "expired": "Đã hết hạn"
+    },
+    "table": {
+      "category": "Danh mục",
+      "currentLimit": "Hạn mức cũ",
+      "newLimit": "Hạn mức mới"
+    }
+  },
+  "insight": {
+    "overspend_anomaly": {
+      "food": "Bạn đã chi {actual} cho thực phẩm tháng này — cao hơn hẳn mức thường lệ {baseline}.",
+      "transportation": "Bạn đã chi {actual} cho giao thông tháng này — cao hơn hẳn mức thường lệ {baseline}.",
+      "clothing": "Bạn đã chi {actual} cho quần áo tháng này — cao hơn hẳn mức thường lệ {baseline}.",
+      "utilities": "Bạn đã chi {actual} cho tiện ích tháng này — cao hơn hẳn mức thường lệ {baseline}.",
+      "entertainment": "Bạn đã chi {actual} cho giải trí tháng này — cao hơn hẳn mức thường lệ {baseline}.",
+      "health": "Bạn đã chi {actual} cho sức khỏe tháng này — cao hơn hẳn mức thường lệ {baseline}.",
+      "education": "Bạn đã chi {actual} cho giáo dục tháng này — cao hơn hẳn mức thường lệ {baseline}.",
+      "shopping": "Bạn đã chi {actual} cho mua sắm tháng này — cao hơn hẳn mức thường lệ {baseline}.",
+      "other": "Chi tiêu khác của bạn tháng này là {actual} — cao hơn hẳn mức thường lệ {baseline}."
+    },
+    "budget_pace": {
+      "food": "Với đà này, chi tiêu thực phẩm sẽ đạt {projectedEndOfMonth} vào cuối tháng — vượt ngân sách {limit} của bạn.",
+      "transportation": "Với đà này, chi tiêu giao thông sẽ đạt {projectedEndOfMonth} vào cuối tháng — vượt ngân sách {limit} của bạn.",
+      "clothing": "Với đà này, chi tiêu quần áo sẽ đạt {projectedEndOfMonth} vào cuối tháng — vượt ngân sách {limit} của bạn.",
+      "utilities": "Với đà này, chi tiêu tiện ích sẽ đạt {projectedEndOfMonth} vào cuối tháng — vượt ngân sách {limit} của bạn.",
+      "entertainment": "Với đà này, chi tiêu giải trí sẽ đạt {projectedEndOfMonth} vào cuối tháng — vượt ngân sách {limit} của bạn.",
+      "health": "Với đà này, chi tiêu sức khỏe sẽ đạt {projectedEndOfMonth} vào cuối tháng — vượt ngân sách {limit} của bạn.",
+      "education": "Với đà này, chi tiêu giáo dục sẽ đạt {projectedEndOfMonth} vào cuối tháng — vượt ngân sách {limit} của bạn.",
+      "shopping": "Với đà này, chi tiêu mua sắm sẽ đạt {projectedEndOfMonth} vào cuối tháng — vượt ngân sách {limit} của bạn.",
+      "other": "Với đà này, các chi tiêu khác sẽ đạt {projectedEndOfMonth} vào cuối tháng — vượt ngân sách {limit} của bạn."
+    },
+    "category_trend": {
+      "food": "Chi tiêu thực phẩm đã tăng liên tục trong {sampleMonths} tháng — hiện trung bình {meanMonthly} mỗi tháng.",
+      "transportation": "Chi tiêu giao thông đã tăng liên tục trong {sampleMonths} tháng — hiện trung bình {meanMonthly} mỗi tháng.",
+      "clothing": "Chi tiêu quần áo đã tăng liên tục trong {sampleMonths} tháng — hiện trung bình {meanMonthly} mỗi tháng.",
+      "utilities": "Chi tiêu tiện ích đã tăng liên tục trong {sampleMonths} tháng — hiện trung bình {meanMonthly} mỗi tháng.",
+      "entertainment": "Chi tiêu giải trí đã tăng liên tục trong {sampleMonths} tháng — hiện trung bình {meanMonthly} mỗi tháng.",
+      "health": "Chi tiêu sức khỏe đã tăng liên tục trong {sampleMonths} tháng — hiện trung bình {meanMonthly} mỗi tháng.",
+      "education": "Chi tiêu giáo dục đã tăng liên tục trong {sampleMonths} tháng — hiện trung bình {meanMonthly} mỗi tháng.",
+      "shopping": "Chi tiêu mua sắm đã tăng liên tục trong {sampleMonths} tháng — hiện trung bình {meanMonthly} mỗi tháng.",
+      "other": "Các chi tiêu khác của bạn đã tăng liên tục trong {sampleMonths} tháng — hiện trung bình {meanMonthly} mỗi tháng."
+    },
+    "recurring": {
+      "food": "\"{description}\" có vẻ là khoản chi định kỳ khoảng {monthlyAmount} mỗi tháng.",
+      "transportation": "\"{description}\" có vẻ là khoản chi định kỳ khoảng {monthlyAmount} mỗi tháng.",
+      "clothing": "\"{description}\" có vẻ là khoản chi định kỳ khoảng {monthlyAmount} mỗi tháng.",
+      "utilities": "\"{description}\" có vẻ là khoản chi định kỳ khoảng {monthlyAmount} mỗi tháng.",
+      "entertainment": "\"{description}\" có vẻ là khoản chi định kỳ khoảng {monthlyAmount} mỗi tháng.",
+      "health": "\"{description}\" có vẻ là khoản chi định kỳ khoảng {monthlyAmount} mỗi tháng.",
+      "education": "\"{description}\" có vẻ là khoản chi định kỳ khoảng {monthlyAmount} mỗi tháng.",
+      "shopping": "\"{description}\" có vẻ là khoản chi định kỳ khoảng {monthlyAmount} mỗi tháng.",
+      "other": "\"{description}\" có vẻ là khoản chi định kỳ khoảng {monthlyAmount} mỗi tháng."
+    },
+    "savings_capacity": "Sau các chi phí định kỳ và ngân sách, bạn còn khoảng {disposable} để tiết kiệm tháng này.",
+    "budget_over_income": "Tổng hạn mức ngân sách của bạn là {committedBudgets} — vượt quá thu nhập {income}.",
+    "budget_underspend": {
+      "food": "Bạn liên tục dùng dưới hạn mức ngân sách ăn uống — có thể giảm xuống còn khoảng {medianActual}.",
+      "transportation": "Bạn liên tục dùng dưới hạn mức ngân sách đi lại — có thể giảm xuống còn khoảng {medianActual}.",
+      "clothing": "Bạn liên tục dùng dưới hạn mức ngân sách quần áo — có thể giảm xuống còn khoảng {medianActual}.",
+      "utilities": "Bạn liên tục dùng dưới hạn mức ngân sách tiện ích — có thể giảm xuống còn khoảng {medianActual}.",
+      "entertainment": "Bạn liên tục dùng dưới hạn mức ngân sách giải trí — có thể giảm xuống còn khoảng {medianActual}.",
+      "health": "Bạn liên tục dùng dưới hạn mức ngân sách sức khỏe — có thể giảm xuống còn khoảng {medianActual}.",
+      "education": "Bạn liên tục dùng dưới hạn mức ngân sách giáo dục — có thể giảm xuống còn khoảng {medianActual}.",
+      "shopping": "Bạn liên tục dùng dưới hạn mức ngân sách mua sắm — có thể giảm xuống còn khoảng {medianActual}.",
+      "other": "Bạn liên tục dùng dưới hạn mức ngân sách khác — có thể giảm xuống còn khoảng {medianActual}."
+    },
+    "subscription_price_hike": {
+      "food": "\"{description}\" đã tăng từ {previousAmount} lên {newAmount}.",
+      "transportation": "\"{description}\" đã tăng từ {previousAmount} lên {newAmount}.",
+      "clothing": "\"{description}\" đã tăng từ {previousAmount} lên {newAmount}.",
+      "utilities": "\"{description}\" đã tăng từ {previousAmount} lên {newAmount}.",
+      "entertainment": "\"{description}\" đã tăng từ {previousAmount} lên {newAmount}.",
+      "health": "\"{description}\" đã tăng từ {previousAmount} lên {newAmount}.",
+      "education": "\"{description}\" đã tăng từ {previousAmount} lên {newAmount}.",
+      "shopping": "\"{description}\" đã tăng từ {previousAmount} lên {newAmount}.",
+      "other": "\"{description}\" đã tăng từ {previousAmount} lên {newAmount}."
+    },
+    "project_off_track": "\"{projectName}\" đang chậm tiến độ — cần khoảng {requiredMonthly} mỗi tháng để đạt được trước {deadline}."
+  },
+  "suggestion": {
+    "raise_budget": {
+      "title": "Tăng ngân sách",
+      "ask": "Tăng ngân sách {category} lên {resolvedValue}?"
+    },
+    "create_budget": {
+      "title": "Ngân sách mới",
+      "ask": "Đặt ngân sách {category} mức {resolvedValue} cho tháng này?"
+    },
+    "contribute_to_project": {
+      "title": "Góp vào mục tiêu",
+      "ask": "Góp {resolvedValue} vào \"{projectName}\"?"
+    },
+    "set_category_limit": {
+      "title": "Đặt hạn mức",
+      "ask": "Đặt ngân sách {category} mức {resolvedValue} cho tháng này?"
+    },
+    "reduce_budget": {
+      "title": "Giảm ngân sách",
+      "ask": "Giảm ngân sách {category} xuống {resolvedValue}?"
+    },
+    "rebalance_budgets": {
+      "title": "Cân đối ngân sách",
+      "ask": "Tổng ngân sách của bạn vượt quá thu nhập — thu gọn cho vừa ({resolvedValue} tổng cộng)?"
+    },
+    "reallocate_budget": {
+      "title": "Chuyển ngân sách",
+      "ask": "Ngân sách {category} sắp vượt mức — bù từ các ngân sách chưa dùng hết ({resolvedValue} được chuyển)?"
+    },
+    "review_subscription": {
+      "title": "Xem lại gói đăng ký",
+      "ask": "\"{description}\" đã tăng từ {previousAmount} lên {newAmount} — bạn đã xem lại chưa?"
+    },
+    "increase_contribution": {
+      "title": "Bắt kịp mục tiêu",
+      "ask": "\"{projectName}\" đang chậm tiến độ — góp thêm {resolvedValue} trong tháng này để bắt kịp?"
+    },
+    "create_project": {
+      "title": "Bắt đầu mục tiêu tiết kiệm",
+      "ask": "Tháng này bạn có tiền dư — bắt đầu một mục tiêu tiết kiệm với {resolvedValue}?"
+    }
   }
 }

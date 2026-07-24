@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { SidebarLayout } from '@/components/templates';
-import { Heading, Text, Button, Alert } from '@/components/atoms';
+import { Heading, Text, Button, Alert, Skeleton } from '@/components/atoms';
 import { Card } from '@/components/molecules/common';
 import { useTheme } from '@/context/ThemeContext';
 import { useTranslations } from 'next-intl';
@@ -499,7 +499,24 @@ export default function NotificationsPage() {
 
         {/* Notifications List */}
         <div className="space-y-4">
-          {displayedNotifications.length === 0 ? (
+          {isLoading ? (
+            <div className="space-y-3">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <div
+                  key={i}
+                  className="p-5 border-l-4 rounded-lg border flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-xs"
+                  style={{ borderColor: colors.border.light, backgroundColor: colors.background.primary }}
+                >
+                  <div className="flex-1 space-y-2">
+                    <Skeleton height={20} width="40%" />
+                    <Skeleton height={14} width="80%" />
+                    <Skeleton height={12} width="20%" />
+                  </div>
+                  <Skeleton height={32} width={80} />
+                </div>
+              ))}
+            </div>
+          ) : displayedNotifications.length === 0 ? (
             <Card className="p-12 text-center">
               <MdNotifications className="w-16 h-16 mx-auto mb-4 opacity-50" style={{ color: colors.text.secondary }} />
               <Heading level={3}>
