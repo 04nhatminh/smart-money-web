@@ -66,6 +66,8 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
   const [myPendingRequest, setMyPendingRequest] = useState<any | null>(null);
   const [savedSponsorshipText, setSavedSponsorshipText] = useState('Chưa cấu hình');
 
+  const [isProjectLoading, setIsProjectLoading] = useState(false);
+
   const isAdmin = group?.adminId === user?.id;
   const isForming = group?.status === 'FORMING';
   const isLocked = group?.status === 'LOCKED';
@@ -78,6 +80,7 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
     } else {
       setGroup(null);
       setProjectDetail(null);
+      setIsProjectLoading(false);
       setShowRegenerateSuggest(false);
       setIsGenerateBudgetOpen(false);
       document.body.style.overflow = '';
@@ -105,6 +108,7 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
 
   const loadDetails = async () => {
     setLocalLoading(true);
+    setIsProjectLoading(false);
     setError(null);
     try {
       const res = await getGroupDetail(groupId);
@@ -125,17 +129,22 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
         }
 
         if (res.data.groupProjectId) {
-          const projRes = await getGroupProjectDetail(res.data.groupProjectId);
-          if (projRes.success && projRes.data) {
-            setProjectDetail(projRes.data);
-          }
+          setIsProjectLoading(true);
+          try {
+            const projRes = await getGroupProjectDetail(res.data.groupProjectId);
+            if (projRes.success && projRes.data) {
+              setProjectDetail(projRes.data);
+            }
 
-          const pendingRes = await getPendingSponsorshipRequests();
-          if (pendingRes.success && pendingRes.data) {
-            const match = pendingRes.data.find((r: any) => r.groupProjectId === res.data.groupProjectId);
-            setMyPendingRequest(match || null);
-          } else {
-            setMyPendingRequest(null);
+            const pendingRes = await getPendingSponsorshipRequests();
+            if (pendingRes.success && pendingRes.data) {
+              const match = pendingRes.data.find((r: any) => r.groupProjectId === res.data.groupProjectId);
+              setMyPendingRequest(match || null);
+            } else {
+              setMyPendingRequest(null);
+            }
+          } finally {
+            setIsProjectLoading(false);
           }
         } else {
           setProjectDetail(null);
@@ -402,8 +411,7 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
     try {
       const res = await dissolveGroupProject(projectDetail.groupProjectId);
       if (res.success) {
-        setSuccess('Group project dissolved.');
-        loadDetails();
+        onClose();
         onSuccess?.();
       } else {
         setError(res.error || 'Failed to dissolve group project');
@@ -484,7 +492,7 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    {isAdmin && (!group.groupProjectId || (projectDetail && projectDetail.status === 'DISSOLVED')) && (
+                    {isAdmin && group.status !== 'DISSOLVED' && !group.groupProjectId && (
                       <Button
                         variant="danger"
                         size="sm"
@@ -656,11 +664,19 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
                       </div>
                     )}
                   </div>
+                ) : isProjectLoading || (group.groupProjectId && !projectDetail) ? (
+                  <div className="p-5 rounded-2xl border bg-white space-y-3 shadow-xs" style={{ borderColor: colors.border.light }}>
+                    <div className="animate-pulse space-y-3">
+                      <div className="h-5 bg-gray-200 rounded w-1/2"></div>
+                      <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                      <div className="h-10 bg-gray-200 rounded w-full"></div>
+                    </div>
+                  </div>
                 ) : (
-                  isAdmin && isLocked && (
+                  isAdmin && isLocked && !group.groupProjectId && (
                     <div className="border border-dashed rounded-xl p-6 text-center space-y-3" style={{ borderColor: colors.border.light }}>
                       <Text style={{ color: colors.text.secondary }} className="text-sm">
-                        This group is locked but has no associated Group Project yet.
+                        Nhóm đã khóa nhưng chưa từng tạo dự án nào.
                       </Text>
                       <Button
                         variant="primary"
@@ -669,7 +685,7 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
                           onCreateProject?.(group.groupId);
                         }}
                       >
-                        Create Group Project
+                        Tạo dự án nhóm
                       </Button>
                     </div>
                   )
