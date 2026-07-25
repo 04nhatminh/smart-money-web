@@ -3,7 +3,7 @@ import type { ApiResponse } from './base.api';
 export type GroupStatus = 'FORMING' | 'LOCKED' | 'DISSOLVED';
 export type GroupMemberRole = 'ADMIN' | 'MEMBER';
 export type GroupMemberInviteStatus = 'INVITED' | 'JOINED' | 'DECLINED';
-export type GroupProjectStatus = 'ACTIVE' | 'COMPLETED' | 'DISSOLVED' | 'PENDING_SPONSORSHIP' | 'SPONSORSHIP_FAILED';
+export type GroupProjectStatus = 'ACTIVE' | 'COMPLETED' | 'DISSOLVED' | 'EXPIRED' | 'PENDING_SPONSORSHIP' | 'SPONSORSHIP_FAILED';
 
 export interface GroupMemberResponse {
   userId: string;
@@ -26,6 +26,10 @@ export interface GroupSummaryResponse {
   memberCount: number;
   myRole: GroupMemberRole;
   createdAt: string;
+  hasActiveProject?: boolean;
+  groupProjectId?: string | null;
+  groupProjectName?: string | null;
+  groupProjectStatus?: GroupProjectStatus | null;
 }
 
 export interface GroupDetailResponse {

@@ -538,7 +538,7 @@ export default function ProjectsPage() {
                     <div
                       key={group.groupId}
                       onClick={() => handleGroupClick(group.groupId)}
-                      className="border rounded-2xl p-5 bg-white shadow-sm hover:shadow-md transition-all cursor-pointer flex flex-col justify-between h-[180px]"
+                      className="border rounded-2xl p-5 bg-white shadow-sm hover:shadow-md transition-all cursor-pointer flex flex-col justify-between min-h-[190px]"
                       style={{ borderColor: colors.border.light }}
                     >
                       <div>
@@ -558,9 +558,38 @@ export default function ProjectsPage() {
                         <Text className="text-xs mt-1.5 line-clamp-2">
                           {group.description || 'No description provided.'}
                         </Text>
+                        <div className="mt-2.5 flex items-center">
+                          {group.groupProjectStatus === 'ACTIVE' ? (
+                            <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200">
+                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                              Dự án đang chạy
+                            </span>
+                          ) : group.groupProjectStatus === 'PENDING_SPONSORSHIP' ? (
+                            <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1.5 bg-amber-50 text-amber-700 border border-amber-200">
+                              <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+                              Chờ khảo sát tài trợ
+                            </span>
+                          ) : group.groupProjectStatus === 'COMPLETED' ? (
+                            <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full flex items-center gap-1.5 bg-blue-50 text-blue-700 border border-blue-200">
+                              Dự án đã hoàn thành
+                            </span>
+                          ) : group.groupProjectStatus === 'DISSOLVED' ? (
+                            <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full flex items-center gap-1.5 bg-rose-50 text-rose-600 border border-rose-200">
+                              Dự án đã bị hủy
+                            </span>
+                          ) : group.groupProjectStatus === 'EXPIRED' || group.groupProjectStatus === 'SPONSORSHIP_FAILED' ? (
+                            <span className="text-[11px] font-medium px-2.5 py-0.5 rounded-full flex items-center gap-1.5 bg-gray-100 text-gray-600 border border-gray-200">
+                              Dự án đã kết thúc
+                            </span>
+                          ) : (
+                            <span className="text-[11px] font-medium px-2.5 py-0.5 rounded-full flex items-center gap-1.5 bg-gray-100 text-gray-500 border border-gray-200">
+                              Chưa có dự án
+                            </span>
+                          )}
+                        </div>
                       </div>
 
-                      <div className="flex items-center justify-between border-t pt-3 mt-4" style={{ borderColor: colors.border.light }}>
+                      <div className="flex items-center justify-between border-t pt-3 mt-3" style={{ borderColor: colors.border.light }}>
                         <span className="text-xs px-2.5 py-1 rounded bg-gray-100 font-bold text-gray-600">
                           {group.memberCount} Joined
                         </span>
@@ -598,6 +627,7 @@ export default function ProjectsPage() {
           maxProjectsReached={!canCreateProject()}
           defaultType={defaultCreateType}
           defaultGroupId={defaultCreateGroupId}
+          initialGroups={groups}
         />
 
         <CreateGroupModal
@@ -656,6 +686,10 @@ export default function ProjectsPage() {
           projectId={selectedProjectId}
           projectName={projects.find(p => p.projectId === selectedProjectId)?.name || null}
           currency={projects.find(p => p.projectId === selectedProjectId)?.currency || 'VND'}
+          remainingAmount={(() => {
+            const proj = projects.find(p => p.projectId === selectedProjectId);
+            return proj ? Math.max(0, proj.targetAmount - proj.totalContributed) : undefined;
+          })()}
         />
 
         <DeleteConfirmationModal
