@@ -4,8 +4,9 @@ import React, { useState, useEffect } from 'react';
 import { Button, Heading, Text, Input, Alert } from '@/components/atoms';
 import { useTheme } from '@/context/ThemeContext';
 import { useProjects } from '@/hooks/useProjects';
-import { formatAmountInput, parseFormattedNumber } from '@/lib/format';
+import { formatAmountInput, parseFormattedNumber, formatPrice } from '@/lib/format';
 import { MdClose } from 'react-icons/md';
+import { useTranslations } from 'next-intl';
 
 interface AddContributionModalProps {
   isOpen: boolean;
@@ -14,6 +15,7 @@ interface AddContributionModalProps {
   projectId: string | null;
   projectName: string | null;
   currency: string;
+  remainingAmount?: number;
 }
 
 interface FormData {
@@ -27,10 +29,13 @@ export const AddContributionModal: React.FC<AddContributionModalProps> = ({
   projectId,
   projectName,
   currency,
+  remainingAmount,
 }) => {
   const { colors } = useTheme();
+  const t = useTranslations();
   const { isLoading, addContribution } = useProjects();
   const [error, setError] = useState<string | null>(null);
+  const [isExceeding, setIsExceeding] = useState(false);
   const [success, setSuccess] = useState(false);
 
   const [formData, setFormData] = useState<FormData>({
@@ -60,10 +65,21 @@ export const AddContributionModal: React.FC<AddContributionModalProps> = ({
     };
   }, [isOpen]);
 
+  // Reset states when modal opens/closes
+  useEffect(() => {
+    if (isOpen) {
+      setError(null);
+      setIsExceeding(false);
+      setSuccess(false);
+    }
+  }, [isOpen]);
+
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
     const { name, value } = e.target;
+    setError(null);
+    setIsExceeding(false);
 
     if (name === 'amount') {
       const formatted = formatAmountInput(value);
@@ -82,21 +98,35 @@ export const AddContributionModal: React.FC<AddContributionModalProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setIsExceeding(false);
 
     if (!projectId) {
       setError('Project ID is missing');
       return;
     }
 
+    const numericAmount = parseFormattedNumber(formData.amount);
+
     // Validation
-    if (!formData.amount || parseFloat(formData.amount) <= 0) {
+    if (!formData.amount || numericAmount <= 0) {
       setError('Please enter a valid amount');
+      return;
+    }
+
+    if (remainingAmount !== undefined && numericAmount > remainingAmount) {
+      setIsExceeding(true);
+      setError(
+        t('projects.exceedsRemainingError', {
+          amount: formatPrice(numericAmount, currency),
+          remaining: formatPrice(remainingAmount, currency),
+        })
+      );
       return;
     }
 
     try {
       const result = await addContribution(projectId, {
-        amount: parseFormattedNumber(formData.amount),
+        amount: numericAmount,
       });
 
       if (result.success) {
@@ -111,10 +141,18 @@ export const AddContributionModal: React.FC<AddContributionModalProps> = ({
           onSuccess?.();
         }, 1500);
       } else {
-        setError(result.error || 'Failed to add contribution');
+        const errMsg = result.error || 'Failed to add contribution';
+        setError(errMsg);
+        if (errMsg.includes('PROJECT_CONTRIBUTION_EXCEEDS_REMAINING') || errMsg.toLowerCase().includes('exceeds')) {
+          setIsExceeding(true);
+        }
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      const errMsg = err instanceof Error ? err.message : 'An error occurred';
+      setError(errMsg);
+      if (errMsg.includes('PROJECT_CONTRIBUTION_EXCEEDS_REMAINING') || errMsg.toLowerCase().includes('exceeds')) {
+        setIsExceeding(true);
+      }
     }
   };
 
@@ -178,7 +216,35 @@ export const AddContributionModal: React.FC<AddContributionModalProps> = ({
 
             {/* Error Message */}
             {error && (
-              <Alert message={error} type="error" onClose={() => setError(null)} />
+              <div className="space-y-2">
+                <Alert message={error} type="error" onClose={() => { setError(null); setIsExceeding(false); }} />
+                {isExceeding && remainingAmount !== undefined && remainingAmount > 0 && (
+                  <div
+                    className="p-3 rounded-xl flex items-center justify-between gap-3 border"
+                    style={{
+                      backgroundColor: `${colors.interactive.primary}10`,
+                      borderColor: `${colors.interactive.primary}30`,
+                    }}
+                  >
+                    <Text className="text-xs font-medium" style={{ color: colors.text.primary }}>
+                      {t('projects.suggestFillRemaining')}
+                    </Text>
+                    <Button
+                      type="button"
+                      variant="primary"
+                      size="sm"
+                      onClick={() => {
+                        setFormData({ amount: formatAmountInput(remainingAmount.toString()) });
+                        setError(null);
+                        setIsExceeding(false);
+                      }}
+                      className="text-xs py-1 px-3 whitespace-nowrap"
+                    >
+                      {t('projects.adjustToRemainingBtn', { remaining: formatPrice(remainingAmount, currency) })}
+                    </Button>
+                  </div>
+                )}
+              </div>
             )}
 
             {/* Project Info */}
@@ -196,6 +262,38 @@ export const AddContributionModal: React.FC<AddContributionModalProps> = ({
                 <Text className="font-semibold" style={{ color: colors.text.primary }}>
                   {projectName}
                 </Text>
+              </div>
+            )}
+
+            {/* Remaining Amount & Quick Fill */}
+            {remainingAmount !== undefined && remainingAmount > 0 && (
+              <div
+                className="p-3.5 rounded-xl flex items-center justify-between gap-3"
+                style={{
+                  backgroundColor: colors.background.secondary,
+                  border: `1px solid ${colors.border.light}`,
+                }}
+              >
+                <div>
+                  <Text className="text-xs font-medium" style={{ color: colors.text.secondary }}>
+                    {t('projects.remainingNeeded')}
+                  </Text>
+                  <Text className="font-bold text-sm" style={{ color: colors.text.primary }}>
+                    {formatPrice(remainingAmount, currency)}
+                  </Text>
+                </div>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => {
+                    setFormData({ amount: formatAmountInput(remainingAmount.toString()) });
+                    setError(null);
+                  }}
+                  className="text-xs py-1.5 px-3 whitespace-nowrap"
+                >
+                  {t('projects.quickFillBtn')}
+                </Button>
               </div>
             )}
 

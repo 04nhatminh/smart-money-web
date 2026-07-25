@@ -686,6 +686,10 @@ export default function ProjectsPage() {
           projectId={selectedProjectId}
           projectName={projects.find(p => p.projectId === selectedProjectId)?.name || null}
           currency={projects.find(p => p.projectId === selectedProjectId)?.currency || 'VND'}
+          remainingAmount={(() => {
+            const proj = projects.find(p => p.projectId === selectedProjectId);
+            return proj ? Math.max(0, proj.targetAmount - proj.totalContributed) : undefined;
+          })()}
         />
 
         <DeleteConfirmationModal
