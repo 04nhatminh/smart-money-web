@@ -12,7 +12,7 @@ import { GenerateBudgetModal } from './GenerateBudgetModal';
 import { CreateProjectRequest, ProjectAdvisorResponse } from '@/types/project.api';
 import { GroupSummaryResponse } from '@/types/group.api';
 import { formatAmountInput, parseFormattedNumber, formatPrice } from '@/lib/format';
-import { MdClose, MdLightbulb, MdAutoAwesome } from 'react-icons/md';
+import { MdClose, MdLightbulb, MdAutoAwesome, MdGroup, MdKeyboardArrowDown, MdCheckCircle, MdBlock } from 'react-icons/md';
 import { useTranslations } from 'next-intl';
 import { useAuth } from '@/context/AuthContext';
 
@@ -26,6 +26,7 @@ interface CreateProjectModalProps {
   maxProjectsReached?: boolean;
   defaultType?: 'PERSONAL' | 'GROUP';
   defaultGroupId?: string;
+  initialGroups?: GroupSummaryResponse[];
 }
 
 type ProjectType = 'PERSONAL' | 'GROUP';
@@ -53,6 +54,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
   maxProjectsReached = false,
   defaultType,
   defaultGroupId,
+  initialGroups,
 }) => {
   const { colors } = useTheme();
   const t = useTranslations();
@@ -78,6 +80,20 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
   // Group states
   const [groups, setGroups] = useState<GroupSummaryResponse[]>([]);
   const [selectedGroupId, setSelectedGroupId] = useState('');
+  const [isFetchingGroups, setIsFetchingGroups] = useState(false);
+  const [isGroupDropdownOpen, setIsGroupDropdownOpen] = useState(false);
+  const dropdownRef = React.useRef<HTMLDivElement>(null);
+
+  // Close dropdown on click outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsGroupDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
   const [totalMonths, setTotalMonths] = useState('1');
   const [suggestType, setSuggestType] = useState<'amount' | 'months'>('amount');
   const [isCreateGroupModalOpen, setIsCreateGroupModalOpen] = useState(false);
@@ -111,12 +127,48 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
 
   const isLoading = projectsLoading || groupsLoading;
 
-  // Load groups when type is GROUP
-  useEffect(() => {
-    if (isOpen && formData.type === 'GROUP') {
-      loadGroups();
+  const filterAdminLockedGroups = (list: GroupSummaryResponse[]) => {
+    return list.filter((g) => g.status === 'LOCKED' && g.myRole === 'ADMIN');
+  };
+
+  const loadGroups = async () => {
+    setIsFetchingGroups(true);
+    try {
+      const res = await listGroups();
+      if (res.success && res.data) {
+        const filtered = filterAdminLockedGroups(res.data);
+        setGroups(filtered);
+        const available = filtered.filter((g) => !g.groupProjectId);
+        if (available.length > 0) {
+          setSelectedGroupId((prev) => prev || available[0].groupId);
+        } else if (filtered.length > 0) {
+          setSelectedGroupId((prev) => prev || filtered[0].groupId);
+        }
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsFetchingGroups(false);
     }
-  }, [isOpen, formData.type]);
+  };
+
+  // Populate groups instantly from initialGroups or fetch if needed when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      if (initialGroups && initialGroups.length > 0) {
+        const filtered = filterAdminLockedGroups(initialGroups);
+        setGroups(filtered);
+        const available = filtered.filter((g) => !g.groupProjectId);
+        if (available.length > 0) {
+          setSelectedGroupId(defaultGroupId || available[0].groupId);
+        } else if (filtered.length > 0) {
+          setSelectedGroupId(defaultGroupId || filtered[0].groupId);
+        }
+      } else if (formData.type === 'GROUP') {
+        loadGroups();
+      }
+    }
+  }, [isOpen, initialGroups, formData.type]);
 
   // Set default values when modal opens
   useEffect(() => {
@@ -137,23 +189,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
     }
   }, [isOpen, defaultType, defaultGroupId, minDeadlineStr]);
 
-  const loadGroups = async () => {
-    try {
-      const res = await listGroups();
-      if (res.success && res.data) {
-        // filter groups where ADMIN and LOCKED
-        const filtered = res.data.filter(
-          (g) => g.status === 'LOCKED' && g.myRole === 'ADMIN'
-        );
-        setGroups(filtered);
-        if (filtered.length > 0 && !selectedGroupId) {
-          setSelectedGroupId(filtered[0].groupId);
-        }
-      }
-    } catch (e) {
-      console.error(e);
-    }
-  };
+
 
   // Prevent scrolling when modal is open
   useEffect(() => {
@@ -326,6 +362,11 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
     if (formData.type === 'GROUP') {
       if (!selectedGroupId) {
         setError(t('projects.createModal.errors.selectGroupProject'));
+        return;
+      }
+      const targetGroup = groups.find(g => g.groupId === selectedGroupId);
+      if (targetGroup?.groupProjectId) {
+        setError('Một nhóm chỉ gắn liền với 1 dự án. Vui lòng nhân bản nhóm để tạo dự án mới.');
         return;
       }
       const months = parseInt(totalMonths);
@@ -678,29 +719,136 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
                       </button>
                     </div>
 
-                    {groups.length === 0 ? (
+                    {isFetchingGroups && groups.length === 0 ? (
+                      <div className="w-full h-10 px-3 py-2 rounded-lg border flex items-center gap-2 animate-pulse" style={{ borderColor: colors.border.light, backgroundColor: colors.background.secondary }}>
+                        <span className="w-4 h-4 rounded-full border-2 border-indigo-600 border-t-transparent animate-spin" />
+                        <span className="text-xs text-gray-500 font-medium">Đang tải danh sách nhóm...</span>
+                      </div>
+                    ) : groups.length === 0 ? (
                       <div className="p-3 text-center border border-dashed rounded-lg" style={{ borderColor: colors.border.light }}>
                         <Text style={{ color: colors.text.secondary }} className="text-xs">
                           {t('projects.createModal.noGroups')}
                         </Text>
                       </div>
                     ) : (
-                      <select
-                        value={selectedGroupId}
-                        onChange={(e) => setSelectedGroupId(e.target.value)}
-                        className="w-full px-3 py-2 rounded-lg border focus:outline-none focus:ring-2"
-                        style={{
-                          borderColor: colors.border.light,
-                          backgroundColor: colors.background.secondary,
-                          color: colors.text.primary,
-                        }}
-                      >
-                        {groups.map(g => (
-                          <option key={g.groupId} value={g.groupId}>
-                            {g.name}
-                          </option>
-                        ))}
-                      </select>
+                      <div className="relative" ref={dropdownRef}>
+                        {/* Custom Select Trigger Button */}
+                        <button
+                          type="button"
+                          onClick={() => setIsGroupDropdownOpen(!isGroupDropdownOpen)}
+                          className="w-full px-3.5 py-2.5 rounded-xl border flex items-center justify-between transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 shadow-xs hover:border-indigo-400 cursor-pointer"
+                          style={{
+                            borderColor: isGroupDropdownOpen ? colors.interactive.primary : colors.border.light,
+                            backgroundColor: colors.background.secondary,
+                            color: colors.text.primary,
+                          }}
+                        >
+                          {(() => {
+                            const sel = groups.find((g) => g.groupId === selectedGroupId);
+                            if (!sel) {
+                              return <span className="text-sm text-gray-400 font-medium">Chọn nhóm...</span>;
+                            }
+                            return (
+                              <div className="flex items-center gap-2.5 overflow-hidden text-left">
+                                <div className="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+                                  <MdGroup size={16} />
+                                </div>
+                                <span className="font-semibold text-sm truncate">{sel.name}</span>
+                                {sel.groupProjectId && (
+                                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-amber-50 text-amber-700 border border-amber-200 shrink-0">
+                                    Đã có dự án
+                                  </span>
+                                )}
+                              </div>
+                            );
+                          })()}
+                          <MdKeyboardArrowDown
+                            size={20}
+                            className={`text-gray-400 transition-transform duration-200 shrink-0 ${
+                              isGroupDropdownOpen ? 'rotate-180 text-indigo-600' : ''
+                            }`}
+                          />
+                        </button>
+
+                        {/* Floating Custom Dropdown Menu */}
+                        {isGroupDropdownOpen && (
+                          <div
+                            className="absolute left-0 right-0 top-full mt-1.5 bg-white rounded-2xl shadow-xl border border-gray-100 p-1.5 space-y-1 z-50 max-h-60 overflow-y-auto"
+                            style={{ borderColor: colors.border.light }}
+                          >
+                            {groups.map((g) => {
+                              const isSelected = g.groupId === selectedGroupId;
+                              const isDisabled = !!g.groupProjectId;
+
+                              return (
+                                <div
+                                  key={g.groupId}
+                                  onClick={() => {
+                                    if (!isDisabled) {
+                                      setSelectedGroupId(g.groupId);
+                                      setIsGroupDropdownOpen(false);
+                                    }
+                                  }}
+                                  className={`p-2.5 rounded-xl transition-all flex items-center justify-between gap-3 ${
+                                    isDisabled
+                                      ? 'opacity-55 bg-gray-50/80 cursor-not-allowed'
+                                      : isSelected
+                                      ? 'bg-indigo-50/90 text-indigo-900 font-semibold border border-indigo-200/60 cursor-pointer'
+                                      : 'hover:bg-gray-50 cursor-pointer text-gray-800'
+                                  }`}
+                                >
+                                  <div className="flex items-center gap-2.5 min-w-0">
+                                    <div
+                                      className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 text-xs font-bold ${
+                                        isDisabled
+                                          ? 'bg-gray-200 text-gray-500'
+                                          : isSelected
+                                          ? 'bg-indigo-600 text-white'
+                                          : 'bg-indigo-50 text-indigo-600'
+                                      }`}
+                                    >
+                                      <MdGroup size={15} />
+                                    </div>
+                                    <div className="min-w-0">
+                                      <p className="text-sm font-semibold truncate leading-tight">{g.name}</p>
+                                      <p className="text-[11px] text-gray-400 mt-0.5 truncate">
+                                        {g.memberCount} thành viên {g.description ? `• ${g.description}` : ''}
+                                      </p>
+                                    </div>
+                                  </div>
+
+                                  <div className="shrink-0">
+                                    {isDisabled ? (
+                                      <div className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-50 text-amber-700 border border-amber-200 text-[10px] font-bold">
+                                        <MdBlock size={11} />
+                                        <span>Đã có dự án (Cần clone)</span>
+                                      </div>
+                                    ) : isSelected ? (
+                                      <span className="flex items-center gap-1 text-xs font-bold text-indigo-600">
+                                        <MdCheckCircle size={15} />
+                                        <span>Đã chọn</span>
+                                      </span>
+                                    ) : (
+                                      <span className="text-[11px] font-medium px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                        Khả dụng
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+
+                        {groups.every((g) => !!g.groupProjectId) && (
+                          <div className="p-3 rounded-xl bg-amber-50/80 border border-amber-200 text-amber-800 text-xs font-medium mt-2 flex items-start gap-2">
+                            <span className="text-amber-600 font-bold shrink-0">⚠️</span>
+                            <span>
+                              Tất cả các nhóm bạn quản lý đều đã từng tạo dự án. Vui lòng chọn <strong>+ Create Group</strong> ở trên để nhân bản (clone) nhóm mới trước khi tạo dự án.
+                            </span>
+                          </div>
+                        )}
+                      </div>
                     )}
                   </div>
                 )}

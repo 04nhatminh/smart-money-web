@@ -224,14 +224,16 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
 
             {/* General Info */}
             <div className="grid grid-cols-2 gap-4 text-sm">
-              <div className="space-y-1">
-                <Text style={{ color: colors.text.tertiary }} className="text-xs">
-                  {t('projects.deadline')}
-                </Text>
-                <Text style={{ color: colors.text.primary }} className="font-semibold">
-                  {formattedDeadline || '-'}
-                </Text>
-              </div>
+              {project.status !== 'COMPLETED' && (
+                <div className="space-y-1">
+                  <Text style={{ color: colors.text.tertiary }} className="text-xs">
+                    {t('projects.deadline')}
+                  </Text>
+                  <Text style={{ color: colors.text.primary }} className="font-semibold">
+                    {formattedDeadline || '-'}
+                  </Text>
+                </div>
+              )}
               <div className="space-y-1">
                 <Text style={{ color: colors.text.tertiary }} className="text-xs">
                   {t('projects.createModal.typeLabel')}
