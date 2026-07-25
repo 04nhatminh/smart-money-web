@@ -137,7 +137,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
       </div>
 
       {/* Deadline Info */}
-      {project.deadline && (
+      {project.deadline && project.status !== 'COMPLETED' && (
         <div className="mb-3 flex items-center justify-between">
           <Text className="text-xs" style={{ color: colors.text.tertiary }}>
             {t('projects.deadline')}
@@ -191,7 +191,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
             {t('projects.contributeBtn')}
           </button>
         )}
-        {!(project.type === 'GROUP' || project.groupProjectId) && (
+        {project.status === 'ACTIVE' && !(project.type === 'GROUP' || project.groupProjectId) && (
           <button
             onClick={() => onEdit(project.projectId)}
             className="px-3 py-2 rounded-lg text-sm font-medium transition-colors hover:cursor-pointer"
