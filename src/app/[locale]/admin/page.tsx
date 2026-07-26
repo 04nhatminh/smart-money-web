@@ -147,13 +147,9 @@ export default function AdminPage() {
     sendBroadcast
   } = useAdmin();
 
-  const { listProjects } = useProjects();
-  const { listGroups } = useGroups();
-
   // State
-  const [activeTab, setActiveTab] = useState<'overview' | 'settlement' | 'users' | 'projects' | 'logs'>('overview');
-  const [projectsList, setProjectsList] = useState<any[]>([]);
-  const [groupsList, setGroupsList] = useState<any[]>([]);
+  const [activeTab, setActiveTab] = useState<'overview' | 'settlement' | 'users' | 'logs'>('overview');
+  const [systemStats, setSystemStats] = useState<any>(null);
   const [isLoadingData, setIsLoadingData] = useState(true);
 
   const { user: currentUser, isAuthenticated, isInitializing } = useAuth();
@@ -201,38 +197,21 @@ export default function AdminPage() {
     }
   };
 
-  // Load project & group data from backend
+  // Load strictly system-wide admin data from backend
   const loadAdminData = async () => {
     setIsLoadingData(true);
     try {
-      const [projRes, groupRes, usersRes] = await Promise.allSettled([
-        adminService.getAllProjects(),
-        adminService.getAllGroups(),
-        adminService.getAllUsers()
+      const [usersRes, statsRes] = await Promise.allSettled([
+        adminService.getAllUsers(),
+        adminService.getSystemStats()
       ]);
-
-      if (projRes.status === 'fulfilled' && Array.isArray(projRes.value) && projRes.value.length > 0) {
-        setProjectsList(projRes.value);
-      } else {
-        const userProjects = await listProjects();
-        if (userProjects?.success && userProjects?.data) {
-          const d: any = userProjects.data;
-          setProjectsList(Array.isArray(d) ? d : d.items || d.content || []);
-        }
-      }
-
-      if (groupRes.status === 'fulfilled' && Array.isArray(groupRes.value) && groupRes.value.length > 0) {
-        setGroupsList(groupRes.value);
-      } else {
-        const userGroups = await listGroups();
-        if (userGroups?.success && userGroups?.data) {
-          const d: any = userGroups.data;
-          setGroupsList(Array.isArray(d) ? d : d.items || d.content || []);
-        }
-      }
 
       if (usersRes.status === 'fulfilled' && Array.isArray(usersRes.value)) {
         setUsers(usersRes.value as any);
+      }
+
+      if (statsRes.status === 'fulfilled' && statsRes.value) {
+        setSystemStats(statsRes.value);
       }
 
       await loadAdminNotifications();
@@ -371,7 +350,6 @@ export default function AdminPage() {
               { id: 'overview', label: t('admin.tabs.overview'), icon: MdSpeed },
               { id: 'settlement', label: t('admin.tabs.settlement'), icon: MdAccountTree },
               { id: 'users', label: t('admin.tabs.users'), icon: MdPeople },
-              { id: 'projects', label: t('admin.tabs.projects'), icon: MdFolderOpen },
               { id: 'logs', label: t('admin.tabs.logs'), icon: MdDns }
             ].map(tab => {
               const Icon = tab.icon;
@@ -399,28 +377,42 @@ export default function AdminPage() {
         {activeTab === 'overview' && (
           <div className="space-y-8">
             {/* KPI Cards Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              <StatCard
-                label={t('admin.kpi.totalUsers')}
-                value={users.length.toString()}
-                icon={<MdPeople className="w-6 h-6 text-indigo-500" />}
-              />
-              <StatCard
-                label={t('admin.kpi.activeProjects')}
-                value={(projectsList.length || 42).toString()}
-                icon={<MdFolderOpen className="w-6 h-6 text-emerald-500" />}
-              />
-              <StatCard
-                label={t('admin.kpi.monthlyVolume')}
-                value={formatVietnamsePrice(385000000)}
-                icon={<MdSwapHoriz className="w-6 h-6 text-amber-500" />}
-              />
-              <StatCard
-                label={t('admin.kpi.settlementStatus')}
-                value={isSettlementRunning ? t('admin.settlement.running') : 'COMPLETED'}
-                icon={<MdCheckCircle className="w-6 h-6 text-emerald-500" />}
-              />
-            </div>
+            {isLoadingData ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                {[1, 2, 3, 4].map(i => (
+                  <Card key={i} className="p-6 border space-y-3" style={{ borderColor: colors.border.light, backgroundColor: colors.surface.primary }}>
+                    <div className="flex justify-between items-center">
+                      <Skeleton variant="text" width="55%" height="1rem" />
+                      <Skeleton variant="circular" width="2.5rem" height="2.5rem" />
+                    </div>
+                    <Skeleton variant="text" width="40%" height="2rem" />
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <StatCard
+                  label={t('admin.kpi.totalUsers')}
+                  value={(systemStats?.totalUsers ?? users.length).toString()}
+                  icon={<MdPeople className="w-6 h-6 text-indigo-500" />}
+                />
+                <StatCard
+                  label={t('admin.kpi.activeUsers')}
+                  value={(systemStats?.activeUsersCount ?? users.filter(u => u.status === 'ACTIVE').length).toString()}
+                  icon={<MdCheckCircle className="w-6 h-6 text-emerald-500" />}
+                />
+                <StatCard
+                  label={t('admin.kpi.monthlyVolume')}
+                  value={formatVietnamsePrice(systemStats?.totalTransactionVolume ?? 0)}
+                  icon={<MdSwapHoriz className="w-6 h-6 text-amber-500" />}
+                />
+                <StatCard
+                  label={t('admin.kpi.settlementStatus')}
+                  value={isSettlementRunning ? t('admin.settlement.running') : (systemStats?.settlementStatus || 'COMPLETED')}
+                  icon={<MdCheckCircle className="w-6 h-6 text-emerald-500" />}
+                />
+              </div>
+            )}
 
             {/* Charts Section */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -746,46 +738,78 @@ export default function AdminPage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y" style={{ borderColor: colors.border.light }}>
-                    {filteredUsers.map((usr) => (
-                      <tr key={usr.id} className="hover:opacity-90 transition-opacity">
-                        <td className="p-4">
-                          <div className="font-bold text-xs sm:text-sm" style={{ color: colors.text.primary }}>{usr.name || usr.fullName || 'User'}</div>
-                          <div style={{ color: colors.text.secondary }} className="text-[11px] font-mono mt-0.5">{usr.email || 'N/A'}</div>
-                        </td>
-                        <td className="p-4">
-                          <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold ${usr.role === 'ADMIN' ? 'bg-purple-500/15 text-purple-400 border border-purple-500/30' : usr.role === 'MANAGER' ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30' : 'bg-blue-500/15 text-blue-400 border border-blue-500/30'
-                            }`}>
-                            {usr.role || 'USER'}
-                          </span>
-                        </td>
-                        <td className="p-4">
-                          <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold ${(usr.financialSetup || usr.financialSetupCompleted) ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' : 'bg-gray-500/10 text-gray-400 border border-gray-500/20'
-                            }`}>
-                            {(usr.financialSetup || usr.financialSetupCompleted) ? t('admin.users.setupCompleted') : t('admin.users.setupPending')}
-                          </span>
-                        </td>
-                        <td className="p-4">
-                          <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold ${usr.status === 'ACTIVE' ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' : usr.status === 'PENDING' ? 'bg-amber-500/10 text-amber-500 border border-amber-500/20' : 'bg-red-500/10 text-red-500 border border-red-500/20'
-                            }`}>
-                            {usr.status || 'ACTIVE'}
-                          </span>
-                        </td>
-                        <td className="p-4 font-mono text-xs" style={{ color: colors.text.secondary }}>{usr.joinedDate || usr.createdAt || 'N/A'}</td>
-                        <td className="p-4 text-right">
-                          <button
-                            onClick={() => toggleUserStatus(usr.id)}
-                            className="px-3 py-1.5 text-xs font-bold rounded-xl border transition-all hover:scale-105"
-                            style={{
-                              borderColor: usr.status === 'ACTIVE' ? '#EF4444' : '#10B981',
-                              color: usr.status === 'ACTIVE' ? '#EF4444' : '#10B981',
-                              backgroundColor: usr.status === 'ACTIVE' ? 'rgba(239, 68, 68, 0.08)' : 'rgba(16, 185, 129, 0.08)'
-                            }}
-                          >
-                            {usr.status === 'ACTIVE' ? t('admin.users.btnSuspend') : t('admin.users.btnActivate')}
-                          </button>
+                    {isLoadingData ? (
+                      [1, 2, 3, 4, 5].map((i) => (
+                        <tr key={i}>
+                          <td className="p-4 space-y-1.5">
+                            <Skeleton variant="text" width="120px" height="1rem" />
+                            <Skeleton variant="text" width="160px" height="0.75rem" />
+                          </td>
+                          <td className="p-4">
+                            <Skeleton variant="rectangular" width="60px" height="1.5rem" />
+                          </td>
+                          <td className="p-4">
+                            <Skeleton variant="rectangular" width="90px" height="1.5rem" />
+                          </td>
+                          <td className="p-4">
+                            <Skeleton variant="rectangular" width="70px" height="1.5rem" />
+                          </td>
+                          <td className="p-4">
+                            <Skeleton variant="text" width="90px" height="0.9rem" />
+                          </td>
+                          <td className="p-4 text-right">
+                            <Skeleton variant="rectangular" width="80px" height="2rem" style={{ marginLeft: 'auto' }} />
+                          </td>
+                        </tr>
+                      ))
+                    ) : filteredUsers.length > 0 ? (
+                      filteredUsers.map((usr) => (
+                        <tr key={usr.id} className="hover:opacity-90 transition-opacity">
+                          <td className="p-4">
+                            <div className="font-bold text-xs sm:text-sm" style={{ color: colors.text.primary }}>{usr.name || usr.fullName || 'User'}</div>
+                            <div style={{ color: colors.text.secondary }} className="text-[11px] font-mono mt-0.5">{usr.email || 'N/A'}</div>
+                          </td>
+                          <td className="p-4">
+                            <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold ${usr.role === 'ADMIN' ? 'bg-purple-500/15 text-purple-400 border border-purple-500/30' : usr.role === 'MANAGER' ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30' : 'bg-blue-500/15 text-blue-400 border border-blue-500/30'
+                              }`}>
+                              {usr.role || 'USER'}
+                            </span>
+                          </td>
+                          <td className="p-4">
+                            <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold ${(usr.financialSetup || usr.financialSetupCompleted) ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' : 'bg-gray-500/10 text-gray-400 border border-gray-500/20'
+                              }`}>
+                              {(usr.financialSetup || usr.financialSetupCompleted) ? t('admin.users.setupCompleted') : t('admin.users.setupPending')}
+                            </span>
+                          </td>
+                          <td className="p-4">
+                            <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold ${usr.status === 'ACTIVE' ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' : usr.status === 'PENDING' ? 'bg-amber-500/10 text-amber-500 border border-amber-500/20' : 'bg-red-500/10 text-red-500 border border-red-500/20'
+                              }`}>
+                              {usr.status || 'ACTIVE'}
+                            </span>
+                          </td>
+                          <td className="p-4 font-mono text-xs" style={{ color: colors.text.secondary }}>{usr.joinedDate || usr.createdAt || 'N/A'}</td>
+                          <td className="p-4 text-right">
+                            <button
+                              onClick={() => toggleUserStatus(usr.id)}
+                              className="px-3 py-1.5 text-xs font-bold rounded-xl border transition-all hover:scale-105"
+                              style={{
+                                borderColor: usr.status === 'ACTIVE' ? '#EF4444' : '#10B981',
+                                color: usr.status === 'ACTIVE' ? '#EF4444' : '#10B981',
+                                backgroundColor: usr.status === 'ACTIVE' ? 'rgba(239, 68, 68, 0.08)' : 'rgba(16, 185, 129, 0.08)'
+                              }}
+                            >
+                              {usr.status === 'ACTIVE' ? t('admin.users.btnSuspend') : t('admin.users.btnActivate')}
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan={6} className="p-8 text-center" style={{ color: colors.text.secondary }}>
+                          <Text className="text-xs">{t('common.noData') || 'No users found'}</Text>
                         </td>
                       </tr>
-                    ))}
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -793,83 +817,7 @@ export default function AdminPage() {
           </div>
         )}
 
-        {/* TAB 4: PROJECTS & GROUPS MONITORING */}
-        {activeTab === 'projects' && (
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Projects Monitoring Card */}
-              <Card className="p-6 sm:p-7 border space-y-6" style={{ borderColor: colors.border.light, backgroundColor: colors.surface.primary }}>
-                <div className="border-b pb-4 mb-6" style={{ borderColor: colors.border.light }}>
-                  <Heading level={3} className="text-base sm:text-lg font-bold flex items-center gap-2.5 mb-1">
-                    <MdFolderOpen className="w-5 h-5 text-indigo-500" />
-                    {t('admin.projects.title')}
-                  </Heading>
-                  <Text style={{ color: colors.text.secondary }} className="text-xs sm:text-sm block">
-                    {t('admin.projects.subtitle')}
-                  </Text>
-                </div>
-
-                <div className="space-y-4">
-                  {projectsList.length > 0 ? (
-                    projectsList.slice(0, 5).map((p: any) => (
-                      <div key={p.projectId || p.id} className="p-4 rounded-2xl border space-y-2" style={{ borderColor: colors.border.light, backgroundColor: colors.background.secondary }}>
-                        <div className="flex items-center justify-between text-xs sm:text-sm">
-                          <span className="font-bold" style={{ color: colors.text.primary }}>{p.name}</span>
-                          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">{p.type || 'PERSONAL'}</span>
-                        </div>
-                        <div className="w-full h-2 bg-gray-700/30 rounded-full overflow-hidden">
-                          <div
-                            className="h-full bg-emerald-500 rounded-full transition-all duration-500"
-                            style={{ width: `${Math.min(((p.currentAmount || p.totalContributed || 0) / (p.targetAmount || 1)) * 100, 100)}%` }}
-                          />
-                        </div>
-                        <div className="flex justify-between text-xs" style={{ color: colors.text.secondary }}>
-                          <span>{t('admin.projects.savedLabel')}: {formatVietnamsePrice(p.currentAmount || p.totalContributed || 0)}</span>
-                          <span>{t('admin.projects.targetLabel')}: {formatVietnamsePrice(p.targetAmount || 0)}</span>
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <Text className="text-xs" style={{ color: colors.text.secondary }}>{t('admin.projects.noProjects')}</Text>
-                  )}
-                </div>
-              </Card>
-
-              {/* Active Groups Overview Card */}
-              <Card className="p-6 sm:p-7 border space-y-6" style={{ borderColor: colors.border.light, backgroundColor: colors.surface.primary }}>
-                <div className="border-b pb-4 mb-6" style={{ borderColor: colors.border.light }}>
-                  <Heading level={3} className="text-base sm:text-lg font-bold flex items-center gap-2.5 mb-1">
-                    <MdGroup className="w-5 h-5 text-emerald-500" />
-                    {t('admin.projects.groupsTitle')}
-                  </Heading>
-                  <Text style={{ color: colors.text.secondary }} className="text-xs sm:text-sm block">
-                    {t('admin.projects.groupsSubtitle')}
-                  </Text>
-                </div>
-
-                <div className="space-y-4">
-                  {groupsList.length > 0 ? (
-                    groupsList.slice(0, 5).map((g: any) => (
-                      <div key={g.groupId || g.id} className="p-4 rounded-2xl border space-y-1 flex items-center justify-between" style={{ borderColor: colors.border.light, backgroundColor: colors.background.secondary }}>
-                        <div>
-                          <Text className="font-bold text-xs sm:text-sm block" style={{ color: colors.text.primary }}>{g.name}</Text>
-                          <Text className="text-xs font-mono" style={{ color: colors.text.secondary }}>{t('admin.projects.inviteCodeLabel')}: {g.inviteCode || 'N/A'}</Text>
-                        </div>
-                        <span className="px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
-                          {t('admin.projects.membersCount', { count: g.membersCount || g.memberCount || 1 })}
-                        </span>
-                      </div>
-                    ))
-                  ) : (
-                    <Text className="text-xs" style={{ color: colors.text.secondary }}>{t('admin.projects.noGroups')}</Text>
-                  )}
-                </div>
-              </Card>
-            </div>
-          </div>
-        )}
-
-        {/* TAB 5: BROADCAST SYSTEM & REAL NOTIFICATIONS HISTORY */}
+        {/* TAB 4: BROADCAST SYSTEM & REAL NOTIFICATIONS HISTORY */}
         {activeTab === 'logs' && (
           <div className="space-y-6">
             {/* Send Broadcast Announcement Card */}

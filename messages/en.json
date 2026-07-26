@@ -909,7 +909,7 @@
     },
     "kpi": {
       "totalUsers": "Total Users",
-      "activeProjects": "Active Projects",
+      "activeUsers": "Active Users",
       "monthlyVolume": "Monthly Volume",
       "settlementStatus": "Settlement Engine"
     },

@@ -906,7 +906,7 @@
     },
     "kpi": {
       "totalUsers": "Tổng Người dùng",
-      "activeProjects": "Dự án Đang Hoạt động",
+      "activeUsers": "Người dùng Hoạt động",
       "monthlyVolume": "Khối lượng Giao dịch Tháng",
       "settlementStatus": "Trạng thái Quyết toán"
     },

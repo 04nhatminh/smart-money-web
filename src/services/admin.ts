@@ -122,34 +122,6 @@ export const adminService = {
   },
 
   /**
-   * Fetches system-wide projects via GET /api/v1/admin/projects
-   */
-  async getAllProjects(): Promise<any[]> {
-    try {
-      const response = await apiClient.get<any>('/api/v1/admin/projects');
-      const data = response?.data || response;
-      if (Array.isArray(data)) return data;
-    } catch (error) {
-      console.warn('Backend admin projects error:', error);
-    }
-    return [];
-  },
-
-  /**
-   * Fetches system-wide groups via GET /api/v1/admin/groups
-   */
-  async getAllGroups(): Promise<any[]> {
-    try {
-      const response = await apiClient.get<any>('/api/v1/admin/groups');
-      const data = response?.data || response;
-      if (Array.isArray(data)) return data;
-    } catch (error) {
-      console.warn('Backend admin groups error:', error);
-    }
-    return [];
-  },
-
-  /**
    * Broadcasts a notification to all active users via POST /api/v1/admin/broadcast
    */
   async broadcastNotification(title: string, message: string, severity: 'INFO' | 'WARNING' | 'URGENT'): Promise<{ success: boolean; message: string }> {
