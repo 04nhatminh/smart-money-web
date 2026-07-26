@@ -11,6 +11,8 @@ import { Button, Input, Heading, Text, Alert } from '@/components/atoms';
 import { useAuth } from '@/context/AuthContext';
 import { useAuthForm } from '@/hooks/useAuthForm';
 import { useTheme } from '@/context/ThemeContext';
+import { AuthChangeEvent, Session } from '@supabase/supabase-js';
+import { supabase } from '@/lib/supabase';
 
 interface LoginFormProps {
   onSuccess?: () => void;
@@ -60,60 +62,55 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
     }
   }, [loginWithGoogle, onSuccess]);
 
-  const handleFacebookLogin = useCallback(() => {
-    if (typeof window === 'undefined') {
-      setError('Window is not available');
-      return;
-    }
-
-    const FB = (window as any).FB;
-
-    if (!FB) {
-      setError('Facebook SDK not loaded yet. Please try again or refresh the page.');
-      console.error('FB object is undefined');
-      return;
-    }
-
-    if (!FB.login) {
-      setError('Facebook login method not available');
-      console.error('FB.login method not available');
-      return;
-    }
-
+  const handleFacebookLogin = useCallback(async () => {
     try {
-      FB.login(
-        (response: any) => {
-          if (!response) {
-            setError('No response from Facebook');
-            return;
-          }
-
-          if (response.authResponse) {
-            loginWithFacebook(response.authResponse.accessToken)
-              .then(() => {
-                onSuccess?.();
-              })
-              .catch((err: any) => {
-                const errorMessage = err instanceof Error ? err.message : 'Facebook login failed';
-                setError(errorMessage);
-                console.error('Facebook login error:', err);
-              });
-          } else {
-            setError(`Facebook login failed: ${response.status || 'Unknown error'}`);
-          }
+      setSocialLoading(true);
+      setError(null);
+      const redirectTo = typeof window !== 'undefined' ? `${window.location.origin}/${locale}/login` : undefined;
+      const { error: oauthError } = await supabase.auth.signInWithOAuth({
+        provider: 'facebook',
+        options: {
+          redirectTo,
         },
-        { scope: 'public_profile,email' }
-      );
+      });
+
+      if (oauthError) {
+        setError(oauthError.message);
+        setSocialLoading(false);
+      }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Error calling Facebook login';
+      const errorMessage = err instanceof Error ? err.message : 'Error starting Facebook login';
       setError(errorMessage);
-      console.error('Exception in FB.login:', err);
+      setSocialLoading(false);
     }
+  }, [locale]);
+
+  // Listen for Supabase auth state changes (handles redirect back from Facebook OAuth)
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event: AuthChangeEvent, session: Session | null) => {
+      if (session?.access_token && (event === 'SIGNED_IN' || event === 'INITIAL_SESSION')) {
+        try {
+          setSocialLoading(true);
+          await loginWithFacebook(session.access_token);
+          await supabase.auth.signOut();
+          onSuccess?.();
+        } catch (err: any) {
+          const errorMessage = err instanceof Error ? err.message : 'Facebook login failed';
+          setError(errorMessage);
+          console.error('Facebook login error:', err);
+        } finally {
+          setSocialLoading(false);
+        }
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, [loginWithFacebook, onSuccess]);
 
-  // Initialize Google Sign-In and Facebook SDK
+  // Initialize Google Sign-In script
   useEffect(() => {
-    // Load Google Sign-In script
     const script = document.createElement('script');
     script.src = 'https://accounts.google.com/gsi/client';
     script.async = true;
@@ -130,39 +127,13 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
 
     document.body.appendChild(script);
 
-    // Initialize Facebook SDK - Set fbAsyncInit BEFORE loading script
-    (window as any).fbAsyncInit = function () {
-      if ((window as any).FB) {
-        (window as any).FB.init({
-          appId: process.env.NEXT_PUBLIC_FACEBOOK_APP_ID,
-          xfbml: false,
-          version: 'v19.0',
-          status: true,
-          cookie: true,
-        });
-      } else {
-        console.error('FB object not available in fbAsyncInit');
-      }
-    };
-
-    // Load Facebook SDK script with appId parameter
-    const fbScript = document.createElement('script');
-    fbScript.src = 'https://connect.facebook.net/en_US/sdk.js';
-    fbScript.async = true;
-    fbScript.defer = true;
-    fbScript.onload = () => { };
-    fbScript.onerror = () => { };
-    document.body.appendChild(fbScript);
-
     return () => {
       if (document.body.contains(script)) {
         document.body.removeChild(script);
       }
-      if (document.body.contains(fbScript)) {
-        document.body.removeChild(fbScript);
-      }
     };
   }, [handleGoogleLogin]);
+
 
   const handleLogoClick = () => {
     router.push(`/${locale}`);

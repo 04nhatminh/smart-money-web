@@ -109,6 +109,9 @@ export function removeToken(): void {
 export function setUser(user: User): void {
   if (typeof window !== 'undefined') {
     localStorage.setItem(AUTH_USER_KEY, JSON.stringify(user));
+    if (user.role) {
+      setCookie('user_role', user.role);
+    }
     if (user.incomeSetupCompleted !== undefined) {
       setCookie('income_setup_completed', String(user.incomeSetupCompleted));
     }
@@ -176,6 +179,7 @@ export function clearAuth(): void {
   removeToken();
   removeRefreshToken();
   removeUser();
+  removeCookie('user_role');
   removeCookie('income_setup_completed');
   removeCookie('financial_setup_completed');
 }
