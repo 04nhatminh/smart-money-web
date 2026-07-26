@@ -12,6 +12,7 @@ import { useGroups } from '@/hooks/useGroups';
 import { useRouter } from 'next/navigation';
 import { useLocale } from 'next-intl';
 import { MdCheck, MdClose, MdNotifications } from 'react-icons/md';
+import { parseNotificationPayload } from '@/lib/format';
 
 interface NotificationData {
   id: string;
@@ -536,21 +537,29 @@ export default function NotificationsPage() {
                 const token = getInviteToken(notification.deepLink);
                 const isInvite = token !== null;
                 const isUnread = !notification.read;
+                const parsed = parseNotificationPayload(notification.content);
+
+                const sevStyle = parsed.severity === 'URGENT'
+                  ? 'bg-red-500/20 text-red-400 border-red-500/30'
+                  : parsed.severity === 'WARNING'
+                    ? 'bg-amber-500/20 text-amber-400 border-amber-500/30'
+                    : 'bg-indigo-500/20 text-indigo-400 border-indigo-500/30';
 
                 return (
                   <div
                     key={notification.id}
-                    className="p-5 transition-all duration-200 border-l-4 rounded-lg flex flex-col md:flex-row md:items-center justify-between gap-4"
+                    className="p-5 transition-all duration-200 border-l-4 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-4"
                     style={{
                       backgroundColor: isUnread ? `${colors.interactive.primary}0c` : colors.background.primary,
-                      borderLeftColor: isInvite ? '#F59E0B' : colors.interactive.primary,
+                      borderLeftColor: isInvite ? '#F59E0B' : parsed.isBroadcast ? (parsed.severity === 'URGENT' ? '#EF4444' : parsed.severity === 'WARNING' ? '#F59E0B' : colors.interactive.primary) : colors.interactive.primary,
                       border: `1px solid ${isUnread ? colors.interactive.primary : colors.border.light}`,
                       boxShadow: isUnread ? `0 0 8px ${colors.interactive.primary}20` : 'none',
                     }}
                   >
-                    {/* Content */}
-                    <div className="flex-1 space-y-1">
-                      <div className="flex items-center gap-2">
+                    {/* Content Area */}
+                    <div className="flex-1 space-y-2">
+                      {/* Header Row with Prominent Title & Severity Badge */}
+                      <div className="flex items-center gap-2.5 flex-wrap">
                         {isUnread && (
                           <span
                             className="w-2.5 h-2.5 rounded-full flex-shrink-0"
@@ -558,20 +567,41 @@ export default function NotificationsPage() {
                             title="Unread"
                           />
                         )}
+
+                        {parsed.isBroadcast && (
+                          <span className={`px-2 py-0.5 text-[10px] font-extrabold uppercase rounded-md border ${sevStyle}`}>
+                            {parsed.severity}
+                          </span>
+                        )}
+
                         <Heading
                           level={4}
-                          style={{ fontWeight: isUnread ? 'bold' : 'normal' }}
+                          className="text-base font-extrabold tracking-tight"
+                          style={{ color: colors.text.primary }}
                         >
-                          {isInvite
-                            ? (t('notifications.groupInvitation') || 'Group Invitation')
-                            : (t('notifications.notificationTitle') || 'Notification')}
+                          {parsed.isBroadcast
+                            ? parsed.title
+                            : isInvite
+                              ? (t('notifications.groupInvitation') || 'Group Invitation')
+                              : (t('notifications.notificationTitle') || 'Notification')}
                         </Heading>
                       </div>
-                      <Text style={{ color: colors.text.secondary, fontWeight: isUnread ? '500' : 'normal' }}>
-                        {parseNotificationContent(notification.content)}
-                      </Text>
+
+                      {/* Separate Row for Notification Message Body */}
+                      {(parsed.isBroadcast ? parsed.message : notification.content) && (
+                        <Text
+                          className="text-xs sm:text-sm leading-relaxed block font-medium"
+                          style={{
+                            color: colors.text.secondary
+                          }}
+                        >
+                          {parsed.isBroadcast ? parsed.message : notification.content}
+                        </Text>
+                      )}
+
+                      {/* Timestamp Row */}
                       <Text
-                        className="text-xs"
+                        className="text-[11px] block pt-0.5"
                         style={{ color: colors.text.tertiary }}
                       >
                         {formatTime(notification.createdAt)}

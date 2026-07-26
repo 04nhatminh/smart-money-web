@@ -895,5 +895,94 @@
       "title": "Start Savings Goal",
       "ask": "You have surplus funds this month — start a savings goal with {resolvedValue}?"
     }
+  },
+  "admin": {
+    "title": "System Control & Admin Dashboard",
+    "subtitle": "Monitor system health, manage user accounts & execute financial settlements",
+    "statusOnline": "All Systems Operational",
+    "tabs": {
+      "overview": "Overview",
+      "settlement": "Financial Settlement",
+      "users": "User Management",
+      "projects": "Projects & Groups",
+      "logs": "Broadcast & Notifications"
+    },
+    "kpi": {
+      "totalUsers": "Total Users",
+      "activeProjects": "Active Projects",
+      "monthlyVolume": "Monthly Volume",
+      "settlementStatus": "Settlement Engine"
+    },
+    "overviewSection": {
+      "analyticsTitle": "Transaction Volume & Savings Analytics",
+      "analyticsSubtitle": "System financial volume trends over the past 6 months",
+      "systemDistributionTitle": "User & Project Distribution",
+      "systemDistributionSubtitle": "Ratio of personal vs group projects and profile setups",
+      "quickActionsTitle": "Quick Management Actions",
+      "manageUsersBtn": "Manage User Accounts",
+      "manageSettlementBtn": "Manage Settlement Engine",
+      "broadcastTabBtn": "Broadcast Announcement",
+      "sysSummary": "System Summary"
+    },
+    "settlement": {
+      "title": "Monthly Financial Settlement",
+      "subtitle": "Manually trigger allocation calculations and budget carry-overs system-wide",
+      "runButton": "Run Settlement Now",
+      "running": "Processing settlement...",
+      "lastRun": "Last Execution",
+      "status": "Status",
+      "message": "Message",
+      "history": "Execution History",
+      "successMessage": "Financial settlement process completed successfully!",
+      "autoScheduleInfo": "Automated settlement executes on the final day of each calendar month.",
+      "dryRunNotice": "Manual execution recalculates balances and creates automated carry-over entries."
+    },
+    "users": {
+      "title": "Registered Users",
+      "subtitle": "Manage system user roles, access statuses, and financial profile setups",
+      "searchPlaceholder": "Search by name or email...",
+      "filterAll": "All Statuses",
+      "filterActive": "Active",
+      "filterPending": "Pending",
+      "filterSuspended": "Suspended",
+      "colUser": "User",
+      "colEmail": "Email",
+      "colRole": "Role",
+      "colFinancial": "Financial Profile",
+      "colStatus": "Status",
+      "colActions": "Actions",
+      "setupCompleted": "Configured",
+      "setupPending": "Pending",
+      "btnSuspend": "Suspend",
+      "btnActivate": "Activate",
+      "noUsersFound": "No matching users found."
+    },
+    "projects": {
+      "title": "Saving Projects Monitoring",
+      "subtitle": "Monitoring system-wide saving goals and budget targets",
+      "groupsTitle": "Group Management & Sponsorships",
+      "groupsSubtitle": "Active joint projects and group member counts",
+      "savedLabel": "Saved",
+      "targetLabel": "Target",
+      "membersCount": "{count} members",
+      "inviteCodeLabel": "Code",
+      "noProjects": "No system projects found.",
+      "noGroups": "No active groups found."
+    },
+    "broadcast": {
+      "title": "System Broadcast Announcement",
+      "subtitle": "Broadcast system-wide notifications to all registered active users",
+      "button": "Send Broadcast",
+      "subject": "Announcement Title",
+      "message": "Announcement Message",
+      "severity": "Severity Level",
+      "send": "Broadcast Now",
+      "broadcasting": "Broadcasting...",
+      "sentSuccess": "System notification broadcasted successfully!",
+      "historyTitle": "Broadcast History & Admin Received Logs",
+      "historySubtitle": "Real notifications stream delivered to Admin and System Users",
+      "refreshBtn": "Refresh",
+      "noHistory": "No broadcast notifications sent yet."
+    }
   }
 }

@@ -180,10 +180,10 @@ export const Header: React.FC<HeaderProps> = ({
 
           {/* Actions - Right */}
           <div className="flex gap-2 sm:gap-4 items-center">
-            <ThemeToggle />
-            <LanguageToggle />
             {showAuthActions && (
               <>
+                <ThemeToggle />
+                <LanguageToggle />
                 <Button variant="secondary" size="md" className="hidden sm:block" onClick={handleLoginClick}>
                   {t('finance.hero.login')}
                 </Button>
@@ -280,15 +280,15 @@ export const Header: React.FC<HeaderProps> = ({
                   {/* User Menu Dropdown */}
                   {openUserMenu && (
                     <div
-                      className="absolute right-0 mt-2 w-64 rounded-lg shadow-lg py-2 z-50"
+                      className="absolute right-0 mt-2 w-64 rounded-xl shadow-xl py-2 z-50 transition-all"
                       style={{ backgroundColor: colors.background.primary, border: `1px solid ${colors.border.light}` }}
                     >
                       {/* User Info */}
-                      <div className="px-4 py-2 border-b" style={{ borderColor: colors.border.light }}>
-                        <p className="font-semibold" style={{ color: colors.text.primary }}>
+                      <div className="px-4 py-2.5 border-b" style={{ borderColor: colors.border.light }}>
+                        <p className="font-bold text-sm" style={{ color: colors.text.primary }}>
                           {user?.fullName || user?.username}
                         </p>
-                        <p className="text-sm" style={{ color: colors.text.secondary }}>
+                        <p className="text-xs mt-0.5 font-medium" style={{ color: colors.text.secondary }}>
                           {user?.email}
                         </p>
                       </div>
@@ -296,7 +296,7 @@ export const Header: React.FC<HeaderProps> = ({
                       {/* Menu Items */}
                       <button
                         onClick={handleDashboardClick}
-                        className="w-full text-left px-4 py-2 hover:bg-opacity-50 transition-colors hover:cursor-pointer"
+                        className="w-full text-left px-4 py-2.5 text-sm font-medium transition-colors hover:cursor-pointer flex items-center"
                         style={{ color: colors.text.primary, backgroundColor: 'transparent' }}
                         onMouseEnter={(e) => e.currentTarget.style.backgroundColor = `${colors.interactive.primary}10`}
                         onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
@@ -306,7 +306,7 @@ export const Header: React.FC<HeaderProps> = ({
 
                       <button
                         onClick={handleProfileClick}
-                        className="w-full text-left px-4 py-2 hover:bg-opacity-50 transition-colors hover:cursor-pointer"
+                        className="w-full text-left px-4 py-2.5 text-sm font-medium transition-colors hover:cursor-pointer flex items-center"
                         style={{ color: colors.text.primary, backgroundColor: 'transparent' }}
                         onMouseEnter={(e) => e.currentTarget.style.backgroundColor = `${colors.interactive.primary}10`}
                         onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
@@ -314,11 +314,33 @@ export const Header: React.FC<HeaderProps> = ({
                         {t('common.profile') || 'Profile'}
                       </button>
 
-                      <div style={{ borderColor: colors.border.light, borderTopWidth: '1px' }}></div>
+                      {user?.role === 'ADMIN' && (
+                        <button
+                          onClick={() => {
+                            router.push(`/${locale}/admin`);
+                            setOpenUserMenu(false);
+                          }}
+                          className="w-full text-left px-4 py-2.5 text-sm font-medium transition-colors hover:cursor-pointer flex items-center justify-between"
+                          style={{ color: colors.text.primary, backgroundColor: 'transparent' }}
+                          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = `${colors.interactive.primary}10`}
+                          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                        >
+                          <span>Admin Dashboard</span>
+                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-purple-500/15 text-purple-600 dark:text-purple-300 font-extrabold border border-purple-500/20">
+                            ADMIN
+                          </span>
+                        </button>
+                      )}
+
+                      {/* Theme & Language Preferences inside User Menu */}
+                      <div className="px-4 py-2.5 border-t border-b flex items-center justify-between gap-2" style={{ borderColor: colors.border.light }}>
+                        <ThemeToggle />
+                        <LanguageToggle />
+                      </div>
 
                       <button
                         onClick={handleLogout}
-                        className="w-full text-left px-4 py-2 transition-colors hover:cursor-pointer"
+                        className="w-full text-left px-4 py-2.5 text-sm font-medium transition-colors hover:cursor-pointer flex items-center"
                         style={{ color: colors.interactive.danger, backgroundColor: 'transparent' }}
                         onMouseEnter={(e) => e.currentTarget.style.backgroundColor = `${colors.interactive.danger}10`}
                         onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
