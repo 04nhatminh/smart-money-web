@@ -96,11 +96,11 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
 
     // Match headers (case-insensitive)
     const headers = rows[0].map(h => String(h || '').toLowerCase().trim());
-    const amountIdx = headers.indexOf('amount');
-    const typeIdx = headers.indexOf('type');
-    const categoryIdx = headers.indexOf('category');
-    const dateIdx = headers.indexOf('date');
-    const descIdx = headers.indexOf('description');
+    const amountIdx = headers.findIndex(h => h.includes('amount'));
+    const typeIdx = headers.findIndex(h => h.includes('type'));
+    const categoryIdx = headers.findIndex(h => h.includes('category'));
+    const dateIdx = headers.findIndex(h => h.includes('date'));
+    const descIdx = headers.findIndex(h => h.includes('description'));
 
     if (amountIdx === -1 || typeIdx === -1 || categoryIdx === -1 || dateIdx === -1) {
       setGeneralError(t('transactions.excelErrorHeaders'));
@@ -128,9 +128,10 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
       // Validate Amount
       let amount = 0;
       if (typeof rawAmount === 'number') {
-        amount = rawAmount;
+        amount = Math.abs(rawAmount);
       } else {
-        amount = Number(String(rawAmount || '').replace(/,/g, ''));
+        const cleaned = String(rawAmount || '').replace(/[^0-9.-]/g, '');
+        amount = Math.abs(Number(cleaned));
       }
 
       if (isNaN(amount) || amount <= 0) {
@@ -224,29 +225,44 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
 
   const handleDownloadTemplate = () => {
     const data = [
-      ['Amount', 'Type', 'Category', 'Date', 'Description'],
-      [50000, 'EXPENSE', 'FOOD', '16/06/2026 12:30', 'Lunch with coworkers'],
-      [15000000, 'INCOME', 'OTHER', '10/06/2026 09:00', 'Monthly salary payment'],
-      [120000, 'EXPENSE', 'TRANSPORTATION', '15/06/2026 18:45', 'Taxi ride home']
+      ['No.', 'Amount (VND)', 'Type', 'Category', 'Date', 'Description'],
+      [1, -50000, 'Expense', 'Food', '16/06/2026 12:30', 'Lunch with coworkers'],
+      [2, 15000000, 'Income', 'Other', '10/06/2026 09:00', 'Monthly salary payment'],
+      [3, -120000, 'Expense', 'Transportation', '15/06/2026 18:45', 'Taxi ride home']
     ];
     const worksheet = XLSX.utils.aoa_to_sheet(data);
 
     // Apply custom column widths
     worksheet['!cols'] = [
-      { wch: 18 }, // Column A (Amount)
-      { wch: 12 }, // Column B (Type)
-      { wch: 18 }, // Column C (Category)
-      { wch: 20 }, // Column D (Date)
-      { wch: 35 }  // Column E (Description)
+      { wch: 8 },  // Column A (No.)
+      { wch: 22 }, // Column B (Amount (VND))
+      { wch: 14 }, // Column C (Type)
+      { wch: 20 }, // Column D (Category)
+      { wch: 22 }, // Column E (Date)
+      { wch: 40 }  // Column F (Description)
     ];
 
     // Apply custom row heights
     worksheet['!rows'] = [
-      { hpt: 26 }, // Header row
-      { hpt: 20 }, // Data row 1
-      { hpt: 20 }, // Data row 2
-      { hpt: 20 }  // Data row 3
+      { hpt: 28 }, // Header row
+      { hpt: 22 }, // Data row 1
+      { hpt: 22 }, // Data row 2
+      { hpt: 22 }  // Data row 3
     ];
+
+    const borderColor = '9CA3AF'; // Standard solid border color (Gray 400) for clear table outline
+    const cellBorder = {
+      top: { style: 'thin', color: { rgb: borderColor } },
+      bottom: { style: 'thin', color: { rgb: borderColor } },
+      left: { style: 'thin', color: { rgb: borderColor } },
+      right: { style: 'thin', color: { rgb: borderColor } }
+    };
+    const headerBorder = {
+      top: { style: 'medium', color: { rgb: '4B5563' } },
+      bottom: { style: 'medium', color: { rgb: '4B5563' } },
+      left: { style: 'thin', color: { rgb: borderColor } },
+      right: { style: 'thin', color: { rgb: borderColor } }
+    };
 
     // Apply styles to cells
     const range = XLSX.utils.decode_range(worksheet['!ref'] || 'A1:A1');
@@ -256,50 +272,46 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
         const cell = worksheet[cellRef];
         if (!cell) continue;
 
-        const topStyle = R === range.s.r ? 'medium' : 'thin';
-        const bottomStyle = R === range.e.r ? 'medium' : 'thin';
-        const leftStyle = C === range.s.c ? 'medium' : 'thin';
-        const rightStyle = C === range.e.c ? 'medium' : 'thin';
-        const borderColor = colors.border.dark;
-
         if (R === 0) {
-          // Header Row Style
+          // Header Row Style: Neutral background #E5E7EB, Dark text #111827, centered header
           cell.s = {
-            fill: { fgColor: { rgb: '3629B7' } }, // Indigo background
-            font: { name: 'Segoe UI', sz: 11, bold: true, color: { rgb: 'FFFFFF' } },
+            fill: { fgColor: { rgb: 'E5E7EB' } },
+            font: { name: 'Segoe UI', sz: 11, bold: true, color: { rgb: '111827' } },
             alignment: { horizontal: 'center', vertical: 'center' },
-            border: {
-              top: { style: topStyle, color: { rgb: borderColor } },
-              bottom: { style: R === range.e.r ? 'medium' : 'thin', color: { rgb: borderColor } },
-              left: { style: leftStyle, color: { rgb: borderColor } },
-              right: { style: rightStyle, color: { rgb: borderColor } }
-            }
+            border: headerBorder
           };
         } else {
-          // Data Row Style (Row 1: EXPENSE, Row 2: INCOME, Row 3: EXPENSE)
-          const isIncome = R === 2; // Row 2 is INCOME (15,000,000)
+          // Data Row Style (Row 1: Expense, Row 2: Income, Row 3: Expense)
+          const isIncome = R === 2; // Row 2 is Income
 
-          // Soft background and text colors
-          const rowBgColor = isIncome ? 'E6F4EA' : 'FCE8E6';
-          const rowTextColor = isIncome ? '137333' : 'C5221F';
+          // Zebra striping: alternate white (#FFFFFF) and very light gray (#F9FAFB)
+          const rowBgColor = R % 2 === 1 ? 'FFFFFF' : 'F9FAFB';
+
+          // Accent colors: Green #16A34A / Red #DC2626 ONLY on Amount and Type
+          const accentColor = isIncome ? '16A34A' : 'DC2626';
+          const textColor = (C === 1 || C === 2) ? accentColor : '374151';
+
+          const isCentered = C === 0 || C === 2 || C === 4; // No., Type, Date
+          const isRight = C === 1;                          // Amount (VND)
 
           cell.s = {
             fill: { fgColor: { rgb: rowBgColor } },
-            font: { name: 'Segoe UI', sz: 10, color: { rgb: rowTextColor } },
-            border: {
-              top: { style: topStyle, color: { rgb: borderColor } },
-              bottom: { style: bottomStyle, color: { rgb: borderColor } },
-              left: { style: leftStyle, color: { rgb: borderColor } },
-              right: { style: rightStyle, color: { rgb: borderColor } }
+            font: {
+              name: 'Segoe UI',
+              sz: 10,
+              bold: C === 1,
+              color: { rgb: textColor }
             },
+            border: cellBorder,
             alignment: {
               vertical: 'center',
-              horizontal: C === 0 ? 'right' : (C === 1 || C === 3 ? 'center' : 'left')
+              horizontal: isRight ? 'right' : (isCentered ? 'center' : 'left'),
+              indent: isCentered ? 0 : 1
             }
           };
 
-          if (C === 0) {
-            cell.z = '#,##0'; // Numeric currency format
+          if (C === 1) {
+            cell.z = '+#,##0_ ;-#,##0_ ;0_ '; // Numeric format with sign, thousand separators and balanced right padding
           }
         }
       }
@@ -418,46 +430,50 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
                   </ul>
 
                   {/* Excel Template Preview Table */}
-                  <div className="overflow-x-auto my-3 border rounded-lg shadow-sm" style={{ borderColor: colors.border.light }}>
-                    <table className="min-w-full text-xs text-left border-collapse" style={{ border: `1px solid ${colors.border.light}` }}>
+                  <div className="overflow-x-auto my-3 border rounded-lg shadow-sm" style={{ borderColor: '#9CA3AF' }}>
+                    <table className="min-w-full text-xs text-left border-collapse" style={{ border: `1px solid #9CA3AF` }}>
                       <thead>
-                        {/* Excel-style Column Indicators A, B, C, D, E */}
-                        <tr style={{ backgroundColor: '#F3F4F6', borderBottom: `1px solid ${colors.border.light}` }}>
-                          <th className="p-1 text-center font-semibold text-[10px]" style={{ color: colors.text.tertiary, borderRight: `1px solid ${colors.border.light}`, width: '5%' }}></th>
-                          <th className="p-1 text-center font-semibold text-[10px]" style={{ color: colors.text.tertiary, borderRight: `1px solid ${colors.border.light}` }}>A</th>
-                          <th className="p-1 text-center font-semibold text-[10px]" style={{ color: colors.text.tertiary, borderRight: `1px solid ${colors.border.light}` }}>B</th>
-                          <th className="p-1 text-center font-semibold text-[10px]" style={{ color: colors.text.tertiary, borderRight: `1px solid ${colors.border.light}` }}>C</th>
-                          <th className="p-1 text-center font-semibold text-[10px]" style={{ color: colors.text.tertiary, borderRight: `1px solid ${colors.border.light}` }}>D</th>
-                          <th className="p-1 text-center font-semibold text-[10px]" style={{ color: colors.text.tertiary }}>E</th>
+                        {/* Excel-style Column Indicators A, B, C, D, E, F */}
+                        <tr style={{ backgroundColor: '#F9FAFB', borderBottom: `1px solid #9CA3AF` }}>
+                          <th className="p-1 text-center font-semibold text-[10px]" style={{ color: colors.text.tertiary, borderRight: `1px solid #9CA3AF`, width: '4%' }}></th>
+                          <th className="p-1 text-center font-semibold text-[10px]" style={{ color: colors.text.tertiary, borderRight: `1px solid #9CA3AF` }}>A</th>
+                          <th className="p-1 text-center font-semibold text-[10px]" style={{ color: colors.text.tertiary, borderRight: `1px solid #9CA3AF` }}>B</th>
+                          <th className="p-1 text-center font-semibold text-[10px]" style={{ color: colors.text.tertiary, borderRight: `1px solid #9CA3AF` }}>C</th>
+                          <th className="p-1 text-center font-semibold text-[10px]" style={{ color: colors.text.tertiary, borderRight: `1px solid #9CA3AF` }}>D</th>
+                          <th className="p-1 text-center font-semibold text-[10px]" style={{ color: colors.text.tertiary, borderRight: `1px solid #9CA3AF` }}>E</th>
+                          <th className="p-1 text-center font-semibold text-[10px]" style={{ color: colors.text.tertiary }}>F</th>
                         </tr>
                         {/* Styled Header Row */}
-                        <tr style={{ backgroundColor: '#3629B7', borderBottom: `1px solid #3026A6` }}>
-                          <td className="p-2 text-center font-bold text-[10px]" style={{ backgroundColor: '#F3F4F6', color: colors.text.tertiary, borderRight: `1px solid ${colors.border.light}` }}>1</td>
-                          <th className="p-2 font-bold text-center" style={{ color: '#FFFFFF', borderRight: `1px solid #B1ACEC` }}>{t('transactions.excelHeaderAmount')}</th>
-                          <th className="p-2 font-bold text-center" style={{ color: '#FFFFFF', borderRight: `1px solid #B1ACEC` }}>{t('transactions.excelHeaderType')}</th>
-                          <th className="p-2 font-bold text-center" style={{ color: '#FFFFFF', borderRight: `1px solid #B1ACEC` }}>{t('transactions.excelHeaderCategory')}</th>
-                          <th className="p-2 font-bold text-center" style={{ color: '#FFFFFF', borderRight: `1px solid #B1ACEC` }}>{t('transactions.excelHeaderDate')}</th>
-                          <th className="p-2 font-bold text-center" style={{ color: '#FFFFFF' }}>{t('transactions.excelHeaderDescription')}</th>
+                        <tr style={{ backgroundColor: '#E5E7EB', borderBottom: `2px solid #4B5563` }}>
+                          <td className="p-2 text-center font-bold text-[10px]" style={{ backgroundColor: '#F9FAFB', color: colors.text.tertiary, borderRight: `1px solid #9CA3AF` }}>1</td>
+                          <th className="p-2 px-2 font-bold text-center" style={{ color: '#111827', borderRight: `1px solid #9CA3AF` }}>No.</th>
+                          <th className="p-2 px-3 font-bold text-center" style={{ color: '#111827', borderRight: `1px solid #9CA3AF` }}>{t('transactions.excelHeaderAmount')}</th>
+                          <th className="p-2 px-3 font-bold text-center" style={{ color: '#111827', borderRight: `1px solid #9CA3AF` }}>{t('transactions.excelHeaderType')}</th>
+                          <th className="p-2 px-3 font-bold text-center" style={{ color: '#111827', borderRight: `1px solid #9CA3AF` }}>{t('transactions.excelHeaderCategory')}</th>
+                          <th className="p-2 px-3 font-bold text-center" style={{ color: '#111827', borderRight: `1px solid #9CA3AF` }}>{t('transactions.excelHeaderDate')}</th>
+                          <th className="p-2 px-3 font-bold text-center" style={{ color: '#111827' }}>{t('transactions.excelHeaderDescription')}</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {/* Row 2: EXPENSE */}
-                        <tr style={{ backgroundColor: '#FCE8E6', borderBottom: `1px solid ${colors.border.light}` }}>
-                          <td className="p-2 text-center font-semibold text-[10px]" style={{ backgroundColor: '#F3F4F6', color: colors.text.tertiary, borderRight: `1px solid ${colors.border.light}` }}>2</td>
-                          <td className="p-2 text-right font-medium" style={{ color: '#C5221F', borderRight: `1px solid #C5C1F1` }}>50,000</td>
-                          <td className="p-2 text-center font-semibold" style={{ color: '#C5221F', borderRight: `1px solid #C5C1F1` }}>EXPENSE</td>
-                          <td className="p-2 text-center" style={{ color: '#C5221F', borderRight: `1px solid #C5C1F1` }}>FOOD</td>
-                          <td className="p-2 text-center font-mono" style={{ color: '#C5221F', borderRight: `1px solid #C5C1F1` }}>16/06/2026 12:30</td>
-                          <td className="p-2 italic" style={{ color: '#C5221F' }}>Lunch with coworkers</td>
+                        {/* Row 2: Expense */}
+                        <tr style={{ backgroundColor: '#FFFFFF', borderBottom: `1px solid #9CA3AF` }}>
+                          <td className="p-2 text-center font-semibold text-[10px]" style={{ backgroundColor: '#F9FAFB', color: colors.text.tertiary, borderRight: `1px solid #9CA3AF` }}>2</td>
+                          <td className="p-2 text-center font-medium" style={{ color: '#374151', borderRight: `1px solid #9CA3AF` }}>1</td>
+                          <td className="p-2 pr-3 text-right font-bold" style={{ color: '#DC2626', borderRight: `1px solid #9CA3AF` }}>-50,000</td>
+                          <td className="p-2 text-center font-semibold" style={{ color: '#DC2626', borderRight: `1px solid #9CA3AF` }}>Expense</td>
+                          <td className="p-2 pl-3 text-left" style={{ color: '#374151', borderRight: `1px solid #9CA3AF` }}>Food</td>
+                          <td className="p-2 text-center font-mono" style={{ color: '#374151', borderRight: `1px solid #9CA3AF` }}>16/06/2026 12:30</td>
+                          <td className="p-2 pl-3 text-left" style={{ color: '#374151' }}>Lunch with coworkers</td>
                         </tr>
-                        {/* Row 3: INCOME */}
-                        <tr style={{ backgroundColor: '#E6F4EA' }}>
-                          <td className="p-2 text-center font-semibold text-[10px]" style={{ backgroundColor: '#F3F4F6', color: colors.text.tertiary, borderRight: `1px solid ${colors.border.light}` }}>3</td>
-                          <td className="p-2 text-right font-medium" style={{ color: '#137333', borderRight: `1px solid #C5C1F1` }}>15,000,000</td>
-                          <td className="p-2 text-center font-semibold" style={{ color: '#137333', borderRight: `1px solid #C5C1F1` }}>INCOME</td>
-                          <td className="p-2 text-center" style={{ color: '#137333', borderRight: `1px solid #C5C1F1` }}>OTHER</td>
-                          <td className="p-2 text-center font-mono" style={{ color: '#137333', borderRight: `1px solid #C5C1F1` }}>10/06/2026 09:00</td>
-                          <td className="p-2 italic" style={{ color: '#137333' }}>Monthly salary payment</td>
+                        {/* Row 3: Income */}
+                        <tr style={{ backgroundColor: '#F9FAFB' }}>
+                          <td className="p-2 text-center font-semibold text-[10px]" style={{ backgroundColor: '#F9FAFB', color: colors.text.tertiary, borderRight: `1px solid #9CA3AF` }}>3</td>
+                          <td className="p-2 text-center font-medium" style={{ color: '#374151', borderRight: `1px solid #9CA3AF` }}>2</td>
+                          <td className="p-2 pr-3 text-right font-bold" style={{ color: '#16A34A', borderRight: `1px solid #9CA3AF` }}>+15,000,000</td>
+                          <td className="p-2 text-center font-semibold" style={{ color: '#16A34A', borderRight: `1px solid #9CA3AF` }}>Income</td>
+                          <td className="p-2 pl-3 text-left" style={{ color: '#374151', borderRight: `1px solid #9CA3AF` }}>Other</td>
+                          <td className="p-2 text-center font-mono" style={{ color: '#374151', borderRight: `1px solid #9CA3AF` }}>10/06/2026 09:00</td>
+                          <td className="p-2 pl-3 text-left" style={{ color: '#374151' }}>Monthly salary payment</td>
                         </tr>
                       </tbody>
                     </table>

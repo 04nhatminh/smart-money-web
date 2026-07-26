@@ -9,11 +9,13 @@ import { ProtectedRoute } from '@/components/templates';
 interface SidebarLayoutProps {
   children: React.ReactNode;
   navItems?: NavItem[];
+  showSidebar?: boolean;
 }
 
 export const SidebarLayout: React.FC<SidebarLayoutProps> = ({
   children,
   navItems = [],
+  showSidebar = true,
 }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
@@ -45,19 +47,21 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({
       <div className="flex flex-col min-h-screen">
         <Header
           navItems={navItems}
-          showSidebarToggle={false}
+          showSidebarToggle={showSidebar}
         />
         <div className="flex flex-1 pt-6 sm:pt-10">
-          <Sidebar
-            isOpen={false}
-            onClose={() => {}}
-            isCollapsed={isCollapsed}
-            onToggleCollapse={toggleCollapse}
-            isMounted={isMounted}
-          />
+          {showSidebar && (
+            <Sidebar
+              isOpen={false}
+              onClose={() => {}}
+              isCollapsed={isCollapsed}
+              onToggleCollapse={toggleCollapse}
+              isMounted={isMounted}
+            />
+          )}
           <div
             className={`flex-1 flex flex-col ${transitionClass} ${
-              isCollapsed ? 'lg:ml-20' : 'lg:ml-64'
+              showSidebar ? (isCollapsed ? 'lg:ml-20' : 'lg:ml-64') : ''
             } ml-0 min-w-0 max-w-full overflow-x-hidden`}
           >
             <main className="flex-1 px-4 sm:px-6 lg:px-8 py-8 pb-24 lg:pb-8 min-w-0 max-w-full">
@@ -66,7 +70,7 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({
             <Footer />
           </div>
         </div>
-        <MobileBottomNav />
+        {showSidebar && <MobileBottomNav />}
       </div>
     </ProtectedRoute>
   );

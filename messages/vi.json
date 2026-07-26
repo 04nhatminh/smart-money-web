@@ -301,8 +301,8 @@
     "importExcel": "Nhập từ Excel",
     "exportExcel": "Xuất Excel",
     "excelModalTitle": "Nhập Giao Dịch từ file Excel",
-    "excelFormatInstructions": "Vui lòng định dạng file Excel của bạn với các tiêu đề cột sau: **Amount**, **Type**, **Category**, **Date**, **Description**.",
-    "excelFormatDetails": "Chi tiết: Amount (số lớn hơn 0), Type (INCOME hoặc EXPENSE), Category (FOOD, TRANSPORTATION, v.v.), Date (dd/MM/yyyy HH:mm), Description (không bắt buộc).",
+    "excelFormatInstructions": "Vui lòng định dạng file Excel của bạn với các tiêu đề cột sau: **Amount (VND)**, **Type**, **Category**, **Date**, **Description**.",
+    "excelFormatDetails": "Chi tiết: Amount (VND) (số lớn hơn 0), Type (INCOME hoặc EXPENSE), Category (FOOD, TRANSPORTATION, v.v.), Date (dd/MM/yyyy HH:mm), Description (không bắt buộc).",
     "downloadTemplate": "Tải file mẫu Excel",
     "dropExcelHere": "Kéo & thả file Excel của bạn vào đây, hoặc click để chọn file",
     "invalidFile": "Vui lòng chọn một file Excel hợp lệ (.xlsx, .xls).",
@@ -328,7 +328,7 @@
     "methodExcelDesc": "Tải lên file Excel",
     "excelGuidelineTitle": "Hướng dẫn Định dạng Excel",
     "excelLabelColumns": "Các cột",
-    "excelGuidelineColumnsDesc": "Amount, Type, Category, Date, Description.",
+    "excelGuidelineColumnsDesc": "Amount (VND), Type, Category, Date, Description.",
     "excelGuidelineAmountDesc": "Chỉ chấp nhận số dương (ví dụ: 50000).",
     "excelGuidelineTypeDesc": "INCOME hoặc EXPENSE.",
     "excelGuidelineCategoryDesc": "Bắt buộc đối với chi tiêu. Sử dụng: FOOD, TRANSPORTATION, CLOTHING, UTILITIES, ENTERTAINMENT, HEALTH, EDUCATION, SHOPPING, OTHER.",
@@ -337,12 +337,12 @@
     "excelOnlySupported": "Chỗ trợ tệp .xlsx, .xls",
     "excelValidationWarning": "Lưu ý: Giao dịch có lỗi xác thực sẽ bị bỏ qua. Vui lòng sửa lại trong tệp Excel của bạn nếu cần thiết.",
     "excelImportRowsBtn": "Nhập {count} dòng",
-    "excelHeaderAmount": "Số tiền",
+    "excelHeaderAmount": "Số tiền (VND)",
     "excelHeaderType": "Loại",
     "excelHeaderCategory": "Danh mục",
     "excelHeaderDate": "Ngày",
     "excelHeaderDescription": "Mô tả",
-    "excelErrorHeaders": "Tệp Excel phải chứa các tiêu đề ở dòng đầu tiên: Amount, Type, Category, Date (Description là không bắt buộc)",
+    "excelErrorHeaders": "Tệp Excel phải chứa các tiêu đề ở dòng đầu tiên: Amount (VND), Type, Category, Date (Description là không bắt buộc)",
     "excelErrorAmount": "Số tiền phải là số lớn hơn 0",
     "excelErrorType": "Loại phải là INCOME hoặc EXPENSE",
     "excelErrorCategory": "Danh mục chi tiêu phải là một trong: {categories}",
@@ -891,6 +891,67 @@
     "create_project": {
       "title": "Bắt đầu mục tiêu tiết kiệm",
       "ask": "Tháng này bạn có tiền dư — bắt đầu một mục tiêu tiết kiệm với {resolvedValue}?"
+    }
+  },
+  "admin": {
+    "title": "Bảng Đăng Nhập & Quản Trị Hệ Thống",
+    "subtitle": "Giám sát hệ thống, quản lý người dùng & thực thi quy trình quyết toán tài chính",
+    "statusOnline": "Hệ thống hoạt động bình thường",
+    "tabs": {
+      "overview": "Tổng quan",
+      "settlement": "Quyết toán Tài chính",
+      "users": "Quản lý Người dùng",
+      "projects": "Giám sát Dự án & Nhóm",
+      "logs": "Broadcast & Thông báo"
+    },
+    "kpi": {
+      "totalUsers": "Tổng Người dùng",
+      "activeUsers": "Người dùng Hoạt động",
+      "monthlyVolume": "Khối lượng Giao dịch Tháng",
+      "settlementStatus": "Trạng thái Quyết toán"
+    },
+    "settlement": {
+      "title": "Quyết toán Tài chính Hàng tháng",
+      "subtitle": "Kích hoạt thủ công tiến trình tính toán phân bổ và kết chuyển ngân sách toàn hệ thống",
+      "runButton": "Kích Hoạt Quyết Toán Ngay",
+      "running": "Đang thực thi quyết toán...",
+      "lastRun": "Lần chạy gần nhất",
+      "status": "Trạng thái",
+      "message": "Thông điệp",
+      "history": "Lịch sử thực thi",
+      "successMessage": "Tiến trình quyết toán tài chính đã hoàn tất thành công!"
+    },
+    "users": {
+      "title": "Danh sách Người dùng",
+      "searchPlaceholder": "Tìm theo tên hoặc email...",
+      "filterAll": "Tất cả trạng thái",
+      "filterActive": "Hoạt động",
+      "filterPending": "Chờ xác thực",
+      "filterSuspended": "Tạm khóa",
+      "colUser": "Người dùng",
+      "colEmail": "Email",
+      "colRole": "Vai trò",
+      "colFinancial": "Hồ sơ Tài chính",
+      "colStatus": "Trạng thái",
+      "colActions": "Thao tác",
+      "setupCompleted": "Đã thiết lập",
+      "setupPending": "Chưa thiết lập"
+    },
+    "projects": {
+      "title": "Giám sát Dự án & Nhóm",
+      "totalTarget": "Mục tiêu Tiết kiệm",
+      "currentSaved": "Đã tích lũy",
+      "groupsCount": "Tổng số Nhóm",
+      "sponsoredProjects": "Dự án được Tài trợ"
+    },
+    "broadcast": {
+      "title": "Gửi Thông báo Toàn Hệ thống",
+      "button": "Gửi Thông báo",
+      "subject": "Tiêu đề thông báo",
+      "message": "Nội dung thông báo",
+      "severity": "Mức độ",
+      "send": "Phát thông báo",
+      "sentSuccess": "Đã phát thông báo hệ thống thành công!"
     }
   }
 }
