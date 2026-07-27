@@ -549,43 +549,43 @@ export default function ProjectsPage() {
                             {group.name}
                           </Heading>
                           <span className={`text-[10px] uppercase font-extrabold px-2 py-0.5 rounded-full shrink-0 flex items-center gap-1 border`} style={{
-                            backgroundColor: group.status === 'LOCKED' ? '#F59E0B15' : '#10B98115',
-                            borderColor: group.status === 'LOCKED' ? '#F59E0B20' : '#10B98120',
-                            color: group.status === 'LOCKED' ? '#F59E0B' : '#10B981',
+                            backgroundColor: group.status === 'LOCKED' ? '#F59E0B15' : group.status === 'DISSOLVED' ? '#EF444415' : '#10B98115',
+                            borderColor: group.status === 'LOCKED' ? '#F59E0B20' : group.status === 'DISSOLVED' ? '#EF444420' : '#10B98120',
+                            color: group.status === 'LOCKED' ? '#F59E0B' : group.status === 'DISSOLVED' ? '#EF4444' : '#10B981',
                           }}>
                             {group.status === 'LOCKED' ? <MdLock size={10} /> : <MdLockOpen size={10} />}
-                            {group.status}
+                            {t(`groupDetail.groupStatus.${group.status}`)}
                           </span>
                         </div>
                         <Text className="text-xs mt-1.5 line-clamp-2">
-                          {group.description || 'No description provided.'}
+                          {group.description || t('groupDetail.noDescription')}
                         </Text>
                         <div className="mt-2.5 flex items-center">
                           {group.groupProjectStatus === 'ACTIVE' ? (
                             <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200">
                               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                              Dự án đang chạy
+                              {t('groupDetail.projectStatus.ACTIVE')}
                             </span>
                           ) : group.groupProjectStatus === 'PENDING_SPONSORSHIP' ? (
                             <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1.5 bg-amber-50 text-amber-700 border border-amber-200">
                               <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
-                              Chờ khảo sát tài trợ
+                              {t('groupDetail.projectStatus.PENDING_SPONSORSHIP')}
                             </span>
                           ) : group.groupProjectStatus === 'COMPLETED' ? (
                             <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full flex items-center gap-1.5 bg-blue-50 text-blue-700 border border-blue-200">
-                              Dự án đã hoàn thành
+                              {t('groupDetail.projectStatus.COMPLETED')}
                             </span>
                           ) : group.groupProjectStatus === 'DISSOLVED' ? (
                             <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full flex items-center gap-1.5 bg-rose-50 text-rose-600 border border-rose-200">
-                              Dự án đã bị hủy
+                              {t('groupDetail.projectStatus.DISSOLVED')}
                             </span>
                           ) : group.groupProjectStatus === 'EXPIRED' || group.groupProjectStatus === 'SPONSORSHIP_FAILED' ? (
                             <span className="text-[11px] font-medium px-2.5 py-0.5 rounded-full flex items-center gap-1.5 bg-gray-100 text-gray-600 border border-gray-200">
-                              Dự án đã kết thúc
+                              {t('groupDetail.projectStatus.EXPIRED')}
                             </span>
                           ) : (
                             <span className="text-[11px] font-medium px-2.5 py-0.5 rounded-full flex items-center gap-1.5 bg-gray-100 text-gray-500 border border-gray-200">
-                              Chưa có dự án
+                              {t('groupDetail.projectStatus.NONE')}
                             </span>
                           )}
                         </div>
@@ -593,10 +593,10 @@ export default function ProjectsPage() {
 
                       <div className="flex items-center justify-between border-t pt-3 mt-3" style={{ borderColor: colors.border.light }}>
                         <span className="text-xs px-2.5 py-1 rounded bg-gray-100 font-bold text-gray-600">
-                          {group.memberCount} Joined
+                          {t('groupDetail.memberCount', { count: group.memberCount })}
                         </span>
                         <span className={`text-xs font-bold uppercase ${isUserAdmin ? 'text-indigo-600' : 'text-gray-500'}`}>
-                          {group.myRole}
+                          {group.myRole === 'ADMIN' ? t('groupDetail.role.ADMIN') : t('groupDetail.role.MEMBER')}
                         </span>
                       </div>
                     </div>
