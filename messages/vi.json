@@ -149,6 +149,18 @@
       "title": "Sẵn Sàng Bắt Đầu Hành Trình Tài Chính?",
       "subtitle": "Tham gia cùng hàng nghìn người dùng quản lý ngân sách và tiết kiệm thông minh hơn với AI.",
       "button": "Bắt Đầu Ngay Hôm Nay"
+    },
+    "mobileApp": {
+      "badge": "Ứng Dụng Di Động",
+      "title": "Trải Nghiệm SmartMoney Trực Tiếp Trên Điện Thoại",
+      "subtitle": "Tải ứng dụng mobile để quản lý thu chi mọi lúc mọi nơi. Nhận cảnh báo ngân sách tức thì, ghi chép nhanh bằng giọng nói và quét hóa đơn mượt mà.",
+      "downloadButton": "Tải Ứng Dụng Mobile",
+      "downloadNote": "Tải trực tiếp file cài đặt / Web Store chính thức",
+      "qrTitle": "Quét mã để tải app",
+      "qrSubtitle": "Mở camera điện thoại quét mã bên dưới",
+      "feature1": "Ghi chép nhanh bằng Giọng nói & Camera OCR",
+      "feature2": "Thông báo & Cảnh báo ngân sách tức thì",
+      "feature3": "Đồng bộ dữ liệu tài chính thời gian thực"
     }
   },
   "auth": {

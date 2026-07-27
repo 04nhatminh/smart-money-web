@@ -5,7 +5,7 @@ export { Header, Footer } from './common';
 export { AuthSection } from './auth';
 
 // Landing organisms
-export { HeroSection, FeaturesSection, BenefitsSection, CTASection, DashboardPreview } from './landing';
+export { HeroSection, FeaturesSection, BenefitsSection, CTASection, DashboardPreview, AppDownloadSection } from './landing';
 
 // Dashboard organisms
 export { ItemList } from './dashboard';

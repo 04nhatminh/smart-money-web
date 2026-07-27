@@ -149,6 +149,18 @@
       "title": "Ready to Master Your Financial Journey?",
       "subtitle": "Join thousands of users managing their budgets and saving goals smarter with AI.",
       "button": "Get Started Today"
+    },
+    "mobileApp": {
+      "badge": "Mobile App",
+      "title": "Experience SmartMoney Directly on Your Phone",
+      "subtitle": "Download the mobile app to manage your finances anywhere, anytime. Get instant budget alerts, quick voice entry, and seamless receipt scanning.",
+      "downloadButton": "Download Mobile App",
+      "downloadNote": "Direct app download / Official web store",
+      "qrTitle": "Scan to download",
+      "qrSubtitle": "Open mobile camera to scan QR code",
+      "feature1": "Quick Voice Entry & Receipt OCR Scan",
+      "feature2": "Real-time Budget Limit Alerts",
+      "feature3": "Seamless Real-time Financial Sync"
     }
   },
   "auth": {
