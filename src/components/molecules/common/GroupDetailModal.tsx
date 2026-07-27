@@ -26,7 +26,7 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
   onSuccess,
   onCreateProject,
 }) => {
-  const { colors } = useTheme();
+  const { colors, colorScheme } = useTheme();
   const { user } = useAuth();
   const { listProjects } = useProjects();
   const {
@@ -438,16 +438,20 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
       <div
         className="fixed inset-0 transition-opacity"
         style={{
-          backgroundColor: 'rgba(0, 0, 0, 0.4)',
+          backgroundColor: 'rgba(0, 0, 0, 0.6)',
           zIndex: 999,
+          backdropFilter: 'blur(4px)',
         }}
         onClick={onClose}
       />
 
       <div className="fixed inset-0 flex items-center justify-center p-4 overflow-y-auto" style={{ zIndex: 1000 }}>
         <div
-          className="bg-white rounded-2xl shadow-2xl max-w-lg w-full my-8 overflow-hidden transition-all transform flex flex-col max-h-[90vh]"
-          style={{ backgroundColor: colors.background.primary }}
+          className="rounded-2xl shadow-2xl max-w-lg w-full my-8 overflow-hidden transition-all transform flex flex-col max-h-[90vh] border"
+          style={{
+            backgroundColor: colors.background.primary,
+            borderColor: colors.border.light,
+          }}
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
@@ -533,7 +537,7 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
 
                 {/* Group Project Info */}
                 {projectDetail && projectDetail.status !== 'DISSOLVED' ? (
-                  <div className="border rounded-xl p-4 space-y-4" style={{ borderColor: colors.border.light }}>
+                  <div className="border rounded-xl p-4 space-y-4" style={{ borderColor: colors.border.light, backgroundColor: colors.surface.primary }}>
                     <div className="flex justify-between items-start">
                       <div>
                         <Heading level={4} style={{ color: colors.text.primary }}>Group Project: {projectDetail.name}</Heading>
@@ -556,11 +560,11 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
                     <div className="space-y-2">
                       <div className="flex justify-between text-sm">
                         <Text style={{ color: colors.text.secondary }}>Total Saved</Text>
-                        <Text className="font-semibold">
+                        <Text className="font-semibold" style={{ color: colors.text.primary }}>
                           {formatNumber(projectDetail.aggregateMoneySaved ?? 0)} / {formatNumber(projectDetail.targetAmount ?? 0)} {projectDetail.currency}
                         </Text>
                       </div>
-                      <div className="w-full bg-gray-100 rounded-full h-3.5 overflow-hidden flex" style={{ backgroundColor: colors.background.secondary }}>
+                      <div className="w-full rounded-full h-3.5 overflow-hidden flex border" style={{ backgroundColor: colors.background.secondary, borderColor: colors.border.light }}>
                         <div
                           className="h-full transition-all duration-500"
                           style={{
@@ -576,9 +580,9 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
 
                     {/* Join flow for current user (only when ACTIVE) */}
                     {!hasJoinedProject() && group?.status !== 'DISSOLVED' && projectDetail.status === 'ACTIVE' && (
-                      <div className="p-4 border rounded-xl space-y-3" style={{ borderColor: colors.border.light, backgroundColor: `${colors.interactive.primary}05` }}>
+                      <div className="p-4 border rounded-xl space-y-3" style={{ borderColor: colors.border.light, backgroundColor: `${colors.interactive.primary}08` }}>
                         <Heading level={4} className='pb-2'>Join Group Project</Heading>
-                        <Text className="text-xs">
+                        <Text className="text-xs" style={{ color: colors.text.secondary }}>
                           Select priority to create your personal sub-project and contribute to the group goal.
                         </Text>
                         <div className="flex gap-2">
@@ -593,7 +597,7 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
                                 className={`flex-1 py-2 px-3 rounded-lg border text-center text-xs font-semibold transition-all ${isUsed ? 'opacity-40 cursor-not-allowed' : 'hover:cursor-pointer'}`}
                                 style={{
                                   borderColor: selectedPriority === pri ? colors.interactive.primary : colors.border.light,
-                                  backgroundColor: selectedPriority === pri ? `${colors.interactive.primary}10` : 'white',
+                                  backgroundColor: selectedPriority === pri ? `${colors.interactive.primary}20` : colors.background.secondary,
                                   color: selectedPriority === pri ? colors.interactive.primary : colors.text.primary,
                                 }}
                               >
@@ -615,18 +619,18 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
 
                     {/* Sponsorship survey pending notice & response actions */}
                     {group?.status !== 'DISSOLVED' && projectDetail.status === 'PENDING_SPONSORSHIP' && (
-                      <div className="p-4 border rounded-xl bg-gradient-to-br from-amber-50 to-orange-50/50 space-y-3 animate-fade-in" style={{ borderColor: '#F59E0B30' }}>
-                        <div className="flex items-center gap-2 text-xs font-bold text-amber-800">
+                      <div className="p-4 border rounded-xl space-y-3 animate-fade-in" style={{ borderColor: '#F59E0B40', backgroundColor: colorScheme === 'dark' ? '#F59E0B12' : '#FFFBEB' }}>
+                        <div className="flex items-center gap-2 text-xs font-bold" style={{ color: colorScheme === 'dark' ? '#FBBF24' : '#92400E' }}>
                           <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
                           {myPendingRequest ? 'Yêu Cầu Hỗ Trợ Đang Chờ Bạn Phản Hồi' : 'Đang chờ khảo sát ý kiến đồng đội...'}
                         </div>
                         {myPendingRequest ? (
                           <div className="space-y-3">
-                            <Text className="text-xs text-gray-600 leading-relaxed">
+                            <Text className="text-xs leading-relaxed" style={{ color: colors.text.secondary }}>
                               Đồng đội trong nhóm của bạn không đủ khả năng tài chính. Hệ thống đề xuất bạn hỗ trợ thêm{' '}
-                              <strong>{Number(myPendingRequest.askedAmount).toLocaleString()} VND/tháng</strong> (nâng mức đóng góp của bạn lên{' '}
-                              <strong>{Number(myPendingRequest.proposedShare).toLocaleString()} VND/tháng</strong> thay vì{' '}
-                              <strong>{Number(myPendingRequest.originalShare).toLocaleString()} VND/tháng</strong>).
+                              <strong style={{ color: colors.text.primary }}>{Number(myPendingRequest.askedAmount).toLocaleString()} VND/tháng</strong> (nâng mức đóng góp của bạn lên{' '}
+                              <strong style={{ color: colors.text.primary }}>{Number(myPendingRequest.proposedShare).toLocaleString()} VND/tháng</strong> thay vì{' '}
+                              <strong style={{ color: colors.text.primary }}>{Number(myPendingRequest.originalShare).toLocaleString()} VND/tháng</strong>).
                             </Text>
                             <div className="flex gap-2 justify-end">
                               <Button
@@ -634,7 +638,7 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
                                 variant="secondary"
                                 onClick={() => handleRespondSponsorship(false)}
                                 disabled={localLoading}
-                                style={{ color: '#EF4444', borderColor: '#EF444420', backgroundColor: 'transparent' }}
+                                style={{ color: '#EF4444', borderColor: '#EF444430', backgroundColor: 'transparent' }}
                               >
                                 Từ chối
                               </Button>
@@ -650,7 +654,7 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
                             </div>
                           </div>
                         ) : (
-                          <Text className="text-xs text-gray-500">
+                          <Text className="text-xs" style={{ color: colors.text.tertiary }}>
                             Dự án đang chờ các thành viên phản hồi khảo sát đóng góp giúp để kích hoạt.
                           </Text>
                         )}
@@ -659,7 +663,7 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
 
                     {/* Sponsorship failed notice */}
                     {group?.status !== 'DISSOLVED' && projectDetail.status === 'SPONSORSHIP_FAILED' && (
-                      <div className="p-4 border rounded-xl bg-red-50 text-red-800 text-xs font-semibold" style={{ borderColor: '#EF444430' }}>
+                      <div className="p-4 border rounded-xl text-xs font-semibold" style={{ borderColor: '#EF444440', backgroundColor: '#EF444415', color: '#EF4444' }}>
                         Dự án này đã thất bại do các thành viên từ chối hoặc không đủ khả năng đóng góp giúp.
                       </div>
                     )}
@@ -667,14 +671,14 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
                 ) : isProjectLoading || (group.groupProjectId && !projectDetail) ? (
                   <div className="p-5 rounded-2xl border space-y-3 shadow-xs" style={{ backgroundColor: colors.surface.primary, borderColor: colors.border.light }}>
                     <div className="animate-pulse space-y-3">
-                      <div className="h-5 bg-gray-200 rounded w-1/2"></div>
-                      <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                      <div className="h-10 bg-gray-200 rounded w-full"></div>
+                      <div className="h-5 rounded w-1/2 opacity-30" style={{ backgroundColor: colors.border.medium }}></div>
+                      <div className="h-4 rounded w-3/4 opacity-30" style={{ backgroundColor: colors.border.medium }}></div>
+                      <div className="h-10 rounded w-full opacity-30" style={{ backgroundColor: colors.border.medium }}></div>
                     </div>
                   </div>
                 ) : (
                   isAdmin && isLocked && !group.groupProjectId && (
-                    <div className="border border-dashed rounded-xl p-6 text-center space-y-3" style={{ borderColor: colors.border.light }}>
+                    <div className="border border-dashed rounded-xl p-6 text-center space-y-3" style={{ borderColor: colors.border.light, backgroundColor: colors.surface.primary }}>
                       <Text style={{ color: colors.text.secondary }} className="text-sm">
                         Nhóm đã khóa nhưng chưa từng tạo dự án nào.
                       </Text>
@@ -693,8 +697,8 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
 
                 {/* Auto-Sponsorship Settings Panel */}
                 {group.status !== 'DISSOLVED' && (
-                  <div className="p-4 border rounded-xl space-y-3 bg-gradient-to-r from-blue-50/20 to-indigo-50/20" style={{ borderColor: colors.border.light }}>
-                    <div className="text-[11px] font-semibold text-blue-700 bg-blue-100/40 px-2.5 py-1 rounded-md border border-blue-200/50 inline-block mb-1">
+                  <div className="p-4 border rounded-xl space-y-3" style={{ borderColor: colors.border.light, backgroundColor: colors.background.secondary }}>
+                    <div className="text-[11px] font-semibold px-2.5 py-1 rounded-md border inline-block mb-1" style={{ backgroundColor: `${colors.interactive.primary}15`, color: colors.interactive.primary, borderColor: `${colors.interactive.primary}30` }}>
                       Lựa chọn hiện tại: {savedSponsorshipText}
                     </div>
                     <div className="flex justify-between items-center">
@@ -714,30 +718,30 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
                           onChange={(e) => setAutoSponsorEnabled(e.target.checked)}
                           className="sr-only peer"
                         />
-                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                        <div className="w-11 h-6 bg-gray-300 dark:bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
                       </label>
                     </div>
 
                     {autoSponsorEnabled && (
                       <div className="space-y-3 pt-2 border-t border-dashed" style={{ borderColor: colors.border.light }}>
                         <div className="flex gap-4">
-                          <label className="flex items-center gap-2 text-xs font-semibold cursor-pointer text-gray-700">
+                          <label className="flex items-center gap-2 text-xs font-semibold cursor-pointer" style={{ color: colors.text.primary }}>
                             <input
                               type="radio"
                               name="sponsorLimitType"
                               checked={autoSponsorLimitType === 'MAX'}
                               onChange={() => setAutoSponsorLimitType('MAX')}
-                              className="text-blue-600 focus:ring-blue-500"
+                              className="text-indigo-600 focus:ring-indigo-500"
                             />
                             Tối đa khả năng (Toàn bộ thặng dư)
                           </label>
-                          <label className="flex items-center gap-2 text-xs font-semibold cursor-pointer text-gray-700">
+                          <label className="flex items-center gap-2 text-xs font-semibold cursor-pointer" style={{ color: colors.text.primary }}>
                             <input
                               type="radio"
                               name="sponsorLimitType"
                               checked={autoSponsorLimitType === 'CUSTOM'}
                               onChange={() => setAutoSponsorLimitType('CUSTOM')}
-                              className="text-blue-600 focus:ring-blue-500"
+                              className="text-indigo-600 focus:ring-indigo-500"
                             />
                             Hạn mức tối đa cụ thể
                           </label>
@@ -745,7 +749,7 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
 
                         {autoSponsorLimitType === 'CUSTOM' && (
                           <div className="max-w-xs">
-                            <label className="block text-xs font-medium mb-1 text-gray-500">Hạn mức hỗ trợ tối đa mỗi tháng (VND)</label>
+                            <label className="block text-xs font-medium mb-1" style={{ color: colors.text.secondary }}>Hạn mức hỗ trợ tối đa mỗi tháng (VND)</label>
                             <Input
                               type="text"
                               value={autoSponsorLimit}
@@ -783,7 +787,8 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
                           key={member.userId}
                           className="p-4 flex items-center justify-between flex-wrap gap-4 transition-all"
                           style={{
-                            backgroundColor: isCurrentUser ? `${colors.interactive.primary}08` : 'white',
+                            backgroundColor: isCurrentUser ? `${colors.interactive.primary}12` : colors.surface.primary,
+                            borderColor: colors.border.light,
                             borderLeft: isCurrentUser ? `4px solid ${colors.interactive.primary}` : 'none',
                             paddingLeft: isCurrentUser ? '12px' : '16px',
                           }}
@@ -794,16 +799,16 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
                                 {member.username || 'User'} {isCurrentUser && '(You)'}
                               </Text>
                               <span className="text-[10px] px-1.5 py-0.5 rounded font-bold uppercase shrink-0" style={{
-                                backgroundColor: member.role === 'ADMIN' ? `${colors.interactive.primary}15` : colors.background.secondary,
+                                backgroundColor: member.role === 'ADMIN' ? `${colors.interactive.primary}20` : colors.background.secondary,
                                 color: member.role === 'ADMIN' ? colors.interactive.primary : colors.text.secondary
                               }}>
                                 {member.role}
                               </span>
                             </div>
                             {member.email && (
-                              <div className="text-xs text-gray-400 mt-0.5">{member.email}</div>
+                              <div className="text-xs mt-0.5" style={{ color: colors.text.tertiary }}>{member.email}</div>
                             )}
-                            <div className="flex gap-2 items-center mt-1 text-xs text-gray-500">
+                            <div className="flex gap-2 items-center mt-1 text-xs" style={{ color: colors.text.secondary }}>
                               {projectDetail ? (
                                 prog?.projectStatus === 'ABANDONED' && (
                                   <span className="flex items-center gap-1 text-red-500 font-semibold uppercase">
@@ -835,25 +840,34 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
                                 <>
                                   {sentEmails[member.email] ? (
                                     <span
-                                      className="text-xs px-2.5 py-1 rounded-md border font-medium flex items-center gap-1 bg-green-50 text-green-700 border-green-300"
+                                      className="text-xs px-2.5 py-1 rounded-md border font-medium flex items-center gap-1"
+                                      style={{
+                                        backgroundColor: '#10B98115',
+                                        color: '#10B981',
+                                        borderColor: '#10B98140',
+                                      }}
                                       title={`Invitation successfully resent to ${member.email}`}
                                     >
-                                      <MdCheckCircle className="w-3.5 h-3.5 text-green-600" />
+                                      <MdCheckCircle className="w-3.5 h-3.5 text-green-500" />
                                       Sent!
                                     </span>
                                   ) : (
                                     <button
                                       onClick={() => handleResendInvite(member.email)}
                                       disabled={isLoading || resendingEmail === member.email}
-                                      className={`text-xs px-2.5 py-1 rounded-md border transition-all font-medium flex items-center gap-1 ${resendingEmail === member.email
-                                          ? 'bg-amber-50/50 text-amber-700/60 border-amber-200 cursor-not-allowed'
-                                          : 'bg-amber-50 text-amber-700 border-amber-300 hover:bg-amber-100 active:bg-amber-200 cursor-pointer'
-                                        }`}
+                                      className={`text-xs px-2.5 py-1 rounded-md border transition-all font-medium flex items-center gap-1 ${
+                                        resendingEmail === member.email ? 'opacity-50 cursor-not-allowed' : 'hover:cursor-pointer'
+                                      }`}
+                                      style={{
+                                        backgroundColor: '#F59E0B15',
+                                        color: '#F59E0B',
+                                        borderColor: '#F59E0B40',
+                                      }}
                                       title={`Resend invitation to ${member.email}`}
                                     >
                                       {resendingEmail === member.email ? (
                                         <>
-                                          <svg className="animate-spin -ml-1 mr-1 h-3 w-3 text-amber-700" fill="none" viewBox="0 0 24 24">
+                                          <svg className="animate-spin -ml-1 mr-1 h-3 w-3 text-amber-500" fill="none" viewBox="0 0 24 24">
                                             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                                             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                                           </svg>
@@ -866,7 +880,7 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
                                   )}
                                   <button
                                     onClick={() => handleRemoveMember(member.userId)}
-                                    className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors hover:cursor-pointer"
+                                    className="p-2 text-red-500 hover:bg-red-500/10 rounded-lg transition-colors hover:cursor-pointer"
                                     title="Kick invited member"
                                   >
                                     <MdDelete size={18} />
@@ -876,7 +890,7 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
                               {isAdmin && isForming && member.inviteStatus === 'DECLINED' && (
                                 <button
                                   onClick={() => handleRemoveMember(member.userId)}
-                                  className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                  className="p-2 text-red-500 hover:bg-red-500/10 rounded-lg transition-colors hover:cursor-pointer"
                                   title="Remove declined invitation"
                                 >
                                   <MdDelete size={18} />
@@ -892,7 +906,7 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
 
                 {/* Invite section inside modal for admin when forming */}
                 {isAdmin && isForming && (
-                  <form onSubmit={handleInvite} className="border-t pt-4 shrink-0 space-y-2">
+                  <form onSubmit={handleInvite} className="border-t pt-4 shrink-0 space-y-2" style={{ borderColor: colors.border.light }}>
                     <label className="block text-sm font-medium" style={{ color: colors.text.primary }}>Invite a new member</label>
                     <div className="flex gap-2">
                       <Input
@@ -925,7 +939,7 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
           <div
             className="fixed inset-0 transition-opacity"
             style={{
-              backgroundColor: 'rgba(0, 0, 0, 0.5)',
+              backgroundColor: 'rgba(0, 0, 0, 0.6)',
               zIndex: 1010,
               backdropFilter: 'blur(4px)',
             }}
@@ -933,8 +947,108 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
           />
           <div className="fixed inset-0 flex items-center justify-center p-4 overflow-y-auto" style={{ zIndex: 1011 }}>
             <div
-              className="bg-white rounded-2xl overflow-hidden shadow-2xl max-w-md w-full p-6 space-y-6 transition-all transform flex flex-col"
-              style={{ backgroundColor: colors.background.primary }}
+              className="rounded-2xl overflow-hidden shadow-2xl max-w-md w-full p-6 space-y-6 transition-all transform flex flex-col border"
+              style={{
+                backgroundColor: colors.background.primary,
+                borderColor: colors.border.light,
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center gap-3 text-red-500">
+                <MdDelete className="w-8 h-8" style={{ color: '#EF4444' }} />
+                <Heading level={4} style={{ color: colors.text.primary }}>Delete Group</Heading>
+              </div>
+              <Text style={{ color: colors.text.secondary }} className="text-sm">
+                Are you sure you want to delete this group? This will remove all members and delete the group permanently. This action cannot be undone.
+              </Text>
+              <div className="flex gap-3 justify-end pt-2">
+                <Button
+                  variant="secondary"
+                  onClick={() => setIsConfirmDeleteOpen(false)}
+                  disabled={isLoading}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="primary"
+                  onClick={handleDeleteGroup}
+                  disabled={isLoading}
+                  style={{ backgroundColor: '#EF4444', borderColor: '#EF4444', color: 'white' }}
+                >
+                  Confirm Delete
+                </Button>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+      {isConfirmDissolveOpen && (
+        <>
+          <div
+            className="fixed inset-0 transition-opacity"
+            style={{
+              backgroundColor: 'rgba(0, 0, 0, 0.6)',
+              zIndex: 1010,
+              backdropFilter: 'blur(4px)',
+            }}
+            onClick={() => setIsConfirmDissolveOpen(false)}
+          />
+          <div className="fixed inset-0 flex items-center justify-center p-4 overflow-y-auto" style={{ zIndex: 1011 }}>
+            <div
+              className="rounded-2xl overflow-hidden shadow-2xl max-w-md w-full p-6 space-y-6 transition-all transform flex flex-col border"
+              style={{
+                backgroundColor: colors.background.primary,
+                borderColor: colors.border.light,
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center gap-3 text-red-500">
+                <MdCancel className="w-8 h-8" style={{ color: '#EF4444' }} />
+                <Heading level={4} style={{ color: colors.text.primary }}>Dissolve Group Project</Heading>
+              </div>
+              <Text style={{ color: colors.text.secondary }} className="text-sm">
+                Are you sure you want to dissolve this group project? This will dissolve the group and abandon all sub-personal projects. This action cannot be undone.
+              </Text>
+              <div className="flex gap-3 justify-end pt-2">
+                <Button
+                  variant="secondary"
+                  onClick={() => setIsConfirmDissolveOpen(false)}
+                  disabled={isLoading}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="primary"
+                  onClick={handleDissolveProject}
+                  disabled={isLoading}
+                  style={{ backgroundColor: '#EF4444', borderColor: '#EF4444', color: 'white' }}
+                >
+                  Confirm Dissolve
+                </Button>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+
+      {showRegenerateSuggest && (
+        <>
+          <div
+            className="fixed inset-0 transition-opacity"
+            style={{
+              backgroundColor: 'rgba(0, 0, 0, 0.6)',
+              zIndex: 1010,
+              backdropFilter: 'blur(4px)',
+            }}
+            onClick={() => setShowRegenerateSuggest(false)}
+          />
+          <div className="fixed inset-0 flex items-center justify-center p-4 overflow-y-auto" style={{ zIndex: 1011 }}>
+            <div
+              className="rounded-2xl overflow-hidden shadow-2xl max-w-md w-full p-6 space-y-6 transition-all transform flex flex-col border"
+              style={{
+                backgroundColor: colors.background.primary,
+                borderColor: colors.border.light,
+              }}
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-center gap-3 text-red-500">
