@@ -75,10 +75,10 @@
   },
   "finance": {
     "appName": "SmartMoney",
-    "appDescription": "Smart personal finance management app",
+    "appDescription": "Smart personal finance management & AI spending planner",
     "hero": {
-      "title": "Take Control of Your Finances",
-      "subtitle": "Smart spending planner with AI-powered insights. Track expenses, achieve saving goals, and build better financial habits.",
+      "title": "Take Control of Your Finances with AI",
+      "subtitle": "Smart spending planner with AI Adaptive Engine. Track expenses via voice, receipt photo scan, or Excel, achieve savings goals together, and receive real-time financial insights.",
       "cta": "Get Started Free",
       "login": "Sign In"
     },
@@ -103,38 +103,50 @@
       "overlayCta": "Get Started — It's Free"
     },
     "features": {
-      "title": "Everything You Need",
-      "subtitle": "Powerful features to manage your finances effectively",
-      "tracking": {
-        "title": "Transaction Tracking",
-        "description": "Organize and categorize all your expenses organized in personal categories"
+      "title": "Everything You Need for Smart Wealth",
+      "subtitle": "Comprehensive AI tools and collaborative features tailored to your financial journey",
+      "budgetEngine": {
+        "title": "AI Adaptive Budget Engine",
+        "description": "Intelligently allocates and dynamically adjusts your spending budgets based on income, focus mode, and saving pace."
       },
-      "goals": {
-        "title": "Saving Goals",
-        "description": "Set personal and group saving goals, track finances and family to save together"
+      "multiInput": {
+        "title": "Voice, Receipt OCR & Excel Entry",
+        "description": "Record transactions effortlessly with AI Voice recognition, camera OCR receipt scanning, or bulk Excel importing."
       },
-      "recommendations": {
-        "title": "Smart Spending Recommendations",
-        "description": "Get personalized insights and recommendations to optimize your spending habits."
+      "smartInsights": {
+        "title": "AI Insights & Action Suggestions",
+        "description": "Detects duplicate charges, unusual high spending, and gives actionable advice to reallocate or balance your budgets."
+      },
+      "savingGoals": {
+        "title": "Personal & Group Savings Goals",
+        "description": "Set prioritized savings goals, track collective milestones, and support teammates with automatic sponsorship mechanisms."
+      },
+      "financialProfile": {
+        "title": "Tailored Financial Profile",
+        "description": "Configure AI intervention levels, saving pace (Safe, Moderate, Aggressive), focus mode, and surplus auto-investment."
+      },
+      "deepAnalytics": {
+        "title": "Cash Flow & Net Wealth Analytics",
+        "description": "Visualize income vs expenses across Day, Month, Year views, interactive calendar stats, and cumulative net balance trends."
       }
     },
     "benefits": {
       "title": "Why Choose SmartMoney?",
-      "benefit1": "AI-powered expense categorization",
-      "benefit2": "Collaborative group savings",
-      "benefit3": "Real-time spending insights",
-      "benefit4": "Secure and private data",
-      "benefit5": "Multi-device sync",
-      "benefit6": "Smart budget recommendations"
+      "benefit1": "AI-driven adaptive budget allocation & auto-rebalance",
+      "benefit2": "Instant transaction entry via Voice & Receipt photo OCR",
+      "benefit3": "Proactive AI suggestions & spending anomaly alerts",
+      "benefit4": "Collaborative group projects with automatic sponsorship",
+      "benefit5": "Flexible financial profile & auto-invest surplus",
+      "benefit6": "Comprehensive cash flow analytics & net balance trends"
     },
     "testimonial": {
-      "balance": "Account Balance",
-      "date": "Date in Oldest",
-      "savingsGoal": "Money Saved"
+      "balance": "Total Net Wealth",
+      "date": "Active Period",
+      "savingsGoal": "Accumulated Savings"
     },
     "cta": {
-      "title": "Ready to Start Your Financial Journey?",
-      "subtitle": "Join thousands of users already managing their finances smarter.",
+      "title": "Ready to Master Your Financial Journey?",
+      "subtitle": "Join thousands of users managing their budgets and saving goals smarter with AI.",
       "button": "Get Started Today"
     }
   },

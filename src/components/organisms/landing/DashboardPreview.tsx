@@ -1,20 +1,24 @@
 'use client';
 
 import React from 'react';
-import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
-  PieChart, Pie, Cell, Tooltip as PieTooltip,
-} from 'recharts';
+import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from 'recharts';
 import { Heading, Text, Button, ScrollReveal } from '@/components/atoms';
 import { useTheme } from '@/context';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { useRouter } from 'next/navigation';
-import { useLocale } from 'next-intl';
-import landingMockData from '@/data/landingMockData.json';
 import { formatVietnamsePrice } from '@/lib/format';
+import {
+  MdInsights,
+  MdSwapHoriz,
+  MdPieChart,
+  MdFolderOpen,
+  MdChevronRight,
+  MdAutoAwesome,
+  MdRefresh,
+  MdLightbulb,
+} from 'react-icons/md';
 
-const DONUT_COLORS = ['#5044d5', '#8a82e3', '#3629b7', '#c5c1f1', '#776ede'];
-
+const CHART_COLORS = ['#5044d5', '#10B981', '#EF4444', '#F59E0B', '#8B5CF6'];
 
 export const DashboardPreview: React.FC = () => {
   const { colors } = useTheme();
@@ -22,71 +26,61 @@ export const DashboardPreview: React.FC = () => {
   const router = useRouter();
   const locale = useLocale();
 
-  const formatMillionVND = (value: number) => {
-    const isVi = locale === 'vi';
-    if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(0)}${isVi ? 'tr' : 'M'}`;
-    if (value >= 1_000) return `${(value / 1_000).toFixed(0)}K`;
-    return `${value}`;
-  };
+  const mockCategories = [
+    { category: 'FOOD', percentage: 35, amount: 4270000 },
+    { category: 'SHOPPING', percentage: 25, amount: 3050000 },
+    { category: 'UTILITIES', percentage: 18, amount: 2196000 },
+    { category: 'ENTERTAINMENT', percentage: 12, amount: 1464000 },
+    { category: 'HEALTH', percentage: 10, amount: 1220000 },
+  ];
 
-  const { monthlyStats, categoryProportions, monthlyTotalIncome, monthlyTotalExpense } = landingMockData;
-
-  const CustomTooltip = ({ active, payload, label }: any) => {
-    if (active && payload && payload.length) {
-      return (
-        <div
-          style={{
-            background: colors.surface.primary === '#ffffff' ? 'rgba(255, 255, 255, 0.96)' : 'rgba(6, 5, 21, 0.96)',
-            border: `1px solid ${colors.border.light}`,
-            borderRadius: 10,
-            padding: '10px 16px',
-            minWidth: 160,
-            boxShadow: colors.surface.primary === '#ffffff' 
-              ? '0 4px 20px rgba(54, 41, 183, 0.15)' 
-              : '0 4px 20px rgba(0, 0, 0, 0.5)',
-          }}
-        >
-          <p style={{ color: colors.text.primary, fontWeight: 600, marginBottom: 4 }}>{label}</p>
-          {payload.map((entry: any) => (
-            <p key={entry.name} style={{ color: entry.color, margin: '2px 0' }}>
-              {entry.name}: {formatVietnamsePrice(entry.value)}
-            </p>
-          ))}
-        </div>
-      );
-    }
-    return null;
-  };
-
-  const DonutTooltip = ({ active, payload }: any) => {
-    if (active && payload && payload.length) {
-      const d = payload[0].payload;
-      return (
-        <div
-          style={{
-            background: colors.surface.primary === '#ffffff' ? 'rgba(255, 255, 255, 0.96)' : 'rgba(6, 5, 21, 0.96)',
-            border: `1px solid ${colors.border.light}`,
-            borderRadius: 10,
-            padding: '10px 16px',
-            boxShadow: colors.surface.primary === '#ffffff' 
-              ? '0 4px 20px rgba(54, 41, 183, 0.15)' 
-              : '0 4px 20px rgba(0, 0, 0, 0.5)',
-          }}
-        >
-          <p style={{ color: colors.text.primary, fontWeight: 600 }}>
-            {d.category === 'Food & Bev' ? t('finance.dashboard.foodBev') : d.category}
-          </p>
-          <p style={{ color: colors.interactive.primary, fontWeight: 600 }}>{(d.percentage * 100).toFixed(0)}%</p>
-          <p style={{ color: colors.text.secondary }}>{d.count} transactions</p>
-        </div>
-      );
-    }
-    return null;
+  const PieTooltipCustom = ({ active, payload }: any) => {
+    if (!active || !payload?.length) return null;
+    const d = payload[0].payload;
+    return (
+      <div
+        style={{
+          background: colors.surface.primary === '#ffffff' ? 'rgba(255, 255, 255, 0.96)' : 'rgba(6, 5, 21, 0.96)',
+          border: `1px solid ${colors.border.light}`,
+          borderRadius: 10,
+          padding: '8px 14px',
+          boxShadow: colors.surface.primary === '#ffffff'
+            ? '0 4px 20px rgba(54, 41, 183, 0.15)'
+            : '0 4px 20px rgba(0, 0, 0, 0.5)',
+        }}
+      >
+        <p style={{ color: colors.text.primary, fontWeight: 700, fontSize: 12 }}>
+          {t.has(`categories.${d.category}`) ? t(`categories.${d.category}`) : d.category}
+        </p>
+        <p style={{ color: colors.interactive.primary, fontSize: 12, fontWeight: 600 }}>{d.percentage}%</p>
+        <p style={{ color: colors.text.secondary, fontSize: 11 }}>{formatVietnamsePrice(d.amount)}</p>
+      </div>
+    );
   };
 
   return (
-    <section className="py-16 md:py-24 transition-colors" style={{ backgroundColor: colors.background.tertiary }}>
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="py-20 md:py-28 transition-colors relative overflow-hidden" style={{ background: `linear-gradient(160deg, ${colors.background.secondary} 0%, ${colors.background.primary} 50%, ${colors.background.secondary} 100%)` }}>
+      {/* Ambient Background Blobs */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+        <div
+          className="absolute w-[400px] md:w-[650px] h-[400px] md:h-[650px] rounded-full filter blur-[100px] md:blur-[150px] opacity-[0.15] dark:opacity-[0.22] animate-blob-1"
+          style={{
+            backgroundColor: colors.interactive.primary,
+            top: '15%',
+            right: '-10%',
+          }}
+        />
+        <div
+          className="absolute w-[300px] md:w-[500px] h-[300px] md:h-[500px] rounded-full filter blur-[80px] md:blur-[120px] opacity-[0.12] dark:opacity-[0.18] animate-blob-3"
+          style={{
+            backgroundColor: colors.interactive.secondary,
+            bottom: '10%',
+            left: '-5%',
+          }}
+        />
+      </div>
+
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Header */}
         <ScrollReveal variant="fade-down">
           <div className="text-center mb-12">
@@ -97,150 +91,352 @@ export const DashboardPreview: React.FC = () => {
           </div>
         </ScrollReveal>
 
-        {/* KPI Strip — each card zooms in with stagger */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-          {[
-            { label: t('finance.dashboard.totalIncome'), value: monthlyTotalIncome, color: '#10B981' },
-            { label: t('finance.dashboard.totalExpenses'), value: monthlyTotalExpense, color: '#EF4444' },
-            { label: t('finance.dashboard.netSavings'), value: monthlyTotalIncome - monthlyTotalExpense, color: colors.interactive.primary },
-          ].map((kpi, index) => (
-            <ScrollReveal key={kpi.label} variant="zoom-in" delay={index * 120}>
-              <div
-                className="rounded-xl p-5 flex flex-col gap-1 shadow"
-                style={{ backgroundColor: colors.surface.primary, borderLeft: `4px solid ${kpi.color}` }}
-              >
-                <Text variant="caption" style={{ color: colors.text.secondary }}>{kpi.label}</Text>
-                <span className="text-xl font-bold" style={{ color: kpi.color }}>
-                  {formatVietnamsePrice(kpi.value)}
-                </span>
-              </div>
-            </ScrollReveal>
-          ))}
-        </div>
-
-        {/* Dashboard Card — fades up after KPI cards */}
-        <ScrollReveal variant="fade-up" delay={200}>
+        {/* Realistic App Frame Mockup */}
+        <ScrollReveal variant="fade-up" delay={150}>
           <div
-            className="rounded-2xl shadow-xl p-4 sm:p-8 border"
+            className="rounded-2xl shadow-2xl overflow-hidden border backdrop-blur-md"
             style={{
               backgroundColor: colors.surface.primary,
               borderColor: colors.border.light,
+              boxShadow: colors.surface.primary === '#ffffff' ? '0 25px 50px -12px rgba(80, 68, 213, 0.12)' : '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
             }}
           >
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-              {/* Stacked Bar Chart — Weekly Income vs Expense */}
-              <div className="w-full overflow-hidden">
-                <Text className="font-semibold mb-4 text-base">
-                  {t('finance.dashboard.weeklyIncomeVsExpense')}
-                </Text>
-                <ResponsiveContainer width="100%" height={220}>
-                  <BarChart data={monthlyStats} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke={colors.border.light} />
-                    <XAxis
-                      dataKey="week"
-                      tick={{ fill: colors.text.secondary, fontSize: 12 }}
-                      axisLine={false}
-                      tickLine={false}
-                    />
-                    <YAxis
-                      tickFormatter={formatMillionVND}
-                      tick={{ fill: colors.text.secondary, fontSize: 11 }}
-                      axisLine={false}
-                      tickLine={false}
-                    />
-                    <Tooltip content={<CustomTooltip />} />
-                    <Legend
-                      formatter={(value) => (
-                        <span style={{ color: colors.text.primary, fontSize: 12 }}>{value}</span>
-                      )}
-                    />
-                    <Bar dataKey="income" name={t('finance.dashboard.totalIncome')} fill="#10B981" radius={[4, 4, 0, 0]} maxBarSize={36} />
-                    <Bar dataKey="expense" name={t('finance.dashboard.totalExpenses')} fill="#EF4444" radius={[4, 4, 0, 0]} maxBarSize={36} />
-                  </BarChart>
-                </ResponsiveContainer>
+            {/* macOS Window Top Bar */}
+            <div
+              className="px-4 py-3 border-b flex items-center justify-between"
+              style={{ backgroundColor: `${colors.background.secondary}80`, borderColor: colors.border.light }}
+            >
+              <div className="flex items-center gap-2">
+                <span className="w-3 h-3 rounded-full bg-red-500 inline-block" />
+                <span className="w-3 h-3 rounded-full bg-yellow-500 inline-block" />
+                <span className="w-3 h-3 rounded-full bg-green-500 inline-block" />
+                <span className="ml-3 text-xs font-semibold tracking-wide opacity-70" style={{ color: colors.text.secondary }}>
+                  SmartMoney Dashboard Live Preview
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs px-2.5 py-1 rounded-full font-semibold flex items-center gap-1" style={{ backgroundColor: `${colors.interactive.primary}15`, color: colors.interactive.primary }}>
+                  <MdAutoAwesome className="w-3.5 h-3.5" /> AI Engine Active
+                </span>
+              </div>
+            </div>
+
+            {/* Inner Dashboard View */}
+            <div className="p-4 sm:p-6 md:p-8 space-y-6">
+              {/* User Greeting & Quick Action Header */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b" style={{ borderColor: `${colors.border.light}60` }}>
+                <div>
+                  <Heading level={3} className="text-lg sm:text-xl font-bold">
+                    {t('dashboard.welcome', { name: 'Alex' })}
+                  </Heading>
+                  <Text variant="caption" style={{ color: colors.text.secondary }}>
+                    {t('dashboard.overviewSubtitle')}
+                  </Text>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="p-2 rounded-lg" style={{ backgroundColor: `${colors.interactive.primary}15`, color: colors.interactive.primary }}>
+                    <MdRefresh className="w-5 h-5" />
+                  </div>
+                </div>
               </div>
 
-              {/* Donut Chart — Category Proportions */}
-              <div className="w-full overflow-hidden">
-                <Text className="font-semibold mb-4 text-base">
-                  {t('finance.dashboard.spendingByCategory')}
-                </Text>
-                <div className="flex flex-col sm:flex-row items-center gap-4">
-                  <div className="w-full sm:w-[55%] h-[220px]">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie
-                          data={categoryProportions}
-                          cx="50%"
-                          cy="50%"
-                          innerRadius={55}
-                          outerRadius={90}
-                          dataKey="percentage"
-                          paddingAngle={1}
-                        >
-                          {categoryProportions.map((entry, index) => (
-                            <Cell key={entry.category} fill={DONUT_COLORS[index % DONUT_COLORS.length]} />
-                          ))}
-                        </Pie>
-                        <PieTooltip content={<DonutTooltip />} />
-                      </PieChart>
-                    </ResponsiveContainer>
+              {/* AI Smart Widgets (Suggestions & Insights Alert Banner) */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div
+                  className="p-4 rounded-xl border flex items-start gap-3"
+                  style={{
+                    backgroundColor: `${colors.interactive.primary}08`,
+                    borderColor: `${colors.interactive.primary}30`,
+                  }}
+                >
+                  <div className="p-2 rounded-lg flex-shrink-0" style={{ backgroundColor: `${colors.interactive.primary}20`, color: colors.interactive.primary }}>
+                    <MdLightbulb className="w-5 h-5" />
                   </div>
-                  <div className="flex flex-col gap-2 w-full sm:flex-1">
-                    {categoryProportions.map((entry, index) => (
-                      <div key={entry.category} className="flex items-center gap-2">
-                        <div
-                          className="w-3 h-3 rounded-full flex-shrink-0"
-                          style={{ backgroundColor: DONUT_COLORS[index % DONUT_COLORS.length] }}
-                        />
-                        <Text variant="caption" style={{ fontSize: 11, color: colors.text.secondary }}>
-                          {entry.category === 'Food & Bev' ? t('finance.dashboard.foodBev') : entry.category} — {(entry.percentage * 100).toFixed(0)}%
+                  <div>
+                    <span className="text-xs font-bold uppercase tracking-wider block mb-0.5" style={{ color: colors.interactive.primary }}>
+                      AI Suggestion
+                    </span>
+                    <Text className="text-xs font-medium" style={{ color: colors.text.primary }}>
+                      {locale === 'vi'
+                        ? 'Bạn có ₫1.500.000 thặng dư tháng này. Tự động chuyển vào Quỹ Dự Phòng Thấu Đáo?'
+                        : 'You have ₫1,500,000 surplus this month. Reallocate to Emergency Savings Fund?'}
+                    </Text>
+                  </div>
+                </div>
+
+                <div
+                  className="p-4 rounded-xl border flex items-start gap-3"
+                  style={{
+                    backgroundColor: '#10B98108',
+                    borderColor: '#10B98130',
+                  }}
+                >
+                  <div className="p-2 rounded-lg flex-shrink-0" style={{ backgroundColor: '#10B98120', color: '#10B981' }}>
+                    <MdInsights className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <span className="text-xs font-bold uppercase tracking-wider block mb-0.5" style={{ color: '#10B981' }}>
+                      AI Financial Health
+                    </span>
+                    <Text className="text-xs font-medium" style={{ color: colors.text.primary }}>
+                      {locale === 'vi'
+                        ? 'Chi tiêu Ăn uống giảm 15% so với tháng trước. Sức khỏe tài chính rất tốt!'
+                        : 'Food & Dining expense is 15% lower than last month. Excellent financial health!'}
+                    </Text>
+                  </div>
+                </div>
+              </div>
+
+              {/* 2x2 Grid Layout for Overview Cards */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+                {/* Card 1: Financial Analysis */}
+                <div
+                  className="p-5 rounded-xl border shadow-sm transition-all"
+                  style={{ borderColor: colors.border.light, backgroundColor: colors.surface.primary }}
+                >
+                  <div className="flex items-center justify-between mb-4 border-b pb-3" style={{ borderColor: colors.border.light }}>
+                    <div className="flex items-center gap-2">
+                      <MdInsights className="w-5 h-5" style={{ color: colors.interactive.primary }} />
+                      <Heading level={4} className="text-base font-bold">{t('dashboard.financialAnalysis')}</Heading>
+                    </div>
+                    <div className="flex items-center text-xs font-semibold" style={{ color: colors.interactive.primary }}>
+                      <span>{t('dashboard.detailedInsights')}</span> <MdChevronRight className="w-4 h-4" />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
+                    <div className="space-y-4">
+                      <div>
+                        <Text className="text-xs font-semibold uppercase tracking-wider" style={{ color: colors.text.secondary }}>
+                          {t('dashboard.netSpendingSavings')}
+                        </Text>
+                        <Text className="text-2xl font-black mt-0.5" style={{ color: '#10B981' }}>
+                          +12.800.000 ₫
+                        </Text>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <Text className="text-xs font-medium" style={{ color: colors.text.secondary }}>{t('dashboard.income')}</Text>
+                          <Text className="text-sm font-bold mt-0.5" style={{ color: '#10B981' }}>
+                            25.000.000 ₫
+                          </Text>
+                        </div>
+                        <div>
+                          <Text className="text-xs font-medium" style={{ color: colors.text.secondary }}>{t('dashboard.expense')}</Text>
+                          <Text className="text-sm font-bold mt-0.5" style={{ color: '#EF4444' }}>
+                            12.200.000 ₫
+                          </Text>
+                        </div>
+                      </div>
+
+                      <div className="pt-2 border-t space-y-1.5" style={{ borderColor: `${colors.border.light}80` }}>
+                        {mockCategories.slice(0, 4).map((item, idx) => (
+                          <div key={item.category} className="flex items-center justify-between text-xs">
+                            <div className="flex items-center gap-2 min-w-0">
+                              <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: CHART_COLORS[idx] }} />
+                              <span className="truncate font-medium" style={{ color: colors.text.primary }}>
+                                {t.has(`categories.${item.category}`) ? t(`categories.${item.category}`) : item.category}
+                              </span>
+                            </div>
+                            <span className="font-semibold" style={{ color: colors.text.secondary }}>
+                              {item.percentage}%
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="h-48 w-full flex items-center justify-center">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie
+                            data={mockCategories}
+                            cx="50%"
+                            cy="50%"
+                            innerRadius={45}
+                            outerRadius={75}
+                            dataKey="percentage"
+                            paddingAngle={2}
+                          >
+                            {mockCategories.map((entry, index) => (
+                              <Cell key={entry.category} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+                            ))}
+                          </Pie>
+                          <Tooltip content={<PieTooltipCustom />} />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Card 2: Recent Transactions */}
+                <div
+                  className="p-5 rounded-xl border shadow-sm transition-all"
+                  style={{ borderColor: colors.border.light, backgroundColor: colors.surface.primary }}
+                >
+                  <div className="flex items-center justify-between mb-4 border-b pb-3" style={{ borderColor: colors.border.light }}>
+                    <div className="flex items-center gap-2">
+                      <MdSwapHoriz className="w-5 h-5" style={{ color: colors.interactive.primary }} />
+                      <Heading level={4} className="text-base font-bold">{t('dashboard.recentTransactions')}</Heading>
+                    </div>
+                    <div className="flex items-center text-xs font-semibold" style={{ color: colors.interactive.primary }}>
+                      <span>{t('dashboard.viewAll')}</span> <MdChevronRight className="w-4 h-4" />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2.5">
+                    {[
+                      { name: 'Highlands Coffee', cat: 'FOOD', type: 'EXPENSE', amount: 55000, date: 'Today' },
+                      { name: 'Monthly Salary', cat: 'SALARY', type: 'INCOME', amount: 25000000, date: 'Yesterday' },
+                      { name: 'WinMart Supermarket', cat: 'SHOPPING', type: 'EXPENSE', amount: 480000, date: 'Jul 25' },
+                      { name: 'Electricity Bill', cat: 'UTILITIES', type: 'EXPENSE', amount: 1250000, date: 'Jul 24' },
+                    ].map((tx, i) => (
+                      <div key={i} className="flex items-center justify-between p-2 rounded-lg" style={{ backgroundColor: `${colors.background.secondary}60` }}>
+                        <div className="min-w-0 flex-1 pr-2">
+                          <Text className="font-bold truncate text-xs" style={{ color: colors.text.primary }}>
+                            {tx.name}
+                          </Text>
+                          <Text className="text-[11px] truncate block" style={{ color: colors.text.secondary }}>
+                            {t.has(`categories.${tx.cat}`) ? t(`categories.${tx.cat}`) : tx.cat} • {tx.date}
+                          </Text>
+                        </div>
+                        <Text className="font-extrabold text-xs whitespace-nowrap" style={{ color: tx.type === 'INCOME' ? '#10B981' : '#EF4444' }}>
+                          {tx.type === 'INCOME' ? '+' : '-'}{formatVietnamsePrice(tx.amount)}
                         </Text>
                       </div>
                     ))}
                   </div>
                 </div>
-              </div>
-            </div>
 
-            {/* Blurred CTA Overlay */}
-            <div className="relative mt-10 min-h-[300px] sm:min-h-[160px]">
+                {/* Card 3: Budgets Remaining */}
+                <div
+                  className="p-5 rounded-xl border shadow-sm transition-all"
+                  style={{ borderColor: colors.border.light, backgroundColor: colors.surface.primary }}
+                >
+                  <div className="flex items-center justify-between mb-4 border-b pb-3" style={{ borderColor: colors.border.light }}>
+                    <div className="flex items-center gap-2">
+                      <MdPieChart className="w-5 h-5" style={{ color: colors.interactive.primary }} />
+                      <Heading level={4} className="text-base font-bold">{t('dashboard.budgetsRemaining')}</Heading>
+                    </div>
+                    <div className="flex items-center text-xs font-semibold" style={{ color: colors.interactive.primary }}>
+                      <span>{t('dashboard.manageBudgets')}</span> <MdChevronRight className="w-4 h-4" />
+                    </div>
+                  </div>
+
+                  <div className="space-y-3.5">
+                    {[
+                      { cat: 'FOOD', spent: 3200000, limit: 5000000, percent: 64 },
+                      { cat: 'SHOPPING', spent: 2100000, limit: 2500000, percent: 84 },
+                      { cat: 'ENTERTAINMENT', spent: 800000, limit: 1500000, percent: 53 },
+                    ].map((b) => {
+                      const remaining = b.limit - b.spent;
+                      return (
+                        <div key={b.cat} className="space-y-1">
+                          <div className="flex justify-between text-xs font-semibold">
+                            <Text style={{ color: colors.text.primary }}>
+                              {t.has(`categories.${b.cat}`) ? t(`categories.${b.cat}`) : b.cat}
+                            </Text>
+                            <Text style={{ color: b.percent > 80 ? '#F59E0B' : colors.text.secondary }}>
+                              {t('dashboard.left', { amount: formatVietnamsePrice(remaining) })}
+                            </Text>
+                          </div>
+                          <div className="w-full h-2 rounded-full overflow-hidden" style={{ backgroundColor: `${colors.border.light}70` }}>
+                            <div
+                              className="h-full rounded-full transition-all duration-500"
+                              style={{
+                                width: `${b.percent}%`,
+                                backgroundColor: b.percent > 80 ? '#F59E0B' : colors.interactive.primary,
+                              }}
+                            />
+                          </div>
+                          <div className="flex justify-between text-[10px]" style={{ color: colors.text.secondary }}>
+                            <span>{t('dashboard.spent', { amount: formatVietnamsePrice(b.spent) })}</span>
+                            <span>{t('dashboard.limit', { amount: formatVietnamsePrice(b.limit) })}</span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Card 4: Projects Overview */}
+                <div
+                  className="p-5 rounded-xl border shadow-sm transition-all"
+                  style={{ borderColor: colors.border.light, backgroundColor: colors.surface.primary }}
+                >
+                  <div className="flex items-center justify-between mb-4 border-b pb-3" style={{ borderColor: colors.border.light }}>
+                    <div className="flex items-center gap-2">
+                      <MdFolderOpen className="w-5 h-5" style={{ color: colors.interactive.primary }} />
+                      <Heading level={4} className="text-base font-bold">{t('dashboard.projectsOverview')}</Heading>
+                    </div>
+                    <div className="flex items-center text-xs font-semibold" style={{ color: colors.interactive.primary }}>
+                      <span>{t('dashboard.viewProjects')}</span> <MdChevronRight className="w-4 h-4" />
+                    </div>
+                  </div>
+
+                  <div className="space-y-3.5">
+                    {[
+                      { name: locale === 'vi' ? '🚗 Mua Xe Máy Mới' : '🚗 New Motorbike Goal', saved: 35000000, target: 50000000, percent: 70, tag: 'PERSONAL' },
+                      { name: locale === 'vi' ? '✈️ Du Lịch Đà Nẵng' : '✈️ Da Nang Trip Goal', saved: 18000000, target: 24000000, percent: 75, tag: 'GROUP' },
+                    ].map((p) => (
+                      <div key={p.name} className="p-3 rounded-lg border space-y-1.5" style={{ borderColor: `${colors.border.light}80`, backgroundColor: `${colors.background.secondary}40` }}>
+                        <div className="flex justify-between items-center text-xs font-bold">
+                          <span style={{ color: colors.text.primary }}>{p.name}</span>
+                          <span className="text-[10px] px-2 py-0.5 rounded font-semibold" style={{ backgroundColor: `${colors.interactive.primary}15`, color: colors.interactive.primary }}>
+                            {t('dashboard.saved', { percent: p.percent })}
+                          </span>
+                        </div>
+                        <div className="w-full h-2 rounded-full overflow-hidden" style={{ backgroundColor: `${colors.border.light}70` }}>
+                          <div
+                            className="h-full rounded-full transition-all duration-500"
+                            style={{
+                              width: `${p.percent}%`,
+                              backgroundColor: p.tag === 'PERSONAL' ? colors.interactive.primary : '#10B981',
+                            }}
+                          />
+                        </div>
+                        <div className="flex justify-between text-[11px]" style={{ color: colors.text.secondary }}>
+                          <span>{t('dashboard.savedLabel', { amount: formatVietnamsePrice(p.saved) })}</span>
+                          <span>{t('dashboard.targetLabel', { amount: formatVietnamsePrice(p.target) })}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+              </div>
+
+              {/* Bottom Interactive Glass Banner */}
               <div
-                className="rounded-xl p-4 sm:p-6"
+                className="rounded-xl p-6 text-center border relative overflow-hidden mt-6 backdrop-blur-md"
                 style={{
-                  filter: 'blur(4px)',
-                  pointerEvents: 'none',
-                  backgroundColor: colors.background.primary,
+                  background: `linear-gradient(135deg, ${colors.interactive.primary}EE 0%, ${colors.palette[700] || colors.interactive.primary}EE 100%)`,
+                  borderColor: colors.border.light,
                 }}
               >
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  {[
-                    { label: t('finance.dashboard.savingsRate'), value: '5.9%' },
-                    { label: t('finance.dashboard.topCategory'), value: t('finance.dashboard.foodBev') },
-                    { label: t('finance.dashboard.runwayMonths'), value: '3.2' },
-                  ].map((item) => (
-                    <div key={item.label} className="text-center p-3 rounded-lg" style={{ backgroundColor: colors.surface.primary }}>
-                      <div className="font-bold text-lg">{item.value}</div>
-                      <div className="text-sm" style={{ color: colors.text.secondary }}>{item.label}</div>
-                    </div>
-                  ))}
+                <div className="relative z-10 max-w-xl mx-auto space-y-3">
+                  <Text className="font-bold text-lg sm:text-xl text-white">
+                    {t('finance.dashboard.overlayTitle')}
+                  </Text>
+                  <Text className="text-xs sm:text-sm text-purple-100">
+                    {t('finance.dashboard.overlaySubtitle')}
+                  </Text>
+                  <div className="pt-2">
+                    <Button
+                      variant="primary"
+                      size="lg"
+                      onClick={() => router.push(`/${locale}/register`)}
+                      className="font-semibold shadow-lg hover:scale-105 transition-transform"
+                      style={{ backgroundColor: colors.palette.white, color: colors.palette.base }}
+                    >
+                      {t('finance.dashboard.overlayCta')}
+                    </Button>
+                  </div>
                 </div>
               </div>
 
-              <div
-                className="absolute inset-0 flex flex-col items-center justify-center rounded-xl px-4 py-6"
-                style={{ background: 'rgba(54,41,183,0.72)', backdropFilter: 'blur(2px)' }}
-              >
-                <Text className="font-bold text-lg sm:text-xl mb-2 text-center" style={{ color: '#fff' }}>
-                  {t('finance.dashboard.overlayTitle')}
-                </Text>
-                <Text variant="caption" style={{ color: '#c5c1f1', textAlign: 'center', maxWidth: '36rem' }} className="mb-4 text-center px-4">
-                  {t('finance.dashboard.overlaySubtitle')}
-                </Text>
-                <Button variant="primary" size="lg" onClick={() => router.push(`/${locale}/register`)}>
-                  {t('finance.dashboard.overlayCta')}
-                </Button>
-              </div>
             </div>
           </div>
         </ScrollReveal>

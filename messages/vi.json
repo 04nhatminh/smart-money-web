@@ -75,16 +75,16 @@
   },
   "finance": {
     "appName": "SmartMoney",
-    "appDescription": "Ứng dụng quản lý tài chính cá nhân thông minh",
+    "appDescription": "Ứng dụng quản lý tài chính cá nhân & lập kế hoạch chi tiêu thông minh",
     "hero": {
-      "title": "Kiểm Soát Tài Chính Của Bạn",
-      "subtitle": "Trình lập kế hoạch chi tiêu thông minh với những hiểu biết do AI hỗ trợ. Theo dõi chi tiêu, đạt các mục tiêu tiết kiệm và xây dựng thói quen tài chính tốt hơn.",
+      "title": "Kiểm Soát Tài Chính Thông Minh Cùng AI",
+      "subtitle": "Trình lập kế hoạch chi tiêu thông minh với AI Adaptive Engine. Ghi chép thu chi bằng Giọng nói, Quét hóa đơn OCR & Import Excel, quản lý dự án tiết kiệm nhóm và nhận khuyến nghị tài chính tức thì.",
       "cta": "Bắt Đầu Miễn Phí",
       "login": "Đăng Nhập"
     },
     "dashboard": {
-      "title": "Tổng Quan",
-      "subtitle": "Tổng quan về bảng điều khiển tài chính của bạn",
+      "title": "Tổng Quan Bảng Điều Khiển",
+      "subtitle": "Tổng quan về bảng điều khiển tài chính thực tế của bạn",
       "monthlySpending": "Xu Hướng Chi Tiêu Hàng Tháng",
       "spendingByCategory": "Chi Tiêu Theo Danh Mục",
       "budgetVsActual": "Ngân Sách So Với Chi Tiêu Thực Tế",
@@ -103,39 +103,51 @@
       "overlayCta": "Bắt Đầu — Hoàn Toàn Miễn Phí"
     },
     "features": {
-      "title": "Tất Cả Những Gì Bạn Cần",
-      "subtitle": "Các tính năng mạnh mẽ để quản lý tài chính của bạn một cách hiệu quả",
-      "tracking": {
-        "title": "Theo Dõi Giao Dịch",
-        "description": "Tổ chức và phân loại tất cả chi tiêu của bạn theo danh mục cá nhân"
+      "title": "Tất Cả Công Cụ Cho Tài Chính Thông Minh",
+      "subtitle": "Bộ tính năng AI toàn diện và các công cụ cộng tác hỗ trợ hành trình tích lũy của bạn",
+      "budgetEngine": {
+        "title": "Lập Ngân Sách AI Tự Động",
+        "description": "Tự động phân bổ ngân sách chi tiêu thông minh và linh hoạt điều chỉnh theo thu nhập, chế độ tập trung & tốc độ tích lũy."
       },
-      "goals": {
-        "title": "Mục Tiêu Tiết Kiệm",
-        "description": "Đặt mục tiêu tiết kiệm cá nhân và nhóm, theo dõi tài chính và gia đình để tiết kiệm cùng nhau"
+      "multiInput": {
+        "title": "Ghi Chép Giọng Nói, OCR & Excel",
+        "description": "Ghi nhận giao dịch tức thì bằng Giọng nói, Quét ảnh hóa đơn AI OCR, Import file Excel hàng loạt hoặc nhập biểu mẫu."
       },
-      "recommendations": {
-        "title": "Đề Xuất Chi Tiêu Thông Minh",
-        "description": "Nhận những hiểu biết được cá nhân hóa và đề xuất để tối ưu hóa thói quen chi tiêu của bạn."
+      "smartInsights": {
+        "title": "Phân Tích & Đề Xuất Tức Thì AI",
+        "description": "Tự động phát hiện chi tiêu bất thường, giao dịch trùng lặp và đưa ra đề xuất hành động thực tế để tối ưu tài chính."
+      },
+      "savingGoals": {
+        "title": "Dự Án Tiết Kiệm Cá Nhân & Nhóm",
+        "description": "Thiết lập dự án tích lũy ưu tiên, theo dõi cột mốc chung và hỗ trợ đồng đội với cơ chế gánh vác đóng góp tự động."
+      },
+      "financialProfile": {
+        "title": "Hồ Sơ Tài Chính Cá Nhân Hóa",
+        "description": "Tùy chỉnh mức độ can thiệp AI, tốc độ tích lũy (An toàn, Vừa phải, Quyết liệt) và tự động đầu tư tiền nhàn rỗi."
+      },
+      "deepAnalytics": {
+        "title": "Phân Tích Dòng Tiền & Tài Sản Ròng",
+        "description": "Trực quan hóa thu nhập và chi tiêu theo Ngày, Tháng, Năm, lịch giao dịch tương tác và xu hướng tài sản tích lũy ròng."
       }
     },
     "benefits": {
       "title": "Tại Sao Chọn SmartMoney?",
-      "benefit1": "Phân loại chi tiêu do AI hỗ trợ",
-      "benefit2": "Tiết kiệm nhóm cộng tác",
-      "benefit3": "Thông tin chi tiêu theo thời gian thực",
-      "benefit4": "Dữ liệu an toàn và riêng tư",
-      "benefit5": "Đồng bộ hóa nhiều thiết bị",
-      "benefit6": "Khuyến nghị ngân sách thông minh"
+      "benefit1": "Lập & điều chỉnh ngân sách tự động bằng AI",
+      "benefit2": "Ghi chép siêu tốc qua Giọng nói & Quét ảnh hóa đơn OCR",
+      "benefit3": "Cảnh báo chi tiêu bất thường & Đề xuất gợi ý AI tức thì",
+      "benefit4": "Dự án tiết kiệm nhóm & Cơ chế tài trợ gánh vác đồng đội",
+      "benefit5": "Tùy chỉnh hồ sơ tài chính & Tự động đầu tư tiền nhàn rỗi",
+      "benefit6": "Phân tích dòng tiền chuyên sâu & Xu hướng tài sản ròng"
     },
     "testimonial": {
-      "balance": "Số Dư Tài Khoản",
-      "date": "Ngày Lâu Nhất",
-      "savingsGoal": "Tiền Tiết Kiệm Được"
+      "balance": "Tổng Tài Sản Ròng",
+      "date": "Kỳ Hoạt Động",
+      "savingsGoal": "Đã Tích Lũy"
     },
     "cta": {
-      "title": "Sẵn Sàng Bắt Đầu Hành Trình Tài Chính Của Bạn?",
-      "subtitle": "Tham gia hàng nghìn người dùng đã quản lý tài chính của họ một cách thông minh hơn.",
-      "button": "Bắt Đầu Hôm Nay"
+      "title": "Sẵn Sàng Bắt Đầu Hành Trình Tài Chính?",
+      "subtitle": "Tham gia cùng hàng nghìn người dùng quản lý ngân sách và tiết kiệm thông minh hơn với AI.",
+      "button": "Bắt Đầu Ngay Hôm Nay"
     }
   },
   "auth": {
