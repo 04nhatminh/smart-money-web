@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { Header, Footer, HeroSection, DashboardPreview, FeaturesSection, BenefitsSection, CTASection } from '@/components/organisms';
+import { Header, Footer, HeroSection, DashboardPreview, FeaturesSection, BenefitsSection, AppDownloadSection, CTASection } from '@/components/organisms';
 import { useAuth } from '@/context/AuthContext';
 import { useLocale } from 'next-intl';
 import { useTheme } from '@/context';
@@ -41,6 +41,9 @@ export default function Home() {
 
         {/* Benefits Section */}
         <BenefitsSection />
+
+        {/* Mobile App Download Section */}
+        <AppDownloadSection downloadUrl={process.env.NEXT_PUBLIC_MOBILE_APP_URL || '#'} />
 
         {/* CTA Section */}
         <CTASection />
