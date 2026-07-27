@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { FcGoogle } from 'react-icons/fc';
 import { FaFacebook } from 'react-icons/fa';
 import { MdVisibility, MdVisibilityOff } from 'react-icons/md';
@@ -21,6 +21,7 @@ interface LoginFormProps {
 export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
   const router = useRouter();
   const locale = useLocale();
+  const t = useTranslations();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
@@ -206,8 +207,8 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
 
       {/* Title and Subtitle */}
       <div className="text-center mb-8">
-        <Heading level={1} className="mb-2">Welcome Back</Heading>
-        <Text className="text-base" style={{ color: colors.text.secondary }}>Sign in to your account to continue</Text>
+        <Heading level={1} className="mb-2">{t.has('auth.welcomeBack') ? t('auth.welcomeBack') : 'Welcome Back'}</Heading>
+        <Text className="text-base" style={{ color: colors.text.secondary }}>{t.has('auth.signInSubtitle') ? t('auth.signInSubtitle') : 'Sign in to your account to continue'}</Text>
       </div>
 
       {error && (
@@ -216,11 +217,11 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
 
       <Input
         type="email"
-        label="Email Address"
+        label={t.has('auth.emailAddress') ? t('auth.emailAddress') : 'Email Address'}
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         onKeyDown={handleKeyDown}
-        placeholder="you@example.com"
+        placeholder={t.has('auth.emailPlaceholder') ? t('auth.emailPlaceholder') : 'you@example.com'}
         required
         disabled={isLoading || socialLoading}
       />
@@ -228,11 +229,11 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
       <div className="relative">
         <Input
           type={showPassword ? 'text' : 'password'}
-          label="Password"
+          label={t.has('auth.password') ? t('auth.password') : 'Password'}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Enter your password"
+          placeholder={t.has('auth.passwordPlaceholder') ? t('auth.passwordPlaceholder') : 'Enter your password'}
           required
           disabled={isLoading || socialLoading}
         />
@@ -258,7 +259,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
           className="text-sm hover:opacity-80 transition-opacity"
           style={{ color: colors.interactive.primary }}
         >
-          Forgot password?
+          {t.has('auth.forgotPassword') ? t('auth.forgotPassword') : 'Forgot password?'}
         </Link>
       </div>
 
@@ -268,7 +269,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
         className="w-full py-3 mt-6 text-lg font-semibold"
         disabled={isLoading || socialLoading}
       >
-        {isLoading ? 'Signing in...' : 'Sign In'}
+        {isLoading ? (t.has('auth.signingIn') ? t('auth.signingIn') : 'Signing in...') : (t.has('auth.signIn') ? t('auth.signIn') : 'Sign In')}
       </Button>
 
       {/* Social Login Divider */}
@@ -277,8 +278,8 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
           <div className="w-full border-t" style={{ borderColor: colors.border?.light }}></div>
         </div>
         <div className="relative flex justify-center text-sm">
-          <span className="px-2" style={{ color: colors.text.secondary, backgroundColor: colorScheme === 'dark' ? colors.palette?.[900] : colors.palette?.white }}>
-            Or continue with
+          <span className="px-2" style={{ color: colors.text.secondary, backgroundColor: colors.surface.primary }}>
+            {t.has('auth.orContinueWith') ? t('auth.orContinueWith') : 'Or continue with'}
           </span>
         </div>
       </div>
@@ -293,7 +294,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
               if (typeof window !== 'undefined' && (window as any).google) {
                 (window as any).google.accounts.id.prompt();
               } else {
-                setError('Google Sign-In is not loaded. Please refresh the page.');
+                setError(t.has('auth.googleLoginFailed') ? t('auth.googleLoginFailed') : 'Google Sign-In is not loaded. Please refresh the page.');
               }
             } catch (err) {
               setError('Error opening Google Sign-In');
@@ -304,7 +305,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
           style={{ borderColor: colors.border?.light }}
         >
           <FcGoogle size={24} />
-          <span style={{ color: colors.text.primary }} className="font-semibold">Sign in with Google</span>
+          <span style={{ color: colors.text.primary }} className="font-semibold">{t.has('auth.signInWithGoogle') ? t('auth.signInWithGoogle') : 'Sign in with Google'}</span>
         </button>
 
         {/* Facebook Login Button */}
@@ -316,18 +317,18 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
           style={{ backgroundColor: '#1877F2', color: '#FFFFFF' }}
         >
           <FaFacebook size={24} />
-          <span className="font-semibold">Sign in with Facebook</span>
+          <span className="font-semibold">{t.has('auth.signInWithFacebook') ? t('auth.signInWithFacebook') : 'Sign in with Facebook'}</span>
         </button>
       </div>
 
       <p className="text-center text-sm" style={{ color: colors.text.secondary }}>
-        Don't have an account?{' '}
+        {t.has('auth.dontHaveAccount') ? t('auth.dontHaveAccount') : "Don't have an account?"}{' '}
         <Link
           href={`/${locale}/register`}
           className="font-semibold hover:opacity-80 transition-opacity"
           style={{ color: colors.interactive.primary }}
         >
-          Sign up
+          {t.has('auth.signUp') ? t('auth.signUp') : 'Sign up'}
         </Link>
       </p>
     </form>

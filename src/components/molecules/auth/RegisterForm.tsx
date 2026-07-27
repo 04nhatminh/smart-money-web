@@ -184,8 +184,8 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
 
       {/* Title and Subtitle */}
       <div className="text-center mb-8">
-        <Heading level={1} className="mb-2">Create Account</Heading>
-        <Text className="text-base" style={{ color: colors.text.secondary }}>Start your journey to financial freedom</Text>
+        <Heading level={1} className="mb-2">{t.has('auth.createAccountTitle') ? t('auth.createAccountTitle') : 'Create Account'}</Heading>
+        <Text className="text-base" style={{ color: colors.text.secondary }}>{t.has('auth.createAccountSubtitle') ? t('auth.createAccountSubtitle') : 'Start your journey to financial freedom'}</Text>
       </div>
 
       {error && (
@@ -194,51 +194,51 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
 
       <Input
         type="text"
-        label="Full Name"
+        label={t.has('auth.fullName') ? t('auth.fullName') : 'Full Name'}
         value={fullName}
         onChange={(e) => setFullName(e.target.value)}
         onKeyDown={handleKeyDown}
-        placeholder="John Doe"
+        placeholder={t.has('auth.fullNamePlaceholder') ? t('auth.fullNamePlaceholder') : 'John Doe'}
         required
         disabled={isSubmitting}
       />
 
       <Input
         type="text"
-        label="Username"
+        label={t.has('auth.username') ? t('auth.username') : 'Username'}
         value={username}
         onChange={(e) => setUsername(e.target.value)}
         onKeyDown={handleKeyDown}
-        placeholder="johndoe123"
+        placeholder={t.has('auth.usernamePlaceholder') ? t('auth.usernamePlaceholder') : 'johndoe123'}
         required
         disabled={isSubmitting}
       />
 
       <Input
         type="email"
-        label="Email Address"
+        label={t.has('auth.emailAddress') ? t('auth.emailAddress') : 'Email Address'}
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         onKeyDown={handleKeyDown}
-        placeholder="you@example.com"
+        placeholder={t.has('auth.emailPlaceholder') ? t('auth.emailPlaceholder') : 'you@example.com'}
         required
         disabled={isSubmitting}
       />
 
       <Input
         type="tel"
-        label="Phone Number"
+        label={t.has('auth.phone') ? t('auth.phone') : 'Phone Number'}
         value={phone}
         onChange={(e) => setPhone(e.target.value)}
         onKeyDown={handleKeyDown}
-        placeholder="+84 123 456 789"
+        placeholder={t.has('auth.phonePlaceholder') ? t('auth.phonePlaceholder') : '+84 123 456 789'}
         required
         disabled={isSubmitting}
       />
 
       <Input
         type="date"
-        label="Date of Birth"
+        label={t.has('auth.dob') ? t('auth.dob') : 'Date of Birth'}
         value={dateOfBirth}
         onChange={handleDateOfBirthChange}
         onKeyDown={handleKeyDown}
@@ -249,11 +249,11 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
       <div className="relative">
         <Input
           type={showPassword ? 'text' : 'password'}
-          label="Password"
+          label={t.has('auth.password') ? t('auth.password') : 'Password'}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Create a strong password"
+          placeholder={t.has('auth.passwordPlaceholder') ? t('auth.passwordPlaceholder') : 'Create a strong password'}
           required
           disabled={isSubmitting}
         />
@@ -276,11 +276,11 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
       <div className="relative">
         <Input
           type={showConfirmPassword ? 'text' : 'password'}
-          label="Confirm Password"
+          label={t.has('auth.confirmPassword') ? t('auth.confirmPassword') : 'Confirm Password'}
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Confirm your password"
+          placeholder={t.has('auth.confirmPasswordPlaceholder') ? t('auth.confirmPasswordPlaceholder') : 'Confirm your password'}
           required
           disabled={isSubmitting}
         />
@@ -310,11 +310,11 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
           className="w-4 h-4 rounded mt-1 flex-shrink-0"
         />
         <label htmlFor="terms" className="text-sm leading-relaxed" style={{ color: colors.text.secondary }}>
-          {locale === 'vi' ? 'Tôi đồng ý với ' : 'I agree to the '}
+          {t.has('auth.agreeTermsText') ? t('auth.agreeTermsText') : 'I agree to the'}{' '}
           <Link href={`/${locale}/terms`} className="font-semibold hover:opacity-80 transition-opacity" style={{ color: colors.interactive.primary }}>
             {t.has('common.terms') ? t('common.terms') : 'Terms of Service'}
           </Link>
-          {locale === 'vi' ? ' và ' : ' and '}
+          {' '}{t.has('auth.and') ? t('auth.and') : 'and'}{' '}
           <Link href={`/${locale}/privacy`} className="font-semibold hover:opacity-80 transition-opacity" style={{ color: colors.interactive.primary }}>
             {t.has('common.privacy') ? t('common.privacy') : 'Privacy Policy'}
           </Link>
@@ -327,17 +327,17 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
         className="w-full py-3 mt-6 text-lg font-semibold"
         disabled={isSubmitting}
       >
-        {isSubmitting ? 'Creating account...' : 'Create Account'}
+        {isSubmitting ? (t.has('auth.creatingAccount') ? t('auth.creatingAccount') : 'Creating account...') : (t.has('auth.createAccount') ? t('auth.createAccount') : 'Create Account')}
       </Button>
 
       <p className="text-center text-sm" style={{ color: colors.text.secondary }}>
-        Already have an account?{' '}
+        {t.has('auth.alreadyHaveAccount') ? t('auth.alreadyHaveAccount') : 'Already have an account?'}{' '}
         <Link
           href={`/${locale}/login`}
           className="font-semibold hover:opacity-80 transition-opacity"
           style={{ color: colors.interactive.primary }}
         >
-          Sign in
+          {t.has('auth.signIn') ? t('auth.signIn') : 'Sign in'}
         </Link>
       </p>
     </form>

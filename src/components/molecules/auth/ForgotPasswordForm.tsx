@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { Button, Input, Heading, Text, Alert } from '@/components/atoms';
 import { useTheme } from '@/context/ThemeContext';
 import { apiClient } from '@/lib/api-client';
@@ -13,21 +13,12 @@ interface ForgotPasswordFormProps {
   onSuccess?: () => void;
 }
 
-/**
- * ForgotPasswordForm Component
- * 
- * Step 1 of password reset process
- * User enters email and receives OTP via email
- * 
- * API Endpoint: POST /api/v1/auth/forgot
- * Body: { email }
- * Response: { success: boolean, message: string }
- */
 export const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({
   onSuccess,
 }) => {
   const router = useRouter();
   const locale = useLocale();
+  const t = useTranslations();
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -40,7 +31,7 @@ export const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({
     setSuccess(false);
 
     if (!email.trim()) {
-      setError('Please enter your email');
+      setError(t.has('auth.fillAllFields') ? t('auth.fillAllFields') : 'Please enter your email');
       return;
     }
 
@@ -97,33 +88,32 @@ export const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({
 
         {/* Success Message */}
         <div className="text-center mb-8">
-          <Heading level={1} className="mb-2">Check Your Email</Heading>
+          <Heading level={1} className="mb-2">{t.has('auth.checkYourEmail') ? t('auth.checkYourEmail') : 'Check Your Email'}</Heading>
           <Text className="text-base" style={{ color: colors.text.secondary }}>
-            Verification code sent successfully
+            {t.has('auth.codeSent') ? t('auth.codeSent') : 'Verification code sent successfully'}
           </Text>
         </div>
 
         <div className="p-4 bg-green-100 text-green-700 rounded-lg border border-green-400">
-          <h3 className="font-semibold mb-2">Code Sent</h3>
+          <h3 className="font-semibold mb-2">{t.has('auth.codeSent') ? t('auth.codeSent') : 'Code Sent'}</h3>
           <p className="text-sm">
-            We've sent a 6-digit verification code to <span className="font-semibold">{email}</span>.
-            Please check your email and enter the code.
+            {t.has('auth.codeSentDesc') ? t('auth.codeSentDesc', { email }) : `We've sent a 6-digit verification code to ${email}. Please check your email and enter the code.`}
           </p>
         </div>
 
         <p className="text-center text-sm" style={{ color: colors.text.secondary }}>
-          Redirecting to verification page...
+          {t.has('auth.redirectingToVerification') ? t('auth.redirectingToVerification') : 'Redirecting to verification page...'}
         </p>
 
         <Link href={`/${locale}/reset-password?email=${encodeURIComponent(email)}`}>
           <Button variant="primary" className="w-full py-3 text-lg font-semibold mb-4">
-            Continue
+            {t.has('auth.continue') ? t('auth.continue') : 'Continue'}
           </Button>
         </Link>
 
         <Link href={`/${locale}/login`}>
           <Button variant="secondary" className="w-full py-3 text-lg font-semibold">
-            Back to Login
+            {t.has('auth.backToSignIn') ? t('auth.backToSignIn') : 'Back to Sign In'}
           </Button>
         </Link>
       </form>
@@ -148,9 +138,9 @@ export const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({
 
       {/* Title and Subtitle */}
       <div className="text-center mb-8">
-        <Heading level={1} className="mb-2">Reset Password</Heading>
+        <Heading level={1} className="mb-2">{t.has('auth.forgotPasswordTitle') ? t('auth.forgotPasswordTitle') : 'Reset Password'}</Heading>
         <Text className="text-base" style={{ color: colors.text.secondary }}>
-          Enter your email and we'll send you a verification code
+          {t.has('auth.forgotPasswordSubtitle') ? t('auth.forgotPasswordSubtitle') : "Enter your email and we'll send you a verification code"}
         </Text>
       </div>
 
@@ -160,10 +150,10 @@ export const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({
 
       <Input
         type="email"
-        label="Email Address"
+        label={t.has('auth.emailAddress') ? t('auth.emailAddress') : 'Email Address'}
         value={email}
         onChange={(e) => setEmail(e.target.value)}
-        placeholder="you@example.com"
+        placeholder={t.has('auth.emailPlaceholder') ? t('auth.emailPlaceholder') : 'you@example.com'}
         required
         disabled={isLoading}
       />
@@ -174,17 +164,17 @@ export const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({
         className="w-full py-3 mt-6 text-lg font-semibold"
         disabled={isLoading}
       >
-        {isLoading ? 'Sending...' : 'Send Verification Code'}
+        {isLoading ? (t.has('auth.sendingCode') ? t('auth.sendingCode') : 'Sending...') : (t.has('auth.sendResetCode') ? t('auth.sendResetCode') : 'Send Verification Code')}
       </Button>
 
       <p className="text-center text-sm" style={{ color: colors.text.secondary }}>
-        Remember your password?{' '}
+        {t.has('auth.rememberPassword') ? t('auth.rememberPassword') : 'Remember your password?'}{' '}
         <Link
           href={`/${locale}/login`}
           className="font-semibold hover:opacity-80 transition-opacity"
           style={{ color: colors.interactive.primary }}
         >
-          Back to Login
+          {t.has('auth.backToSignIn') ? t('auth.backToSignIn') : 'Back to Sign In'}
         </Link>
       </p>
     </form>
