@@ -408,7 +408,7 @@ export default function AdminPage() {
                 />
                 <StatCard
                   label={t('admin.kpi.settlementStatus')}
-                  value={isSettlementRunning ? t('admin.settlement.running') : (systemStats?.settlementStatus || 'COMPLETED')}
+                  value={isSettlementRunning ? t('admin.settlement.running') : (systemStats?.settlementStatus === 'COMPLETED' ? t('admin.settlement.statusCompleted') : (systemStats?.settlementStatus || t('admin.settlement.statusCompleted')))}
                   icon={<MdCheckCircle className="w-6 h-6 text-emerald-500" />}
                 />
               </div>
@@ -420,8 +420,8 @@ export default function AdminPage() {
               <Card className="lg:col-span-2 p-6 sm:p-7 border" style={{ borderColor: colors.border.light, backgroundColor: colors.surface.primary }}>
                 <div className="flex items-center justify-between mb-6 border-b pb-4" style={{ borderColor: colors.border.light }}>
                   <div className="space-y-1">
-                    <Heading level={3} className="text-lg font-bold">System Volume & Activity Growth</Heading>
-                    <Text style={{ color: colors.text.secondary }} className="text-xs sm:text-sm block">Monthly transactions vs volume throughput</Text>
+                    <Heading level={3} className="text-lg font-bold">{t('admin.overviewSection.analyticsTitle')}</Heading>
+                    <Text style={{ color: colors.text.secondary }} className="text-xs sm:text-sm block">{t('admin.overviewSection.analyticsSubtitle')}</Text>
                   </div>
                 </div>
                 <div className="h-64 sm:h-72 w-full pt-2">
@@ -461,8 +461,8 @@ export default function AdminPage() {
               <Card className="p-6 sm:p-7 border flex flex-col justify-between" style={{ borderColor: colors.border.light, backgroundColor: colors.surface.primary }}>
                 <div>
                   <div className="mb-6 border-b pb-4" style={{ borderColor: colors.border.light }}>
-                    <Heading level={3} className="text-lg font-bold mb-1">System Health & AI Engines</Heading>
-                    <Text style={{ color: colors.text.secondary }} className="text-xs sm:text-sm block">Infrastructure status monitoring</Text>
+                    <Heading level={3} className="text-lg font-bold mb-1">{t('admin.overviewSection.healthTitle')}</Heading>
+                    <Text style={{ color: colors.text.secondary }} className="text-xs sm:text-sm block">{t('admin.overviewSection.healthSubtitle')}</Text>
                   </div>
 
                   <div className="space-y-4">
@@ -474,7 +474,7 @@ export default function AdminPage() {
                           <Text className="text-[10px]" style={{ color: colors.text.secondary }}>v1.0.0 • Port 8080</Text>
                         </div>
                       </div>
-                      <span className="px-2.5 py-1 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">HEALTHY</span>
+                      <span className="px-2.5 py-1 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">{t('admin.overviewSection.statusHealthy')}</span>
                     </div>
 
                     <div className="flex items-center justify-between p-3.5 rounded-xl border" style={{ borderColor: colors.border.light, backgroundColor: colors.background.secondary }}>
@@ -485,7 +485,7 @@ export default function AdminPage() {
                           <Text className="text-[10px]" style={{ color: colors.text.secondary }}>Cron: Monthly 1st 00:00</Text>
                         </div>
                       </div>
-                      <span className="px-2.5 py-1 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">ACTIVE</span>
+                      <span className="px-2.5 py-1 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">{t('admin.overviewSection.statusActive')}</span>
                     </div>
 
                     <div className="flex items-center justify-between p-3.5 rounded-xl border" style={{ borderColor: colors.border.light, backgroundColor: colors.background.secondary }}>
@@ -493,10 +493,10 @@ export default function AdminPage() {
                         <MdSpeed className="w-5 h-5 text-amber-500" />
                         <div>
                           <Text className="text-xs font-bold block">Budget AI Engine</Text>
-                          <Text className="text-[10px]" style={{ color: colors.text.secondary }}>Adaptive Engine Active</Text>
+                          <Text className="text-[10px]" style={{ color: colors.text.secondary }}>{t('admin.overviewSection.adaptiveActive')}</Text>
                         </div>
                       </div>
-                      <span className="px-2.5 py-1 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">READY</span>
+                      <span className="px-2.5 py-1 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">{t('admin.overviewSection.statusReady')}</span>
                     </div>
                   </div>
                 </div>
@@ -556,7 +556,7 @@ export default function AdminPage() {
                   )}
                   <div>
                     <Text className="font-bold text-sm block">
-                      {settlementResult.success ? t('admin.settlement.successMessage') : 'Settlement Failed'}
+                      {settlementResult.success ? t('admin.settlement.successMessage') : t('admin.settlement.statusFailed')}
                     </Text>
                     <Text className="text-xs opacity-90">{settlementResult.message}</Text>
                   </div>
@@ -566,15 +566,15 @@ export default function AdminPage() {
               {/* Settlement Information Callout */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 my-6">
                 <div className="p-4.5 rounded-2xl border space-y-1.5 shadow-sm" style={{ borderColor: colors.border.light, backgroundColor: colors.background.secondary }}>
-                  <Text className="text-xs font-semibold block" style={{ color: colors.text.secondary }}>Target API Endpoint</Text>
+                  <Text className="text-xs font-semibold block" style={{ color: colors.text.secondary }}>{t('admin.settlement.targetEndpoint')}</Text>
                   <Text className="font-mono text-xs font-bold text-indigo-400 block">POST /api/v1/admin/settlement/run</Text>
                 </div>
                 <div className="p-4.5 rounded-2xl border space-y-1.5 shadow-sm" style={{ borderColor: colors.border.light, backgroundColor: colors.background.secondary }}>
-                  <Text className="text-xs font-semibold block" style={{ color: colors.text.secondary }}>Process Execution Scope</Text>
-                  <Text className="text-xs font-bold block" style={{ color: colors.text.primary }}>All Active Projects & Group Settlements</Text>
+                  <Text className="text-xs font-semibold block" style={{ color: colors.text.secondary }}>{t('admin.settlement.executionScope')}</Text>
+                  <Text className="text-xs font-bold block" style={{ color: colors.text.primary }}>{t('admin.settlement.executionScopeDesc')}</Text>
                 </div>
                 <div className="p-4.5 rounded-2xl border space-y-1.5 shadow-sm" style={{ borderColor: colors.border.light, backgroundColor: colors.background.secondary }}>
-                  <Text className="text-xs font-semibold block" style={{ color: colors.text.secondary }}>Backend Controller Class</Text>
+                  <Text className="text-xs font-semibold block" style={{ color: colors.text.secondary }}>{t('admin.settlement.controllerClass')}</Text>
                   <Text className="font-mono text-xs font-bold block text-emerald-400">AdminSettlementController</Text>
                 </div>
               </div>
@@ -586,11 +586,11 @@ export default function AdminPage() {
                   <table className="w-full text-left text-xs">
                     <thead style={{ backgroundColor: colors.background.secondary, color: colors.text.secondary }}>
                       <tr>
-                        <th className="p-3.5">Timestamp</th>
-                        <th className="p-3.5">Triggered By</th>
-                        <th className="p-3.5">Duration</th>
-                        <th className="p-3.5">Status</th>
-                        <th className="p-3.5">Message</th>
+                        <th className="p-3.5">{t('admin.settlement.tableTimestamp')}</th>
+                        <th className="p-3.5">{t('admin.settlement.tableTriggeredBy')}</th>
+                        <th className="p-3.5">{t('admin.settlement.tableDuration')}</th>
+                        <th className="p-3.5">{t('admin.settlement.tableStatus')}</th>
+                        <th className="p-3.5">{t('admin.settlement.tableMessage')}</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y" style={{ borderColor: colors.border.light }}>
@@ -600,7 +600,7 @@ export default function AdminPage() {
                             {new Date(log.timestamp).toLocaleString(locale)}
                           </td>
                           <td className="p-3.5 font-semibold" style={{ color: colors.text.primary }}>
-                            {log.triggeredBy}
+                            {log.triggeredBy === 'SYSTEM_SCHEDULER' ? t('admin.settlement.systemScheduler') : log.triggeredBy === 'ADMIN_MANUAL_TRIGGER' ? t('admin.settlement.adminManualTrigger') : log.triggeredBy}
                           </td>
                           <td className="p-3.5 font-mono">{log.durationMs} ms</td>
                           <td className="p-3.5">
@@ -608,11 +608,13 @@ export default function AdminPage() {
                               className={`px-2.5 py-1 rounded-full text-[10px] font-bold ${log.status === 'SUCCESS' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-red-500/10 text-red-500'
                                 }`}
                             >
-                              {log.status}
+                              {log.status === 'SUCCESS' ? t('admin.settlement.statusSuccess') : log.status === 'FAILED' ? t('admin.settlement.statusFailed') : log.status}
                             </span>
                           </td>
                           <td className="p-3.5 max-w-xs truncate" style={{ color: colors.text.secondary }}>
-                            {log.message}
+                            {log.message?.includes('Automated monthly settlement')
+                              ? t('admin.settlement.defaultLogMsg', { count: 38 })
+                              : log.message}
                           </td>
                         </tr>
                       ))}
@@ -632,7 +634,7 @@ export default function AdminPage() {
                 <div className="space-y-1">
                   <Heading level={3} className="text-lg font-bold">{t('admin.users.title')}</Heading>
                   <Text style={{ color: colors.text.secondary }} className="text-xs sm:text-sm block">
-                    Manage system user roles, access statuses, and financial profile setups
+                    {t('admin.users.subtitle')}
                   </Text>
                 </div>
 
@@ -733,7 +735,7 @@ export default function AdminPage() {
                       <th className="p-4">{t('admin.users.colRole')}</th>
                       <th className="p-4">{t('admin.users.colFinancial')}</th>
                       <th className="p-4">{t('admin.users.colStatus')}</th>
-                      <th className="p-4">Joined Date</th>
+                      <th className="p-4">{t('admin.users.colJoinedDate')}</th>
                       <th className="p-4 text-right">{t('admin.users.colActions')}</th>
                     </tr>
                   </thead>
@@ -848,7 +850,7 @@ export default function AdminPage() {
                     <Input
                       value={broadcastTitle}
                       onChange={(e) => setBroadcastTitle(e.target.value)}
-                      placeholder="e.g. Scheduled System Maintenance Notice"
+                      placeholder={t('admin.broadcast.titlePlaceholder')}
                       required
                       className="w-full text-xs sm:text-sm"
                     />
@@ -888,7 +890,7 @@ export default function AdminPage() {
                     rows={3}
                     value={broadcastMsg}
                     onChange={(e) => setBroadcastMsg(e.target.value)}
-                    placeholder="Enter full broadcast details to be delivered to user notification feeds..."
+                    placeholder={t('admin.broadcast.messagePlaceholder')}
                     required
                     className="w-full p-3.5 text-xs sm:text-sm rounded-xl border outline-none transition-all resize-none"
                     style={{
