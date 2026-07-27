@@ -21,6 +21,7 @@ export const Footer: React.FC<FooterProps> = ({
   const locale = useLocale();
 
   const footerLinks = [
+    { label: t.has('common.terms') ? t('common.terms') : 'Terms of Service', href: `/${locale}/terms` },
     { label: t('common.privacy'), href: `/${locale}/privacy` },
     { label: t('common.helpCenter'), href: `/${locale}/help` },
     { label: t('common.contact'), href: `/${locale}/contact` },

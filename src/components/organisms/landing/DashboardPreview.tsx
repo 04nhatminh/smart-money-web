@@ -417,10 +417,10 @@ export const DashboardPreview: React.FC = () => {
                 }}
               >
                 <div className="relative z-10 max-w-xl mx-auto space-y-3">
-                  <Text className="font-bold text-lg sm:text-xl text-white">
+                  <Text className="font-bold text-lg sm:text-xl" style={{ color: '#ffffff' }}>
                     {t('finance.dashboard.overlayTitle')}
                   </Text>
-                  <Text className="text-xs sm:text-sm text-purple-100">
+                  <Text className="text-xs sm:text-sm" style={{ color: 'rgba(255, 255, 255, 0.9)' }}>
                     {t('finance.dashboard.overlaySubtitle')}
                   </Text>
                   <div className="pt-2">

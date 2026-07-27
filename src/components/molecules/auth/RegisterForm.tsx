@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { MdVisibility, MdVisibilityOff } from 'react-icons/md';
 import { Button, Input, Heading, Text, Alert } from '@/components/atoms';
 import { useAuth } from '@/context/AuthContext';
@@ -17,6 +17,7 @@ interface RegisterFormProps {
 export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
   const router = useRouter();
   const locale = useLocale();
+  const t = useTranslations();
   const [fullName, setFullName] = useState('');
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
@@ -309,13 +310,13 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
           className="w-4 h-4 rounded mt-1 flex-shrink-0"
         />
         <label htmlFor="terms" className="text-sm leading-relaxed" style={{ color: colors.text.secondary }}>
-          I agree to the{' '}
-          <Link href="/terms" className="font-semibold hover:opacity-80 transition-opacity" style={{ color: colors.interactive.primary }}>
-            Terms of Service
+          {locale === 'vi' ? 'Tôi đồng ý với ' : 'I agree to the '}
+          <Link href={`/${locale}/terms`} className="font-semibold hover:opacity-80 transition-opacity" style={{ color: colors.interactive.primary }}>
+            {t.has('common.terms') ? t('common.terms') : 'Terms of Service'}
           </Link>
-          {' '}and{' '}
-          <Link href="/privacy" className="font-semibold hover:opacity-80 transition-opacity" style={{ color: colors.interactive.primary }}>
-            Privacy Policy
+          {locale === 'vi' ? ' và ' : ' and '}
+          <Link href={`/${locale}/privacy`} className="font-semibold hover:opacity-80 transition-opacity" style={{ color: colors.interactive.primary }}>
+            {t.has('common.privacy') ? t('common.privacy') : 'Privacy Policy'}
           </Link>
         </label>
       </div>

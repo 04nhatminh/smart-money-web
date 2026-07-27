@@ -89,61 +89,61 @@ export const PRIMARY_COLORS = {
 
 // Dark Mode Color Palette
 export const DARK_COLORS = {
-  // Backgrounds
+  // Backgrounds - rich slate dark palette
   background: {
-    primary: PRIMARY_PALETTE[990],
-    secondary: PRIMARY_PALETTE[900],
-    tertiary: PRIMARY_PALETTE[850],
+    primary: '#090A0F',
+    secondary: '#131520',
+    tertiary: '#1B1E2E',
   },
 
-  // Text
+  // Text - high contrast & legibility
   text: {
-    primary: PRIMARY_PALETTE.white,
-    secondary: PRIMARY_PALETTE[150],
-    tertiary: PRIMARY_PALETTE[200],
-    inverse: PRIMARY_PALETTE[900],
+    primary: '#FFFFFF',
+    secondary: '#D1D5DB',
+    tertiary: '#9CA3AF',
+    inverse: '#FFFFFF',
   },
 
-  // Surfaces (elevated components)
+  // Surfaces (elevated components, cards, sidebar, modals)
   surface: {
-    primary: PRIMARY_PALETTE[900],
-    secondary: PRIMARY_PALETTE[850],
+    primary: '#131520',
+    secondary: '#1B1E2E',
   },
 
   // States
   states: {
-    hover: 'rgba(200, 193, 241, 0.1)',
-    active: 'rgba(200, 193, 241, 0.15)',
-    disabled: 'rgba(200, 193, 241, 0.25)',
+    hover: 'rgba(255, 255, 255, 0.08)',
+    active: 'rgba(255, 255, 255, 0.12)',
+    disabled: 'rgba(255, 255, 255, 0.20)',
   },
 
   // Interactive
   interactive: {
-    primary: PRIMARY_PALETTE[350],
-    secondary: PRIMARY_PALETTE[550],
-    tertiary: PRIMARY_PALETTE[700],
+    primary: '#6366F1',
+    secondary: '#282B40',
+    tertiary: '#373B56',
     danger: '#FF5252',
     dangerHover: '#FF1744',
-    success: '#66BB6A',
-    successHover: '#43A047',
-    warning: '#FDD835',
-    warningHover: '#F9A825',
-    info: '#42A5F5',
-    infoHover: '#1E88E5',
+    success: '#34D399',
+    successHover: '#10B981',
+    warning: '#FBBF24',
+    warningHover: '#F59E0B',
+    info: '#38BDF8',
+    infoHover: '#0284C7',
   },
 
   // Borders
   border: {
-    light: PRIMARY_PALETTE[800],
-    medium: PRIMARY_PALETTE[700],
-    dark: PRIMARY_PALETTE[600],
+    light: '#26293B',
+    medium: '#353952',
+    dark: '#474D6E',
   },
 
   // Shadows
   shadow: {
     sm: 'rgba(0, 0, 0, 0.5)',
-    md: 'rgba(0, 0, 0, 0.6)',
-    lg: 'rgba(0, 0, 0, 0.7)',
+    md: 'rgba(0, 0, 0, 0.65)',
+    lg: 'rgba(0, 0, 0, 0.8)',
   },
 
   // Palette values (for gradient and direct access)

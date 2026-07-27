@@ -111,8 +111,8 @@ export const InsightCard: React.FC<InsightCardProps> = ({ insight, locale = 'vi'
               key={key}
               className="p-2.5 rounded-xl border transition-colors"
               style={{
-                backgroundColor: colors.background.primary,
-                borderColor: `${colors.border.light}80`,
+                backgroundColor: colors.surface.secondary,
+                borderColor: colors.border.light,
               }}
             >
               <div

@@ -338,8 +338,9 @@ export default function ProjectsPage() {
               ].map((stat, idx) => (
                 <div
                   key={idx}
-                  className="p-4 rounded-xl border bg-white shadow-sm flex flex-col justify-between transition-all hover:shadow-md"
+                  className="p-4 rounded-xl border shadow-sm flex flex-col justify-between transition-all hover:shadow-md"
                   style={{
+                    backgroundColor: colors.surface.primary,
                     borderColor: colors.border.light,
                     borderLeft: `4px solid ${stat.color}`,
                   }}
@@ -427,7 +428,7 @@ export default function ProjectsPage() {
             {projectsLoading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {[1, 2, 3, 4, 5, 6].map((i) => (
-                  <div key={i} className="p-5 rounded-2xl border bg-white space-y-3 shadow-xs">
+                  <div key={i} className="p-5 rounded-2xl border space-y-3 shadow-xs" style={{ backgroundColor: colors.surface.primary, borderColor: colors.border.light }}>
                     <div className="flex justify-between items-center">
                       <Skeleton height={22} width="60%" />
                       <Skeleton height={20} width="25%" variant="circular" />
@@ -445,8 +446,9 @@ export default function ProjectsPage() {
               </div>
             ) : filteredProjects.length === 0 ? (
               <div
-                className="rounded-lg p-12 text-center border bg-white"
+                className="rounded-lg p-12 text-center border"
                 style={{
+                  backgroundColor: colors.surface.primary,
                   borderColor: colors.border.light,
                 }}
               >
@@ -494,8 +496,8 @@ export default function ProjectsPage() {
                 {[1, 2, 3].map((i) => (
                   <div
                     key={i}
-                    className="border rounded-2xl p-5 bg-white shadow-sm flex flex-col justify-between h-[180px]"
-                    style={{ borderColor: colors.border.light }}
+                    className="border rounded-2xl p-5 shadow-sm flex flex-col justify-between h-[180px]"
+                    style={{ backgroundColor: colors.surface.primary, borderColor: colors.border.light }}
                   >
                     <div>
                       <div className="flex justify-between items-start gap-2">
@@ -513,8 +515,8 @@ export default function ProjectsPage() {
               </div>
             ) : groups.length === 0 ? (
               <div
-                className="rounded-lg p-12 text-center border bg-white"
-                style={{ borderColor: colors.border.light }}
+                className="rounded-lg p-12 text-center border"
+                style={{ backgroundColor: colors.surface.primary, borderColor: colors.border.light }}
               >
                 <Heading level={3} style={{ color: colors.text.secondary }} className="mb-2">
                   No groups found
@@ -538,8 +540,8 @@ export default function ProjectsPage() {
                     <div
                       key={group.groupId}
                       onClick={() => handleGroupClick(group.groupId)}
-                      className="border rounded-2xl p-5 bg-white shadow-sm hover:shadow-md transition-all cursor-pointer flex flex-col justify-between min-h-[190px]"
-                      style={{ borderColor: colors.border.light }}
+                      className="border rounded-2xl p-5 shadow-sm hover:shadow-md transition-all cursor-pointer flex flex-col justify-between min-h-[190px]"
+                      style={{ backgroundColor: colors.surface.primary, borderColor: colors.border.light }}
                     >
                       <div>
                         <div className="flex justify-between items-start gap-2">

@@ -200,8 +200,8 @@ export default function BudgetsPage() {
             {[1, 2, 3, 4, 5, 6].map((i) => (
               <div
                 key={i}
-                className="p-5 rounded-2xl border bg-white space-y-4 shadow-xs"
-                style={{ borderColor: colors.border.light }}
+                className="p-5 rounded-2xl border space-y-4 shadow-xs"
+                style={{ backgroundColor: colors.surface.primary, borderColor: colors.border.light }}
               >
                 <div className="flex justify-between items-center">
                   <Skeleton height={20} width="50%" />

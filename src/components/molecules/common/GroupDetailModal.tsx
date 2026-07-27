@@ -665,7 +665,7 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
                     )}
                   </div>
                 ) : isProjectLoading || (group.groupProjectId && !projectDetail) ? (
-                  <div className="p-5 rounded-2xl border bg-white space-y-3 shadow-xs" style={{ borderColor: colors.border.light }}>
+                  <div className="p-5 rounded-2xl border space-y-3 shadow-xs" style={{ backgroundColor: colors.surface.primary, borderColor: colors.border.light }}>
                     <div className="animate-pulse space-y-3">
                       <div className="h-5 bg-gray-200 rounded w-1/2"></div>
                       <div className="h-4 bg-gray-200 rounded w-3/4"></div>

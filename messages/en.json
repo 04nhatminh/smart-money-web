@@ -32,6 +32,7 @@
     "blog": "Blog",
     "helpCenter": "Help Center",
     "privacy": "Privacy",
+    "terms": "Terms of Service",
     "notifications": "Notifications",
     "dashboard": "Dashboard",
     "profile": "Profile",
@@ -540,7 +541,15 @@
     },
     "yearLabel": "Year {year}",
     "monthLabel": "{month} {year}",
-    "weekHeaders": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+    "weekHeaders": [
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri",
+      "Sat",
+      "Sun"
+    ],
     "month": "Month:",
     "year": "Year:",
     "refresh": "Refresh",
@@ -709,7 +718,7 @@
   "privacyPage": {
     "subtitle": "This Privacy Policy describes how we collect, use, and protect your personal financial information.",
     "questions": "Have any questions?",
-    "contactSupport": "Please contact our security team at: support@smartmoney.vn",
+    "contactSupport": "Please contact our security team at: {email}",
     "sec1Title": "1. Information Collection",
     "sec1Desc": "We collect information to provide better services to our users. This includes information you provide when creating an account (such as name, email) and the financial transactions you enter into the system for budget planning and analysis.",
     "sec2Title": "2. How We Use Data",
@@ -718,6 +727,19 @@
     "sec3Desc": "We implement industry-standard security measures including data transmission encryption (SSL/TLS) and secure database storage. Your password is one-way hashed before storage.",
     "sec4Title": "4. Your Rights",
     "sec4Desc": "You have full rights to access, edit, or request the deletion of your account and all stored financial data in the SmartMoney system at any time through the Account Settings or by contacting us directly."
+  },
+  "termsPage": {
+    "subtitle": "Please read these Terms of Service carefully before using the SmartMoney platform.",
+    "questions": "Have questions about our terms?",
+    "contactSupport": "Contact legal support at: {email}",
+    "sec1Title": "1. Acceptance of Terms",
+    "sec1Desc": "By creating an account or accessing the SmartMoney application, you agree to comply with and be bound by these Terms of Service and all applicable policies.",
+    "sec2Title": "2. Account Registration & Security",
+    "sec2Desc": "You are responsible for maintaining the confidentiality of your login credentials. You are fully responsible for all activities that occur under your SmartMoney account.",
+    "sec3Title": "3. User Conduct & Financial Data",
+    "sec3Desc": "SmartMoney provides personal and group spending management tools. Users must not use the platform for unlawful activities, unauthorized data scraping, or attempting to compromise server security.",
+    "sec4Title": "4. Service Availability & Modifications",
+    "sec4Desc": "We reserve the right to update, modify, or enhance features within SmartMoney to improve system performance, security, and user experience."
   },
   "helpPage": {
     "subtitle": "Find answers to frequently asked questions or learn how to use SmartMoney effectively.",
