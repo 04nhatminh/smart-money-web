@@ -894,7 +894,7 @@
     }
   },
   "admin": {
-    "title": "Bảng Đăng Nhập & Quản Trị Hệ Thống",
+    "title": "Bảng Điều Khiển & Quản Trị Hệ Thống",
     "subtitle": "Giám sát hệ thống, quản lý người dùng & thực thi quy trình quyết toán tài chính",
     "statusOnline": "Hệ thống hoạt động bình thường",
     "tabs": {
@@ -908,7 +908,24 @@
       "totalUsers": "Tổng Người dùng",
       "activeUsers": "Người dùng Hoạt động",
       "monthlyVolume": "Khối lượng Giao dịch Tháng",
-      "settlementStatus": "Trạng thái Quyết toán"
+      "settlementStatus": "Bộ máy Quyết toán"
+    },
+    "overviewSection": {
+      "analyticsTitle": "Tăng Trưởng Khối Lượng & Hoạt Động Hệ Thống",
+      "analyticsSubtitle": "Số lượng giao dịch hàng tháng và tổng dung lượng xử lý",
+      "healthTitle": "Sức Khỏe Hệ Thống & Bộ Máy AI",
+      "healthSubtitle": "Giám sát trạng thái hạ tầng hệ thống",
+      "statusHealthy": "HOẠT ĐỘNG TỐT",
+      "statusActive": "ĐANG HOẠT ĐỘNG",
+      "statusReady": "SẴN SÀNG",
+      "adaptiveActive": "Bộ máy thích ứng đang chạy",
+      "systemDistributionTitle": "Phân bổ Người dùng & Dự án",
+      "systemDistributionSubtitle": "Tỷ lệ dự án cá nhân vs nhóm và tình trạng thiết lập hồ sơ",
+      "quickActionsTitle": "Thao tác Quản lý Nhanh",
+      "manageUsersBtn": "Quản lý Tài khoản Người dùng",
+      "manageSettlementBtn": "Quản lý Bộ máy Quyết toán",
+      "broadcastTabBtn": "Gửi Thông báo Hệ thống",
+      "sysSummary": "Tóm tắt Hệ thống"
     },
     "settlement": {
       "title": "Quyết toán Tài chính Hàng tháng",
@@ -919,10 +936,28 @@
       "status": "Trạng thái",
       "message": "Thông điệp",
       "history": "Lịch sử thực thi",
-      "successMessage": "Tiến trình quyết toán tài chính đã hoàn tất thành công!"
+      "successMessage": "Tiến trình quyết toán tài chính đã hoàn tất thành công!",
+      "autoScheduleInfo": "Quyết toán tự động thực thi vào ngày cuối cùng của mỗi tháng lịch.",
+      "dryRunNotice": "Thực thi thủ công sẽ tính lại số dư và tạo các bút toán kết chuyển tự động.",
+      "targetEndpoint": "Endpoint API Đích",
+      "executionScope": "Phạm Vi Thực Thi Tiến Trình",
+      "executionScopeDesc": "Tất cả Dự án Hoạt động & Quyết toán Nhóm",
+      "controllerClass": "Lớp Controller Backend",
+      "tableTimestamp": "Thời gian",
+      "tableTriggeredBy": "Khởi tạo bởi",
+      "tableDuration": "Thời lượng",
+      "tableStatus": "Trạng thái",
+      "tableMessage": "Thông điệp",
+      "statusCompleted": "ĐÃ HOÀN THÀNH",
+      "statusSuccess": "THÀNH CÔNG",
+      "statusFailed": "THẤT BẠI",
+      "systemScheduler": "LỊCH_HỆ_THỐNG",
+      "adminManualTrigger": "ADMIN_KÍCH_HOẠT_THỦ_CÔNG",
+      "defaultLogMsg": "Quyết toán hàng tháng tự động hoàn tất cho {count} dự án đang hoạt động."
     },
     "users": {
       "title": "Danh sách Người dùng",
+      "subtitle": "Quản lý vai trò, trạng thái truy cập và thiết lập tài chính của người dùng",
       "searchPlaceholder": "Tìm theo tên hoặc email...",
       "filterAll": "Tất cả trạng thái",
       "filterActive": "Hoạt động",
@@ -933,25 +968,46 @@
       "colRole": "Vai trò",
       "colFinancial": "Hồ sơ Tài chính",
       "colStatus": "Trạng thái",
+      "colJoinedDate": "Ngày tham gia",
       "colActions": "Thao tác",
       "setupCompleted": "Đã thiết lập",
-      "setupPending": "Chưa thiết lập"
+      "setupPending": "Chưa thiết lập",
+      "btnSuspend": "Tạm khóa",
+      "btnActivate": "Kích hoạt",
+      "noUsersFound": "Không tìm thấy người dùng phù hợp."
     },
     "projects": {
-      "title": "Giám sát Dự án & Nhóm",
+      "title": "Giám sát Dự án Tiết kiệm",
+      "subtitle": "Giám sát các mục tiêu tiết kiệm và hạn mức ngân sách toàn hệ thống",
+      "groupsTitle": "Quản lý Nhóm & Tài trợ",
+      "groupsSubtitle": "Các dự án chung đang hoạt động và số lượng thành viên",
       "totalTarget": "Mục tiêu Tiết kiệm",
       "currentSaved": "Đã tích lũy",
       "groupsCount": "Tổng số Nhóm",
-      "sponsoredProjects": "Dự án được Tài trợ"
+      "sponsoredProjects": "Dự án được Tài trợ",
+      "savedLabel": "Đã tiết kiệm",
+      "targetLabel": "Mục tiêu",
+      "membersCount": "{count} thành viên",
+      "inviteCodeLabel": "Mã",
+      "noProjects": "Không tìm thấy dự án hệ thống nào.",
+      "noGroups": "Không tìm thấy nhóm hoạt động nào."
     },
     "broadcast": {
       "title": "Gửi Thông báo Toàn Hệ thống",
+      "subtitle": "Phát thông báo toàn hệ thống đến tất cả người dùng đang hoạt động",
+      "titlePlaceholder": "Ví dụ: Thông báo Bảo trì Hệ thống Định kỳ",
+      "messagePlaceholder": "Nhập chi tiết nội dung thông báo sẽ gửi đến hòm thư thông báo của người dùng...",
       "button": "Gửi Thông báo",
       "subject": "Tiêu đề thông báo",
       "message": "Nội dung thông báo",
-      "severity": "Mức độ",
-      "send": "Phát thông báo",
-      "sentSuccess": "Đã phát thông báo hệ thống thành công!"
+      "severity": "Mức độ nghiêm trọng",
+      "send": "Phát thông báo ngay",
+      "broadcasting": "Đang gửi thông báo...",
+      "sentSuccess": "Đã phát thông báo hệ thống thành công!",
+      "historyTitle": "Lịch sử Broadcast & Nhật ký Admin nhận",
+      "historySubtitle": "Luồng thông báo thực tế được gửi đến Admin và Người dùng",
+      "refreshBtn": "Làm mới",
+      "noHistory": "Chưa có thông báo broadcast nào được gửi."
     }
   }
 }
