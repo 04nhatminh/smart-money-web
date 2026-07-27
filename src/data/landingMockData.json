@@ -6,11 +6,11 @@
     { "week": "Week 4", "income": 1500000, "expense": 2900000 }
   ],
   "categoryProportions": [
-    { "category": "Food & Beverage", "count": 18, "percentage": 0.35 },
-    { "category": "Housing & Rent", "count": 1, "percentage": 0.25 },
-    { "category": "Shopping", "count": 12, "percentage": 0.20 },
-    { "category": "Utilities", "count": 4, "percentage": 0.10 },
-    { "category": "Entertainment", "count": 5, "percentage": 0.10 }
+    { "category": "FOOD", "count": 18, "percentage": 0.35 },
+    { "category": "SHOPPING", "count": 12, "percentage": 0.25 },
+    { "category": "UTILITIES", "count": 6, "percentage": 0.18 },
+    { "category": "ENTERTAINMENT", "count": 5, "percentage": 0.12 },
+    { "category": "HEALTH", "count": 3, "percentage": 0.10 }
   ],
   "monthlyTotalTransactions": 40,
   "monthlyTotalExpense": 17400000,

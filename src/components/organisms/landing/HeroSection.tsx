@@ -27,7 +27,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 }) => {
   const router = useRouter();
   const locale = useLocale();
-  const { colors } = useTheme();
+  const { colors, colorScheme } = useTheme();
   const t = useTranslations();
 
   const handlePrimary = onPrimaryCTA || (() => router.push(`/${locale}/register`));
@@ -44,7 +44,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
         <div className="text-center max-w-3xl mx-auto">
           {/* Title */}
           <ScrollReveal variant="fade-up" delay={0}>
-            <Heading level={1} className="mb-6 text-4xl md:text-5xl lg:text-6xl font-bold" style={{ color: colors.interactive.primary }}>
+            <Heading level={1} className="mb-6 text-4xl md:text-5xl lg:text-6xl font-bold" style={{ color: colorScheme === 'dark' ? colors.palette.white : colors.interactive.primary }}>
               {finalTitle}
             </Heading>
           </ScrollReveal>

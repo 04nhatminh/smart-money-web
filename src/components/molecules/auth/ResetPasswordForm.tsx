@@ -2,8 +2,8 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useParams } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { MdVisibility, MdVisibilityOff } from 'react-icons/md';
 import { Button, Input, Heading, Text, Alert } from '@/components/atoms';
 import { useTheme } from '@/context/ThemeContext';
@@ -16,17 +16,6 @@ interface ResetPasswordFormProps {
   onSuccess?: () => void;
 }
 
-/**
- * ResetPasswordForm Component
- * 
- * Step 2 of password reset: Set new password
- * User enters new password using the resetToken from OTP verification
- * 
- * API Endpoint: POST /api/v1/auth/reset-password
- * Header: X-Reset-Token: {resetToken}
- * Body: { email, newPassword }
- * Response: { success: boolean, message: string }
- */
 export const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({
   email,
   resetToken,
@@ -35,6 +24,7 @@ export const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({
   const router = useRouter();
   const params = useParams();
   const locale = params.locale as string;
+  const t = useTranslations();
 
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -50,7 +40,7 @@ export const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({
     setError(null);
 
     if (!newPassword.trim() || !confirmPassword.trim()) {
-      setError('Please fill in all password fields');
+      setError(t.has('auth.fillAllFields') ? t('auth.fillAllFields') : 'Please fill in all password fields');
       return;
     }
 
@@ -122,26 +112,26 @@ export const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({
 
         {/* Success Message */}
         <div className="text-center mb-8">
-          <Heading level={1} className="mb-2">Success!</Heading>
+          <Heading level={1} className="mb-2">{t.has('auth.passwordResetSuccessful') ? t('auth.passwordResetSuccessful') : 'Success!'}</Heading>
           <Text className="text-base" style={{ color: colors.text.secondary }}>
-            Your password has been reset
+            {t.has('auth.passwordResetSuccessDesc') ? t('auth.passwordResetSuccessDesc') : 'Your password has been reset'}
           </Text>
         </div>
 
         <div className="p-4 bg-green-100 text-green-700 rounded-lg border border-green-400">
-          <h3 className="font-semibold mb-2">Password Reset Successful</h3>
+          <h3 className="font-semibold mb-2">{t.has('auth.passwordResetSuccessful') ? t('auth.passwordResetSuccessful') : 'Password Reset Successful'}</h3>
           <p className="text-sm">
-            Your password has been reset successfully. You can now login with your new password.
+            {t.has('auth.passwordResetSuccessDesc') ? t('auth.passwordResetSuccessDesc') : 'Your password has been reset successfully. You can now login with your new password.'}
           </p>
         </div>
 
         <p className="text-center text-sm" style={{ color: colors.text.secondary }}>
-          Redirecting to login...
+          {t.has('auth.redirectingToVerification') ? t('auth.redirectingToVerification') : 'Redirecting to login...'}
         </p>
 
         <Link href={`/${locale}/login`}>
           <Button variant="primary" className="w-full py-3 text-lg font-semibold">
-            Go to Login
+            {t.has('auth.goToLogin') ? t('auth.goToLogin') : 'Go to Login'}
           </Button>
         </Link>
       </form>
@@ -166,9 +156,9 @@ export const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({
 
       {/* Title and Subtitle */}
       <div className="text-center mb-8">
-        <Heading level={1} className="mb-2">Set New Password</Heading>
+        <Heading level={1} className="mb-2">{t.has('auth.setNewPasswordTitle') ? t('auth.setNewPasswordTitle') : 'Set New Password'}</Heading>
         <Text className="text-base" style={{ color: colors.text.secondary }}>
-          Enter your new password below
+          {t.has('auth.setNewPasswordSubtitle') ? t('auth.setNewPasswordSubtitle') : 'Enter your new password below'}
         </Text>
       </div>
 
@@ -179,7 +169,7 @@ export const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({
       {/* Email Display (Read-only) */}
       <div className="p-3 rounded-lg" style={{ backgroundColor: colorScheme === 'dark' ? colors.palette?.[800] : colors.palette?.['100'] }}>
         <p className="text-sm font-semibold" style={{ color: colors.text.primary }}>
-          Account: <span className="font-bold">{email}</span>
+          {t.has('auth.accountLabel') ? t('auth.accountLabel') : 'Account:'} <span className="font-bold">{email}</span>
         </p>
       </div>
 
@@ -187,10 +177,10 @@ export const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({
       <div className="relative">
         <Input
           type={showPassword ? 'text' : 'password'}
-          label="New Password"
+          label={t.has('auth.newPassword') ? t('auth.newPassword') : 'New Password'}
           value={newPassword}
           onChange={(e) => setNewPassword(e.target.value)}
-          placeholder="Enter new password"
+          placeholder={t.has('auth.newPasswordPlaceholder') ? t('auth.newPasswordPlaceholder') : 'Enter new password'}
           required
           disabled={isLoading}
         />
@@ -214,10 +204,10 @@ export const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({
       <div className="relative">
         <Input
           type={showConfirmPassword ? 'text' : 'password'}
-          label="Confirm Password"
+          label={t.has('auth.confirmPassword') ? t('auth.confirmPassword') : 'Confirm Password'}
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
-          placeholder="Confirm new password"
+          placeholder={t.has('auth.confirmPasswordPlaceholder') ? t('auth.confirmPasswordPlaceholder') : 'Confirm new password'}
           required
           disabled={isLoading}
         />
@@ -243,17 +233,17 @@ export const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({
         className="w-full py-3 mt-6 text-lg font-semibold"
         disabled={isLoading}
       >
-        {isLoading ? 'Resetting Password...' : 'Reset Password'}
+        {isLoading ? (t.has('auth.resettingPassword') ? t('auth.resettingPassword') : 'Resetting Password...') : (t.has('auth.resetPasswordBtn') ? t('auth.resetPasswordBtn') : 'Reset Password')}
       </Button>
 
       <p className="text-center text-sm" style={{ color: colors.text.secondary }}>
-        Remember your password?{' '}
+        {t.has('auth.rememberPassword') ? t('auth.rememberPassword') : 'Remember your password?'}{' '}
         <Link
           href={`/${locale}/login`}
           className="font-semibold hover:opacity-80 transition-opacity"
           style={{ color: colors.interactive.primary }}
         >
-          Back to Login
+          {t.has('auth.backToSignIn') ? t('auth.backToSignIn') : 'Back to Sign In'}
         </Link>
       </p>
     </form>

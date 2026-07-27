@@ -52,7 +52,7 @@ export const PendingSuggestionsWidget: React.FC = () => {
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <span className="text-xs font-bold uppercase tracking-wider text-indigo-600">
+              <span className="text-xs font-bold uppercase tracking-wider" style={{ color: colors.interactive.primary }}>
                 {t.has('suggestions.aiSuggestionsCount')
                   ? t('suggestions.aiSuggestionsCount', { count: suggestions.length })
                   : `Gợi ý AI (${suggestions.length})`}

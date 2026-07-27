@@ -48,14 +48,17 @@ export const Text: React.FC<TextProps> = ({
     bold: FONT_WEIGHTS.bold,
   };
 
+  const { style, ...restProps } = props;
+
   return (
     <p
       style={{
         ...variantStyles[variant],
         fontWeight: fontWeights[weight],
+        ...(style || {}),
       }}
       className={className}
-      {...props}
+      {...restProps}
     />
   );
 };

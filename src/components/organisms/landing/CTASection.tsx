@@ -34,10 +34,30 @@ export const CTASection: React.FC<CTASectionProps> = ({
 
   return (
     <section
-      className="py-16 md:py-24 transition-colors"
-      style={{ background: `linear-gradient(135deg, ${colors.palette.base} 0%, ${colors.palette[700]} 100%)` }}
+      className="py-20 md:py-28 transition-colors relative overflow-hidden"
+      style={{ background: `linear-gradient(135deg, ${colors.palette.base} 0%, ${colors.palette[700]} 50%, ${colors.palette[800] || colors.palette[700]} 100%)` }}
     >
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      {/* Ambient Glows */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+        <div 
+          className="absolute w-[400px] h-[400px] rounded-full filter blur-[100px] opacity-[0.3] animate-blob-1" 
+          style={{ 
+            backgroundColor: 'rgba(255, 255, 255, 0.20)',
+            top: '-20%',
+            left: '20%',
+          }} 
+        />
+        <div 
+          className="absolute w-[350px] h-[350px] rounded-full filter blur-[90px] opacity-[0.25] animate-blob-2" 
+          style={{ 
+            backgroundColor: 'rgba(120, 110, 240, 0.45)',
+            bottom: '-20%',
+            right: '15%',
+          }} 
+        />
+      </div>
+
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
         {/* Title */}
         <ScrollReveal variant="fade-up" delay={0}>
           <Heading level={2} style={{ color: colors.palette.white }}>

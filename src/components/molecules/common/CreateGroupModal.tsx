@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Button, Heading, Text, Input, Alert } from '@/components/atoms';
 import { useTheme } from '@/context/ThemeContext';
 import { useGroups } from '@/hooks/useGroups';
+import { useTranslations } from 'next-intl';
 import { MdClose, MdPersonAdd } from 'react-icons/md';
 
 import type { GroupSummaryResponse } from '@/types/group.api';
@@ -21,6 +22,7 @@ export const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
 }) => {
   const { colors } = useTheme();
   const { createGroup, inviteGroupMember, listGroups, isLoading } = useGroups();
+  const t = useTranslations();
 
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
@@ -60,11 +62,11 @@ export const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
     if (!currentEmail.trim()) return;
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(currentEmail.trim())) {
-      setError('Please enter a valid email address');
+      setError(t('createGroupModal.invalidEmail'));
       return;
     }
     if (emails.includes(currentEmail.trim())) {
-      setError('Email already added');
+      setError(t('createGroupModal.emailExists'));
       return;
     }
     setEmails([...emails, currentEmail.trim()]);

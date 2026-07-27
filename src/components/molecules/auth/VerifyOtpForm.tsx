@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { Button, Input, Heading, Text, Alert } from '@/components/atoms';
 import { useTheme } from '@/context/ThemeContext';
 import { apiClient } from '@/lib/api-client';
@@ -14,22 +14,13 @@ interface VerifyOtpFormProps {
   onSuccess?: (resetToken: string) => void;
 }
 
-/**
- * VerifyOtpForm Component
- * 
- * Step 1 of password reset: Verify OTP
- * User enters OTP received via email
- * 
- * API Endpoint: POST /api/v1/auth/verify-otp
- * Body: { email, otp }
- * Response: { success: boolean, message: string, data: { resetToken, email } }
- */
 export const VerifyOtpForm: React.FC<VerifyOtpFormProps> = ({
   email,
   onSuccess,
 }) => {
   const router = useRouter();
   const locale = useLocale();
+  const t = useTranslations();
   const [otp, setOtp] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -63,7 +54,7 @@ export const VerifyOtpForm: React.FC<VerifyOtpFormProps> = ({
     setError(null);
 
     if (!otp || otp.length !== 6) {
-      setError('Please enter a valid 6-digit OTP');
+      setError(t.has('auth.enter6DigitCode') ? t('auth.enter6DigitCode') : 'Please enter a valid 6-digit OTP');
       return;
     }
 
@@ -133,9 +124,9 @@ export const VerifyOtpForm: React.FC<VerifyOtpFormProps> = ({
 
       {/* Title and Subtitle */}
       <div className="text-center mb-8">
-        <Heading level={1} className="mb-2">Verify Code</Heading>
+        <Heading level={1} className="mb-2">{t.has('auth.verifyCodeTitle') ? t('auth.verifyCodeTitle') : 'Verify Code'}</Heading>
         <Text className="text-base" style={{ color: colors.text.secondary }}>
-          Enter the 6-digit code sent to your email
+          {t.has('auth.verifyCodeSubtitle') ? t('auth.verifyCodeSubtitle') : 'Enter the 6-digit code sent to your email'}
         </Text>
       </div>
 
@@ -146,14 +137,14 @@ export const VerifyOtpForm: React.FC<VerifyOtpFormProps> = ({
       {/* Email Display (Read-only) */}
       <div className="p-3 rounded-lg" style={{ backgroundColor: colorScheme === 'dark' ? colors.palette?.[800] : colors.palette?.['100'] }}>
         <p className="text-sm font-semibold" style={{ color: colors.text.primary }}>
-          Code sent to: <span className="font-bold">{email}</span>
+          {t.has('auth.codeSentTo') ? t('auth.codeSentTo') : 'Code sent to:'} <span className="font-bold">{email}</span>
         </p>
       </div>
 
       {/* OTP Input */}
       <div>
         <label htmlFor="otp" className="block text-sm font-semibold mb-2" style={{ color: colors.text.primary }}>
-          Verification Code
+          {t.has('auth.verificationCodeLabel') ? t('auth.verificationCodeLabel') : 'Verification Code'}
         </label>
         <Input
           id="otp"
@@ -170,7 +161,7 @@ export const VerifyOtpForm: React.FC<VerifyOtpFormProps> = ({
         />
         <div className="flex justify-between items-center mt-2">
           <p className="text-xs" style={{ color: colors.text.secondary }}>
-            Enter the 6-digit code
+            {t.has('auth.enter6DigitCode') ? t('auth.enter6DigitCode') : 'Enter the 6-digit code'}
           </p>
           <button
             type="button"
@@ -179,7 +170,9 @@ export const VerifyOtpForm: React.FC<VerifyOtpFormProps> = ({
             className="text-xs font-semibold transition-opacity hover:opacity-70 disabled:opacity-50"
             style={{ color: colors.interactive.primary }}
           >
-            {canResendOtp ? 'Resend Code' : `Resend in ${countdown}s`}
+            {canResendOtp
+              ? (t.has('auth.resendCode') ? t('auth.resendCode') : 'Resend Code')
+              : (t.has('auth.resendIn') ? t('auth.resendIn', { seconds: countdown }) : `Resend in ${countdown}s`)}
           </button>
         </div>
       </div>
@@ -190,17 +183,17 @@ export const VerifyOtpForm: React.FC<VerifyOtpFormProps> = ({
         className="w-full py-3 mt-6 text-lg font-semibold"
         disabled={isLoading}
       >
-        {isLoading ? 'Verifying...' : 'Verify Code'}
+        {isLoading ? (t.has('auth.verifyingBtn') ? t('auth.verifyingBtn') : 'Verifying...') : (t.has('auth.verifyCodeBtn') ? t('auth.verifyCodeBtn') : 'Verify Code')}
       </Button>
 
       <p className="text-center text-sm" style={{ color: colors.text.secondary }}>
-        Remember your password?{' '}
+        {t.has('auth.rememberPassword') ? t('auth.rememberPassword') : 'Remember your password?'}{' '}
         <Link
           href={`/${locale}/login`}
           className="font-semibold hover:opacity-80 transition-opacity"
           style={{ color: colors.interactive.primary }}
         >
-          Back to Login
+          {t.has('auth.backToSignIn') ? t('auth.backToSignIn') : 'Back to Sign In'}
         </Link>
       </p>
     </form>
