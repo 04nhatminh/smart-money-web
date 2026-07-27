@@ -157,7 +157,7 @@ export default function ContactPage() {
                     </svg>
                   </div>
                   <div>
-                    <Text className="font-semibold" style={{ color: colors.text.primary }}>{locale === 'vi' ? 'Số điện thoại' : 'Phone Number'}</Text>
+                    <Text className="font-semibold" style={{ color: colors.text.primary }}>{t('contactPage.phoneLabel')}</Text>
                     <Text style={{ color: colors.text.secondary }}>{phone}</Text>
                   </div>
                 </div>

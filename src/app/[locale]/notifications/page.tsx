@@ -99,7 +99,7 @@ export default function NotificationsPage() {
       setActionLoading(requestId);
       const res = await respondToSponsorshipRequest(requestId, { agreed });
       if (res.success) {
-        setSuccess(agreed ? 'Bạn đã đồng ý gánh vác đóng góp giúp đồng đội!' : 'Bạn đã từ chối gánh vác đóng góp.');
+        setSuccess(agreed ? t('notifications.sponsorSuccess') : t('notifications.sponsorDecline'));
         loadSponsorshipRequests();
         loadNotifications(0, true);
       } else {
@@ -289,7 +289,7 @@ export default function NotificationsPage() {
     try {
       const res = await acceptGroupInvite(token);
       if (res.success) {
-        setSuccess('Successfully joined the group!');
+        setSuccess(t('notifications.joinGroupSuccess'));
         // Remove or reload notifications
         setNotifications(prev => prev.filter(n => n.id !== notifId));
         // Redirect to groups tab in projects page
@@ -317,7 +317,7 @@ export default function NotificationsPage() {
     try {
       const res = await declineGroupInvite(token);
       if (res.success) {
-        setSuccess('Declined group invitation.');
+        setSuccess(t('notifications.declineGroupSuccess'));
         setNotifications(prev => prev.filter(n => n.id !== notifId));
       } else {
         setError(res.error || 'Failed to decline invitation');

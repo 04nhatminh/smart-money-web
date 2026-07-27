@@ -248,7 +248,7 @@ export default function ProjectsPage() {
               {t('projects.title')}
             </Heading>
             <Text style={{ color: colors.text.secondary }} className="mt-1">
-              Manage your personal savings projects and collaborative group projects.
+              {t('projects.subtitle')}
             </Text>
           </div>
           <div className="flex items-center gap-3">
@@ -286,7 +286,7 @@ export default function ProjectsPage() {
                 className="flex items-center gap-2"
               >
                 <MdAdd size={20} />
-                New Group
+                {t('projects.newGroup')}
               </Button>
             )}
           </div>
@@ -303,7 +303,7 @@ export default function ProjectsPage() {
             }}
           >
             <MdAssignment size={18} />
-            Projects
+            {t('projects.tabs.projects')}
           </button>
           <button
             onClick={() => setActiveTab('groups')}
@@ -314,7 +314,7 @@ export default function ProjectsPage() {
             }}
           >
             <MdGroup size={18} />
-            Groups
+            {t('projects.tabs.groups')}
           </button>
         </div>
 
@@ -338,8 +338,9 @@ export default function ProjectsPage() {
               ].map((stat, idx) => (
                 <div
                   key={idx}
-                  className="p-4 rounded-xl border bg-white shadow-sm flex flex-col justify-between transition-all hover:shadow-md"
+                  className="p-4 rounded-xl border shadow-sm flex flex-col justify-between transition-all hover:shadow-md"
                   style={{
+                    backgroundColor: colors.surface.primary,
                     borderColor: colors.border.light,
                     borderLeft: `4px solid ${stat.color}`,
                   }}
@@ -427,7 +428,7 @@ export default function ProjectsPage() {
             {projectsLoading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {[1, 2, 3, 4, 5, 6].map((i) => (
-                  <div key={i} className="p-5 rounded-2xl border bg-white space-y-3 shadow-xs">
+                  <div key={i} className="p-5 rounded-2xl border space-y-3 shadow-xs" style={{ backgroundColor: colors.surface.primary, borderColor: colors.border.light }}>
                     <div className="flex justify-between items-center">
                       <Skeleton height={22} width="60%" />
                       <Skeleton height={20} width="25%" variant="circular" />
@@ -445,8 +446,9 @@ export default function ProjectsPage() {
               </div>
             ) : filteredProjects.length === 0 ? (
               <div
-                className="rounded-lg p-12 text-center border bg-white"
+                className="rounded-lg p-12 text-center border"
                 style={{
+                  backgroundColor: colors.surface.primary,
                   borderColor: colors.border.light,
                 }}
               >
@@ -494,8 +496,8 @@ export default function ProjectsPage() {
                 {[1, 2, 3].map((i) => (
                   <div
                     key={i}
-                    className="border rounded-2xl p-5 bg-white shadow-sm flex flex-col justify-between h-[180px]"
-                    style={{ borderColor: colors.border.light }}
+                    className="border rounded-2xl p-5 shadow-sm flex flex-col justify-between h-[180px]"
+                    style={{ backgroundColor: colors.surface.primary, borderColor: colors.border.light }}
                   >
                     <div>
                       <div className="flex justify-between items-start gap-2">
@@ -513,8 +515,8 @@ export default function ProjectsPage() {
               </div>
             ) : groups.length === 0 ? (
               <div
-                className="rounded-lg p-12 text-center border bg-white"
-                style={{ borderColor: colors.border.light }}
+                className="rounded-lg p-12 text-center border"
+                style={{ backgroundColor: colors.surface.primary, borderColor: colors.border.light }}
               >
                 <Heading level={3} style={{ color: colors.text.secondary }} className="mb-2">
                   No groups found
@@ -538,8 +540,8 @@ export default function ProjectsPage() {
                     <div
                       key={group.groupId}
                       onClick={() => handleGroupClick(group.groupId)}
-                      className="border rounded-2xl p-5 bg-white shadow-sm hover:shadow-md transition-all cursor-pointer flex flex-col justify-between min-h-[190px]"
-                      style={{ borderColor: colors.border.light }}
+                      className="border rounded-2xl p-5 shadow-sm hover:shadow-md transition-all cursor-pointer flex flex-col justify-between min-h-[190px]"
+                      style={{ backgroundColor: colors.surface.primary, borderColor: colors.border.light }}
                     >
                       <div>
                         <div className="flex justify-between items-start gap-2">
@@ -547,43 +549,43 @@ export default function ProjectsPage() {
                             {group.name}
                           </Heading>
                           <span className={`text-[10px] uppercase font-extrabold px-2 py-0.5 rounded-full shrink-0 flex items-center gap-1 border`} style={{
-                            backgroundColor: group.status === 'LOCKED' ? '#F59E0B15' : '#10B98115',
-                            borderColor: group.status === 'LOCKED' ? '#F59E0B20' : '#10B98120',
-                            color: group.status === 'LOCKED' ? '#F59E0B' : '#10B981',
+                            backgroundColor: group.status === 'LOCKED' ? '#F59E0B15' : group.status === 'DISSOLVED' ? '#EF444415' : '#10B98115',
+                            borderColor: group.status === 'LOCKED' ? '#F59E0B20' : group.status === 'DISSOLVED' ? '#EF444420' : '#10B98120',
+                            color: group.status === 'LOCKED' ? '#F59E0B' : group.status === 'DISSOLVED' ? '#EF4444' : '#10B981',
                           }}>
                             {group.status === 'LOCKED' ? <MdLock size={10} /> : <MdLockOpen size={10} />}
-                            {group.status}
+                            {t(`groupDetail.groupStatus.${group.status}`)}
                           </span>
                         </div>
                         <Text className="text-xs mt-1.5 line-clamp-2">
-                          {group.description || 'No description provided.'}
+                          {group.description || t('groupDetail.noDescription')}
                         </Text>
                         <div className="mt-2.5 flex items-center">
                           {group.groupProjectStatus === 'ACTIVE' ? (
                             <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200">
                               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                              Dự án đang chạy
+                              {t('groupDetail.projectStatus.ACTIVE')}
                             </span>
                           ) : group.groupProjectStatus === 'PENDING_SPONSORSHIP' ? (
                             <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1.5 bg-amber-50 text-amber-700 border border-amber-200">
                               <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
-                              Chờ khảo sát tài trợ
+                              {t('groupDetail.projectStatus.PENDING_SPONSORSHIP')}
                             </span>
                           ) : group.groupProjectStatus === 'COMPLETED' ? (
                             <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full flex items-center gap-1.5 bg-blue-50 text-blue-700 border border-blue-200">
-                              Dự án đã hoàn thành
+                              {t('groupDetail.projectStatus.COMPLETED')}
                             </span>
                           ) : group.groupProjectStatus === 'DISSOLVED' ? (
                             <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full flex items-center gap-1.5 bg-rose-50 text-rose-600 border border-rose-200">
-                              Dự án đã bị hủy
+                              {t('groupDetail.projectStatus.DISSOLVED')}
                             </span>
                           ) : group.groupProjectStatus === 'EXPIRED' || group.groupProjectStatus === 'SPONSORSHIP_FAILED' ? (
                             <span className="text-[11px] font-medium px-2.5 py-0.5 rounded-full flex items-center gap-1.5 bg-gray-100 text-gray-600 border border-gray-200">
-                              Dự án đã kết thúc
+                              {t('groupDetail.projectStatus.EXPIRED')}
                             </span>
                           ) : (
                             <span className="text-[11px] font-medium px-2.5 py-0.5 rounded-full flex items-center gap-1.5 bg-gray-100 text-gray-500 border border-gray-200">
-                              Chưa có dự án
+                              {t('groupDetail.projectStatus.NONE')}
                             </span>
                           )}
                         </div>
@@ -591,10 +593,10 @@ export default function ProjectsPage() {
 
                       <div className="flex items-center justify-between border-t pt-3 mt-3" style={{ borderColor: colors.border.light }}>
                         <span className="text-xs px-2.5 py-1 rounded bg-gray-100 font-bold text-gray-600">
-                          {group.memberCount} Joined
+                          {t('groupDetail.memberCount', { count: group.memberCount })}
                         </span>
                         <span className={`text-xs font-bold uppercase ${isUserAdmin ? 'text-indigo-600' : 'text-gray-500'}`}>
-                          {group.myRole}
+                          {group.myRole === 'ADMIN' ? t('groupDetail.role.ADMIN') : t('groupDetail.role.MEMBER')}
                         </span>
                       </div>
                     </div>

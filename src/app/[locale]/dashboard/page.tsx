@@ -487,7 +487,7 @@ export default function DashboardPage() {
                       className="inline-flex items-center gap-1.5 text-xs py-2 px-4 font-semibold"
                     >
                       <MdAutoAwesome className="w-4 h-4" />
-                      <span>Generate Budget</span>
+                      <span>{t('budgets.generateBudget')}</span>
                     </Button>
                   </div>
                 </div>

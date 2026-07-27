@@ -21,11 +21,11 @@ export const FeatureCard: React.FC<FeatureCardProps> = ({
 
   return (
     <div
-      className={`p-8 rounded-lg transition-all hover:shadow-lg hover:-translate-y-1 min-h-64 ${className}`}
+      className={`p-8 rounded-2xl transition-all duration-300 hover:shadow-xl hover:-translate-y-1.5 min-h-64 relative z-10 backdrop-blur-md border ${className}`}
       style={{
-        backgroundColor: colors.surface.primary,
+        backgroundColor: colors.surface.primary === '#ffffff' ? 'rgba(255, 255, 255, 0.85)' : 'rgba(15, 12, 41, 0.75)',
         borderColor: colors.border.light,
-        borderWidth: '1px',
+        boxShadow: colors.surface.primary === '#ffffff' ? '0 10px 30px rgba(80, 68, 213, 0.06)' : '0 10px 30px rgba(0, 0, 0, 0.3)',
       }}
     >
       {/* Icon */}
