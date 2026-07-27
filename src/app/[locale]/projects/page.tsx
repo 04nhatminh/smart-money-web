@@ -248,7 +248,7 @@ export default function ProjectsPage() {
               {t('projects.title')}
             </Heading>
             <Text style={{ color: colors.text.secondary }} className="mt-1">
-              Manage your personal savings projects and collaborative group projects.
+              {t('projects.subtitle')}
             </Text>
           </div>
           <div className="flex items-center gap-3">
@@ -286,7 +286,7 @@ export default function ProjectsPage() {
                 className="flex items-center gap-2"
               >
                 <MdAdd size={20} />
-                New Group
+                {t('projects.newGroup')}
               </Button>
             )}
           </div>
@@ -303,7 +303,7 @@ export default function ProjectsPage() {
             }}
           >
             <MdAssignment size={18} />
-            Projects
+            {t('projects.tabs.projects')}
           </button>
           <button
             onClick={() => setActiveTab('groups')}
@@ -314,7 +314,7 @@ export default function ProjectsPage() {
             }}
           >
             <MdGroup size={18} />
-            Groups
+            {t('projects.tabs.groups')}
           </button>
         </div>
 

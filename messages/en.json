@@ -204,7 +204,11 @@
     "digest": {
       "pending_suggestions": "You have suggestions waiting for review.",
       "weekly": "{count} things worth a look in this week's insights."
-    }
+    },
+    "joinGroupSuccess": "Successfully joined the group!",
+    "declineGroupSuccess": "Declined group invitation.",
+    "sponsorSuccess": "You agreed to take on the contribution for your teammate!",
+    "sponsorDecline": "You declined taking on the contribution."
   },
   "profile": {
     "editProfile": "Edit Profile",
@@ -383,7 +387,12 @@
   },
   "projects": {
     "title": "Projects",
-    "subtitle": "Manage your saving projects (Max 3, one per priority)",
+    "subtitle": "Manage your personal savings projects and collaborative group projects.",
+    "newGroup": "New Group",
+    "tabs": {
+      "projects": "Projects",
+      "groups": "Groups"
+    },
     "maxLimitReached": "You've reached the limit of 3 projects",
     "newProject": "New Project",
     "stats": {
@@ -512,6 +521,14 @@
   "analysis": {
     "title": "Financial Analysis",
     "subtitle": "Deep-dive insights into your finances for {year}",
+    "viewMode": {
+      "day": "Day",
+      "month": "Month",
+      "year": "Year"
+    },
+    "yearLabel": "Year {year}",
+    "monthLabel": "{month} {year}",
+    "weekHeaders": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
     "month": "Month:",
     "year": "Year:",
     "refresh": "Refresh",
@@ -554,6 +571,7 @@
   "budgets": {
     "title": "Budget Management",
     "subtitle": "Track and manage your spending budgets",
+    "generateBudget": "Generate Budget",
     "createMultiple": "Create Multiple",
     "createBudget": "Create Budget",
     "failedLoad": "Failed to load budgets",
@@ -1008,5 +1026,33 @@
       "refreshBtn": "Refresh",
       "noHistory": "No broadcast notifications sent yet."
     }
+  },
+  "contactPage": {
+    "subtitle": "Have questions or need assistance? Reach out to our support team.",
+    "formTitle": "Send Us a Message",
+    "successMessage": "Thank you for reaching out! We will get back to you soon.",
+    "fullNameLabel": "Full Name",
+    "fullNamePlaceholder": "Enter your full name",
+    "emailPlaceholder": "Enter your email address",
+    "messageLabel": "Message",
+    "messagePlaceholder": "How can we help you?",
+    "submitBtn": "Send Message",
+    "infoTitle": "Contact Information",
+    "infoDesc": "We are here to help you manage your personal finances smarter. Feel free to contact us anytime.",
+    "phoneLabel": "Phone Number",
+    "addressLabel": "Address",
+    "workingHoursLabel": "Working Hours",
+    "workingHoursVal": "Monday - Friday, 8:00 AM - 5:00 PM"
+  },
+  "generateBudgetModal": {
+    "title": "AI Budget Planner",
+    "initializing": "Initializing budget assistant...",
+    "pleaseCompleteSetup": "Please complete the financial setup before generating a budget plan.",
+    "financialSetupRequired": "Financial setup is required to generate AI budgets."
+  },
+  "createGroupModal": {
+    "title": "Create New Group",
+    "invalidEmail": "Please enter a valid email address",
+    "emailExists": "Email already added"
   }
 }

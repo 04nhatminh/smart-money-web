@@ -8,7 +8,7 @@ import { apiClient } from '@/lib/api-client';
 import { API_ENDPOINTS } from '@/constants/api';
 import { formatVietnamsePrice } from '@/lib/format';
 import { getCookie } from '@/lib/auth';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { MdClose, MdAutoAwesome, MdCheck, MdError, MdRefresh } from 'react-icons/md';
 import { UserFinancialModal } from '.';
 import { useUserFinancial, useBudgets } from '@/hooks';
@@ -35,6 +35,7 @@ export const GenerateBudgetModal: React.FC<GenerateBudgetModalProps> = ({
   const { getUserFinancial } = useUserFinancial();
   const { listBudgets } = useBudgets();
   const locale = useLocale();
+  const t = useTranslations();
 
   // Onboarding sub-modals
   const [isFinancialModalOpen, setIsFinancialModalOpen] = useState(false);
@@ -42,7 +43,7 @@ export const GenerateBudgetModal: React.FC<GenerateBudgetModalProps> = ({
   // States
   const [step, setStep] = useState<'CHECKING' | 'READY' | 'LOADING' | 'SUGGESTION' | 'ERROR'>('CHECKING');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [loadingStatus, setLoadingStatus] = useState<string>('Initializing budget assistant...');
+  const [loadingStatus, setLoadingStatus] = useState<string>(t('generateBudgetModal.initializing'));
   const [jobId, setJobId] = useState<string | null>(null);
   const [suggestions, setSuggestions] = useState<BudgetCategorySuggestion[]>([]);
   const [totalBudget, setTotalBudget] = useState<number>(0);
@@ -84,7 +85,7 @@ export const GenerateBudgetModal: React.FC<GenerateBudgetModalProps> = ({
 
     if (!financialSetupCompleted) {
       setErrorMsg(
-        `Please complete the financial setup before generating a budget plan.`
+        t('generateBudgetModal.pleaseCompleteSetup')
       );
       setStep('ERROR');
     } else {

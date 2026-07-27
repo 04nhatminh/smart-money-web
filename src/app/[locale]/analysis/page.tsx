@@ -241,9 +241,7 @@ export default function AnalysisPage() {
     const daysInMonth = getDaysInMonth(selectedMonth, selectedYear);
     const startOffset = getFirstDayOfMonth(selectedMonth, selectedYear);
     const cells: React.ReactNode[] = [];
-    const weekHeaders = locale === 'vi'
-      ? ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN']
-      : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    const weekHeaders = t.raw('analysis.weekHeaders') as string[] || ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
     for (let i = 0; i < startOffset; i++) {
       cells.push(
@@ -328,13 +326,9 @@ export default function AnalysisPage() {
 
   const getFormattedDateLabel = () => {
     if (viewMode === 'YEAR') {
-      return locale === 'vi' ? `Năm ${selectedYear}` : `Year ${selectedYear}`;
+      return t('analysis.yearLabel', { year: selectedYear });
     }
-    if (locale === 'vi') {
-      return `Tháng ${selectedMonth} ${selectedYear}`;
-    }
-    const monthName = new Date(selectedYear, selectedMonth - 1).toLocaleString(locale, { month: 'long' });
-    return `${monthName} ${selectedYear}`;
+    return t('analysis.monthLabel', { month: selectedMonth, year: selectedYear });
   };
 
   // ──── Derived metrics ────
@@ -475,7 +469,7 @@ export default function AnalysisPage() {
                     boxShadow: viewMode === mode ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
                   }}
                 >
-                  {mode === 'DAY' ? (locale === 'vi' ? 'Ngày' : 'Day') : mode === 'MONTH' ? (locale === 'vi' ? 'Tháng' : 'Month') : (locale === 'vi' ? 'Năm' : 'Year')}
+                  {t(`analysis.viewMode.${mode.toLowerCase()}`)}
                 </button>
               ))}
             </div>

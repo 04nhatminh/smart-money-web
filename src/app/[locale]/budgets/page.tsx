@@ -107,7 +107,7 @@ export default function BudgetsPage() {
               }}
             >
               <MdAutoAwesome className="w-5 h-5" />
-              Generate Budget
+              {t('budgets.generateBudget')}
             </Button>
           </div>
         </div>

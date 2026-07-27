@@ -204,7 +204,11 @@
     "digest": {
       "pending_suggestions": "Bạn có các gợi ý đang chờ xem xét.",
       "weekly": "Bạn có {count} thông tin chi tiêu đáng chú ý trong tuần này."
-    }
+    },
+    "joinGroupSuccess": "Tham gia nhóm thành công!",
+    "declineGroupSuccess": "Đã từ chối lời mời vào nhóm.",
+    "sponsorSuccess": "Bạn đã đồng ý gánh vác đóng góp giúp đồng đội!",
+    "sponsorDecline": "Bạn đã từ chối gánh vác đóng góp."
   },
   "profile": {
     "editProfile": "Chỉnh Sửa Hồ Sơ",
@@ -383,7 +387,12 @@
   },
   "projects": {
     "title": "Kế Hoạch Tiết Kiệm",
-    "subtitle": "Quản lý các kế hoạch tiết kiệm của bạn (Tối đa 3, một kế hoạch cho mỗi mức độ ưu tiên)",
+    "subtitle": "Quản lý các dự án tiết kiệm cá nhân và dự án nhóm chung.",
+    "newGroup": "Tạo Nhóm Mới",
+    "tabs": {
+      "projects": "Dự án",
+      "groups": "Nhóm"
+    },
     "maxLimitReached": "Bạn đã đạt giới hạn 3 kế hoạch",
     "newProject": "Kế Hoạch Tiết Kiệm Mới",
     "stats": {
@@ -512,6 +521,14 @@
   "analysis": {
     "title": "Phân Tích Tài Chính",
     "subtitle": "Thông tin chi tiết chuyên sâu về tài chính của bạn trong năm {year}",
+    "viewMode": {
+      "day": "Ngày",
+      "month": "Tháng",
+      "year": "Năm"
+    },
+    "yearLabel": "Năm {year}",
+    "monthLabel": "Tháng {month} {year}",
+    "weekHeaders": ["T2", "T3", "T4", "T5", "T6", "T7", "CN"],
     "month": "Tháng:",
     "year": "Năm:",
     "refresh": "Làm mới",
@@ -554,6 +571,7 @@
   "budgets": {
     "title": "Quản Lý Ngân Sách",
     "subtitle": "Theo dõi và quản lý ngân sách chi tiêu của bạn",
+    "generateBudget": "Tạo ngân sách tự động",
     "createMultiple": "Tạo Nhiều Ngân Sách",
     "createBudget": "Tạo Ngân Sách",
     "failedLoad": "Không thể tải ngân sách",
@@ -1009,5 +1027,33 @@
       "refreshBtn": "Làm mới",
       "noHistory": "Chưa có thông báo broadcast nào được gửi."
     }
+  },
+  "contactPage": {
+    "subtitle": "Có thắc mắc hoặc cần trợ giúp? Hãy liên hệ với đội ngũ hỗ trợ của chúng tôi.",
+    "formTitle": "Gửi tin nhắn cho chúng tôi",
+    "successMessage": "Cảm ơn bạn đã liên hệ! Chúng tôi sẽ phản hồi sớm nhất có thể.",
+    "fullNameLabel": "Họ và tên",
+    "fullNamePlaceholder": "Nhập họ và tên của bạn",
+    "emailPlaceholder": "Nhập địa chỉ email của bạn",
+    "messageLabel": "Lời nhắn",
+    "messagePlaceholder": "Chúng tôi có thể giúp gì cho bạn?",
+    "submitBtn": "Gửi tin nhắn",
+    "infoTitle": "Thông tin liên hệ",
+    "infoDesc": "Chúng tôi sẵn sàng hỗ trợ bạn quản lý tài chính cá nhân thông minh hơn. Đừng ngần ngại liên hệ.",
+    "phoneLabel": "Số điện thoại",
+    "addressLabel": "Địa chỉ",
+    "workingHoursLabel": "Giờ làm việc",
+    "workingHoursVal": "Thứ Hai - Thứ Sáu, 8:00 - 17:00"
+  },
+  "generateBudgetModal": {
+    "title": "Lập ngân sách AI",
+    "initializing": "Đang khởi tạo trợ lý ngân sách...",
+    "pleaseCompleteSetup": "Vui lòng hoàn tất thiết lập tài chính trước khi tạo kế hoạch ngân sách.",
+    "financialSetupRequired": "Cần hoàn tất thiết lập tài chính để tạo ngân sách AI."
+  },
+  "createGroupModal": {
+    "title": "Tạo Nhóm Mới",
+    "invalidEmail": "Vui lòng nhập địa chỉ email hợp lệ",
+    "emailExists": "Email đã được thêm vào danh sách"
   }
 }
