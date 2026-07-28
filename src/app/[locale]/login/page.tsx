@@ -3,7 +3,7 @@
 import React, { useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
-import { LoginForm } from '@/components/molecules/auth';
+import { CliLoginPanel, LoginForm } from '@/components/molecules/auth';
 import { CenteredLayout } from '@/components/templates';
 import { Heading } from '@/components/atoms';
 import { useAuth } from '@/context/AuthContext';
@@ -19,6 +19,12 @@ function LoginContent() {
 
   const redirectParam = searchParams.get('redirect');
 
+  // Opened by the CLI / MCP server (Claude Desktop) to authorize a waiting session.
+  // In this mode the page is not a gateway to the dashboard, so the usual
+  // "already logged in → bounce to dashboard" redirect below must not fire:
+  // an authenticated visitor still has an approval to confirm here.
+  const cliSessionId = searchParams.get('cli');
+
   const getTargetUrl = () => {
     if (redirectParam && redirectParam.startsWith('/')) {
       return redirectParam;
@@ -27,10 +33,10 @@ function LoginContent() {
   };
 
   useEffect(() => {
-    if (!isInitializing && isAuthenticated) {
+    if (!isInitializing && isAuthenticated && !cliSessionId) {
       router.push(getTargetUrl());
     }
-  }, [isAuthenticated, isInitializing, router, redirectParam, locale]);
+  }, [isAuthenticated, isInitializing, router, redirectParam, locale, cliSessionId]);
 
   if (isInitializing) {
     return (
@@ -44,11 +50,15 @@ function LoginContent() {
     <CenteredLayout hideHeader hideFooter>
       <div className="w-full max-w-[520px] rounded-2xl p-5 sm:p-10 auth-glass-card">
         {/* Form */}
-        <LoginForm
-          onSuccess={() => {
-            router.push(getTargetUrl());
-          }}
-        />
+        {cliSessionId ? (
+          <CliLoginPanel sessionId={cliSessionId} />
+        ) : (
+          <LoginForm
+            onSuccess={() => {
+              router.push(getTargetUrl());
+            }}
+          />
+        )}
       </div>
     </CenteredLayout>
   );
