@@ -11,14 +11,14 @@ import { useTheme } from '@/context/ThemeContext';
 import { useBudgets } from '@/hooks/useBudgets';
 import { Budget } from '@/types/budget.api';
 import { formatVietnamsePrice } from '@/lib/format';
-import { MdAutoAwesome } from 'react-icons/md';
+import { MdAutoAwesome, MdAccountBalanceWallet, MdCreditCard, MdSavings } from 'react-icons/md';
 
 export default function BudgetsPage() {
   const router = useRouter();
   const locale = useLocale();
   const t = useTranslations();
   const { isAuthenticated, isInitializing } = useAuth();
-  const { colors } = useTheme();
+  const { colors, colorScheme } = useTheme();
   const { listBudgets, isLoading } = useBudgets();
 
   const [budgets, setBudgets] = useState<Budget[]>([]);
@@ -83,6 +83,9 @@ export default function BudgetsPage() {
   const totalSpent = budgets.reduce((sum, b) => sum + b.spent, 0);
   const totalRemaining = totalLimit - totalSpent;
 
+  const spentPercent = totalLimit > 0 ? Math.min(100, Math.round((totalSpent / totalLimit) * 100)) : 0;
+  const remainingPercent = totalLimit > 0 ? Math.max(0, 100 - spentPercent) : 100;
+
   return (
     <SidebarLayout>
       <div className="space-y-5">
@@ -90,13 +93,12 @@ export default function BudgetsPage() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <Heading level={2}>{t('budgets.title')}</Heading>
-            <Text style={{ color: colors.text.secondary }} className="text-lg">
+            <Text style={{ color: colors.text.secondary }}>
               {t('budgets.subtitle')}
             </Text>
           </div>
-          <div className="flex gap-2 w-full sm:w-auto">
+          <div className="flex items-center gap-3">
             <Button
-              variant="secondary"
               onClick={() => setIsGenerateBudgetModalOpen(true)}
               className="flex items-center gap-2 w-full sm:w-auto justify-center"
               style={{
@@ -107,7 +109,7 @@ export default function BudgetsPage() {
               }}
             >
               <MdAutoAwesome className="w-5 h-5" />
-              Generate Budget
+              {t('budgets.generateBudget')}
             </Button>
           </div>
         </div>
@@ -135,61 +137,134 @@ export default function BudgetsPage() {
         </div>
 
         {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          {/* Total Budget Card */}
           <div
-            className="rounded-lg p-4 border"
+            className="group relative overflow-hidden rounded-2xl p-5 border transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
             style={{
               borderColor: colors.border.light,
               backgroundColor: colors.surface.primary,
+              boxShadow: colorScheme === 'dark' ? '0 4px 20px -2px rgba(0, 0, 0, 0.4)' : '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
             }}
           >
-            <Text className="text-sm font-medium" style={{ color: colors.text.secondary }}>
-              {t('budgets.totalBudget')}
-            </Text>
+            {/* Top Accent Line */}
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500 to-blue-500 opacity-80" />
+
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-xl bg-indigo-500/10 text-indigo-500 dark:bg-indigo-500/20 dark:text-indigo-400">
+                  <MdAccountBalanceWallet className="w-5 h-5" />
+                </div>
+                <Text className="text-xs font-bold tracking-wider uppercase" style={{ color: colors.text.secondary }}>
+                  {t('budgets.totalBudget')}
+                </Text>
+              </div>
+              <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">
+                100%
+              </span>
+            </div>
+
             {isLoading ? (
-              <Skeleton height={28} width="60%" className="mt-2" />
+              <Skeleton height={32} width="70%" className="mt-2" />
             ) : (
-              <Text className="text-2xl font-bold mt-2" style={{ color: colors.text.primary }}>
-                {formatVietnamsePrice(totalLimit)}
-              </Text>
+              <div>
+                <Text className="text-2xl sm:text-3xl font-extrabold tracking-tight" style={{ color: colors.text.primary }}>
+                  {formatVietnamsePrice(totalLimit)}
+                </Text>
+                <div className="mt-3 w-full bg-gray-200 dark:bg-slate-700/50 rounded-full h-1.5 overflow-hidden">
+                  <div className="h-full bg-indigo-500 rounded-full" style={{ width: '100%' }} />
+                </div>
+              </div>
             )}
           </div>
 
+          {/* Total Spent Card */}
           <div
-            className="rounded-lg p-4 border"
+            className="group relative overflow-hidden rounded-2xl p-5 border transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
             style={{
               borderColor: colors.border.light,
               backgroundColor: colors.surface.primary,
+              boxShadow: colorScheme === 'dark' ? '0 4px 20px -2px rgba(0, 0, 0, 0.4)' : '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
             }}
           >
-            <Text className="text-sm font-medium" style={{ color: colors.text.secondary }}>
-              {t('budgets.totalSpent')}
-            </Text>
+            {/* Top Accent Line */}
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-rose-500 to-red-500 opacity-80" />
+
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-xl bg-rose-500/10 text-rose-500 dark:bg-rose-500/20 dark:text-rose-400">
+                  <MdCreditCard className="w-5 h-5" />
+                </div>
+                <Text className="text-xs font-bold tracking-wider uppercase" style={{ color: colors.text.secondary }}>
+                  {t('budgets.totalSpent')}
+                </Text>
+              </div>
+              {!isLoading && (
+                <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-600 dark:text-rose-400">
+                  {spentPercent}%
+                </span>
+              )}
+            </div>
+
             {isLoading ? (
-              <Skeleton height={28} width="60%" className="mt-2" />
+              <Skeleton height={32} width="70%" className="mt-2" />
             ) : (
-              <Text className="text-2xl font-bold mt-2" style={{ color: '#EF4444' }}>
-                {formatVietnamsePrice(totalSpent)}
-              </Text>
+              <div>
+                <Text className="text-2xl sm:text-3xl font-extrabold tracking-tight text-red-600 dark:text-rose-400">
+                  {formatVietnamsePrice(totalSpent)}
+                </Text>
+                <div className="mt-3 w-full bg-gray-200 dark:bg-slate-700/50 rounded-full h-1.5 overflow-hidden">
+                  <div
+                    className="h-full bg-rose-500 rounded-full transition-all duration-500"
+                    style={{ width: `${spentPercent}%` }}
+                  />
+                </div>
+              </div>
             )}
           </div>
 
+          {/* Remaining Card */}
           <div
-            className="rounded-lg p-4 border"
+            className="group relative overflow-hidden rounded-2xl p-5 border transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
             style={{
               borderColor: colors.border.light,
               backgroundColor: colors.surface.primary,
+              boxShadow: colorScheme === 'dark' ? '0 4px 20px -2px rgba(0, 0, 0, 0.4)' : '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
             }}
           >
-            <Text className="text-sm font-medium" style={{ color: colors.text.secondary }}>
-              {t('budgets.remaining')}
-            </Text>
+            {/* Top Accent Line */}
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-500 opacity-80" />
+
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-500 dark:bg-emerald-500/20 dark:text-emerald-400">
+                  <MdSavings className="w-5 h-5" />
+                </div>
+                <Text className="text-xs font-bold tracking-wider uppercase" style={{ color: colors.text.secondary }}>
+                  {t('budgets.remaining')}
+                </Text>
+              </div>
+              {!isLoading && (
+                <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                  {remainingPercent}%
+                </span>
+              )}
+            </div>
+
             {isLoading ? (
-              <Skeleton height={28} width="60%" className="mt-2" />
+              <Skeleton height={32} width="70%" className="mt-2" />
             ) : (
-              <Text className="text-2xl font-bold mt-2" style={{ color: '#10B981' }}>
-                {formatVietnamsePrice(totalRemaining)}
-              </Text>
+              <div>
+                <Text className="text-2xl sm:text-3xl font-extrabold tracking-tight text-emerald-600 dark:text-emerald-400">
+                  {formatVietnamsePrice(totalRemaining)}
+                </Text>
+                <div className="mt-3 w-full bg-gray-200 dark:bg-slate-700/50 rounded-full h-1.5 overflow-hidden">
+                  <div
+                    className="h-full bg-emerald-500 rounded-full transition-all duration-500"
+                    style={{ width: `${remainingPercent}%` }}
+                  />
+                </div>
+              </div>
             )}
           </div>
         </div>
@@ -200,8 +275,8 @@ export default function BudgetsPage() {
             {[1, 2, 3, 4, 5, 6].map((i) => (
               <div
                 key={i}
-                className="p-5 rounded-2xl border bg-white space-y-4 shadow-xs"
-                style={{ borderColor: colors.border.light }}
+                className="p-5 rounded-2xl border space-y-4 shadow-xs"
+                style={{ backgroundColor: colors.surface.primary, borderColor: colors.border.light }}
               >
                 <div className="flex justify-between items-center">
                   <Skeleton height={20} width="50%" />

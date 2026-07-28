@@ -5,7 +5,7 @@ import { Heading, Text, ScrollReveal } from '@/components/atoms';
 import { FeatureCard } from '@/components/molecules';
 import { useTheme } from '@/context';
 import { useTranslations } from 'next-intl';
-import { FaChartBar, FaBullseye, FaMagic } from 'react-icons/fa';
+import { FaBrain, FaMicrophone, FaChartLine, FaUsers, FaSlidersH, FaChartBar } from 'react-icons/fa';
 
 interface Feature {
   title: string;
@@ -32,25 +32,60 @@ export const FeaturesSection: React.FC<FeaturesProps> = ({
 
   const defaultFeatures: Feature[] = features || [
     {
-      title: t('finance.features.tracking.title'),
-      description: t('finance.features.tracking.description'),
+      title: t('finance.features.budgetEngine.title'),
+      description: t('finance.features.budgetEngine.description'),
+      icon: <FaBrain className="text-3xl" style={{ color: colors.interactive.primary }} />,
+    },
+    {
+      title: t('finance.features.multiInput.title'),
+      description: t('finance.features.multiInput.description'),
+      icon: <FaMicrophone className="text-3xl" style={{ color: colors.interactive.primary }} />,
+    },
+    {
+      title: t('finance.features.smartInsights.title'),
+      description: t('finance.features.smartInsights.description'),
+      icon: <FaChartLine className="text-3xl" style={{ color: colors.interactive.primary }} />,
+    },
+    {
+      title: t('finance.features.savingGoals.title'),
+      description: t('finance.features.savingGoals.description'),
+      icon: <FaUsers className="text-3xl" style={{ color: colors.interactive.primary }} />,
+    },
+    {
+      title: t('finance.features.financialProfile.title'),
+      description: t('finance.features.financialProfile.description'),
+      icon: <FaSlidersH className="text-3xl" style={{ color: colors.interactive.primary }} />,
+    },
+    {
+      title: t('finance.features.deepAnalytics.title'),
+      description: t('finance.features.deepAnalytics.description'),
       icon: <FaChartBar className="text-3xl" style={{ color: colors.interactive.primary }} />,
-    },
-    {
-      title: t('finance.features.goals.title'),
-      description: t('finance.features.goals.description'),
-      icon: <FaBullseye className="text-3xl" style={{ color: colors.interactive.primary }} />,
-    },
-    {
-      title: t('finance.features.recommendations.title'),
-      description: t('finance.features.recommendations.description'),
-      icon: <FaMagic className="text-3xl" style={{ color: colors.interactive.primary }} />,
     },
   ];
 
   return (
-    <section id="features" className="py-16 md:py-24 transition-colors" style={{ backgroundColor: colors.background.secondary }}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="features" className="py-20 md:py-28 transition-colors relative overflow-hidden" style={{ background: `linear-gradient(180deg, ${colors.background.primary} 0%, ${colors.background.secondary} 50%, ${colors.background.primary} 100%)` }}>
+      {/* Ambient Background Blobs */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+        <div 
+          className="absolute w-[350px] md:w-[550px] h-[350px] md:h-[550px] rounded-full filter blur-[90px] md:blur-[130px] opacity-[0.16] dark:opacity-[0.24] animate-blob-2" 
+          style={{ 
+            backgroundColor: colors.interactive.secondary,
+            top: '10%',
+            left: '-8%',
+          }} 
+        />
+        <div 
+          className="absolute w-[300px] md:w-[500px] h-[300px] md:h-[500px] rounded-full filter blur-[80px] md:blur-[120px] opacity-[0.14] dark:opacity-[0.20] animate-blob-1" 
+          style={{ 
+            backgroundColor: colors.interactive.primary,
+            bottom: '10%',
+            right: '-5%',
+          }} 
+        />
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Header */}
         <ScrollReveal variant="fade-down">
           <div className="text-center mb-16">

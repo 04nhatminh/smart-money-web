@@ -35,37 +35,89 @@ export const ExcelExportModal: React.FC<ExcelExportModalProps> = ({
 
   if (!isOpen) return null;
 
+  const toTitleCase = (str: string): string => {
+    if (!str) return '';
+    return str
+      .toLowerCase()
+      .split('_')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  };
+
+  const formatDescription = (desc: string): string => {
+    if (!desc) return '';
+    const trimmed = desc.trim();
+    if (!trimmed) return '';
+    return trimmed.charAt(0).toUpperCase() + trimmed.slice(1);
+  };
+
+  const formatDateStr = (dateString: string): string => {
+    if (!dateString) return '';
+    try {
+      const regex = /^(\d{2})\/(\d{2})\/(\d{4})\s(\d{2}):(\d{2})$/;
+      if (regex.test(dateString)) return dateString;
+
+      const d = new Date(dateString);
+      if (!isNaN(d.getTime())) {
+        const pad = (n: number) => n.toString().padStart(2, '0');
+        return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+      }
+    } catch {
+      // Fallback
+    }
+    return dateString;
+  };
+
   // Convert array of transactions to Excel file and trigger download
   const downloadExcel = (data: any[], filename: string) => {
-    const headers = ['Amount', 'Type', 'Category', 'Date', 'Description'];
-    const rows = [headers];
+    const headers = ['No.', 'Amount (VND)', 'Type', 'Category', 'Date', 'Description'];
+    const rows: (string | number)[][] = [headers];
 
-    data.forEach(item => {
-      const amount = item.amount || 0;
-      const type = item.type || 'EXPENSE';
-      const category = item.category || 'OTHER';
-      const date = item.date || '';
-      const description = item.description || '';
+    data.forEach((item, index) => {
+      const rawAmount = item.amount || 0;
+      const typeStr = (item.type || 'EXPENSE').toUpperCase();
+      const isIncome = typeStr === 'INCOME';
 
-      rows.push([amount, type, category, date, description]);
+      const amountVal = isIncome ? Math.abs(rawAmount) : -Math.abs(rawAmount);
+      const typeVal = toTitleCase(typeStr);
+      const categoryVal = toTitleCase(item.category || 'OTHER');
+      const dateVal = formatDateStr(item.date || '');
+      const descriptionVal = formatDescription(item.description || '');
+
+      rows.push([index + 1, amountVal, typeVal, categoryVal, dateVal, descriptionVal]);
     });
 
     const worksheet = XLSX.utils.aoa_to_sheet(rows);
 
     // Apply custom column widths
     worksheet['!cols'] = [
-      { wch: 18 }, // Column A (Amount)
-      { wch: 12 }, // Column B (Type)
-      { wch: 18 }, // Column C (Category)
-      { wch: 20 }, // Column D (Date)
-      { wch: 35 }  // Column E (Description)
+      { wch: 8 },  // Column A (No.)
+      { wch: 22 }, // Column B (Amount (VND))
+      { wch: 14 }, // Column C (Type)
+      { wch: 20 }, // Column D (Category)
+      { wch: 22 }, // Column E (Date)
+      { wch: 40 }  // Column F (Description)
     ];
 
     // Apply custom row heights
     worksheet['!rows'] = [
-      { hpt: 26 }, // Header row
-      ...data.map(() => ({ hpt: 20 })) // Data rows
+      { hpt: 20 }, // Header row
+      ...data.map(() => ({ hpt: 18 })) // Data rows
     ];
+
+    const borderColor = '9CA3AF'; // Standard solid border color (Gray 400) for clear table outline
+    const cellBorder = {
+      top: { style: 'thin', color: { rgb: borderColor } },
+      bottom: { style: 'thin', color: { rgb: borderColor } },
+      left: { style: 'thin', color: { rgb: borderColor } },
+      right: { style: 'thin', color: { rgb: borderColor } }
+    };
+    const headerBorder = {
+      top: { style: 'medium', color: { rgb: '4B5563' } },
+      bottom: { style: 'medium', color: { rgb: '4B5563' } },
+      left: { style: 'thin', color: { rgb: borderColor } },
+      right: { style: 'thin', color: { rgb: borderColor } }
+    };
 
     // Apply styles to cells
     const range = XLSX.utils.decode_range(worksheet['!ref'] || 'A1:A1');
@@ -75,51 +127,47 @@ export const ExcelExportModal: React.FC<ExcelExportModalProps> = ({
         const cell = worksheet[cellRef];
         if (!cell) continue;
 
-        const topStyle = R === range.s.r ? 'medium' : 'thin';
-        const bottomStyle = R === range.e.r ? 'medium' : 'thin';
-        const leftStyle = C === range.s.c ? 'medium' : 'thin';
-        const rightStyle = C === range.e.c ? 'medium' : 'thin';
-        const borderColor = colors.border.dark;
-
         if (R === 0) {
-          // Header Row Style
+          // Header Row Style: Neutral background #E5E7EB, Dark text #111827, centered header
           cell.s = {
-            fill: { fgColor: { rgb: '3629B7' } }, // Indigo background
-            font: { name: 'Segoe UI', sz: 11, bold: true, color: { rgb: 'FFFFFF' } },
+            fill: { fgColor: { rgb: 'E5E7EB' } },
+            font: { name: 'Segoe UI', sz: 11, bold: true, color: { rgb: '111827' } },
             alignment: { horizontal: 'center', vertical: 'center' },
-            border: {
-              top: { style: topStyle, color: { rgb: borderColor } },
-              bottom: { style: bottomStyle, color: { rgb: borderColor } },
-              left: { style: leftStyle, color: { rgb: borderColor } },
-              right: { style: rightStyle, color: { rgb: borderColor } }
-            }
+            border: headerBorder
           };
         } else {
           // Data Row Style
           const item = data[R - 1];
-          const isIncome = item && (item.type || 'EXPENSE') === 'INCOME';
+          const isIncome = item && (item.type || 'EXPENSE').toUpperCase() === 'INCOME';
 
-          // Soft background and text colors
-          const rowBgColor = isIncome ? 'E6F4EA' : 'FCE8E6';
-          const rowTextColor = isIncome ? '137333' : 'C5221F';
+          // Zebra striping: alternate white (#FFFFFF) and very light gray (#F9FAFB)
+          const rowBgColor = R % 2 === 1 ? 'FFFFFF' : 'F9FAFB';
+
+          // Accent colors: Green #16A34A / Red #DC2626 ONLY on Amount and Type
+          const accentColor = isIncome ? '16A34A' : 'DC2626';
+          const textColor = (C === 1 || C === 2) ? accentColor : '374151';
+
+          const isCentered = C === 0 || C === 2 || C === 4; // No., Type, Date
+          const isRight = C === 1;                          // Amount (VND)
 
           cell.s = {
             fill: { fgColor: { rgb: rowBgColor } },
-            font: { name: 'Segoe UI', sz: 10, color: { rgb: rowTextColor } },
-            border: {
-              top: { style: topStyle, color: { rgb: borderColor } },
-              bottom: { style: bottomStyle, color: { rgb: borderColor } },
-              left: { style: leftStyle, color: { rgb: borderColor } },
-              right: { style: rightStyle, color: { rgb: borderColor } }
+            font: {
+              name: 'Segoe UI',
+              sz: 10,
+              bold: C === 1,
+              color: { rgb: textColor }
             },
+            border: cellBorder,
             alignment: {
               vertical: 'center',
-              horizontal: C === 0 ? 'right' : (C === 1 || C === 3 ? 'center' : 'left')
+              horizontal: isRight ? 'right' : (isCentered ? 'center' : 'left'),
+              indent: isCentered ? 0 : 1
             }
           };
 
-          if (C === 0) {
-            cell.z = '#,##0'; // Numeric currency format
+          if (C === 1) {
+            cell.z = '+#,##0_ ;-#,##0_ ;0_ ';
           }
         }
       }

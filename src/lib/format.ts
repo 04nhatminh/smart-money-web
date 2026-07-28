@@ -120,3 +120,49 @@ export const formatDateToInput = (dateString: string | undefined): string => {
   console.warn('Unable to format date:', dateString);
   return '';
 };
+
+export interface ParsedNotification {
+  isBroadcast: boolean;
+  severity: 'INFO' | 'WARNING' | 'URGENT';
+  title: string;
+  message: string;
+}
+
+/**
+ * Parses broadcast notification payload formatted as "[SEVERITY] Title: Message"
+ * or fallback content.
+ */
+export const parseNotificationPayload = (content: string): ParsedNotification => {
+  if (!content) {
+    return { isBroadcast: false, severity: 'INFO', title: '', message: '' };
+  }
+
+  // Match: "[INFO] Title: Message"
+  const match = content.match(/^\[(INFO|WARNING|URGENT)\]\s*([^:\n]+):\s*([\s\S]*)$/);
+  if (match) {
+    return {
+      isBroadcast: true,
+      severity: match[1] as 'INFO' | 'WARNING' | 'URGENT',
+      title: match[2].trim(),
+      message: match[3].trim(),
+    };
+  }
+
+  // Match: "[INFO] Title" (without colon)
+  const matchNoColon = content.match(/^\[(INFO|WARNING|URGENT)\]\s*([\s\S]*)$/);
+  if (matchNoColon) {
+    return {
+      isBroadcast: true,
+      severity: matchNoColon[1] as 'INFO' | 'WARNING' | 'URGENT',
+      title: matchNoColon[2].trim(),
+      message: '',
+    };
+  }
+
+  return {
+    isBroadcast: false,
+    severity: 'INFO',
+    title: '',
+    message: content,
+  };
+};

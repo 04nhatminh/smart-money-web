@@ -51,8 +51,28 @@ export const BenefitsSection: React.FC<BenefitsProps> = ({
   ];
 
   return (
-    <section id="about" className="py-16 md:py-24 transition-colors" style={{ backgroundColor: colors.background.primary }}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="about" className="py-20 md:py-28 transition-colors relative overflow-hidden" style={{ background: `linear-gradient(135deg, ${colors.background.secondary} 0%, ${colors.background.primary} 60%, ${colors.background.secondary} 100%)` }}>
+      {/* Ambient Background Blobs */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+        <div 
+          className="absolute w-[400px] md:w-[600px] h-[400px] md:h-[600px] rounded-full filter blur-[100px] md:blur-[140px] opacity-[0.16] dark:opacity-[0.24] animate-blob-1" 
+          style={{ 
+            backgroundColor: colors.interactive.primary,
+            top: '15%',
+            right: '-10%',
+          }} 
+        />
+        <div 
+          className="absolute w-[300px] md:w-[450px] h-[300px] md:h-[450px] rounded-full filter blur-[80px] md:blur-[110px] opacity-[0.14] dark:opacity-[0.20] animate-blob-2" 
+          style={{ 
+            backgroundColor: colors.interactive.secondary,
+            bottom: '5%',
+            left: '-5%',
+          }} 
+        />
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           {/* Left: Benefits List — slides in from the left */}
           <ScrollReveal variant="fade-left">
@@ -73,11 +93,11 @@ export const BenefitsSection: React.FC<BenefitsProps> = ({
           {/* Right: Testimonial Card — slides in from the right */}
           <ScrollReveal variant="fade-right" delay={150}>
             <div
-              className="rounded-lg p-8 shadow-lg"
+              className="rounded-2xl p-8 shadow-2xl backdrop-blur-md border relative z-10"
               style={{
-                backgroundColor: colors.surface.secondary,
+                backgroundColor: colors.surface.primary === '#ffffff' ? 'rgba(255, 255, 255, 0.85)' : 'rgba(15, 12, 41, 0.75)',
                 borderColor: colors.border.light,
-                borderWidth: '1px',
+                boxShadow: colors.surface.primary === '#ffffff' ? '0 20px 40px rgba(80, 68, 213, 0.08)' : '0 20px 40px rgba(0, 0, 0, 0.4)',
               }}
             >
               <div className="mb-6">
@@ -85,7 +105,7 @@ export const BenefitsSection: React.FC<BenefitsProps> = ({
                   {t('finance.testimonial.balance')}
                 </Text>
                 <Heading level={3} className="text-3xl font-bold mt-1">
-                  {formatVietnamsePrice(1234.56, 'VND', 2)}
+                  {formatVietnamsePrice(25400000)}
                 </Heading>
               </div>
 
@@ -95,7 +115,7 @@ export const BenefitsSection: React.FC<BenefitsProps> = ({
                     {t('finance.testimonial.date')}
                   </Text>
                   <Text className="text-lg font-semibold mt-1">
-                    12/15
+                    2026
                   </Text>
                 </div>
                 <div>
@@ -106,7 +126,7 @@ export const BenefitsSection: React.FC<BenefitsProps> = ({
                     className="text-lg font-semibold mt-1"
                     style={{ color: colors.interactive.success }}
                   >
-                    {formatVietnamsePrice(8943.21, 'VND', 2)}
+                    {formatVietnamsePrice(120000000)}
                   </Text>
                 </div>
               </div>

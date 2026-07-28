@@ -32,6 +32,7 @@
     "blog": "Blog",
     "helpCenter": "Help Center",
     "privacy": "Privacy",
+    "terms": "Terms of Service",
     "notifications": "Notifications",
     "dashboard": "Dashboard",
     "profile": "Profile",
@@ -75,10 +76,10 @@
   },
   "finance": {
     "appName": "SmartMoney",
-    "appDescription": "Smart personal finance management app",
+    "appDescription": "Smart personal finance management & AI spending planner",
     "hero": {
-      "title": "Take Control of Your Finances",
-      "subtitle": "Smart spending planner with AI-powered insights. Track expenses, achieve saving goals, and build better financial habits.",
+      "title": "Take Control of Your Finances with AI",
+      "subtitle": "Smart spending planner with AI Adaptive Engine. Track expenses via voice, receipt photo scan, or Excel, achieve savings goals together, and receive real-time financial insights.",
       "cta": "Get Started Free",
       "login": "Sign In"
     },
@@ -103,39 +104,63 @@
       "overlayCta": "Get Started — It's Free"
     },
     "features": {
-      "title": "Everything You Need",
-      "subtitle": "Powerful features to manage your finances effectively",
-      "tracking": {
-        "title": "Transaction Tracking",
-        "description": "Organize and categorize all your expenses organized in personal categories"
+      "title": "Everything You Need for Smart Wealth",
+      "subtitle": "Comprehensive AI tools and collaborative features tailored to your financial journey",
+      "budgetEngine": {
+        "title": "AI Adaptive Budget Engine",
+        "description": "Intelligently allocates and dynamically adjusts your spending budgets based on income, focus mode, and saving pace."
       },
-      "goals": {
-        "title": "Saving Goals",
-        "description": "Set personal and group saving goals, track finances and family to save together"
+      "multiInput": {
+        "title": "Voice, Receipt OCR & Excel Entry",
+        "description": "Record transactions effortlessly with AI Voice recognition, camera OCR receipt scanning, or bulk Excel importing."
       },
-      "recommendations": {
-        "title": "Smart Spending Recommendations",
-        "description": "Get personalized insights and recommendations to optimize your spending habits."
+      "smartInsights": {
+        "title": "AI Insights & Action Suggestions",
+        "description": "Detects duplicate charges, unusual high spending, and gives actionable advice to reallocate or balance your budgets."
+      },
+      "savingGoals": {
+        "title": "Personal & Group Savings Goals",
+        "description": "Set prioritized savings goals, track collective milestones, and support teammates with automatic sponsorship mechanisms."
+      },
+      "financialProfile": {
+        "title": "Tailored Financial Profile",
+        "description": "Configure AI intervention levels, saving pace (Safe, Moderate, Aggressive), focus mode, and surplus auto-investment."
+      },
+      "deepAnalytics": {
+        "title": "Cash Flow & Net Wealth Analytics",
+        "description": "Visualize income vs expenses across Day, Month, Year views, interactive calendar stats, and cumulative net balance trends."
       }
     },
     "benefits": {
       "title": "Why Choose SmartMoney?",
-      "benefit1": "AI-powered expense categorization",
-      "benefit2": "Collaborative group savings",
-      "benefit3": "Real-time spending insights",
-      "benefit4": "Secure and private data",
-      "benefit5": "Multi-device sync",
-      "benefit6": "Smart budget recommendations"
+      "benefit1": "AI-driven adaptive budget allocation & auto-rebalance",
+      "benefit2": "Instant transaction entry via Voice & Receipt photo OCR",
+      "benefit3": "Proactive AI suggestions & spending anomaly alerts",
+      "benefit4": "Collaborative group projects with automatic sponsorship",
+      "benefit5": "Flexible financial profile & auto-invest surplus",
+      "benefit6": "Comprehensive cash flow analytics & net balance trends"
     },
     "testimonial": {
-      "balance": "Account Balance",
-      "date": "Date in Oldest",
-      "savingsGoal": "Money Saved"
+      "balance": "Total Net Wealth",
+      "date": "Active Period",
+      "savingsGoal": "Accumulated Savings"
     },
     "cta": {
-      "title": "Ready to Start Your Financial Journey?",
-      "subtitle": "Join thousands of users already managing their finances smarter.",
+      "title": "Ready to Master Your Financial Journey?",
+      "subtitle": "Join thousands of users managing their budgets and saving goals smarter with AI.",
       "button": "Get Started Today"
+    },
+    "mobileApp": {
+      "badge": "Mobile App",
+      "title": "Experience SmartMoney Directly on Your Phone",
+      "subtitle": "Download the mobile app to manage your finances anywhere, anytime. Get instant budget alerts, quick voice entry, and seamless receipt scanning.",
+      "downloadButton": "Download Mobile App",
+      "downloadNote": "Direct app download / Official web store",
+      "qrTitle": "Scan to download",
+      "qrSubtitle": "Open mobile camera to scan QR code",
+      "feature1": "Quick Voice Entry & Receipt OCR Scan",
+      "feature2": "Real-time Budget Limit Alerts",
+      "feature3": "Seamless Real-time Financial Sync"
     }
   },
   "auth": {
@@ -148,7 +173,69 @@
     "loginSuccess": "Login successful",
     "loginError": "Login failed",
     "registerSuccess": "Registration successful",
-    "registerError": "Registration failed"
+    "registerError": "Registration failed",
+    "welcomeBack": "Welcome Back",
+    "signInSubtitle": "Sign in to your account to continue",
+    "emailAddress": "Email Address",
+    "emailPlaceholder": "you@example.com",
+    "passwordPlaceholder": "Enter your password",
+    "signIn": "Sign In",
+    "signingIn": "Signing in...",
+    "orContinueWith": "Or continue with",
+    "signInWithGoogle": "Sign in with Google",
+    "signInWithFacebook": "Sign in with Facebook",
+    "dontHaveAccount": "Don't have an account?",
+    "signUp": "Sign up",
+    "alreadyHaveAccount": "Already have an account?",
+    "createAccountTitle": "Create Account",
+    "createAccountSubtitle": "Join SmartMoney to manage your finances with AI",
+    "fullName": "Full Name",
+    "fullNamePlaceholder": "John Doe",
+    "username": "Username",
+    "usernamePlaceholder": "johndoe",
+    "phone": "Phone Number",
+    "phonePlaceholder": "0912345678",
+    "dob": "Date of Birth",
+    "confirmPassword": "Confirm Password",
+    "confirmPasswordPlaceholder": "Re-enter your password",
+    "agreeTermsText": "I agree to the",
+    "and": "and",
+    "createAccount": "Create Account",
+    "creatingAccount": "Creating account...",
+    "forgotPasswordTitle": "Reset Password",
+    "forgotPasswordSubtitle": "Enter your email and we'll send you a verification code",
+    "sendResetCode": "Send Verification Code",
+    "sendingCode": "Sending...",
+    "rememberPassword": "Remember your password?",
+    "backToSignIn": "Back to Sign In",
+    "checkYourEmail": "Check Your Email",
+    "codeSent": "Verification code sent successfully",
+    "codeSentDesc": "We've sent a 6-digit verification code to {email}. Please check your email and enter the code.",
+    "redirectingToVerification": "Redirecting to verification page...",
+    "continue": "Continue",
+    "setNewPasswordTitle": "Set New Password",
+    "setNewPasswordSubtitle": "Enter your new password below",
+    "accountLabel": "Account:",
+    "newPassword": "New Password",
+    "newPasswordPlaceholder": "Enter new password",
+    "resetPasswordBtn": "Reset Password",
+    "resettingPassword": "Resetting Password...",
+    "passwordResetSuccessful": "Password Reset Successful",
+    "passwordResetSuccessDesc": "Your password has been reset successfully. You can now login with your new password.",
+    "goToLogin": "Go to Login",
+    "verifyCodeTitle": "Verify Code",
+    "verifyCodeSubtitle": "Enter the 6-digit code sent to your email",
+    "codeSentTo": "Code sent to:",
+    "verificationCodeLabel": "Verification Code",
+    "otpPlaceholder": "000000",
+    "enter6DigitCode": "Enter the 6-digit code",
+    "verifyCodeBtn": "Verify Code",
+    "verifyingBtn": "Verifying...",
+    "resendCode": "Resend Code",
+    "resendIn": "Resend in {seconds}s",
+    "fillAllFields": "Please fill in all fields",
+    "googleLoginFailed": "Google Sign-In is not loaded. Please refresh the page.",
+    "facebookLoginFailed": "Facebook login failed"
   },
   "validation": {
     "required": "This field is required",
@@ -204,7 +291,11 @@
     "digest": {
       "pending_suggestions": "You have suggestions waiting for review.",
       "weekly": "{count} things worth a look in this week's insights."
-    }
+    },
+    "joinGroupSuccess": "Successfully joined the group!",
+    "declineGroupSuccess": "Declined group invitation.",
+    "sponsorSuccess": "You agreed to take on the contribution for your teammate!",
+    "sponsorDecline": "You declined taking on the contribution."
   },
   "profile": {
     "editProfile": "Edit Profile",
@@ -301,8 +392,8 @@
     "importExcel": "Import Excel",
     "exportExcel": "Export Excel",
     "excelModalTitle": "Import Transactions via Excel",
-    "excelFormatInstructions": "Please format your Excel file with the following headers: **Amount**, **Type**, **Category**, **Date**, **Description**.",
-    "excelFormatDetails": "Details: Amount (number > 0), Type (INCOME or EXPENSE), Category (FOOD, TRANSPORTATION, etc.), Date (dd/MM/yyyy HH:mm), Description (optional).",
+    "excelFormatInstructions": "Please format your Excel file with the following headers: **Amount (VND)**, **Type**, **Category**, **Date**, **Description**.",
+    "excelFormatDetails": "Details: Amount (VND) (number > 0), Type (INCOME or EXPENSE), Category (FOOD, TRANSPORTATION, etc.), Date (dd/MM/yyyy HH:mm), Description (optional).",
     "downloadTemplate": "Download Excel Template",
     "dropExcelHere": "Drag & drop your Excel file here, or click to browse",
     "invalidFile": "Please select a valid Excel file (.xlsx, .xls).",
@@ -328,7 +419,7 @@
     "methodExcelDesc": "Upload Excel file",
     "excelGuidelineTitle": "Excel Format Guidelines",
     "excelLabelColumns": "Columns",
-    "excelGuidelineColumnsDesc": "Amount, Type, Category, Date, Description.",
+    "excelGuidelineColumnsDesc": "Amount (VND), Type, Category, Date, Description.",
     "excelGuidelineAmountDesc": "Positive numbers only (e.g., 50000).",
     "excelGuidelineTypeDesc": "INCOME or EXPENSE.",
     "excelGuidelineCategoryDesc": "Required for expenses. Use: FOOD, TRANSPORTATION, CLOTHING, UTILITIES, ENTERTAINMENT, HEALTH, EDUCATION, SHOPPING, OTHER.",
@@ -337,12 +428,12 @@
     "excelOnlySupported": "Only .xlsx, .xls files are supported",
     "excelValidationWarning": "Note: Transactions with validation errors will be skipped. Please fix them in your Excel if they are important.",
     "excelImportRowsBtn": "Import {count} Rows",
-    "excelHeaderAmount": "Amount",
+    "excelHeaderAmount": "Amount (VND)",
     "excelHeaderType": "Type",
     "excelHeaderCategory": "Category",
     "excelHeaderDate": "Date",
     "excelHeaderDescription": "Description",
-    "excelErrorHeaders": "Excel must contain headers in the first row: Amount, Type, Category, Date (Description is optional)",
+    "excelErrorHeaders": "Excel must contain headers in the first row: Amount (VND), Type, Category, Date (Description is optional)",
     "excelErrorAmount": "Amount must be a number greater than 0",
     "excelErrorType": "Type must be INCOME or EXPENSE",
     "excelErrorCategory": "Expense category must be one of: {categories}",
@@ -383,7 +474,12 @@
   },
   "projects": {
     "title": "Projects",
-    "subtitle": "Manage your saving projects (Max 3, one per priority)",
+    "subtitle": "Manage your personal savings projects and collaborative group projects.",
+    "newGroup": "New Group",
+    "tabs": {
+      "projects": "Projects",
+      "groups": "Groups"
+    },
     "maxLimitReached": "You've reached the limit of 3 projects",
     "newProject": "New Project",
     "stats": {
@@ -509,9 +605,147 @@
       }
     }
   },
+  "groupDetail": {
+    "loadingGroup": "Loading group...",
+    "statusLabel": "STATUS",
+    "groupStatus": {
+      "LOCKED": "LOCKED",
+      "FORMING": "FORMING",
+      "DISSOLVED": "DISSOLVED"
+    },
+    "statusText": {
+      "LOCKED": "Locked",
+      "FORMING": "Forming",
+      "DISSOLVED": "Dissolved"
+    },
+    "noDescription": "No description provided.",
+    "memberCount": "{count} Joined",
+    "role": {
+      "ADMIN": "ADMIN",
+      "MEMBER": "MEMBER"
+    },
+    "projectStatus": {
+      "ACTIVE": "Project running",
+      "PENDING_SPONSORSHIP": "Awaiting sponsorship survey",
+      "COMPLETED": "Project completed",
+      "DISSOLVED": "Project dissolved",
+      "EXPIRED": "Project ended",
+      "NONE": "No project yet"
+    },
+    "deleteGroup": "Delete Group",
+    "lockGroup": "Lock Group",
+    "unlockGroup": "Unlock Group",
+    "dissolveProject": "Dissolve Project",
+    "groupProjectTitle": "Group Project: {name}",
+    "totalSaved": "Total Saved",
+    "completed": "{percent}% Completed",
+    "originalGoalNote": "(Original goal: {amount} {currency})",
+    "joinGroupProject": "Join Group Project",
+    "joinDescription": "Select priority to create your personal sub-project and contribute to the group goal.",
+    "priorityLabel": {
+      "LOW": "LOW",
+      "MEDIUM": "MEDIUM",
+      "HIGH": "HIGH"
+    },
+    "priorityUsed": "(Used)",
+    "acceptCreate": "Accept & Create Project",
+    "noProjectYet": "Group is locked but has no project yet.",
+    "createGroupProject": "Create Group Project",
+    "currentConfig": "Current config: {config}",
+    "configNone": "Not configured",
+    "configDisabled": "Auto-sponsorship disabled",
+    "configMax": "Auto-sponsor (Maximum capacity)",
+    "configCustom": "Auto-sponsor (Max {amount} VND/month)",
+    "autoSponsorTitle": "Auto-Sponsor Teammates",
+    "autoSponsorDesc": "The system will automatically use your surplus usable funds to cover teammates' deficits when creating projects.",
+    "maxCapacity": "Maximum capacity (All surplus)",
+    "customLimit": "Custom maximum limit",
+    "customLimitLabel": "Maximum monthly sponsorship limit (VND)",
+    "customLimitPlaceholder": "Enter amount, e.g., 200,000",
+    "saving": "Saving...",
+    "saveConfig": "Save Config",
+    "pendingRequestTitle": "Sponsorship Request Awaiting Your Response",
+    "waitingSurvey": "Waiting for team survey responses...",
+    "requestDescription": "Your teammate lacks sufficient financial capacity. The system suggests you contribute an additional {askedAmount} VND/month (raising your contribution to {proposedShare} VND/month instead of {originalShare} VND/month).",
+    "declineBtn": "Decline",
+    "agreeBtn": "Agree to Help",
+    "waitingActivation": "The project is waiting for members to respond to the sponsorship survey to activate.",
+    "sponsorshipFailed": "This project has failed because members declined or lacked capacity to sponsor the deficit.",
+    "membersTitle": "Members",
+    "you": "(You)",
+    "userFallback": "User",
+    "roleAdmin": "ADMIN",
+    "roleMember": "MEMBER",
+    "inviteStatus": {
+      "JOINED": "Joined",
+      "INVITED": "Invited",
+      "DECLINED": "Declined"
+    },
+    "abandoned": "ABANDONED",
+    "progress": "{percent}% Progress",
+    "sent": "Sent!",
+    "resending": "Resending...",
+    "resend": "Resend",
+    "kickMemberTitle": "Remove invited member",
+    "removeDeclinedTitle": "Remove declined invitation",
+    "inviteNewMember": "Invite a new member",
+    "inviteBtn": "Invite",
+    "deleteTitle": "Delete Group",
+    "deleteConfirm": "Are you sure you want to delete this group? This will remove all members and delete the group permanently. This action cannot be undone.",
+    "cancelBtn": "Cancel",
+    "confirmDelete": "Confirm Delete",
+    "dissolveTitle": "Dissolve Group Project",
+    "dissolveConfirm": "Are you sure you want to dissolve this group project? This will dissolve the group and abandon all sub-personal projects. This action cannot be undone.",
+    "confirmDissolve": "Confirm Dissolve",
+    "recalcTitle": "Recalculate Budget?",
+    "recalcDesc": "You have successfully joined the group project! Would you like AI to recalculate your spending budget to align with this new savings goal?",
+    "laterBtn": "Later",
+    "recalcNow": "Recalculate Now",
+    "toast": {
+      "inviteSuccess": "Invitation sent successfully!",
+      "inviteFailed": "Failed to invite member",
+      "memberRemoved": "Member removed successfully!",
+      "removeFailed": "Failed to remove member",
+      "inviteResent": "Invitation resent to {email}!",
+      "resendFailed": "Failed to resend invitation",
+      "groupLocked": "Group locked successfully!",
+      "lockFailed": "Failed to lock group. Verify you have at least one JOINED member.",
+      "groupUnlocked": "Group unlocked successfully!",
+      "unlockFailed": "Failed to unlock group.",
+      "groupDeleted": "Group deleted successfully!",
+      "deleteFailed": "Failed to delete group",
+      "joinedProject": "Successfully joined group project! Created sub-personal project.",
+      "joinFailed": "Failed to join group project",
+      "priorityInUse": "Priority {priority} is already in use by one of your projects.",
+      "sponsorshipUpdated": "Auto-sponsorship settings updated successfully!",
+      "sponsorshipUpdateFailed": "Failed to update settings",
+      "errorOccurred": "An error occurred",
+      "sponsorAccepted": "You have agreed to sponsor your teammate!",
+      "sponsorDeclined": "You have declined the sponsorship request.",
+      "sponsorResponseFailed": "An error occurred while responding",
+      "dissolveFailed": "Failed to dissolve group project",
+      "sponsorLimitExceed": "The sponsorship limit entered ({limit} VND) exceeds your maximum financial capacity ({capacity} VND).\n\nWould you like to switch to 'Maximum capacity'?\n- Click OK to switch and save.\n- Click Cancel to go back and enter a different amount."
+    }
+  },
   "analysis": {
     "title": "Financial Analysis",
     "subtitle": "Deep-dive insights into your finances for {year}",
+    "viewMode": {
+      "day": "Day",
+      "month": "Month",
+      "year": "Year"
+    },
+    "yearLabel": "Year {year}",
+    "monthLabel": "{month} {year}",
+    "weekHeaders": [
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri",
+      "Sat",
+      "Sun"
+    ],
     "month": "Month:",
     "year": "Year:",
     "refresh": "Refresh",
@@ -554,6 +788,7 @@
   "budgets": {
     "title": "Budget Management",
     "subtitle": "Track and manage your spending budgets",
+    "generateBudget": "Generate Budget",
     "createMultiple": "Create Multiple",
     "createBudget": "Create Budget",
     "failedLoad": "Failed to load budgets",
@@ -679,7 +914,7 @@
   "privacyPage": {
     "subtitle": "This Privacy Policy describes how we collect, use, and protect your personal financial information.",
     "questions": "Have any questions?",
-    "contactSupport": "Please contact our security team at: support@smartmoney.vn",
+    "contactSupport": "Please contact our security team at: {email}",
     "sec1Title": "1. Information Collection",
     "sec1Desc": "We collect information to provide better services to our users. This includes information you provide when creating an account (such as name, email) and the financial transactions you enter into the system for budget planning and analysis.",
     "sec2Title": "2. How We Use Data",
@@ -688,6 +923,19 @@
     "sec3Desc": "We implement industry-standard security measures including data transmission encryption (SSL/TLS) and secure database storage. Your password is one-way hashed before storage.",
     "sec4Title": "4. Your Rights",
     "sec4Desc": "You have full rights to access, edit, or request the deletion of your account and all stored financial data in the SmartMoney system at any time through the Account Settings or by contacting us directly."
+  },
+  "termsPage": {
+    "subtitle": "Please read these Terms of Service carefully before using the SmartMoney platform.",
+    "questions": "Have questions about our terms?",
+    "contactSupport": "Contact legal support at: {email}",
+    "sec1Title": "1. Acceptance of Terms",
+    "sec1Desc": "By creating an account or accessing the SmartMoney application, you agree to comply with and be bound by these Terms of Service and all applicable policies.",
+    "sec2Title": "2. Account Registration & Security",
+    "sec2Desc": "You are responsible for maintaining the confidentiality of your login credentials. You are fully responsible for all activities that occur under your SmartMoney account.",
+    "sec3Title": "3. User Conduct & Financial Data",
+    "sec3Desc": "SmartMoney provides personal and group spending management tools. Users must not use the platform for unlawful activities, unauthorized data scraping, or attempting to compromise server security.",
+    "sec4Title": "4. Service Availability & Modifications",
+    "sec4Desc": "We reserve the right to update, modify, or enhance features within SmartMoney to improve system performance, security, and user experience."
   },
   "helpPage": {
     "subtitle": "Find answers to frequently asked questions or learn how to use SmartMoney effectively.",
@@ -895,5 +1143,146 @@
       "title": "Start Savings Goal",
       "ask": "You have surplus funds this month — start a savings goal with {resolvedValue}?"
     }
+  },
+  "admin": {
+    "title": "System Control & Admin Dashboard",
+    "subtitle": "Monitor system health, manage user accounts & execute financial settlements",
+    "statusOnline": "All Systems Operational",
+    "tabs": {
+      "overview": "Overview",
+      "settlement": "Financial Settlement",
+      "users": "User Management",
+      "projects": "Projects & Groups",
+      "logs": "Broadcast & Notifications"
+    },
+    "kpi": {
+      "totalUsers": "Total Users",
+      "activeUsers": "Active Users",
+      "monthlyVolume": "Monthly Volume",
+      "settlementStatus": "Settlement Engine"
+    },
+    "overviewSection": {
+      "analyticsTitle": "System Volume & Activity Growth",
+      "analyticsSubtitle": "Monthly transactions vs volume throughput",
+      "healthTitle": "System Health & AI Engines",
+      "healthSubtitle": "Infrastructure status monitoring",
+      "statusHealthy": "HEALTHY",
+      "statusActive": "ACTIVE",
+      "statusReady": "READY",
+      "adaptiveActive": "Adaptive Engine Active",
+      "systemDistributionTitle": "User & Project Distribution",
+      "systemDistributionSubtitle": "Ratio of personal vs group projects and profile setups",
+      "quickActionsTitle": "Quick Management Actions",
+      "manageUsersBtn": "Manage User Accounts",
+      "manageSettlementBtn": "Manage Settlement Engine",
+      "broadcastTabBtn": "Broadcast Announcement",
+      "sysSummary": "System Summary"
+    },
+    "settlement": {
+      "title": "Monthly Financial Settlement",
+      "subtitle": "Manually trigger allocation calculations and budget carry-overs system-wide",
+      "runButton": "Run Settlement Now",
+      "running": "Processing settlement...",
+      "lastRun": "Last Execution",
+      "status": "Status",
+      "message": "Message",
+      "history": "Execution History",
+      "successMessage": "Financial settlement process completed successfully!",
+      "autoScheduleInfo": "Automated settlement executes on the final day of each calendar month.",
+      "dryRunNotice": "Manual execution recalculates balances and creates automated carry-over entries.",
+      "targetEndpoint": "Target API Endpoint",
+      "executionScope": "Process Execution Scope",
+      "executionScopeDesc": "All Active Projects & Group Settlements",
+      "controllerClass": "Backend Controller Class",
+      "tableTimestamp": "Timestamp",
+      "tableTriggeredBy": "Triggered By",
+      "tableDuration": "Duration",
+      "tableStatus": "Status",
+      "tableMessage": "Message",
+      "statusCompleted": "COMPLETED",
+      "statusSuccess": "SUCCESS",
+      "statusFailed": "FAILED",
+      "systemScheduler": "SYSTEM_SCHEDULER",
+      "adminManualTrigger": "ADMIN_MANUAL_TRIGGER",
+      "defaultLogMsg": "Automated monthly settlement completed for {count} active projects."
+    },
+    "users": {
+      "title": "Registered Users",
+      "subtitle": "Manage system user roles, access statuses, and financial profile setups",
+      "searchPlaceholder": "Search by name or email...",
+      "filterAll": "All Statuses",
+      "filterActive": "Active",
+      "filterPending": "Pending",
+      "filterSuspended": "Suspended",
+      "colUser": "User",
+      "colEmail": "Email",
+      "colRole": "Role",
+      "colFinancial": "Financial Profile",
+      "colStatus": "Status",
+      "colJoinedDate": "Joined Date",
+      "colActions": "Actions",
+      "setupCompleted": "Configured",
+      "setupPending": "Pending",
+      "btnSuspend": "Suspend",
+      "btnActivate": "Activate",
+      "noUsersFound": "No matching users found."
+    },
+    "projects": {
+      "title": "Saving Projects Monitoring",
+      "subtitle": "Monitoring system-wide saving goals and budget targets",
+      "groupsTitle": "Group Management & Sponsorships",
+      "groupsSubtitle": "Active joint projects and group member counts",
+      "savedLabel": "Saved",
+      "targetLabel": "Target",
+      "membersCount": "{count} members",
+      "inviteCodeLabel": "Code",
+      "noProjects": "No system projects found.",
+      "noGroups": "No active groups found."
+    },
+    "broadcast": {
+      "title": "System Broadcast Announcement",
+      "subtitle": "Broadcast system-wide notifications to all registered active users",
+      "titlePlaceholder": "e.g. Scheduled System Maintenance Notice",
+      "messagePlaceholder": "Enter full broadcast details to be delivered to user notification feeds...",
+      "button": "Send Broadcast",
+      "subject": "Announcement Title",
+      "message": "Announcement Message",
+      "severity": "Severity Level",
+      "send": "Broadcast Now",
+      "broadcasting": "Broadcasting...",
+      "sentSuccess": "System notification broadcasted successfully!",
+      "historyTitle": "Broadcast History & Admin Received Logs",
+      "historySubtitle": "Real notifications stream delivered to Admin and System Users",
+      "refreshBtn": "Refresh",
+      "noHistory": "No broadcast notifications sent yet."
+    }
+  },
+  "contactPage": {
+    "subtitle": "Have questions or need assistance? Reach out to our support team.",
+    "formTitle": "Send Us a Message",
+    "successMessage": "Thank you for reaching out! We will get back to you soon.",
+    "fullNameLabel": "Full Name",
+    "fullNamePlaceholder": "Enter your full name",
+    "emailPlaceholder": "Enter your email address",
+    "messageLabel": "Message",
+    "messagePlaceholder": "How can we help you?",
+    "submitBtn": "Send Message",
+    "infoTitle": "Contact Information",
+    "infoDesc": "We are here to help you manage your personal finances smarter. Feel free to contact us anytime.",
+    "phoneLabel": "Phone Number",
+    "addressLabel": "Address",
+    "workingHoursLabel": "Working Hours",
+    "workingHoursVal": "Monday - Friday, 8:00 AM - 5:00 PM"
+  },
+  "generateBudgetModal": {
+    "title": "AI Budget Planner",
+    "initializing": "Initializing budget assistant...",
+    "pleaseCompleteSetup": "Please complete the financial setup before generating a budget plan.",
+    "financialSetupRequired": "Financial setup is required to generate AI budgets."
+  },
+  "createGroupModal": {
+    "title": "Create New Group",
+    "invalidEmail": "Please enter a valid email address",
+    "emailExists": "Email already added"
   }
 }

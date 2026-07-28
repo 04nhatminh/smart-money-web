@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { FcGoogle } from 'react-icons/fc';
 import { FaFacebook } from 'react-icons/fa';
 import { MdVisibility, MdVisibilityOff } from 'react-icons/md';
@@ -11,6 +11,8 @@ import { Button, Input, Heading, Text, Alert } from '@/components/atoms';
 import { useAuth } from '@/context/AuthContext';
 import { useAuthForm } from '@/hooks/useAuthForm';
 import { useTheme } from '@/context/ThemeContext';
+import { AuthChangeEvent, Session } from '@supabase/supabase-js';
+import { supabase } from '@/lib/supabase';
 
 interface LoginFormProps {
   onSuccess?: () => void;
@@ -19,6 +21,7 @@ interface LoginFormProps {
 export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
   const router = useRouter();
   const locale = useLocale();
+  const t = useTranslations();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
@@ -60,60 +63,55 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
     }
   }, [loginWithGoogle, onSuccess]);
 
-  const handleFacebookLogin = useCallback(() => {
-    if (typeof window === 'undefined') {
-      setError('Window is not available');
-      return;
-    }
-
-    const FB = (window as any).FB;
-
-    if (!FB) {
-      setError('Facebook SDK not loaded yet. Please try again or refresh the page.');
-      console.error('FB object is undefined');
-      return;
-    }
-
-    if (!FB.login) {
-      setError('Facebook login method not available');
-      console.error('FB.login method not available');
-      return;
-    }
-
+  const handleFacebookLogin = useCallback(async () => {
     try {
-      FB.login(
-        (response: any) => {
-          if (!response) {
-            setError('No response from Facebook');
-            return;
-          }
-
-          if (response.authResponse) {
-            loginWithFacebook(response.authResponse.accessToken)
-              .then(() => {
-                onSuccess?.();
-              })
-              .catch((err: any) => {
-                const errorMessage = err instanceof Error ? err.message : 'Facebook login failed';
-                setError(errorMessage);
-                console.error('Facebook login error:', err);
-              });
-          } else {
-            setError(`Facebook login failed: ${response.status || 'Unknown error'}`);
-          }
+      setSocialLoading(true);
+      setError(null);
+      const redirectTo = typeof window !== 'undefined' ? `${window.location.origin}/${locale}/login` : undefined;
+      const { error: oauthError } = await supabase.auth.signInWithOAuth({
+        provider: 'facebook',
+        options: {
+          redirectTo,
         },
-        { scope: 'public_profile,email' }
-      );
+      });
+
+      if (oauthError) {
+        setError(oauthError.message);
+        setSocialLoading(false);
+      }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Error calling Facebook login';
+      const errorMessage = err instanceof Error ? err.message : 'Error starting Facebook login';
       setError(errorMessage);
-      console.error('Exception in FB.login:', err);
+      setSocialLoading(false);
     }
+  }, [locale]);
+
+  // Listen for Supabase auth state changes (handles redirect back from Facebook OAuth)
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event: AuthChangeEvent, session: Session | null) => {
+      if (session?.access_token && (event === 'SIGNED_IN' || event === 'INITIAL_SESSION')) {
+        try {
+          setSocialLoading(true);
+          await loginWithFacebook(session.access_token);
+          await supabase.auth.signOut();
+          onSuccess?.();
+        } catch (err: any) {
+          const errorMessage = err instanceof Error ? err.message : 'Facebook login failed';
+          setError(errorMessage);
+          console.error('Facebook login error:', err);
+        } finally {
+          setSocialLoading(false);
+        }
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, [loginWithFacebook, onSuccess]);
 
-  // Initialize Google Sign-In and Facebook SDK
+  // Initialize Google Sign-In script
   useEffect(() => {
-    // Load Google Sign-In script
     const script = document.createElement('script');
     script.src = 'https://accounts.google.com/gsi/client';
     script.async = true;
@@ -130,39 +128,13 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
 
     document.body.appendChild(script);
 
-    // Initialize Facebook SDK - Set fbAsyncInit BEFORE loading script
-    (window as any).fbAsyncInit = function () {
-      if ((window as any).FB) {
-        (window as any).FB.init({
-          appId: process.env.NEXT_PUBLIC_FACEBOOK_APP_ID,
-          xfbml: false,
-          version: 'v19.0',
-          status: true,
-          cookie: true,
-        });
-      } else {
-        console.error('FB object not available in fbAsyncInit');
-      }
-    };
-
-    // Load Facebook SDK script with appId parameter
-    const fbScript = document.createElement('script');
-    fbScript.src = 'https://connect.facebook.net/en_US/sdk.js';
-    fbScript.async = true;
-    fbScript.defer = true;
-    fbScript.onload = () => { };
-    fbScript.onerror = () => { };
-    document.body.appendChild(fbScript);
-
     return () => {
       if (document.body.contains(script)) {
         document.body.removeChild(script);
       }
-      if (document.body.contains(fbScript)) {
-        document.body.removeChild(fbScript);
-      }
     };
   }, [handleGoogleLogin]);
+
 
   const handleLogoClick = () => {
     router.push(`/${locale}`);
@@ -235,8 +207,8 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
 
       {/* Title and Subtitle */}
       <div className="text-center mb-8">
-        <Heading level={1} className="mb-2">Welcome Back</Heading>
-        <Text className="text-base" style={{ color: colors.text.secondary }}>Sign in to your account to continue</Text>
+        <Heading level={1} className="mb-2">{t.has('auth.welcomeBack') ? t('auth.welcomeBack') : 'Welcome Back'}</Heading>
+        <Text className="text-base" style={{ color: colors.text.secondary }}>{t.has('auth.signInSubtitle') ? t('auth.signInSubtitle') : 'Sign in to your account to continue'}</Text>
       </div>
 
       {error && (
@@ -245,11 +217,11 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
 
       <Input
         type="email"
-        label="Email Address"
+        label={t.has('auth.emailAddress') ? t('auth.emailAddress') : 'Email Address'}
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         onKeyDown={handleKeyDown}
-        placeholder="you@example.com"
+        placeholder={t.has('auth.emailPlaceholder') ? t('auth.emailPlaceholder') : 'you@example.com'}
         required
         disabled={isLoading || socialLoading}
       />
@@ -257,11 +229,11 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
       <div className="relative">
         <Input
           type={showPassword ? 'text' : 'password'}
-          label="Password"
+          label={t.has('auth.password') ? t('auth.password') : 'Password'}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Enter your password"
+          placeholder={t.has('auth.passwordPlaceholder') ? t('auth.passwordPlaceholder') : 'Enter your password'}
           required
           disabled={isLoading || socialLoading}
         />
@@ -287,7 +259,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
           className="text-sm hover:opacity-80 transition-opacity"
           style={{ color: colors.interactive.primary }}
         >
-          Forgot password?
+          {t.has('auth.forgotPassword') ? t('auth.forgotPassword') : 'Forgot password?'}
         </Link>
       </div>
 
@@ -297,7 +269,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
         className="w-full py-3 mt-6 text-lg font-semibold"
         disabled={isLoading || socialLoading}
       >
-        {isLoading ? 'Signing in...' : 'Sign In'}
+        {isLoading ? (t.has('auth.signingIn') ? t('auth.signingIn') : 'Signing in...') : (t.has('auth.signIn') ? t('auth.signIn') : 'Sign In')}
       </Button>
 
       {/* Social Login Divider */}
@@ -306,8 +278,8 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
           <div className="w-full border-t" style={{ borderColor: colors.border?.light }}></div>
         </div>
         <div className="relative flex justify-center text-sm">
-          <span className="px-2" style={{ color: colors.text.secondary, backgroundColor: colorScheme === 'dark' ? colors.palette?.[900] : colors.palette?.white }}>
-            Or continue with
+          <span className="px-2" style={{ color: colors.text.secondary, backgroundColor: colors.surface.primary }}>
+            {t.has('auth.orContinueWith') ? t('auth.orContinueWith') : 'Or continue with'}
           </span>
         </div>
       </div>
@@ -322,7 +294,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
               if (typeof window !== 'undefined' && (window as any).google) {
                 (window as any).google.accounts.id.prompt();
               } else {
-                setError('Google Sign-In is not loaded. Please refresh the page.');
+                setError(t.has('auth.googleLoginFailed') ? t('auth.googleLoginFailed') : 'Google Sign-In is not loaded. Please refresh the page.');
               }
             } catch (err) {
               setError('Error opening Google Sign-In');
@@ -333,7 +305,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
           style={{ borderColor: colors.border?.light }}
         >
           <FcGoogle size={24} />
-          <span style={{ color: colors.text.primary }} className="font-semibold">Sign in with Google</span>
+          <span style={{ color: colors.text.primary }} className="font-semibold">{t.has('auth.signInWithGoogle') ? t('auth.signInWithGoogle') : 'Sign in with Google'}</span>
         </button>
 
         {/* Facebook Login Button */}
@@ -345,18 +317,18 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
           style={{ backgroundColor: '#1877F2', color: '#FFFFFF' }}
         >
           <FaFacebook size={24} />
-          <span className="font-semibold">Sign in with Facebook</span>
+          <span className="font-semibold">{t.has('auth.signInWithFacebook') ? t('auth.signInWithFacebook') : 'Sign in with Facebook'}</span>
         </button>
       </div>
 
       <p className="text-center text-sm" style={{ color: colors.text.secondary }}>
-        Don't have an account?{' '}
+        {t.has('auth.dontHaveAccount') ? t('auth.dontHaveAccount') : "Don't have an account?"}{' '}
         <Link
           href={`/${locale}/register`}
           className="font-semibold hover:opacity-80 transition-opacity"
           style={{ color: colors.interactive.primary }}
         >
-          Sign up
+          {t.has('auth.signUp') ? t('auth.signUp') : 'Sign up'}
         </Link>
       </p>
     </form>

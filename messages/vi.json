@@ -32,6 +32,7 @@
     "blog": "Blog",
     "helpCenter": "Trung tâm Trợ giúp",
     "privacy": "Riêng tư",
+    "terms": "Điều khoản dịch vụ",
     "notifications": "Thông báo",
     "dashboard": "Bảng điều khiển",
     "profile": "Hồ sơ",
@@ -75,16 +76,16 @@
   },
   "finance": {
     "appName": "SmartMoney",
-    "appDescription": "Ứng dụng quản lý tài chính cá nhân thông minh",
+    "appDescription": "Ứng dụng quản lý tài chính cá nhân & lập kế hoạch chi tiêu thông minh",
     "hero": {
-      "title": "Kiểm Soát Tài Chính Của Bạn",
-      "subtitle": "Trình lập kế hoạch chi tiêu thông minh với những hiểu biết do AI hỗ trợ. Theo dõi chi tiêu, đạt các mục tiêu tiết kiệm và xây dựng thói quen tài chính tốt hơn.",
+      "title": "Kiểm Soát Tài Chính Thông Minh Cùng AI",
+      "subtitle": "Trình lập kế hoạch chi tiêu thông minh với AI Adaptive Engine. Ghi chép thu chi bằng Giọng nói, Quét hóa đơn OCR & Import Excel, quản lý dự án tiết kiệm nhóm và nhận khuyến nghị tài chính tức thì.",
       "cta": "Bắt Đầu Miễn Phí",
       "login": "Đăng Nhập"
     },
     "dashboard": {
-      "title": "Tổng Quan",
-      "subtitle": "Tổng quan về bảng điều khiển tài chính của bạn",
+      "title": "Tổng Quan Bảng Điều Khiển",
+      "subtitle": "Tổng quan về bảng điều khiển tài chính thực tế của bạn",
       "monthlySpending": "Xu Hướng Chi Tiêu Hàng Tháng",
       "spendingByCategory": "Chi Tiêu Theo Danh Mục",
       "budgetVsActual": "Ngân Sách So Với Chi Tiêu Thực Tế",
@@ -103,39 +104,63 @@
       "overlayCta": "Bắt Đầu — Hoàn Toàn Miễn Phí"
     },
     "features": {
-      "title": "Tất Cả Những Gì Bạn Cần",
-      "subtitle": "Các tính năng mạnh mẽ để quản lý tài chính của bạn một cách hiệu quả",
-      "tracking": {
-        "title": "Theo Dõi Giao Dịch",
-        "description": "Tổ chức và phân loại tất cả chi tiêu của bạn theo danh mục cá nhân"
+      "title": "Tất Cả Công Cụ Cho Tài Chính Thông Minh",
+      "subtitle": "Bộ tính năng AI toàn diện và các công cụ cộng tác hỗ trợ hành trình tích lũy của bạn",
+      "budgetEngine": {
+        "title": "Lập Ngân Sách AI Tự Động",
+        "description": "Tự động phân bổ ngân sách chi tiêu thông minh và linh hoạt điều chỉnh theo thu nhập, chế độ tập trung & tốc độ tích lũy."
       },
-      "goals": {
-        "title": "Mục Tiêu Tiết Kiệm",
-        "description": "Đặt mục tiêu tiết kiệm cá nhân và nhóm, theo dõi tài chính và gia đình để tiết kiệm cùng nhau"
+      "multiInput": {
+        "title": "Ghi Chép Giọng Nói, OCR & Excel",
+        "description": "Ghi nhận giao dịch tức thì bằng Giọng nói, Quét ảnh hóa đơn AI OCR, Import file Excel hàng loạt hoặc nhập biểu mẫu."
       },
-      "recommendations": {
-        "title": "Đề Xuất Chi Tiêu Thông Minh",
-        "description": "Nhận những hiểu biết được cá nhân hóa và đề xuất để tối ưu hóa thói quen chi tiêu của bạn."
+      "smartInsights": {
+        "title": "Phân Tích & Đề Xuất Tức Thì AI",
+        "description": "Tự động phát hiện chi tiêu bất thường, giao dịch trùng lặp và đưa ra đề xuất hành động thực tế để tối ưu tài chính."
+      },
+      "savingGoals": {
+        "title": "Dự Án Tiết Kiệm Cá Nhân & Nhóm",
+        "description": "Thiết lập dự án tích lũy ưu tiên, theo dõi cột mốc chung và hỗ trợ đồng đội với cơ chế gánh vác đóng góp tự động."
+      },
+      "financialProfile": {
+        "title": "Hồ Sơ Tài Chính Cá Nhân Hóa",
+        "description": "Tùy chỉnh mức độ can thiệp AI, tốc độ tích lũy (An toàn, Vừa phải, Quyết liệt) và tự động đầu tư tiền nhàn rỗi."
+      },
+      "deepAnalytics": {
+        "title": "Phân Tích Dòng Tiền & Tài Sản Ròng",
+        "description": "Trực quan hóa thu nhập và chi tiêu theo Ngày, Tháng, Năm, lịch giao dịch tương tác và xu hướng tài sản tích lũy ròng."
       }
     },
     "benefits": {
       "title": "Tại Sao Chọn SmartMoney?",
-      "benefit1": "Phân loại chi tiêu do AI hỗ trợ",
-      "benefit2": "Tiết kiệm nhóm cộng tác",
-      "benefit3": "Thông tin chi tiêu theo thời gian thực",
-      "benefit4": "Dữ liệu an toàn và riêng tư",
-      "benefit5": "Đồng bộ hóa nhiều thiết bị",
-      "benefit6": "Khuyến nghị ngân sách thông minh"
+      "benefit1": "Lập & điều chỉnh ngân sách tự động bằng AI",
+      "benefit2": "Ghi chép siêu tốc qua Giọng nói & Quét ảnh hóa đơn OCR",
+      "benefit3": "Cảnh báo chi tiêu bất thường & Đề xuất gợi ý AI tức thì",
+      "benefit4": "Dự án tiết kiệm nhóm & Cơ chế tài trợ gánh vác đồng đội",
+      "benefit5": "Tùy chỉnh hồ sơ tài chính & Tự động đầu tư tiền nhàn rỗi",
+      "benefit6": "Phân tích dòng tiền chuyên sâu & Xu hướng tài sản ròng"
     },
     "testimonial": {
-      "balance": "Số Dư Tài Khoản",
-      "date": "Ngày Lâu Nhất",
-      "savingsGoal": "Tiền Tiết Kiệm Được"
+      "balance": "Tổng Tài Sản Ròng",
+      "date": "Kỳ Hoạt Động",
+      "savingsGoal": "Đã Tích Lũy"
     },
     "cta": {
-      "title": "Sẵn Sàng Bắt Đầu Hành Trình Tài Chính Của Bạn?",
-      "subtitle": "Tham gia hàng nghìn người dùng đã quản lý tài chính của họ một cách thông minh hơn.",
-      "button": "Bắt Đầu Hôm Nay"
+      "title": "Sẵn Sàng Bắt Đầu Hành Trình Tài Chính?",
+      "subtitle": "Tham gia cùng hàng nghìn người dùng quản lý ngân sách và tiết kiệm thông minh hơn với AI.",
+      "button": "Bắt Đầu Ngay Hôm Nay"
+    },
+    "mobileApp": {
+      "badge": "Ứng Dụng Di Động",
+      "title": "Trải Nghiệm SmartMoney Trực Tiếp Trên Điện Thoại",
+      "subtitle": "Tải ứng dụng mobile để quản lý thu chi mọi lúc mọi nơi. Nhận cảnh báo ngân sách tức thì, ghi chép nhanh bằng giọng nói và quét hóa đơn mượt mà.",
+      "downloadButton": "Tải Ứng Dụng Mobile",
+      "downloadNote": "Tải trực tiếp file cài đặt / Web Store chính thức",
+      "qrTitle": "Quét mã để tải app",
+      "qrSubtitle": "Mở camera điện thoại quét mã bên dưới",
+      "feature1": "Ghi chép nhanh bằng Giọng nói & Camera OCR",
+      "feature2": "Thông báo & Cảnh báo ngân sách tức thì",
+      "feature3": "Đồng bộ dữ liệu tài chính thời gian thực"
     }
   },
   "auth": {
@@ -148,7 +173,69 @@
     "loginSuccess": "Đăng nhập thành công",
     "loginError": "Đăng nhập thất bại",
     "registerSuccess": "Đăng ký thành công",
-    "registerError": "Đăng ký thất bại"
+    "registerError": "Đăng ký thất bại",
+    "welcomeBack": "Chào Mừng Trở Lại",
+    "signInSubtitle": "Đăng nhập vào tài khoản của bạn để tiếp tục",
+    "emailAddress": "Địa chỉ Email",
+    "emailPlaceholder": "you@example.com",
+    "passwordPlaceholder": "Nhập mật khẩu của bạn",
+    "signIn": "Đăng Nhập",
+    "signingIn": "Đang đăng nhập...",
+    "orContinueWith": "Hoặc tiếp tục với",
+    "signInWithGoogle": "Đăng nhập bằng Google",
+    "signInWithFacebook": "Đăng nhập bằng Facebook",
+    "dontHaveAccount": "Chưa có tài khoản?",
+    "signUp": "Đăng ký ngay",
+    "alreadyHaveAccount": "Đã có tài khoản?",
+    "createAccountTitle": "Tạo Tài Khoản",
+    "createAccountSubtitle": "Tham gia SmartMoney để quản lý tài chính thông minh cùng AI",
+    "fullName": "Họ và tên",
+    "fullNamePlaceholder": "Nguyễn Văn A",
+    "username": "Tên đăng nhập",
+    "usernamePlaceholder": "nguyenvana",
+    "phone": "Số điện thoại",
+    "phonePlaceholder": "0912345678",
+    "dob": "Ngày sinh",
+    "confirmPassword": "Xác nhận mật khẩu",
+    "confirmPasswordPlaceholder": "Nhập lại mật khẩu",
+    "agreeTermsText": "Tôi đồng ý với",
+    "and": "và",
+    "createAccount": "Tạo Tài Khoản",
+    "creatingAccount": "Đang tạo tài khoản...",
+    "forgotPasswordTitle": "Đặt Lại Mật Khẩu",
+    "forgotPasswordSubtitle": "Nhập email của bạn và chúng tôi sẽ gửi mã xác thực OTP",
+    "sendResetCode": "Gửi Mã Xác Thực",
+    "sendingCode": "Đang gửi...",
+    "rememberPassword": "Nhớ lại mật khẩu?",
+    "backToSignIn": "Quay lại Đăng nhập",
+    "checkYourEmail": "Kiểm Tra Email Của Bạn",
+    "codeSent": "Đã gửi mã xác nhận thành công",
+    "codeSentDesc": "Chúng tôi đã gửi mã xác thực 6 chữ số tới {email}. Vui lòng kiểm tra email của bạn.",
+    "redirectingToVerification": "Đang chuyển hướng tới trang xác thực...",
+    "continue": "Tiếp tục",
+    "setNewPasswordTitle": "Đặt Mật Khẩu Mới",
+    "setNewPasswordSubtitle": "Nhập mật khẩu mới của bạn bên dưới",
+    "accountLabel": "Tài khoản:",
+    "newPassword": "Mật khẩu mới",
+    "newPasswordPlaceholder": "Nhập mật khẩu mới",
+    "resetPasswordBtn": "Đặt Lại Mật Khẩu",
+    "resettingPassword": "Đang đặt lại mật khẩu...",
+    "passwordResetSuccessful": "Đặt Lại Mật Khẩu Thành Công",
+    "passwordResetSuccessDesc": "Mật khẩu của bạn đã được đặt lại thành công. Bạn có thể đăng nhập ngay bây giờ.",
+    "goToLogin": "Đến trang Đăng nhập",
+    "verifyCodeTitle": "Xác Thực Mã OTP",
+    "verifyCodeSubtitle": "Nhập mã 6 chữ số đã được gửi đến email của bạn",
+    "codeSentTo": "Mã được gửi tới:",
+    "verificationCodeLabel": "Mã xác thực (OTP)",
+    "otpPlaceholder": "000000",
+    "enter6DigitCode": "Nhập mã xác thực 6 chữ số",
+    "verifyCodeBtn": "Xác Thực Mã",
+    "verifyingBtn": "Đang xác thực...",
+    "resendCode": "Gửi lại mã",
+    "resendIn": "Gửi lại sau {seconds}s",
+    "fillAllFields": "Vui lòng điền đầy đủ thông tin",
+    "googleLoginFailed": "Không thể tải Google Sign-In. Vui lòng tải lại trang.",
+    "facebookLoginFailed": "Đăng nhập Facebook thất bại"
   },
   "validation": {
     "required": "Trường này là bắt buộc",
@@ -204,7 +291,11 @@
     "digest": {
       "pending_suggestions": "Bạn có các gợi ý đang chờ xem xét.",
       "weekly": "Bạn có {count} thông tin chi tiêu đáng chú ý trong tuần này."
-    }
+    },
+    "joinGroupSuccess": "Tham gia nhóm thành công!",
+    "declineGroupSuccess": "Đã từ chối lời mời vào nhóm.",
+    "sponsorSuccess": "Bạn đã đồng ý gánh vác đóng góp giúp đồng đội!",
+    "sponsorDecline": "Bạn đã từ chối gánh vác đóng góp."
   },
   "profile": {
     "editProfile": "Chỉnh Sửa Hồ Sơ",
@@ -301,8 +392,8 @@
     "importExcel": "Nhập từ Excel",
     "exportExcel": "Xuất Excel",
     "excelModalTitle": "Nhập Giao Dịch từ file Excel",
-    "excelFormatInstructions": "Vui lòng định dạng file Excel của bạn với các tiêu đề cột sau: **Amount**, **Type**, **Category**, **Date**, **Description**.",
-    "excelFormatDetails": "Chi tiết: Amount (số lớn hơn 0), Type (INCOME hoặc EXPENSE), Category (FOOD, TRANSPORTATION, v.v.), Date (dd/MM/yyyy HH:mm), Description (không bắt buộc).",
+    "excelFormatInstructions": "Vui lòng định dạng file Excel của bạn với các tiêu đề cột sau: **Amount (VND)**, **Type**, **Category**, **Date**, **Description**.",
+    "excelFormatDetails": "Chi tiết: Amount (VND) (số lớn hơn 0), Type (INCOME hoặc EXPENSE), Category (FOOD, TRANSPORTATION, v.v.), Date (dd/MM/yyyy HH:mm), Description (không bắt buộc).",
     "downloadTemplate": "Tải file mẫu Excel",
     "dropExcelHere": "Kéo & thả file Excel của bạn vào đây, hoặc click để chọn file",
     "invalidFile": "Vui lòng chọn một file Excel hợp lệ (.xlsx, .xls).",
@@ -328,7 +419,7 @@
     "methodExcelDesc": "Tải lên file Excel",
     "excelGuidelineTitle": "Hướng dẫn Định dạng Excel",
     "excelLabelColumns": "Các cột",
-    "excelGuidelineColumnsDesc": "Amount, Type, Category, Date, Description.",
+    "excelGuidelineColumnsDesc": "Amount (VND), Type, Category, Date, Description.",
     "excelGuidelineAmountDesc": "Chỉ chấp nhận số dương (ví dụ: 50000).",
     "excelGuidelineTypeDesc": "INCOME hoặc EXPENSE.",
     "excelGuidelineCategoryDesc": "Bắt buộc đối với chi tiêu. Sử dụng: FOOD, TRANSPORTATION, CLOTHING, UTILITIES, ENTERTAINMENT, HEALTH, EDUCATION, SHOPPING, OTHER.",
@@ -337,12 +428,12 @@
     "excelOnlySupported": "Chỗ trợ tệp .xlsx, .xls",
     "excelValidationWarning": "Lưu ý: Giao dịch có lỗi xác thực sẽ bị bỏ qua. Vui lòng sửa lại trong tệp Excel của bạn nếu cần thiết.",
     "excelImportRowsBtn": "Nhập {count} dòng",
-    "excelHeaderAmount": "Số tiền",
+    "excelHeaderAmount": "Số tiền (VND)",
     "excelHeaderType": "Loại",
     "excelHeaderCategory": "Danh mục",
     "excelHeaderDate": "Ngày",
     "excelHeaderDescription": "Mô tả",
-    "excelErrorHeaders": "Tệp Excel phải chứa các tiêu đề ở dòng đầu tiên: Amount, Type, Category, Date (Description là không bắt buộc)",
+    "excelErrorHeaders": "Tệp Excel phải chứa các tiêu đề ở dòng đầu tiên: Amount (VND), Type, Category, Date (Description là không bắt buộc)",
     "excelErrorAmount": "Số tiền phải là số lớn hơn 0",
     "excelErrorType": "Loại phải là INCOME hoặc EXPENSE",
     "excelErrorCategory": "Danh mục chi tiêu phải là một trong: {categories}",
@@ -383,7 +474,12 @@
   },
   "projects": {
     "title": "Kế Hoạch Tiết Kiệm",
-    "subtitle": "Quản lý các kế hoạch tiết kiệm của bạn (Tối đa 3, một kế hoạch cho mỗi mức độ ưu tiên)",
+    "subtitle": "Quản lý các dự án tiết kiệm cá nhân và dự án nhóm chung.",
+    "newGroup": "Tạo Nhóm Mới",
+    "tabs": {
+      "projects": "Dự án",
+      "groups": "Nhóm"
+    },
     "maxLimitReached": "Bạn đã đạt giới hạn 3 kế hoạch",
     "newProject": "Kế Hoạch Tiết Kiệm Mới",
     "stats": {
@@ -509,9 +605,147 @@
       }
     }
   },
+  "groupDetail": {
+    "loadingGroup": "Đang tải thông tin nhóm...",
+    "statusLabel": "TRẠNG THÁI",
+    "groupStatus": {
+      "LOCKED": "ĐÃ KHÓA",
+      "FORMING": "ĐANG GOM NHÓM",
+      "DISSOLVED": "ĐÃ GIẢI TÁN"
+    },
+    "statusText": {
+      "LOCKED": "Đã khóa",
+      "FORMING": "Đang gom nhóm",
+      "DISSOLVED": "Đã giải tán"
+    },
+    "noDescription": "Chưa có mô tả.",
+    "memberCount": "{count} thành viên",
+    "role": {
+      "ADMIN": "TRƯỞNG NHÓM",
+      "MEMBER": "THÀNH VIÊN"
+    },
+    "projectStatus": {
+      "ACTIVE": "Dự án đang chạy",
+      "PENDING_SPONSORSHIP": "Chờ khảo sát tài trợ",
+      "COMPLETED": "Dự án đã hoàn thành",
+      "DISSOLVED": "Dự án đã bị hủy",
+      "EXPIRED": "Dự án đã kết thúc",
+      "NONE": "Chưa có dự án"
+    },
+    "deleteGroup": "Xóa nhóm",
+    "lockGroup": "Khóa nhóm",
+    "unlockGroup": "Mở khóa nhóm",
+    "dissolveProject": "Giải tán dự án",
+    "groupProjectTitle": "Dự án nhóm: {name}",
+    "totalSaved": "Tổng tích lũy",
+    "completed": "Hoàn thành {percent}%",
+    "originalGoalNote": "(Mục tiêu ban đầu: {amount} {currency})",
+    "joinGroupProject": "Tham gia dự án nhóm",
+    "joinDescription": "Chọn độ ưu tiên để tạo kế hoạch cá nhân và đóng góp vào mục tiêu chung của nhóm.",
+    "priorityLabel": {
+      "LOW": "THẤP",
+      "MEDIUM": "TRUNG BÌNH",
+      "HIGH": "CAO"
+    },
+    "priorityUsed": "(Đã dùng)",
+    "acceptCreate": "Xác nhận & Tạo kế hoạch",
+    "noProjectYet": "Nhóm đã khóa nhưng chưa từng tạo dự án nào.",
+    "createGroupProject": "Tạo dự án nhóm",
+    "currentConfig": "Lựa chọn hiện tại: {config}",
+    "configNone": "Chưa cấu hình",
+    "configDisabled": "Không tự động hỗ trợ",
+    "configMax": "Tự động hỗ trợ (Tối đa khả năng)",
+    "configCustom": "Tự động hỗ trợ (Tối đa {amount} VND/tháng)",
+    "autoSponsorTitle": "Tự Động Hỗ Trợ Đồng Đội (Auto-Sponsor)",
+    "autoSponsorDesc": "Hệ thống sẽ tự động trích quỹ usable dư thừa để bù đắp phần thiếu hụt của đồng đội khi tạo dự án.",
+    "maxCapacity": "Tối đa khả năng (Toàn bộ thặng dư)",
+    "customLimit": "Hạn mức tối đa cụ thể",
+    "customLimitLabel": "Hạn mức hỗ trợ tối đa mỗi tháng (VND)",
+    "customLimitPlaceholder": "Nhập số tiền, ví dụ: 200,000",
+    "saving": "Đang lưu...",
+    "saveConfig": "Lưu cấu hình",
+    "pendingRequestTitle": "Yêu Cầu Hỗ Trợ Đang Chờ Bạn Phản Hồi",
+    "waitingSurvey": "Đang chờ khảo sát ý kiến đồng đội...",
+    "requestDescription": "Đồng đội trong nhóm của bạn không đủ khả năng tài chính. Hệ thống đề xuất bạn hỗ trợ thêm {askedAmount} VND/tháng (nâng mức đóng góp của bạn lên {proposedShare} VND/tháng thay vì {originalShare} VND/tháng).",
+    "declineBtn": "Từ chối",
+    "agreeBtn": "Đồng ý giúp",
+    "waitingActivation": "Dự án đang chờ các thành viên phản hồi khảo sát đóng góp giúp để kích hoạt.",
+    "sponsorshipFailed": "Dự án này đã thất bại do các thành viên từ chối hoặc không đủ khả năng đóng góp giúp.",
+    "membersTitle": "Danh sách thành viên",
+    "you": "(Bạn)",
+    "userFallback": "Người dùng",
+    "roleAdmin": "TRƯỞNG NHÓM",
+    "roleMember": "THÀNH VIÊN",
+    "inviteStatus": {
+      "JOINED": "Đã tham gia",
+      "INVITED": "Đã mời",
+      "DECLINED": "Từ chối"
+    },
+    "abandoned": "ĐÃ BỎ DỞ",
+    "progress": "Tiến độ {percent}%",
+    "sent": "Đã gửi!",
+    "resending": "Đang gửi lại...",
+    "resend": "Gửi lại",
+    "kickMemberTitle": "Xóa thành viên được mời",
+    "removeDeclinedTitle": "Xóa lời mời đã bị từ chối",
+    "inviteNewMember": "Mời thành viên mới",
+    "inviteBtn": "Mời",
+    "deleteTitle": "Xóa nhóm",
+    "deleteConfirm": "Bạn có chắc chắn muốn xóa nhóm này? Hành động này sẽ xóa tất cả thành viên và xóa nhóm vĩnh viễn, không thể hoàn tác.",
+    "cancelBtn": "Hủy",
+    "confirmDelete": "Xác nhận xóa",
+    "dissolveTitle": "Giải tán dự án nhóm",
+    "dissolveConfirm": "Bạn có chắc chắn muốn giải tán dự án nhóm này? Hành động này sẽ hủy dự án chung và các kế hoạch cá nhân liên quan. Không thể hoàn tác.",
+    "confirmDissolve": "Xác nhận giải tán",
+    "recalcTitle": "Tính toán lại ngân sách chi tiêu?",
+    "recalcDesc": "Bạn đã tham gia dự án nhóm thành công! Bạn có muốn AI tính toán lại ngân sách chi tiêu để phù hợp với mục tiêu tiết kiệm mới không?",
+    "laterBtn": "Để sau",
+    "recalcNow": "Tính toán ngay",
+    "toast": {
+      "inviteSuccess": "Gửi lời mời thành công!",
+      "inviteFailed": "Không thể mời thành viên",
+      "memberRemoved": "Đã xóa thành viên thành công!",
+      "removeFailed": "Không thể xóa thành viên",
+      "inviteResent": "Đã gửi lại lời mời đến {email}!",
+      "resendFailed": "Không thể gửi lại lời mời",
+      "groupLocked": "Khóa nhóm thành công!",
+      "lockFailed": "Không thể khóa nhóm. Hãy đảm bảo có ít nhất một thành viên đã tham gia.",
+      "groupUnlocked": "Mở khóa nhóm thành công!",
+      "unlockFailed": "Không thể mở khóa nhóm.",
+      "groupDeleted": "Xóa nhóm thành công!",
+      "deleteFailed": "Không thể xóa nhóm",
+      "joinedProject": "Tham gia dự án nhóm thành công! Đã tạo kế hoạch cá nhân.",
+      "joinFailed": "Không thể tham gia dự án nhóm",
+      "priorityInUse": "Độ ưu tiên {priority} đã được sử dụng bởi một dự án khác của bạn.",
+      "sponsorshipUpdated": "Cập nhật cấu hình tự động hỗ trợ thành công!",
+      "sponsorshipUpdateFailed": "Không thể cập nhật cấu hình",
+      "errorOccurred": "Đã có lỗi xảy ra",
+      "sponsorAccepted": "Bạn đã đồng ý gánh vác đóng góp giúp đồng đội!",
+      "sponsorDeclined": "Bạn đã từ chối gánh vác đóng góp.",
+      "sponsorResponseFailed": "Có lỗi xảy ra khi phản hồi",
+      "dissolveFailed": "Không thể giải tán dự án nhóm",
+      "sponsorLimitExceed": "Hạn mức hỗ trợ nhập vào ({limit} VND) vượt quá khả năng tài chính tối đa của bạn ({capacity} VND).\n\nBạn có muốn chuyển sang tùy chọn 'Tối đa khả năng' không?\n- Nhấp OK để chuyển sang 'Tối đa khả năng' và tiến hành lưu.\n- Nhấp Cancel để hủy và tự nhập lại số khác."
+    }
+  },
   "analysis": {
     "title": "Phân Tích Tài Chính",
     "subtitle": "Thông tin chi tiết chuyên sâu về tài chính của bạn trong năm {year}",
+    "viewMode": {
+      "day": "Ngày",
+      "month": "Tháng",
+      "year": "Năm"
+    },
+    "yearLabel": "Năm {year}",
+    "monthLabel": "Tháng {month} {year}",
+    "weekHeaders": [
+      "T2",
+      "T3",
+      "T4",
+      "T5",
+      "T6",
+      "T7",
+      "CN"
+    ],
     "month": "Tháng:",
     "year": "Năm:",
     "refresh": "Làm mới",
@@ -554,6 +788,7 @@
   "budgets": {
     "title": "Quản Lý Ngân Sách",
     "subtitle": "Theo dõi và quản lý ngân sách chi tiêu của bạn",
+    "generateBudget": "Tạo ngân sách tự động",
     "createMultiple": "Tạo Nhiều Ngân Sách",
     "createBudget": "Tạo Ngân Sách",
     "failedLoad": "Không thể tải ngân sách",
@@ -676,7 +911,7 @@
   "privacyPage": {
     "subtitle": "Chính sách bảo mật này mô tả cách chúng tôi thu thập, sử dụng và bảo vệ thông tin tài chính cá nhân của bạn.",
     "questions": "Bạn có câu hỏi nào khác?",
-    "contactSupport": "Vui lòng liên hệ với ban quản trị qua email: support@smartmoney.vn",
+    "contactSupport": "Vui lòng liên hệ với ban quản trị qua email: {email}",
     "sec1Title": "1. Thu Thập Thông Tin",
     "sec1Desc": "Chúng tôi thu thập thông tin để cung cấp dịch vụ tốt hơn cho người dùng. Thông tin này bao gồm dữ liệu bạn cung cấp khi tạo tài khoản (như tên, email) và các giao dịch tài chính bạn nhập vào hệ thống để phân tích và lập kế hoạch ngân sách.",
     "sec2Title": "2. Cách Chúng Tôi Sử Dụng Dữ Liệu",
@@ -685,6 +920,19 @@
     "sec3Desc": "Chúng tôi áp dụng các biện pháp bảo mật tiêu chuẩn mã hóa dữ liệu truyền tải (SSL/TLS) và bảo vệ dữ liệu trong cơ sở dữ liệu. Mật khẩu của bạn được mã hóa một chiều trước khi lưu trữ.",
     "sec4Title": "4. Quyền Của Bạn",
     "sec4Desc": "Bạn có toàn quyền truy cập, chỉnh sửa, hoặc yêu cầu xóa bỏ tài khoản cũng như toàn bộ dữ liệu tài chính đã lưu trữ trong hệ thống SmartMoney bất kỳ lúc nào thông qua phần Cài đặt tài khoản hoặc liên hệ trực tiếp với chúng tôi."
+  },
+  "termsPage": {
+    "subtitle": "Vui lòng đọc kỹ các Điều khoản dịch vụ này trước khi sử dụng nền tảng SmartMoney.",
+    "questions": "Bạn có thắc mắc về điều khoản?",
+    "contactSupport": "Liên hệ bộ phận pháp lý qua email: {email}",
+    "sec1Title": "1. Chấp Thuận Các Điều Khoản",
+    "sec1Desc": "Bằng việc tạo tài khoản hoặc truy cập ứng dụng SmartMoney, bạn đồng ý tuân thủ và chịu sự ràng buộc bởi các Điều khoản dịch vụ này cùng toàn bộ các chính sách liên quan.",
+    "sec2Title": "2. Đăng Ký & Bảo Mật Tài Khoản",
+    "sec2Desc": "Bạn chịu trách nhiệm duy trì tính bảo mật của thông tin đăng nhập. Bạn hoàn toàn chịu trách nhiệm về tất cả các hoạt động diễn ra dưới tài khoản SmartMoney của mình.",
+    "sec3Title": "3. Quy Định Sử Dụng & Dữ Liệu Tài Chính",
+    "sec3Desc": "SmartMoney cung cấp công cụ quản lý chi tiêu cá nhân và nhóm. Người dùng không được sử dụng nền tảng cho các hoạt động trái pháp luật, thu thập dữ liệu trái phép hoặc can thiệp vào an ninh hệ thống.",
+    "sec4Title": "4. Khả Năng Cung Cấp Dịch Vụ & Thay Đổi",
+    "sec4Desc": "Chúng tôi có quyền cập nhật, chỉnh sửa hoặc cải tiến các tính năng trong SmartMoney nhằm nâng cao hiệu năng, tính bảo mật và trải nghiệm người dùng."
   },
   "helpPage": {
     "subtitle": "Tìm câu trả lời cho các câu hỏi thường gặp hoặc tìm hiểu cách sử dụng SmartMoney hiệu quả nhất.",
@@ -892,5 +1140,150 @@
       "title": "Bắt đầu mục tiêu tiết kiệm",
       "ask": "Tháng này bạn có tiền dư — bắt đầu một mục tiêu tiết kiệm với {resolvedValue}?"
     }
+  },
+  "admin": {
+    "title": "Bảng Điều Khiển & Quản Trị Hệ Thống",
+    "subtitle": "Giám sát hệ thống, quản lý người dùng & thực thi quy trình quyết toán tài chính",
+    "statusOnline": "Hệ thống hoạt động bình thường",
+    "tabs": {
+      "overview": "Tổng quan",
+      "settlement": "Quyết toán Tài chính",
+      "users": "Quản lý Người dùng",
+      "projects": "Giám sát Dự án & Nhóm",
+      "logs": "Broadcast & Thông báo"
+    },
+    "kpi": {
+      "totalUsers": "Tổng Người dùng",
+      "activeUsers": "Người dùng Hoạt động",
+      "monthlyVolume": "Khối lượng Giao dịch Tháng",
+      "settlementStatus": "Bộ máy Quyết toán"
+    },
+    "overviewSection": {
+      "analyticsTitle": "Tăng Trưởng Khối Lượng & Hoạt Động Hệ Thống",
+      "analyticsSubtitle": "Số lượng giao dịch hàng tháng và tổng dung lượng xử lý",
+      "healthTitle": "Sức Khỏe Hệ Thống & Bộ Máy AI",
+      "healthSubtitle": "Giám sát trạng thái hạ tầng hệ thống",
+      "statusHealthy": "HOẠT ĐỘNG TỐT",
+      "statusActive": "ĐANG HOẠT ĐỘNG",
+      "statusReady": "SẴN SÀNG",
+      "adaptiveActive": "Bộ máy thích ứng đang chạy",
+      "systemDistributionTitle": "Phân bổ Người dùng & Dự án",
+      "systemDistributionSubtitle": "Tỷ lệ dự án cá nhân vs nhóm và tình trạng thiết lập hồ sơ",
+      "quickActionsTitle": "Thao tác Quản lý Nhanh",
+      "manageUsersBtn": "Quản lý Tài khoản Người dùng",
+      "manageSettlementBtn": "Quản lý Bộ máy Quyết toán",
+      "broadcastTabBtn": "Gửi Thông báo Hệ thống",
+      "sysSummary": "Tóm tắt Hệ thống"
+    },
+    "settlement": {
+      "title": "Quyết toán Tài chính Hàng tháng",
+      "subtitle": "Kích hoạt thủ công tiến trình tính toán phân bổ và kết chuyển ngân sách toàn hệ thống",
+      "runButton": "Kích Hoạt Quyết Toán Ngay",
+      "running": "Đang thực thi quyết toán...",
+      "lastRun": "Lần chạy gần nhất",
+      "status": "Trạng thái",
+      "message": "Thông điệp",
+      "history": "Lịch sử thực thi",
+      "successMessage": "Tiến trình quyết toán tài chính đã hoàn tất thành công!",
+      "autoScheduleInfo": "Quyết toán tự động thực thi vào ngày cuối cùng của mỗi tháng lịch.",
+      "dryRunNotice": "Thực thi thủ công sẽ tính lại số dư và tạo các bút toán kết chuyển tự động.",
+      "targetEndpoint": "Endpoint API Đích",
+      "executionScope": "Phạm Vi Thực Thi Tiến Trình",
+      "executionScopeDesc": "Tất cả Dự án Hoạt động & Quyết toán Nhóm",
+      "controllerClass": "Lớp Controller Backend",
+      "tableTimestamp": "Thời gian",
+      "tableTriggeredBy": "Khởi tạo bởi",
+      "tableDuration": "Thời lượng",
+      "tableStatus": "Trạng thái",
+      "tableMessage": "Thông điệp",
+      "statusCompleted": "ĐÃ HOÀN THÀNH",
+      "statusSuccess": "THÀNH CÔNG",
+      "statusFailed": "THẤT BẠI",
+      "systemScheduler": "LỊCH_HỆ_THỐNG",
+      "adminManualTrigger": "ADMIN_KÍCH_HOẠT_THỦ_CÔNG",
+      "defaultLogMsg": "Quyết toán hàng tháng tự động hoàn tất cho {count} dự án đang hoạt động."
+    },
+    "users": {
+      "title": "Danh sách Người dùng",
+      "subtitle": "Quản lý vai trò, trạng thái truy cập và thiết lập tài chính của người dùng",
+      "searchPlaceholder": "Tìm theo tên hoặc email...",
+      "filterAll": "Tất cả trạng thái",
+      "filterActive": "Hoạt động",
+      "filterPending": "Chờ xác thực",
+      "filterSuspended": "Tạm khóa",
+      "colUser": "Người dùng",
+      "colEmail": "Email",
+      "colRole": "Vai trò",
+      "colFinancial": "Hồ sơ Tài chính",
+      "colStatus": "Trạng thái",
+      "colJoinedDate": "Ngày tham gia",
+      "colActions": "Thao tác",
+      "setupCompleted": "Đã thiết lập",
+      "setupPending": "Chưa thiết lập",
+      "btnSuspend": "Tạm khóa",
+      "btnActivate": "Kích hoạt",
+      "noUsersFound": "Không tìm thấy người dùng phù hợp."
+    },
+    "projects": {
+      "title": "Giám sát Dự án Tiết kiệm",
+      "subtitle": "Giám sát các mục tiêu tiết kiệm và hạn mức ngân sách toàn hệ thống",
+      "groupsTitle": "Quản lý Nhóm & Tài trợ",
+      "groupsSubtitle": "Các dự án chung đang hoạt động và số lượng thành viên",
+      "totalTarget": "Mục tiêu Tiết kiệm",
+      "currentSaved": "Đã tích lũy",
+      "groupsCount": "Tổng số Nhóm",
+      "sponsoredProjects": "Dự án được Tài trợ",
+      "savedLabel": "Đã tiết kiệm",
+      "targetLabel": "Mục tiêu",
+      "membersCount": "{count} thành viên",
+      "inviteCodeLabel": "Mã",
+      "noProjects": "Không tìm thấy dự án hệ thống nào.",
+      "noGroups": "Không tìm thấy nhóm hoạt động nào."
+    },
+    "broadcast": {
+      "title": "Gửi Thông báo Toàn Hệ thống",
+      "subtitle": "Phát thông báo toàn hệ thống đến tất cả người dùng đang hoạt động",
+      "titlePlaceholder": "Ví dụ: Thông báo Bảo trì Hệ thống Định kỳ",
+      "messagePlaceholder": "Nhập chi tiết nội dung thông báo sẽ gửi đến hòm thư thông báo của người dùng...",
+      "button": "Gửi Thông báo",
+      "subject": "Tiêu đề thông báo",
+      "message": "Nội dung thông báo",
+      "severity": "Mức độ nghiêm trọng",
+      "send": "Phát thông báo ngay",
+      "broadcasting": "Đang gửi thông báo...",
+      "sentSuccess": "Đã phát thông báo hệ thống thành công!",
+      "historyTitle": "Lịch sử Broadcast & Nhật ký Admin nhận",
+      "historySubtitle": "Luồng thông báo thực tế được gửi đến Admin và Người dùng",
+      "refreshBtn": "Làm mới",
+      "noHistory": "Chưa có thông báo broadcast nào được gửi."
+    }
+  },
+  "contactPage": {
+    "subtitle": "Có thắc mắc hoặc cần trợ giúp? Hãy liên hệ với đội ngũ hỗ trợ của chúng tôi.",
+    "formTitle": "Gửi tin nhắn cho chúng tôi",
+    "successMessage": "Cảm ơn bạn đã liên hệ! Chúng tôi sẽ phản hồi sớm nhất có thể.",
+    "fullNameLabel": "Họ và tên",
+    "fullNamePlaceholder": "Nhập họ và tên của bạn",
+    "emailPlaceholder": "Nhập địa chỉ email của bạn",
+    "messageLabel": "Lời nhắn",
+    "messagePlaceholder": "Chúng tôi có thể giúp gì cho bạn?",
+    "submitBtn": "Gửi tin nhắn",
+    "infoTitle": "Thông tin liên hệ",
+    "infoDesc": "Chúng tôi sẵn sàng hỗ trợ bạn quản lý tài chính cá nhân thông minh hơn. Đừng ngần ngại liên hệ.",
+    "phoneLabel": "Số điện thoại",
+    "addressLabel": "Địa chỉ",
+    "workingHoursLabel": "Giờ làm việc",
+    "workingHoursVal": "Thứ Hai - Thứ Sáu, 8:00 - 17:00"
+  },
+  "generateBudgetModal": {
+    "title": "Lập ngân sách AI",
+    "initializing": "Đang khởi tạo trợ lý ngân sách...",
+    "pleaseCompleteSetup": "Vui lòng hoàn tất thiết lập tài chính trước khi tạo kế hoạch ngân sách.",
+    "financialSetupRequired": "Cần hoàn tất thiết lập tài chính để tạo ngân sách AI."
+  },
+  "createGroupModal": {
+    "title": "Tạo Nhóm Mới",
+    "invalidEmail": "Vui lòng nhập địa chỉ email hợp lệ",
+    "emailExists": "Email đã được thêm vào danh sách"
   }
 }
