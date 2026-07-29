@@ -1,6 +1,6 @@
 import { getToken, getRefreshToken, setToken, setRefreshToken, clearAuth } from './auth';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://smartmoney-haibang.duckdns.org';
 
 const getHeaders = () => {
   const token = getToken();

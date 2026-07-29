@@ -71,7 +71,7 @@ export const WebSocketProvider: React.FC<{ children: ReactNode }> = ({
 
     const baseUrl =
       process.env.NEXT_PUBLIC_WEBSOCKET_URL ||
-      'http://localhost:8080/ws';
+      'https://smartmoney-haibang.duckdns.org/ws';
 
     const client = new Client({
       webSocketFactory: () => {
