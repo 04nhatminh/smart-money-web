@@ -6,3 +6,4 @@ export { VerifyOtpForm } from './VerifyOtpForm';
 export { ResetPasswordForm } from './ResetPasswordForm';
 export { LogoutButton } from './LogoutButton';
 export { DeviceActivateForm } from './DeviceActivateForm';
+export { CliLoginPanel } from './CliLoginPanel';

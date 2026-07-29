@@ -13,7 +13,12 @@ export const API_ENDPOINTS = {
     verifyOtp: '/api/v1/auth/verify-otp',
     resetPassword: '/api/v1/auth/reset-password',
     forgotPassword: '/api/v1/auth/forgot',
+    /** @deprecated Device Flow is superseded by the CLI session below — kept for backward compat. */
     deviceActivate: '/api/v1/auth/device/activate',
+    // CLI / MCP (Claude Desktop) browser login — the login page approves the session
+    // it was opened with, and the backend parks the JWT in Redis for one hour.
+    cliApprove: (sessionId: string) => `/api/v1/auth/cli/session/${sessionId}/approve`,
+    cliStatus: (sessionId: string) => `/api/v1/auth/cli/session/${sessionId}/status`,
   },
 
   // Transactions
