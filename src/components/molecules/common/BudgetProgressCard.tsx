@@ -4,7 +4,7 @@ import React from 'react';
 import { Text } from '@/components/atoms';
 import { useTheme } from '@/context/ThemeContext';
 import { Budget } from '@/types/budget.api';
-import { getCategoryIcon } from '@/constants/categoryIcons';
+import { getCategoryIcon, getCategoryColor } from '@/constants/categoryIcons';
 import { formatVietnamsePrice } from '@/lib/format';
 import { useTranslations } from 'next-intl';
 
@@ -30,6 +30,7 @@ export const BudgetProgressCard: React.FC<BudgetProgressCardProps> = ({
 
   const spentPercentage = Math.min((budget.spent / budget.amountLimit) * 100, 100);
   const alertColor = getAlertColor(budget.alertLevel);
+  const categoryColor = getCategoryColor(budget.category);
 
   return (
     <div
@@ -37,6 +38,7 @@ export const BudgetProgressCard: React.FC<BudgetProgressCardProps> = ({
       style={{
         borderColor: colors.border.light,
         backgroundColor: colors.surface.primary,
+        borderLeft: `4px solid ${categoryColor}`,
       }}
       onMouseEnter={e => {
         e.currentTarget.style.borderColor = alertColor + '80';
@@ -48,13 +50,13 @@ export const BudgetProgressCard: React.FC<BudgetProgressCardProps> = ({
       }}
     >
       {/* Header with Category and Status */}
-      <div className="flex items-start justify-between mb-5">
+        <div className="flex items-start justify-between mb-5">
         <div className="flex items-center gap-3.5 flex-1">
           <div
             className="p-2.5 rounded-xl flex items-center justify-center transition-all duration-300"
             style={{
-              backgroundColor: alertColor + '12',
-              color: alertColor,
+              backgroundColor: categoryColor + '15',
+              color: categoryColor,
             }}
           >
             {getCategoryIcon(budget.category)}

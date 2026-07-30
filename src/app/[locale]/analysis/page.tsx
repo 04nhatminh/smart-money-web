@@ -112,9 +112,9 @@ const KPICard: React.FC<KPICardProps> = ({ label, value, icon, accentColor, tren
       style={{ backgroundColor: colors.surface.primary, borderLeft: `4px solid ${accentColor}` }}
     >
       <div className="flex items-center justify-between gap-2">
-        <Text variant="caption" style={{ color: colors.text.secondary, fontSize: 12, fontWeight: 600, letterSpacing: '0.04em', textTransform: 'uppercase' }} className="truncate">
+        <Heading level={5} style={{ color: colors.text.secondary, fontSize: 12, fontWeight: 600, letterSpacing: '0.04em', textTransform: 'uppercase' }} className="truncate">
           {label}
-        </Text>
+        </Heading>
         <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: `${accentColor}22` }}>
           <span style={{ color: accentColor }}>{icon}</span>
         </div>

@@ -269,9 +269,9 @@ export default function DashboardPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
               <div className="space-y-5">
                 <div>
-                  <Text className="text-xs font-semibold uppercase tracking-wider" style={{ color: colors.text.secondary }}>
+                  <Heading level={5} className="text-xs font-semibold uppercase tracking-wider" style={{ color: colors.text.secondary }}>
                     {t('dashboard.netSpendingSavings')}
-                  </Text>
+                  </Heading>
                   {isLoading ? (
                     <Skeleton height={36} width="65%" className="mt-1" />
                   ) : (
@@ -305,9 +305,9 @@ export default function DashboardPage() {
 
                 {sortedCategoryProportions && sortedCategoryProportions.length > 0 && (
                   <div className="pt-3 border-t" style={{ borderColor: `${colors.border.light}80` }}>
-                    <Text className="text-xs font-bold uppercase tracking-wider mb-2 block" style={{ color: colors.text.secondary }}>
+                    <Heading level={5} className="text-xs font-bold uppercase tracking-wider mb-2 block" style={{ color: colors.text.secondary }}>
                       {t('dashboard.topCategories')}
-                    </Text>
+                    </Heading>
                     <div className="space-y-2">
                       {sortedCategoryProportions.slice(0, 5).map((item: any, idx: number) => (
                         <div key={item.category} className="flex items-center justify-between text-xs">
