@@ -345,9 +345,9 @@ export default function ProjectsPage() {
                     borderLeft: `4px solid ${stat.color}`,
                   }}
                 >
-                  <Text className="text-xs font-semibold uppercase tracking-wider" style={{ color: colors.text.tertiary }}>
+                  <Heading level={5} className="text-xs font-semibold uppercase tracking-wider" style={{ color: colors.text.tertiary }}>
                     {stat.label}
-                  </Text>
+                  </Heading>
                   <Heading
                     level={2}
                     className="mt-2 font-bold"
