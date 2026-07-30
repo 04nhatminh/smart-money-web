@@ -15,6 +15,7 @@ import {
   MdChevronRight,
   MdAutoAwesome,
   MdRefresh,
+  MdLightbulb,
 } from 'react-icons/md';
 import { getCategoryIcon, getCategoryColor } from '@/constants/categoryIcons';
 
