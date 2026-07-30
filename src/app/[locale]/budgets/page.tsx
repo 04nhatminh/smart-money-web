@@ -176,9 +176,6 @@ export default function BudgetsPage() {
                     >
                       {formatVietnamsePrice(totalRemaining)}
                     </Text>
-                    <Text className="text-sm font-medium" style={{ color: colors.text.secondary }}>
-                      VND
-                    </Text>
                   </div>
                 </div>
 
@@ -220,14 +217,9 @@ export default function BudgetsPage() {
                       <Heading level={6} className="text-xs font-bold" style={{ color: colors.text.secondary }}>
                         {t('budgets.totalSpent')}
                       </Heading>
-                      <div className="flex items-baseline gap-1.5">
-                        <Text className="text-base font-extrabold tracking-tight" style={{ color: totalSpent > totalLimit ? '#EF4444' : colors.text.primary }}>
-                          {formatVietnamsePrice(totalSpent)}
-                        </Text>
-                        <span className="text-2xs font-semibold px-1.5 py-0.5 rounded-md bg-rose-500/10 text-rose-600 dark:text-rose-400">
-                          {spentPercent}%
-                        </span>
-                      </div>
+                      <Text className="text-base font-extrabold tracking-tight" style={{ color: totalSpent > totalLimit ? '#EF4444' : colors.text.primary }}>
+                        {formatVietnamsePrice(totalSpent)}
+                      </Text>
                     </div>
                   </div>
                 </div>
@@ -235,9 +227,9 @@ export default function BudgetsPage() {
                 {/* Overall Progress Bar */}
                 <div className="space-y-2 pt-1">
                   <div className="flex justify-between text-xs font-medium">
-                    <span style={{ color: colors.text.secondary }}>Tiến trình ngân sách</span>
+                    <span style={{ color: colors.text.secondary }}>{t('budgets.budgetProgress')}</span>
                     <span style={{ color: totalRemaining < 0 ? '#EF4444' : colors.text.primary }}>
-                      {spentPercent}% đã chi tiêu
+                      {t('budgets.percentSpent', { percent: spentPercent })}
                     </span>
                   </div>
                   <div className="w-full bg-gray-200 dark:bg-slate-700/50 rounded-full h-3 overflow-hidden">
@@ -264,7 +256,7 @@ export default function BudgetsPage() {
                     <Pie
                       data={
                         totalLimit === 0
-                          ? [{ name: 'No Budget', value: 1, color: colorScheme === 'dark' ? '#334155' : '#E2E8F0' }]
+                          ? [{ name: t('budgets.noBudget'), value: 1, color: colorScheme === 'dark' ? '#334155' : '#E2E8F0' }]
                           : [
                             {
                               name: t('budgets.totalSpent'),
@@ -286,7 +278,7 @@ export default function BudgetsPage() {
                       dataKey="value"
                     >
                       {(totalLimit === 0
-                        ? [{ name: 'No Budget', value: 1, color: colorScheme === 'dark' ? '#334155' : '#E2E8F0' }]
+                        ? [{ name: t('budgets.noBudget'), value: 1, color: colorScheme === 'dark' ? '#334155' : '#E2E8F0' }]
                         : [
                           {
                             name: t('budgets.totalSpent'),
@@ -309,14 +301,9 @@ export default function BudgetsPage() {
                 {/* Absolute Center Text in Donut Chart */}
                 <div className="absolute flex flex-col items-center justify-center text-center pointer-events-none">
                   {totalLimit === 0 ? (
-                    <>
-                      <Text className="text-sm font-bold" style={{ color: colors.text.secondary }}>
-                        Chưa có
-                      </Text>
-                      <Text className="text-2xs" style={{ color: colors.text.tertiary }}>
-                        ngân sách
-                      </Text>
-                    </>
+                    <Text className="text-xs font-bold text-center max-w-[90px]" style={{ color: colors.text.secondary }}>
+                      {t('budgets.noBudget')}
+                    </Text>
                   ) : (
                     <>
                       <span
@@ -326,7 +313,7 @@ export default function BudgetsPage() {
                         {spentPercent}%
                       </span>
                       <span className="text-3xs uppercase tracking-wider font-semibold" style={{ color: colors.text.tertiary }}>
-                        Đã chi tiêu
+                        {t('budgets.spent')}
                       </span>
                     </>
                   )}

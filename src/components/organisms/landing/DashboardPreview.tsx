@@ -15,8 +15,8 @@ import {
   MdChevronRight,
   MdAutoAwesome,
   MdRefresh,
-  MdLightbulb,
 } from 'react-icons/md';
+import { getCategoryIcon, getCategoryColor } from '@/constants/categoryIcons';
 
 const CHART_COLORS = ['#5044d5', '#10B981', '#EF4444', '#F59E0B', '#8B5CF6'];
 
@@ -126,10 +126,10 @@ export const DashboardPreview: React.FC = () => {
               {/* User Greeting & Quick Action Header */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b" style={{ borderColor: `${colors.border.light}60` }}>
                 <div>
-                  <Heading level={3} className="text-lg sm:text-xl font-bold">
+                  <Heading level={2} className="text-xl sm:text-2xl font-bold">
                     {t('dashboard.welcome', { name: 'Alex' })}
                   </Heading>
-                  <Text variant="caption" style={{ color: colors.text.secondary }}>
+                  <Text style={{ color: colors.text.secondary }} className="text-sm sm:text-base">
                     {t('dashboard.overviewSubtitle')}
                   </Text>
                 </div>
@@ -153,10 +153,10 @@ export const DashboardPreview: React.FC = () => {
                     <MdLightbulb className="w-5 h-5" />
                   </div>
                   <div>
-                    <span className="text-xs font-bold uppercase tracking-wider block mb-0.5" style={{ color: colors.interactive.primary }}>
+                    <Heading level={5} className="text-xs font-bold uppercase tracking-wider mb-1 block" style={{ color: colors.interactive.primary }}>
                       AI Suggestion
-                    </span>
-                    <Text className="text-xs font-medium" style={{ color: colors.text.primary }}>
+                    </Heading>
+                    <Text className="text-sm font-medium" style={{ color: colors.text.primary }}>
                       {locale === 'vi'
                         ? 'Bạn có ₫1.500.000 thặng dư tháng này. Tự động chuyển vào Quỹ Dự Phòng Thấu Đáo?'
                         : 'You have ₫1,500,000 surplus this month. Reallocate to Emergency Savings Fund?'}
@@ -175,10 +175,10 @@ export const DashboardPreview: React.FC = () => {
                     <MdInsights className="w-5 h-5" />
                   </div>
                   <div>
-                    <span className="text-xs font-bold uppercase tracking-wider block mb-0.5" style={{ color: '#10B981' }}>
+                    <Heading level={5} className="text-xs font-bold uppercase tracking-wider mb-1 block" style={{ color: '#10B981' }}>
                       AI Financial Health
-                    </span>
-                    <Text className="text-xs font-medium" style={{ color: colors.text.primary }}>
+                    </Heading>
+                    <Text className="text-sm font-medium" style={{ color: colors.text.primary }}>
                       {locale === 'vi'
                         ? 'Chi tiêu Ăn uống giảm 15% so với tháng trước. Sức khỏe tài chính rất tốt!'
                         : 'Food & Dining expense is 15% lower than last month. Excellent financial health!'}
@@ -198,7 +198,7 @@ export const DashboardPreview: React.FC = () => {
                   <div className="flex items-center justify-between mb-4 border-b pb-3" style={{ borderColor: colors.border.light }}>
                     <div className="flex items-center gap-2">
                       <MdInsights className="w-5 h-5" style={{ color: colors.interactive.primary }} />
-                      <Heading level={4} className="text-base font-bold">{t('dashboard.financialAnalysis')}</Heading>
+                      <Heading level={3} className="text-base sm:text-lg font-bold">{t('dashboard.financialAnalysis')}</Heading>
                     </div>
                     <div className="flex items-center text-xs font-semibold" style={{ color: colors.interactive.primary }}>
                       <span>{t('dashboard.detailedInsights')}</span> <MdChevronRight className="w-4 h-4" />
@@ -208,10 +208,10 @@ export const DashboardPreview: React.FC = () => {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
                     <div className="space-y-4">
                       <div>
-                        <Text className="text-xs font-semibold uppercase tracking-wider" style={{ color: colors.text.secondary }}>
+                        <Heading level={5} className="text-xs font-semibold uppercase tracking-wider" style={{ color: colors.text.secondary }}>
                           {t('dashboard.netSpendingSavings')}
-                        </Text>
-                        <Text className="text-2xl font-black mt-0.5" style={{ color: '#10B981' }}>
+                        </Heading>
+                        <Text className="text-3xl font-black mt-1" style={{ color: '#10B981' }}>
                           +12.800.000 ₫
                         </Text>
                       </div>
@@ -219,28 +219,31 @@ export const DashboardPreview: React.FC = () => {
                       <div className="grid grid-cols-2 gap-2">
                         <div>
                           <Text className="text-xs font-medium" style={{ color: colors.text.secondary }}>{t('dashboard.income')}</Text>
-                          <Text className="text-sm font-bold mt-0.5" style={{ color: '#10B981' }}>
+                          <Text className="text-base font-bold mt-0.5" style={{ color: '#10B981' }}>
                             25.000.000 ₫
                           </Text>
                         </div>
                         <div>
                           <Text className="text-xs font-medium" style={{ color: colors.text.secondary }}>{t('dashboard.expense')}</Text>
-                          <Text className="text-sm font-bold mt-0.5" style={{ color: '#EF4444' }}>
+                          <Text className="text-base font-bold mt-0.5" style={{ color: '#EF4444' }}>
                             12.200.000 ₫
                           </Text>
                         </div>
                       </div>
 
                       <div className="pt-2 border-t space-y-1.5" style={{ borderColor: `${colors.border.light}80` }}>
+                        <Heading level={5} className="text-xs font-bold uppercase tracking-wider mb-2 block" style={{ color: colors.text.secondary }}>
+                          {t('dashboard.topCategories')}
+                        </Heading>
                         {mockCategories.slice(0, 4).map((item, idx) => (
                           <div key={item.category} className="flex items-center justify-between text-xs">
                             <div className="flex items-center gap-2 min-w-0">
                               <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: CHART_COLORS[idx] }} />
-                              <span className="truncate font-medium" style={{ color: colors.text.primary }}>
+                              <span className="truncate font-medium text-xs" style={{ color: colors.text.primary }}>
                                 {t.has(`categories.${item.category}`) ? t(`categories.${item.category}`) : item.category}
                               </span>
                             </div>
-                            <span className="font-semibold" style={{ color: colors.text.secondary }}>
+                            <span className="font-semibold text-xs" style={{ color: colors.text.secondary }}>
                               {item.percentage}%
                             </span>
                           </div>
@@ -279,7 +282,7 @@ export const DashboardPreview: React.FC = () => {
                   <div className="flex items-center justify-between mb-4 border-b pb-3" style={{ borderColor: colors.border.light }}>
                     <div className="flex items-center gap-2">
                       <MdSwapHoriz className="w-5 h-5" style={{ color: colors.interactive.primary }} />
-                      <Heading level={4} className="text-base font-bold">{t('dashboard.recentTransactions')}</Heading>
+                      <Heading level={3} className="text-base sm:text-lg font-bold">{t('dashboard.recentTransactions')}</Heading>
                     </div>
                     <div className="flex items-center text-xs font-semibold" style={{ color: colors.interactive.primary }}>
                       <span>{t('dashboard.viewAll')}</span> <MdChevronRight className="w-4 h-4" />
@@ -292,21 +295,60 @@ export const DashboardPreview: React.FC = () => {
                       { name: 'Monthly Salary', cat: 'SALARY', type: 'INCOME', amount: 25000000, date: 'Yesterday' },
                       { name: 'WinMart Supermarket', cat: 'SHOPPING', type: 'EXPENSE', amount: 480000, date: 'Jul 25' },
                       { name: 'Electricity Bill', cat: 'UTILITIES', type: 'EXPENSE', amount: 1250000, date: 'Jul 24' },
-                    ].map((tx, i) => (
-                      <div key={i} className="flex items-center justify-between p-2 rounded-lg" style={{ backgroundColor: `${colors.background.secondary}60` }}>
-                        <div className="min-w-0 flex-1 pr-2">
-                          <Text className="font-bold truncate text-xs" style={{ color: colors.text.primary }}>
-                            {tx.name}
-                          </Text>
-                          <Text className="text-[11px] truncate block" style={{ color: colors.text.secondary }}>
-                            {t.has(`categories.${tx.cat}`) ? t(`categories.${tx.cat}`) : tx.cat} • {tx.date}
+                    ].map((tx, i) => {
+                      const catColor = tx.type === 'INCOME' ? '#10B981' : getCategoryColor(tx.cat);
+                      const catLabel = t.has(`categories.${tx.cat}`) ? t(`categories.${tx.cat}`) : tx.cat;
+                      return (
+                        <div
+                          key={i}
+                          className="flex items-center justify-between p-2.5 rounded-xl transition-all gap-3 border"
+                          style={{
+                            backgroundColor: colors.surface.primary,
+                            borderColor: `${colors.border.light}80`,
+                          }}
+                        >
+                          {/* Category Icon */}
+                          <div
+                            className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 text-lg font-bold"
+                            style={{
+                              backgroundColor: `${catColor}18`,
+                              color: catColor,
+                            }}
+                          >
+                            {getCategoryIcon(tx.cat)}
+                          </div>
+
+                          {/* Description & Category Badge */}
+                          <div className="min-w-0 flex-1">
+                            <Text className="font-extrabold text-sm sm:text-base truncate block tracking-tight" style={{ color: colors.text.primary }}>
+                              {tx.name}
+                            </Text>
+                            <div className="flex items-center gap-2 mt-0.5">
+                              <span
+                                className="text-[11px] font-bold px-2 py-0.5 rounded-md whitespace-nowrap"
+                                style={{
+                                  backgroundColor: `${catColor}15`,
+                                  color: catColor,
+                                }}
+                              >
+                                {catLabel}
+                              </span>
+                              <span className="text-xs font-medium" style={{ color: colors.text.tertiary }}>
+                                • {tx.date}
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Amount */}
+                          <Text
+                            className="font-black text-sm sm:text-base whitespace-nowrap tracking-tight ml-2"
+                            style={{ color: tx.type === 'INCOME' ? '#10B981' : '#EF4444' }}
+                          >
+                            {tx.type === 'INCOME' ? '+' : '-'}{formatVietnamsePrice(tx.amount)}
                           </Text>
                         </div>
-                        <Text className="font-extrabold text-xs whitespace-nowrap" style={{ color: tx.type === 'INCOME' ? '#10B981' : '#EF4444' }}>
-                          {tx.type === 'INCOME' ? '+' : '-'}{formatVietnamsePrice(tx.amount)}
-                        </Text>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
 
@@ -318,7 +360,7 @@ export const DashboardPreview: React.FC = () => {
                   <div className="flex items-center justify-between mb-4 border-b pb-3" style={{ borderColor: colors.border.light }}>
                     <div className="flex items-center gap-2">
                       <MdPieChart className="w-5 h-5" style={{ color: colors.interactive.primary }} />
-                      <Heading level={4} className="text-base font-bold">{t('dashboard.budgetsRemaining')}</Heading>
+                      <Heading level={3} className="text-base sm:text-lg font-bold">{t('dashboard.budgetsRemaining')}</Heading>
                     </div>
                     <div className="flex items-center text-xs font-semibold" style={{ color: colors.interactive.primary }}>
                       <span>{t('dashboard.manageBudgets')}</span> <MdChevronRight className="w-4 h-4" />
@@ -335,10 +377,10 @@ export const DashboardPreview: React.FC = () => {
                       return (
                         <div key={b.cat} className="space-y-1">
                           <div className="flex justify-between text-xs font-semibold">
-                            <Text style={{ color: colors.text.primary }}>
+                            <Heading level={4} className="text-sm font-bold" style={{ color: colors.text.primary }}>
                               {t.has(`categories.${b.cat}`) ? t(`categories.${b.cat}`) : b.cat}
-                            </Text>
-                            <Text style={{ color: b.percent > 80 ? '#F59E0B' : colors.text.secondary }}>
+                            </Heading>
+                            <Text className="text-sm font-extrabold" style={{ color: b.percent > 80 ? '#F59E0B' : colors.interactive.primary }}>
                               {t('dashboard.left', { amount: formatVietnamsePrice(remaining) })}
                             </Text>
                           </div>
@@ -351,7 +393,7 @@ export const DashboardPreview: React.FC = () => {
                               }}
                             />
                           </div>
-                          <div className="flex justify-between text-[10px]" style={{ color: colors.text.secondary }}>
+                          <div className="flex justify-between text-xs font-medium" style={{ color: colors.text.secondary }}>
                             <span>{t('dashboard.spent', { amount: formatVietnamsePrice(b.spent) })}</span>
                             <span>{t('dashboard.limit', { amount: formatVietnamsePrice(b.limit) })}</span>
                           </div>
@@ -369,7 +411,7 @@ export const DashboardPreview: React.FC = () => {
                   <div className="flex items-center justify-between mb-4 border-b pb-3" style={{ borderColor: colors.border.light }}>
                     <div className="flex items-center gap-2">
                       <MdFolderOpen className="w-5 h-5" style={{ color: colors.interactive.primary }} />
-                      <Heading level={4} className="text-base font-bold">{t('dashboard.projectsOverview')}</Heading>
+                      <Heading level={3} className="text-base sm:text-lg font-bold">{t('dashboard.projectsOverview')}</Heading>
                     </div>
                     <div className="flex items-center text-xs font-semibold" style={{ color: colors.interactive.primary }}>
                       <span>{t('dashboard.viewProjects')}</span> <MdChevronRight className="w-4 h-4" />
@@ -383,8 +425,8 @@ export const DashboardPreview: React.FC = () => {
                     ].map((p) => (
                       <div key={p.name} className="p-3 rounded-lg border space-y-1.5" style={{ borderColor: `${colors.border.light}80`, backgroundColor: `${colors.background.secondary}40` }}>
                         <div className="flex justify-between items-center text-xs font-bold">
-                          <span style={{ color: colors.text.primary }}>{p.name}</span>
-                          <span className="text-[10px] px-2 py-0.5 rounded font-semibold" style={{ backgroundColor: `${colors.interactive.primary}15`, color: colors.interactive.primary }}>
+                          <Heading level={4} className="text-sm font-bold" style={{ color: colors.text.primary }}>{p.name}</Heading>
+                          <span className="text-xs px-2.5 py-1 rounded-full font-bold" style={{ backgroundColor: `${colors.interactive.primary}15`, color: colors.interactive.primary }}>
                             {t('dashboard.saved', { percent: p.percent })}
                           </span>
                         </div>
@@ -397,7 +439,7 @@ export const DashboardPreview: React.FC = () => {
                             }}
                           />
                         </div>
-                        <div className="flex justify-between text-[11px]" style={{ color: colors.text.secondary }}>
+                        <div className="flex justify-between text-xs font-medium" style={{ color: colors.text.secondary }}>
                           <span>{t('dashboard.savedLabel', { amount: formatVietnamsePrice(p.saved) })}</span>
                           <span>{t('dashboard.targetLabel', { amount: formatVietnamsePrice(p.target) })}</span>
                         </div>

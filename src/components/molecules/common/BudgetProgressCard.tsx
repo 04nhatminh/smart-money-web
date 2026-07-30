@@ -6,7 +6,7 @@ import { useTheme } from '@/context/ThemeContext';
 import { Budget } from '@/types/budget.api';
 import { getCategoryIcon, getCategoryColor } from '@/constants/categoryIcons';
 import { formatVietnamsePrice } from '@/lib/format';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 
 interface BudgetProgressCardProps {
   budget: Budget;
@@ -27,8 +27,10 @@ export const BudgetProgressCard: React.FC<BudgetProgressCardProps> = ({
 }) => {
   const { colors } = useTheme();
   const t = useTranslations();
+  const locale = useLocale();
 
   const spentPercentage = Math.min((budget.spent / budget.amountLimit) * 100, 100);
+  const formattedPercent = spentPercentage % 1 === 0 ? spentPercentage.toFixed(0) : spentPercentage.toFixed(1);
   const alertColor = getAlertColor(budget.alertLevel);
   const categoryColor = getCategoryColor(budget.category);
 
@@ -66,7 +68,7 @@ export const BudgetProgressCard: React.FC<BudgetProgressCardProps> = ({
               {t.has(`categories.${budget.category}`) ? t(`categories.${budget.category}`) : budget.category}
             </Text>
             <Text className="text-xs" style={{ color: colors.text.tertiary }}>
-              {new Date(budget.year, budget.month - 1).toLocaleString('default', {
+              {new Date(budget.year, budget.month - 1).toLocaleString(locale === 'vi' ? 'vi-VN' : 'en-US', {
                 month: 'long',
                 year: 'numeric',
               })}
@@ -112,7 +114,7 @@ export const BudgetProgressCard: React.FC<BudgetProgressCardProps> = ({
         {/* Progress Info */}
         <div className="flex justify-between items-center pt-1">
           <Text className="text-xs font-medium" style={{ color: colors.text.tertiary }}>
-            {t('budgets.used', { percent: spentPercentage.toFixed(1) })}
+            {t('budgets.used', { percent: formattedPercent })}
           </Text>
           <Text className="text-xs font-semibold" style={{ color: budget.remaining < 0 ? '#EF4444' : '#10B981' }}>
             {budget.remaining < 0 

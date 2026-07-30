@@ -816,6 +816,10 @@
     "used": "{percent}% used",
     "remainingAmount": "{amount} remaining",
     "overspent": "{amount} overspent",
+    "budgetProgress": "Budget Progress",
+    "percentSpent": "{percent}% spent",
+    "noBudget": "No Budget",
+    "spent": "Spent",
     "status": {
       "SAFE": "Safe",
       "CAUTION": "Caution",

@@ -816,6 +816,10 @@
     "used": "Đã dùng {percent}%",
     "remainingAmount": "Còn lại {amount}",
     "overspent": "Vượt quá {amount}",
+    "budgetProgress": "Tiến trình ngân sách",
+    "percentSpent": "{percent}% đã chi tiêu",
+    "noBudget": "Chưa có ngân sách",
+    "spent": "Đã chi tiêu",
     "status": {
       "SAFE": "An toàn",
       "CAUTION": "Cẩn trọng",
