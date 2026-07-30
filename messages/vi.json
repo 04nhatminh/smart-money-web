@@ -347,7 +347,8 @@
     "pleaseGoBack": "Vui lòng quay lại và thử lại."
   },
   "transactions": {
-    "deleteConfirm": "Bạn có chắc chắn muốn xóa giao dịch này không?",
+    "deleteConfirm": "Bạn có chắc chắn muốn xóa giao dịch này không? Hành động này không thể hoàn tác.",
+    "deleteConfirmTitle": "Xóa Giao Dịch",
     "deleteFailed": "Xóa giao dịch thất bại: ",
     "title": "Quản Lý Giao Dịch",
     "subtitle": "Theo dõi và quản lý tất cả các khoản thu nhập và chi tiêu của bạn",

@@ -347,7 +347,8 @@
     "pleaseGoBack": "Please go back and try again."
   },
   "transactions": {
-    "deleteConfirm": "Are you sure you want to delete this transaction?",
+    "deleteConfirm": "Are you sure you want to delete this transaction? This action cannot be undone.",
+    "deleteConfirmTitle": "Delete Transaction",
     "deleteFailed": "Failed to delete transaction: ",
     "title": "Transaction Management",
     "subtitle": "Track and manage all your income and expenses",

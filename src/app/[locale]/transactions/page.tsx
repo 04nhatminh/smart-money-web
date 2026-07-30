@@ -6,7 +6,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { useAuth } from '@/context/AuthContext';
 import { SidebarLayout } from '@/components/templates';
 import { Heading, Text, Button, Skeleton } from '@/components/atoms';
-import { Card, StatCard, TransactionRow, CreateTransactionModal, EditTransactionModal, TransactionMethodModal, ImageBillUploadModal, VoiceRecordModal, TransactionFilter, Pagination, ExcelImportModal, ExcelExportModal, type TransactionFilterState } from '@/components/molecules/common';
+import { Card, StatCard, TransactionRow, CreateTransactionModal, EditTransactionModal, TransactionMethodModal, ImageBillUploadModal, VoiceRecordModal, TransactionFilter, Pagination, ExcelImportModal, ExcelExportModal, DeleteConfirmationModal, type TransactionFilterState } from '@/components/molecules/common';
 import { useTheme } from '@/context/ThemeContext';
 import { useTransactions, type TransactionFilters } from '@/hooks/useTransactions';
 import { transformAIResultToFormData } from '@/lib/ai-result-transformer';
@@ -177,21 +177,26 @@ export default function TransactionsPage() {
     }
   };
 
+  const [deletingTxId, setDeletingTxId] = useState<string | null>(null);
+
   const handleEditClick = (id: string) => {
     setEditingTransactionId(id);
     setIsEditModalOpen(true);
   };
 
-  const handleDeleteClick = async (id: string) => {
-    if (!confirm(t('transactions.deleteConfirm'))) {
-      return;
-    }
+  const handleDeleteClick = (id: string) => {
+    setDeletingTxId(id);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deletingTxId) return;
 
     try {
       setDeleteLoading(true);
-      const result = await deleteTransaction(id);
+      const result = await deleteTransaction(deletingTxId);
       if (result.success) {
-        setTransactions(transactions.filter(t => t.id !== id));
+        setDeletingTxId(null);
+        await loadTransactions();
       } else {
         alert(t('transactions.deleteFailed') + (result.error || 'Unknown error'));
       }
@@ -712,6 +717,18 @@ export default function TransactionsPage() {
           onSuccess={() => {
             loadTransactions();
           }}
+        />
+
+        {/* Delete Confirmation Modal */}
+        <DeleteConfirmationModal
+          isOpen={!!deletingTxId}
+          title={t('transactions.deleteConfirmTitle')}
+          message={t('transactions.deleteConfirm')}
+          confirmLabel={t('common.delete') || 'Delete'}
+          cancelLabel={t('common.cancel') || 'Cancel'}
+          isLoading={deleteLoading}
+          onConfirm={handleConfirmDelete}
+          onCancel={() => setDeletingTxId(null)}
         />
 
         {/* Excel Export Modal */}
