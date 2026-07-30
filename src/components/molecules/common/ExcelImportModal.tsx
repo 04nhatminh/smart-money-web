@@ -40,7 +40,8 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
   onClose,
   onSuccess,
 }) => {
-  const { colors } = useTheme();
+  const { colors, colorScheme } = useTheme();
+  const isDark = colorScheme === 'dark';
   const t = useTranslations();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -430,28 +431,51 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
     }
   };
 
+  // High-contrast theme-aware style tokens
+  const totalCardBg = isDark ? '#1E2235' : '#F3F4F6';
+  const totalCardBorder = isDark ? '#373A54' : '#E5E7EB';
+  const totalLabelColor = isDark ? '#9CA3AF' : '#4B5563';
+  const totalValColor = isDark ? '#FFFFFF' : '#111827';
+
+  const successCardBg = isDark ? '#064E3B' : '#ECFDF5';
+  const successCardBorder = isDark ? '#059669' : '#A7F3D0';
+  const successLabelColor = isDark ? '#A7F3D0' : '#047857';
+  const successValColor = isDark ? '#34D399' : '#065F46';
+
+  const failedCardBg = isDark ? '#7F1D1D' : '#FEF2F2';
+  const failedCardBorder = isDark ? '#DC2626' : '#FECDD3';
+  const failedLabelColor = isDark ? '#FECDD3' : '#B91C1C';
+  const failedValColor = isDark ? '#FCA5A5' : '#991B1B';
+
   return (
     <>
       {/* Floating Minimized Toast / Widget */}
       {isMinimized && (
-        <div className="fixed bottom-6 right-6 z-[9999] bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 shadow-2xl rounded-2xl p-4 w-96 space-y-3 transition-all">
+        <div
+          className="fixed bottom-6 right-6 z-[9999] shadow-2xl rounded-2xl p-4 w-96 space-y-3 transition-all border"
+          style={{
+            backgroundColor: colors.surface.primary,
+            borderColor: colors.border.medium,
+          }}
+        >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               {isProcessing ? (
-                <MdRefresh className="w-5 h-5 animate-spin text-indigo-600 dark:text-indigo-400" />
+                <MdRefresh className="w-5 h-5 animate-spin" style={{ color: colors.interactive.primary }} />
               ) : progress.errorCount === 0 ? (
-                <MdCheckCircle className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                <MdCheckCircle className="w-5 h-5" style={{ color: colors.interactive.success }} />
               ) : (
                 <MdWarning className="w-5 h-5 text-amber-500" />
               )}
-              <span className="font-bold text-sm text-gray-900 dark:text-white">
+              <span className="font-bold text-sm" style={{ color: colors.text.primary }}>
                 {isProcessing ? t('transactions.minimizedNotice') : t('transactions.importComplete', { success: progress.success })}
               </span>
             </div>
             <div className="flex items-center gap-1">
               <button
                 onClick={() => setIsMinimized(false)}
-                className="p-1.5 rounded-lg text-gray-500 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"
+                className="p-1.5 rounded-lg transition-colors hover:opacity-80"
+                style={{ color: colors.text.secondary }}
                 title="Expand modal"
               >
                 <MdOpenInNew className="w-4 h-4" />
@@ -462,7 +486,8 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
                     setIsMinimized(false);
                     onClose();
                   }}
-                  className="p-1.5 rounded-lg text-gray-500 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"
+                  className="p-1.5 rounded-lg transition-colors hover:opacity-80"
+                  style={{ color: colors.text.secondary }}
                   title="Close"
                 >
                   <MdClose className="w-4 h-4" />
@@ -471,24 +496,28 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
             </div>
           </div>
 
-          <div className="w-full bg-gray-200 dark:bg-slate-800 rounded-full h-2 overflow-hidden">
+          <div
+            className="w-full rounded-full h-2 overflow-hidden"
+            style={{ backgroundColor: isDark ? '#282B40' : '#E5E7EB' }}
+          >
             <div
-              className="h-2 rounded-full transition-all duration-300 bg-indigo-600 dark:bg-indigo-400"
+              className="h-2 rounded-full transition-all duration-300"
               style={{
                 width: `${progress.total > 0 ? (progress.current / progress.total) * 100 : 0}%`,
+                backgroundColor: colors.interactive.primary,
               }}
             />
           </div>
 
           <div className="flex justify-between text-xs font-semibold">
-            <span className="text-gray-600 dark:text-slate-400">
+            <span style={{ color: colors.text.secondary }}>
               {progress.current} / {progress.total}
             </span>
             <div className="flex gap-3">
-              <span className="text-emerald-600 dark:text-emerald-400 font-bold">
+              <span style={{ color: successValColor }} className="font-bold">
                 ✓ {progress.success}
               </span>
-              <span className="text-rose-600 dark:text-rose-400 font-bold">
+              <span style={{ color: failedValColor }} className="font-bold">
                 ✗ {progress.errorCount}
               </span>
             </div>
@@ -503,7 +532,7 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
           <div
             className="fixed inset-0 transition-opacity"
             style={{
-              backgroundColor: 'rgba(0, 0, 0, 0.4)',
+              backgroundColor: 'rgba(0, 0, 0, 0.5)',
               zIndex: 999,
             }}
             onClick={handleCloseModal}
@@ -512,20 +541,23 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
           {/* Modal Container */}
           <div className="fixed inset-0 flex items-center justify-center p-4" style={{ zIndex: 1000 }}>
             <div
-              className="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[85vh] flex flex-col overflow-hidden"
-              style={{ backgroundColor: colors.background.primary }}
+              className="rounded-2xl shadow-2xl max-w-lg w-full max-h-[85vh] flex flex-col overflow-hidden border"
+              style={{
+                backgroundColor: colors.background.primary,
+                borderColor: colors.border.light,
+              }}
             >
               {/* Header */}
               <div
                 className="flex items-center justify-between p-6 border-b"
                 style={{ borderColor: colors.border.light }}
               >
-                <Heading level={3} className="m-0">
+                <Heading level={3} className="m-0" style={{ color: colors.text.primary }}>
                   {t('transactions.excelModalTitle')}
                 </Heading>
                 <button
                   onClick={handleCloseModal}
-                  className="p-1 rounded-lg transition-colors hover:bg-black/5 hover:cursor-pointer"
+                  className="p-1 rounded-lg transition-colors hover:opacity-75 hover:cursor-pointer"
                   style={{ color: colors.text.secondary }}
                   title={isProcessing ? t('transactions.runInBackground') : 'Close'}
                 >
@@ -556,7 +588,7 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
                       <div className="overflow-x-auto my-3 border rounded-lg shadow-sm" style={{ borderColor: '#9CA3AF' }}>
                         <table className="min-w-full text-xs text-left border-collapse" style={{ border: `1px solid #9CA3AF` }}>
                           <thead>
-                            <tr style={{ backgroundColor: '#F9FAFB', borderBottom: `1px solid #9CA3AF` }}>
+                            <tr style={{ backgroundColor: isDark ? '#1E2235' : '#F9FAFB', borderBottom: `1px solid #9CA3AF` }}>
                               <th className="p-1 text-center font-semibold text-[10px]" style={{ color: colors.text.tertiary, borderRight: `1px solid #9CA3AF`, width: '4%' }}></th>
                               <th className="p-1 text-center font-semibold text-[10px]" style={{ color: colors.text.tertiary, borderRight: `1px solid #9CA3AF` }}>A</th>
                               <th className="p-1 text-center font-semibold text-[10px]" style={{ color: colors.text.tertiary, borderRight: `1px solid #9CA3AF` }}>B</th>
@@ -565,34 +597,34 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
                               <th className="p-1 text-center font-semibold text-[10px]" style={{ color: colors.text.tertiary, borderRight: `1px solid #9CA3AF` }}>E</th>
                               <th className="p-1 text-center font-semibold text-[10px]" style={{ color: colors.text.tertiary }}>F</th>
                             </tr>
-                            <tr style={{ backgroundColor: '#E5E7EB', borderBottom: `2px solid #4B5563` }}>
-                              <td className="p-2 text-center font-bold text-[10px]" style={{ backgroundColor: '#F9FAFB', color: colors.text.tertiary, borderRight: `1px solid #9CA3AF` }}>1</td>
-                              <th className="p-2 px-2 font-bold text-center" style={{ color: '#111827', borderRight: `1px solid #9CA3AF` }}>No.</th>
-                              <th className="p-2 px-3 font-bold text-center" style={{ color: '#111827', borderRight: `1px solid #9CA3AF` }}>{t('transactions.excelHeaderAmount')}</th>
-                              <th className="p-2 px-3 font-bold text-center" style={{ color: '#111827', borderRight: `1px solid #9CA3AF` }}>{t('transactions.excelHeaderType')}</th>
-                              <th className="p-2 px-3 font-bold text-center" style={{ color: '#111827', borderRight: `1px solid #9CA3AF` }}>{t('transactions.excelHeaderCategory')}</th>
-                              <th className="p-2 px-3 font-bold text-center" style={{ color: '#111827', borderRight: `1px solid #9CA3AF` }}>{t('transactions.excelHeaderDate')}</th>
-                              <th className="p-2 px-3 font-bold text-center" style={{ color: '#111827' }}>{t('transactions.excelHeaderDescription')}</th>
+                            <tr style={{ backgroundColor: isDark ? '#282B40' : '#E5E7EB', borderBottom: `2px solid #4B5563` }}>
+                              <td className="p-2 text-center font-bold text-[10px]" style={{ backgroundColor: isDark ? '#1E2235' : '#F9FAFB', color: colors.text.tertiary, borderRight: `1px solid #9CA3AF` }}>1</td>
+                              <th className="p-2 px-2 font-bold text-center" style={{ color: colors.text.primary, borderRight: `1px solid #9CA3AF` }}>No.</th>
+                              <th className="p-2 px-3 font-bold text-center" style={{ color: colors.text.primary, borderRight: `1px solid #9CA3AF` }}>{t('transactions.excelHeaderAmount')}</th>
+                              <th className="p-2 px-3 font-bold text-center" style={{ color: colors.text.primary, borderRight: `1px solid #9CA3AF` }}>{t('transactions.excelHeaderType')}</th>
+                              <th className="p-2 px-3 font-bold text-center" style={{ color: colors.text.primary, borderRight: `1px solid #9CA3AF` }}>{t('transactions.excelHeaderCategory')}</th>
+                              <th className="p-2 px-3 font-bold text-center" style={{ color: colors.text.primary, borderRight: `1px solid #9CA3AF` }}>{t('transactions.excelHeaderDate')}</th>
+                              <th className="p-2 px-3 font-bold text-center" style={{ color: colors.text.primary }}>{t('transactions.excelHeaderDescription')}</th>
                             </tr>
                           </thead>
                           <tbody>
-                            <tr style={{ backgroundColor: '#FFFFFF', borderBottom: `1px solid #9CA3AF` }}>
-                              <td className="p-2 text-center font-semibold text-[10px]" style={{ backgroundColor: '#F9FAFB', color: colors.text.tertiary, borderRight: `1px solid #9CA3AF` }}>2</td>
-                              <td className="p-2 text-center font-medium" style={{ color: '#374151', borderRight: `1px solid #9CA3AF` }}>1</td>
-                              <td className="p-2 pr-3 text-right font-bold" style={{ color: '#DC2626', borderRight: `1px solid #9CA3AF` }}>-50,000</td>
-                              <td className="p-2 text-center font-semibold" style={{ color: '#DC2626', borderRight: `1px solid #9CA3AF` }}>Expense</td>
-                              <td className="p-2 pl-3 text-left" style={{ color: '#374151', borderRight: `1px solid #9CA3AF` }}>Food</td>
-                              <td className="p-2 text-center font-mono" style={{ color: '#374151', borderRight: `1px solid #9CA3AF` }}>16/06/2026 12:30</td>
-                              <td className="p-2 pl-3 text-left" style={{ color: '#374151' }}>Lunch with coworkers</td>
+                            <tr style={{ backgroundColor: isDark ? '#131520' : '#FFFFFF', borderBottom: `1px solid #9CA3AF` }}>
+                              <td className="p-2 text-center font-semibold text-[10px]" style={{ backgroundColor: isDark ? '#1E2235' : '#F9FAFB', color: colors.text.tertiary, borderRight: `1px solid #9CA3AF` }}>2</td>
+                              <td className="p-2 text-center font-medium" style={{ color: colors.text.primary, borderRight: `1px solid #9CA3AF` }}>1</td>
+                              <td className="p-2 pr-3 text-right font-bold" style={{ color: failedValColor, borderRight: `1px solid #9CA3AF` }}>-50,000</td>
+                              <td className="p-2 text-center font-semibold" style={{ color: failedValColor, borderRight: `1px solid #9CA3AF` }}>Expense</td>
+                              <td className="p-2 pl-3 text-left" style={{ color: colors.text.primary, borderRight: `1px solid #9CA3AF` }}>Food</td>
+                              <td className="p-2 text-center font-mono" style={{ color: colors.text.primary, borderRight: `1px solid #9CA3AF` }}>16/06/2026 12:30</td>
+                              <td className="p-2 pl-3 text-left" style={{ color: colors.text.primary }}>Lunch with coworkers</td>
                             </tr>
-                            <tr style={{ backgroundColor: '#F9FAFB' }}>
-                              <td className="p-2 text-center font-semibold text-[10px]" style={{ backgroundColor: '#F9FAFB', color: colors.text.tertiary, borderRight: `1px solid #9CA3AF` }}>3</td>
-                              <td className="p-2 text-center font-medium" style={{ color: '#374151', borderRight: `1px solid #9CA3AF` }}>2</td>
-                              <td className="p-2 pr-3 text-right font-bold" style={{ color: '#16A34A', borderRight: `1px solid #9CA3AF` }}>+15,000,000</td>
-                              <td className="p-2 text-center font-semibold" style={{ color: '#16A34A', borderRight: `1px solid #9CA3AF` }}>Income</td>
-                              <td className="p-2 pl-3 text-left" style={{ color: '#374151', borderRight: `1px solid #9CA3AF` }}>Other</td>
-                              <td className="p-2 text-center font-mono" style={{ color: '#374151', borderRight: `1px solid #9CA3AF` }}>10/06/2026 09:00</td>
-                              <td className="p-2 pl-3 text-left" style={{ color: '#374151' }}>Monthly salary payment</td>
+                            <tr style={{ backgroundColor: isDark ? '#1B1E2E' : '#F9FAFB' }}>
+                              <td className="p-2 text-center font-semibold text-[10px]" style={{ backgroundColor: isDark ? '#1E2235' : '#F9FAFB', color: colors.text.tertiary, borderRight: `1px solid #9CA3AF` }}>3</td>
+                              <td className="p-2 text-center font-medium" style={{ color: colors.text.primary, borderRight: `1px solid #9CA3AF` }}>2</td>
+                              <td className="p-2 pr-3 text-right font-bold" style={{ color: successValColor, borderRight: `1px solid #9CA3AF` }}>+15,000,000</td>
+                              <td className="p-2 text-center font-semibold" style={{ color: successValColor, borderRight: `1px solid #9CA3AF` }}>Income</td>
+                              <td className="p-2 pl-3 text-left" style={{ color: colors.text.primary, borderRight: `1px solid #9CA3AF` }}>Other</td>
+                              <td className="p-2 text-center font-mono" style={{ color: colors.text.primary, borderRight: `1px solid #9CA3AF` }}>10/06/2026 09:00</td>
+                              <td className="p-2 pl-3 text-left" style={{ color: colors.text.primary }}>Monthly salary payment</td>
                             </tr>
                           </tbody>
                         </table>
@@ -668,14 +700,14 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
                     {/* Parsed Rows Preview */}
                     <div className="border rounded-lg max-h-60 overflow-y-auto divide-y" style={{ borderColor: colors.border.light }}>
                       {parsedData.map((row) => (
-                        <div key={row.rowNum} className="p-3 text-sm flex justify-between items-start gap-4">
+                        <div key={row.rowNum} className="p-3 text-sm flex justify-between items-start gap-4" style={{ borderColor: colors.border.light }}>
                           <div className="space-y-0.5">
                             <div className="flex items-center gap-2">
                               <span
                                 className="text-xs font-bold px-1.5 py-0.5 rounded"
                                 style={{
-                                  backgroundColor: row.type === 'INCOME' ? '#D1FAE5' : '#FEE2E2',
-                                  color: row.type === 'INCOME' ? '#065F46' : '#991B1B',
+                                  backgroundColor: row.type === 'INCOME' ? (isDark ? '#064E3B' : '#D1FAE5') : (isDark ? '#7F1D1D' : '#FEE2E2'),
+                                  color: row.type === 'INCOME' ? (isDark ? '#34D399' : '#065F46') : (isDark ? '#FCA5A5' : '#991B1B'),
                                 }}
                               >
                                 {row.type}
@@ -704,7 +736,7 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
                             ) : (
                               <div className="flex flex-col items-end">
                                 <MdError className="w-5 h-5" style={{ color: colors.interactive.danger }} />
-                                <span className="text-[10px] text-right mt-1 max-w-[200px]" style={{ color: colors.interactive.danger }}>
+                                <span className="text-[10px] text-right mt-1 max-w-[200px]" style={{ color: failedValColor }}>
                                   {row.error}
                                 </span>
                               </div>
@@ -717,7 +749,7 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
                     {parsedData.some(r => !r.isValid) && (
                       <div
                         className="p-3 rounded-lg border text-xs"
-                        style={{ backgroundColor: `${colors.interactive.warning}10`, borderColor: colors.interactive.warning, color: colors.text.primary }}
+                        style={{ backgroundColor: `${colors.interactive.warning}15`, borderColor: colors.interactive.warning, color: colors.text.primary }}
                       >
                         {t('transactions.excelValidationWarning')}
                       </div>
@@ -731,12 +763,15 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
                     <div className="flex justify-center">
                       <MdRefresh className="w-12 h-12 animate-spin" style={{ color: colors.interactive.primary }} />
                     </div>
-                    <Heading level={4} className="pb-1">
+                    <Heading level={4} className="pb-1" style={{ color: colors.text.primary }}>
                       {t('transactions.importProgress', { current: progress.current, total: progress.total })}
                     </Heading>
 
                     {/* Progress Bar */}
-                    <div className="w-full bg-gray-200 dark:bg-slate-700 rounded-full h-3 max-w-md mx-auto overflow-hidden">
+                    <div
+                      className="w-full rounded-full h-3 max-w-md mx-auto overflow-hidden"
+                      style={{ backgroundColor: isDark ? '#282B40' : '#E5E7EB' }}
+                    >
                       <div
                         className="h-3 rounded-full transition-all duration-300"
                         style={{
@@ -748,27 +783,41 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
 
                     {/* Stat Badges Grid */}
                     <div className="grid grid-cols-3 gap-3 max-w-md mx-auto pt-2">
-                      <div className="p-3 rounded-xl border text-center bg-gray-50 dark:bg-slate-800/50 border-gray-200 dark:border-slate-700">
-                        <span className="text-xs font-medium text-gray-500 dark:text-slate-400 block mb-0.5">
+                      {/* Total Card */}
+                      <div
+                        className="p-3.5 rounded-xl border text-center transition-colors"
+                        style={{ backgroundColor: totalCardBg, borderColor: totalCardBorder }}
+                      >
+                        <span className="text-xs font-semibold block mb-1" style={{ color: totalLabelColor }}>
                           {t('transactions.excelTotalCount', { count: '' }).replace(': ', '').replace(':', '')}
                         </span>
-                        <span className="text-xl font-bold text-gray-900 dark:text-white">
+                        <span className="text-2xl font-extrabold" style={{ color: totalValColor }}>
                           {progress.total}
                         </span>
                       </div>
-                      <div className="p-3 rounded-xl border text-center bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800/50">
-                        <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400 block mb-0.5">
+
+                      {/* Success Card */}
+                      <div
+                        className="p-3.5 rounded-xl border text-center transition-colors"
+                        style={{ backgroundColor: successCardBg, borderColor: successCardBorder }}
+                      >
+                        <span className="text-xs font-semibold block mb-1" style={{ color: successLabelColor }}>
                           {t('transactions.excelSuccessCount', { count: '' }).replace(': ', '').replace(':', '')}
                         </span>
-                        <span className="text-xl font-bold text-emerald-700 dark:text-emerald-400">
+                        <span className="text-2xl font-extrabold" style={{ color: successValColor }}>
                           {progress.success}
                         </span>
                       </div>
-                      <div className="p-3 rounded-xl border text-center bg-rose-50 dark:bg-rose-950/30 border-rose-200 dark:border-rose-800/50">
-                        <span className="text-xs font-semibold text-rose-700 dark:text-rose-400 block mb-0.5">
+
+                      {/* Failed Card */}
+                      <div
+                        className="p-3.5 rounded-xl border text-center transition-colors"
+                        style={{ backgroundColor: failedCardBg, borderColor: failedCardBorder }}
+                      >
+                        <span className="text-xs font-semibold block mb-1" style={{ color: failedLabelColor }}>
                           {t('transactions.excelFailedCount', { count: '' }).replace(': ', '').replace(':', '')}
                         </span>
-                        <span className="text-xl font-bold text-rose-700 dark:text-rose-400">
+                        <span className="text-2xl font-extrabold" style={{ color: failedValColor }}>
                           {progress.errorCount}
                         </span>
                       </div>
@@ -796,27 +845,41 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
 
                     {/* Stat Badges Grid */}
                     <div className="grid grid-cols-3 gap-3 max-w-md mx-auto">
-                      <div className="p-3 rounded-xl border text-center bg-gray-50 dark:bg-slate-800/50 border-gray-200 dark:border-slate-700">
-                        <span className="text-xs font-medium text-gray-500 dark:text-slate-400 block mb-0.5">
+                      {/* Total Card */}
+                      <div
+                        className="p-3.5 rounded-xl border text-center transition-colors"
+                        style={{ backgroundColor: totalCardBg, borderColor: totalCardBorder }}
+                      >
+                        <span className="text-xs font-semibold block mb-1" style={{ color: totalLabelColor }}>
                           {t('transactions.excelTotalCount', { count: '' }).replace(': ', '').replace(':', '')}
                         </span>
-                        <span className="text-xl font-bold text-gray-900 dark:text-white">
+                        <span className="text-2xl font-extrabold" style={{ color: totalValColor }}>
                           {progress.total}
                         </span>
                       </div>
-                      <div className="p-3 rounded-xl border text-center bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800/50">
-                        <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400 block mb-0.5">
+
+                      {/* Success Card */}
+                      <div
+                        className="p-3.5 rounded-xl border text-center transition-colors"
+                        style={{ backgroundColor: successCardBg, borderColor: successCardBorder }}
+                      >
+                        <span className="text-xs font-semibold block mb-1" style={{ color: successLabelColor }}>
                           {t('transactions.excelSuccessCount', { count: '' }).replace(': ', '').replace(':', '')}
                         </span>
-                        <span className="text-xl font-bold text-emerald-700 dark:text-emerald-400">
+                        <span className="text-2xl font-extrabold" style={{ color: successValColor }}>
                           {progress.success}
                         </span>
                       </div>
-                      <div className="p-3 rounded-xl border text-center bg-rose-50 dark:bg-rose-950/30 border-rose-200 dark:border-rose-800/50">
-                        <span className="text-xs font-semibold text-rose-700 dark:text-rose-400 block mb-0.5">
+
+                      {/* Failed Card */}
+                      <div
+                        className="p-3.5 rounded-xl border text-center transition-colors"
+                        style={{ backgroundColor: failedCardBg, borderColor: failedCardBorder }}
+                      >
+                        <span className="text-xs font-semibold block mb-1" style={{ color: failedLabelColor }}>
                           {t('transactions.excelFailedCount', { count: '' }).replace(': ', '').replace(':', '')}
                         </span>
-                        <span className="text-xl font-bold text-rose-700 dark:text-rose-400">
+                        <span className="text-2xl font-extrabold" style={{ color: failedValColor }}>
                           {progress.errorCount}
                         </span>
                       </div>
@@ -828,17 +891,48 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
                         <Text className="font-semibold text-sm" style={{ color: colors.text.primary }}>
                           {t('transactions.failedRowsDetails', { count: importErrors.length })}
                         </Text>
-                        <div className="border rounded-xl max-h-52 overflow-y-auto divide-y text-xs shadow-inner" style={{ borderColor: colors.border.light }}>
-                          <div className="sticky top-0 bg-gray-100 dark:bg-slate-800 p-2.5 font-bold flex justify-between gap-4 text-gray-700 dark:text-slate-300 border-b border-gray-200 dark:border-slate-700">
-                            <span className="w-16 flex-shrink-0">{t('transactions.excelRowHeader')}</span>
-                            <span className="flex-1">{t('transactions.excelErrorHeader')}</span>
+                        <div
+                          className="border rounded-xl max-h-52 overflow-y-auto divide-y text-xs shadow-inner"
+                          style={{
+                            borderColor: colors.border.light,
+                            backgroundColor: colors.background.secondary,
+                          }}
+                        >
+                          <div
+                            className="sticky top-0 p-2.5 font-bold flex justify-between gap-4 border-b"
+                            style={{
+                              backgroundColor: isDark ? '#282B40' : '#E5E7EB',
+                              borderColor: colors.border.light,
+                            }}
+                          >
+                            <span className="w-16 flex-shrink-0" style={{ color: isDark ? '#F3F4F6' : '#1F2937' }}>
+                              {t('transactions.excelRowHeader')}
+                            </span>
+                            <span className="flex-1" style={{ color: isDark ? '#F3F4F6' : '#1F2937' }}>
+                              {t('transactions.excelErrorHeader')}
+                            </span>
                           </div>
                           {importErrors.map((err, idx) => (
-                            <div key={idx} className="p-2.5 flex justify-between gap-4 items-start hover:bg-rose-50/50 dark:hover:bg-rose-950/20 transition-colors">
-                              <span className="font-mono font-bold text-rose-700 dark:text-rose-400 bg-rose-100 dark:bg-rose-900/40 px-2 py-0.5 rounded text-center w-16 flex-shrink-0">
+                            <div
+                              key={idx}
+                              className="p-2.5 flex justify-between gap-4 items-start border-b transition-colors"
+                              style={{ borderColor: colors.border.light }}
+                            >
+                              <span
+                                className="font-mono font-bold px-2 py-0.5 rounded text-center w-16 flex-shrink-0"
+                                style={{
+                                  backgroundColor: isDark ? '#991B1B' : '#FEE2E2',
+                                  color: isDark ? '#FCA5A5' : '#991B1B',
+                                }}
+                              >
                                 #{err.rowNum}
                               </span>
-                              <span className="flex-1 font-medium text-rose-600 dark:text-rose-300">{err.error}</span>
+                              <span
+                                className="flex-1 font-medium"
+                                style={{ color: isDark ? '#FCA5A5' : '#B91C1C' }}
+                              >
+                                {err.error}
+                              </span>
                             </div>
                           ))}
                         </div>
