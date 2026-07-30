@@ -54,6 +54,7 @@ import {
   MdChevronRight,
   MdAutoAwesome
 } from 'react-icons/md';
+import { getCategoryIcon, getCategoryColor } from '@/constants/categoryIcons';
 
 const CHART_COLORS = ['#5044d5', '#10B981', '#EF4444', '#F59E0B', '#8B5CF6', '#EC4899', '#06B6D4'];
 
@@ -269,9 +270,9 @@ export default function DashboardPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
               <div className="space-y-5">
                 <div>
-                  <Text className="text-xs font-semibold uppercase tracking-wider" style={{ color: colors.text.secondary }}>
+                  <Heading level={5} className="text-xs font-semibold uppercase tracking-wider" style={{ color: colors.text.secondary }}>
                     {t('dashboard.netSpendingSavings')}
-                  </Text>
+                  </Heading>
                   {isLoading ? (
                     <Skeleton height={36} width="65%" className="mt-1" />
                   ) : (
@@ -305,9 +306,9 @@ export default function DashboardPage() {
 
                 {sortedCategoryProportions && sortedCategoryProportions.length > 0 && (
                   <div className="pt-3 border-t" style={{ borderColor: `${colors.border.light}80` }}>
-                    <Text className="text-xs font-bold uppercase tracking-wider mb-2 block" style={{ color: colors.text.secondary }}>
+                    <Heading level={5} className="text-xs font-bold uppercase tracking-wider mb-2 block" style={{ color: colors.text.secondary }}>
                       {t('dashboard.topCategories')}
-                    </Text>
+                    </Heading>
                     <div className="space-y-2">
                       {sortedCategoryProportions.slice(0, 5).map((item: any, idx: number) => (
                         <div key={item.category} className="flex items-center justify-between text-xs">
@@ -387,21 +388,63 @@ export default function DashboardPage() {
                   ))}
                 </div>
               ) : transactions.length > 0 ? (
-                transactions.map((tx: any) => (
-                  <div key={tx.id} className="flex items-center justify-between p-2 rounded-lg transition-colors" style={{ backgroundColor: `${colors.background.secondary}60` }}>
-                    <div className="min-w-0 flex-1 pr-2">
-                      <Text className="font-bold truncate text-sm" style={{ color: colors.text.primary }}>
-                        {tx.description || (t.has(`categories.${tx.category}`) ? t(`categories.${tx.category}`) : tx.category)}
-                      </Text>
-                      <Text className="text-xs truncate block" style={{ color: colors.text.secondary }}>
-                        {(t.has(`categories.${tx.category}`) ? t(`categories.${tx.category}`) : tx.category)} • {parseTransactionDate(tx.date).toLocaleDateString(locale, { month: 'short', day: 'numeric' })}
+                transactions.map((tx: any) => {
+                  const catColor = tx.type === 'INCOME' ? '#10B981' : getCategoryColor(tx.category);
+                  const catLabel = t.has(`categories.${tx.category}`) ? t(`categories.${tx.category}`) : tx.category;
+                  const description = tx.description || catLabel;
+                  const formattedDate = parseTransactionDate(tx.date).toLocaleDateString(locale, { month: 'short', day: 'numeric' });
+
+                  return (
+                    <div
+                      key={tx.id}
+                      className="flex items-center justify-between p-2.5 rounded-xl transition-all gap-3 border"
+                      style={{
+                        backgroundColor: colors.surface.primary,
+                        borderColor: `${colors.border.light}80`,
+                      }}
+                    >
+                      {/* Category Icon */}
+                      <div
+                        className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 text-lg font-bold"
+                        style={{
+                          backgroundColor: `${catColor}18`,
+                          color: catColor,
+                        }}
+                      >
+                        {getCategoryIcon(tx.category)}
+                      </div>
+
+                      {/* Description & Category Badge */}
+                      <div className="min-w-0 flex-1">
+                        <Text className="font-extrabold text-sm sm:text-base truncate block tracking-tight" style={{ color: colors.text.primary }}>
+                          {description}
+                        </Text>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <span
+                            className="text-[11px] font-bold px-2 py-0.5 rounded-md whitespace-nowrap"
+                            style={{
+                              backgroundColor: `${catColor}15`,
+                              color: catColor,
+                            }}
+                          >
+                            {catLabel}
+                          </span>
+                          <span className="text-xs font-medium" style={{ color: colors.text.tertiary }}>
+                            • {formattedDate}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Amount */}
+                      <Text
+                        className="font-black text-sm sm:text-base whitespace-nowrap tracking-tight ml-2"
+                        style={{ color: tx.type === 'INCOME' ? '#10B981' : '#EF4444' }}
+                      >
+                        {tx.type === 'INCOME' ? '+' : '-'}{formatVietnamsePrice(tx.amount)}
                       </Text>
                     </div>
-                    <Text className="font-extrabold text-sm whitespace-nowrap" style={{ color: tx.type === 'INCOME' ? '#10B981' : '#EF4444' }}>
-                      {tx.type === 'INCOME' ? '+' : '-'}{formatVietnamsePrice(tx.amount)}
-                    </Text>
-                  </div>
-                ))
+                  );
+                })
               ) : (
                 <div className="text-center py-6">
                   <Text style={{ color: colors.text.secondary }}>{t('dashboard.noRecentTransactions')}</Text>

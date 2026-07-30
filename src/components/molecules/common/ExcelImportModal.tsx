@@ -6,7 +6,16 @@ import { useTheme } from '@/context/ThemeContext';
 import { useTranslations } from 'next-intl';
 import { apiClient } from '@/lib/api-client';
 import { API_ENDPOINTS } from '@/constants/api';
-import { MdClose, MdCloudUpload, MdFileDownload, MdCheckCircle, MdError, MdRefresh } from 'react-icons/md';
+import {
+  MdClose,
+  MdCloudUpload,
+  MdFileDownload,
+  MdCheckCircle,
+  MdError,
+  MdRefresh,
+  MdOpenInNew,
+  MdWarning,
+} from 'react-icons/md';
 import * as XLSX from 'xlsx-js-style';
 
 interface ExcelImportModalProps {
@@ -31,7 +40,8 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
   onClose,
   onSuccess,
 }) => {
-  const { colors } = useTheme();
+  const { colors, colorScheme } = useTheme();
+  const isDark = colorScheme === 'dark';
   const t = useTranslations();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -42,6 +52,7 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
   const [generalError, setGeneralError] = useState<string | null>(null);
   const [importStatus, setImportStatus] = useState<'idle' | 'parsed' | 'importing' | 'completed'>('idle');
   const [importErrors, setImportErrors] = useState<{ rowNum: number; error: string }[]>([]);
+  const [isMinimized, setIsMinimized] = useState(false);
 
   React.useEffect(() => {
     if (isOpen) {
@@ -50,20 +61,21 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
       setGeneralError(null);
       setImportStatus('idle');
       setProgress({ current: 0, total: 0, success: 0, errorCount: 0 });
+      setIsMinimized(false);
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
     }
   }, [isOpen]);
 
-  if (!isOpen) return null;
+  if (!isOpen && !isMinimized) return null;
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (e.type === "dragenter" || e.type === "dragover") {
+    if (e.type === 'dragenter' || e.type === 'dragover') {
       setDragActive(true);
-    } else if (e.type === "dragleave") {
+    } else if (e.type === 'dragleave') {
       setDragActive(false);
     }
   };
@@ -232,25 +244,23 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
     ];
     const worksheet = XLSX.utils.aoa_to_sheet(data);
 
-    // Apply custom column widths
     worksheet['!cols'] = [
-      { wch: 8 },  // Column A (No.)
-      { wch: 22 }, // Column B (Amount (VND))
-      { wch: 14 }, // Column C (Type)
-      { wch: 20 }, // Column D (Category)
-      { wch: 22 }, // Column E (Date)
-      { wch: 40 }  // Column F (Description)
+      { wch: 8 },
+      { wch: 22 },
+      { wch: 14 },
+      { wch: 20 },
+      { wch: 22 },
+      { wch: 40 }
     ];
 
-    // Apply custom row heights
     worksheet['!rows'] = [
-      { hpt: 28 }, // Header row
-      { hpt: 22 }, // Data row 1
-      { hpt: 22 }, // Data row 2
-      { hpt: 22 }  // Data row 3
+      { hpt: 28 },
+      { hpt: 22 },
+      { hpt: 22 },
+      { hpt: 22 }
     ];
 
-    const borderColor = '9CA3AF'; // Standard solid border color (Gray 400) for clear table outline
+    const borderColor = '9CA3AF';
     const cellBorder = {
       top: { style: 'thin', color: { rgb: borderColor } },
       bottom: { style: 'thin', color: { rgb: borderColor } },
@@ -264,7 +274,6 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
       right: { style: 'thin', color: { rgb: borderColor } }
     };
 
-    // Apply styles to cells
     const range = XLSX.utils.decode_range(worksheet['!ref'] || 'A1:A1');
     for (let R = range.s.r; R <= range.e.r; ++R) {
       for (let C = range.s.c; C <= range.e.c; ++C) {
@@ -273,7 +282,6 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
         if (!cell) continue;
 
         if (R === 0) {
-          // Header Row Style: Neutral background #E5E7EB, Dark text #111827, centered header
           cell.s = {
             fill: { fgColor: { rgb: 'E5E7EB' } },
             font: { name: 'Segoe UI', sz: 11, bold: true, color: { rgb: '111827' } },
@@ -281,18 +289,12 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
             border: headerBorder
           };
         } else {
-          // Data Row Style (Row 1: Expense, Row 2: Income, Row 3: Expense)
-          const isIncome = R === 2; // Row 2 is Income
-
-          // Zebra striping: alternate white (#FFFFFF) and very light gray (#F9FAFB)
+          const isIncome = R === 2;
           const rowBgColor = R % 2 === 1 ? 'FFFFFF' : 'F9FAFB';
-
-          // Accent colors: Green #16A34A / Red #DC2626 ONLY on Amount and Type
           const accentColor = isIncome ? '16A34A' : 'DC2626';
           const textColor = (C === 1 || C === 2) ? accentColor : '374151';
-
-          const isCentered = C === 0 || C === 2 || C === 4; // No., Type, Date
-          const isRight = C === 1;                          // Amount (VND)
+          const isCentered = C === 0 || C === 2 || C === 4;
+          const isRight = C === 1;
 
           cell.s = {
             fill: { fgColor: { rgb: rowBgColor } },
@@ -311,7 +313,7 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
           };
 
           if (C === 1) {
-            cell.z = '+#,##0_ ;-#,##0_ ;0_ '; // Numeric format with sign, thousand separators and balanced right padding
+            cell.z = '+#,##0_ ;-#,##0_ ;0_ ';
           }
         }
       }
@@ -323,39 +325,85 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
   };
 
   const handleStartImport = async () => {
+    if (parsedData.length === 0) return;
+
+    // Track pre-validation failures from file parsing
+    const preValidationErrors = parsedData
+      .filter(item => !item.isValid)
+      .map(item => ({
+        rowNum: item.rowNum,
+        error: item.error || 'Excel format validation error',
+      }));
+
     const validItems = parsedData.filter(item => item.isValid);
-    if (validItems.length === 0) return;
 
     setIsProcessing(true);
     setImportStatus('importing');
-    setImportErrors([]);
-    setProgress({ current: 0, total: validItems.length, success: 0, errorCount: 0 });
+    setImportErrors(preValidationErrors);
 
-    const failedImports: { rowNum: number; error: string }[] = [];
+    const totalRows = parsedData.length;
+    const initialErrorCount = preValidationErrors.length;
+
+    setProgress({
+      current: initialErrorCount,
+      total: totalRows,
+      success: 0,
+      errorCount: initialErrorCount,
+    });
+
+    const failedImports = [...preValidationErrors];
     let successfulCount = 0;
 
-    for (let i = 0; i < validItems.length; i++) {
-      const item = validItems[i];
-      setProgress(prev => ({ ...prev, current: i + 1 }));
+    // Concurrent Batch Execution (chunk size = 10 for high speed)
+    const CONCURRENCY = 10;
+    for (let i = 0; i < validItems.length; i += CONCURRENCY) {
+      const chunk = validItems.slice(i, i + CONCURRENCY);
+      const results = await Promise.allSettled(
+        chunk.map(async (item) => {
+          try {
+            await apiClient.post(API_ENDPOINTS.transactions.create, {
+              amount: item.amount,
+              type: item.type,
+              category: item.category,
+              description: item.description || undefined,
+              date: item.date,
+            });
+            return { success: true, item };
+          } catch (err) {
+            const errorMsg = err instanceof Error ? err.message : 'API creation error';
+            return { success: false, item, error: errorMsg };
+          }
+        })
+      );
 
-      try {
-        await apiClient.post(API_ENDPOINTS.transactions.create, {
-          amount: item.amount,
-          type: item.type,
-          category: item.category,
-          description: item.description || undefined,
-          date: item.date,
-        });
-        successfulCount++;
-        setProgress(prev => ({ ...prev, success: successfulCount }));
-      } catch (err) {
-        const errorMsg = err instanceof Error ? err.message : 'API creation error';
-        failedImports.push({ rowNum: item.rowNum, error: errorMsg });
-        setProgress(prev => ({ ...prev, errorCount: failedImports.length }));
+      for (const res of results) {
+        if (res.status === 'fulfilled') {
+          if (res.value.success) {
+            successfulCount++;
+          } else {
+            failedImports.push({
+              rowNum: res.value.item.rowNum,
+              error: res.value.error || 'API creation error',
+            });
+          }
+        } else {
+          failedImports.push({
+            rowNum: 0,
+            error: String(res.reason || 'Unknown error'),
+          });
+        }
       }
+
+      const processedCount = successfulCount + failedImports.length;
+      setProgress({
+        current: processedCount,
+        total: totalRows,
+        success: successfulCount,
+        errorCount: failedImports.length,
+      });
+      setImportErrors([...failedImports]);
     }
 
-    setImportErrors(failedImports);
     setIsProcessing(false);
     setImportStatus('completed');
     if (successfulCount > 0) {
@@ -369,336 +417,573 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
     setGeneralError(null);
     setImportStatus('idle');
     setProgress({ current: 0, total: 0, success: 0, errorCount: 0 });
+    setIsMinimized(false);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
   };
 
+  const handleCloseModal = () => {
+    if (isProcessing) {
+      setIsMinimized(true);
+    } else {
+      onClose();
+    }
+  };
+
+  // High-contrast theme-aware style tokens
+  const totalCardBg = isDark ? '#1E2235' : '#F3F4F6';
+  const totalCardBorder = isDark ? '#373A54' : '#E5E7EB';
+  const totalLabelColor = isDark ? '#9CA3AF' : '#4B5563';
+  const totalValColor = isDark ? '#FFFFFF' : '#111827';
+
+  const successCardBg = isDark ? '#064E3B' : '#ECFDF5';
+  const successCardBorder = isDark ? '#059669' : '#A7F3D0';
+  const successLabelColor = isDark ? '#A7F3D0' : '#047857';
+  const successValColor = isDark ? '#34D399' : '#065F46';
+
+  const failedCardBg = isDark ? '#7F1D1D' : '#FEF2F2';
+  const failedCardBorder = isDark ? '#DC2626' : '#FECDD3';
+  const failedLabelColor = isDark ? '#FECDD3' : '#B91C1C';
+  const failedValColor = isDark ? '#FCA5A5' : '#991B1B';
+
   return (
     <>
-      {/* Backdrop */}
-      <div
-        className="fixed inset-0 transition-opacity"
-        style={{
-          backgroundColor: 'rgba(0, 0, 0, 0.4)',
-          zIndex: 999,
-        }}
-        onClick={isProcessing ? undefined : onClose}
-      />
-
-      {/* Modal Container */}
-      <div className="fixed inset-0 flex items-center justify-center p-4" style={{ zIndex: 1000 }}>
+      {/* Floating Minimized Toast / Widget */}
+      {isMinimized && (
         <div
-          className="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[85vh] flex flex-col overflow-hidden"
-          style={{ backgroundColor: colors.background.primary }}
+          className="fixed bottom-6 right-6 z-[9999] shadow-2xl rounded-2xl p-4 w-96 space-y-3 transition-all border"
+          style={{
+            backgroundColor: colors.surface.primary,
+            borderColor: colors.border.medium,
+          }}
         >
-          {/* Header */}
-          <div
-            className="flex items-center justify-between p-6 border-b"
-            style={{ borderColor: colors.border.light }}
-          >
-            <Heading level={3} className="m-0">
-              {t('transactions.excelModalTitle')}
-            </Heading>
-            <button
-              onClick={onClose}
-              disabled={isProcessing}
-              className="p-1 rounded-lg transition-colors hover:bg-black/5 disabled:opacity-50 hover:cursor-pointer"
-              style={{ color: colors.text.secondary }}
-            >
-              <MdClose className="w-5 h-5" />
-            </button>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              {isProcessing ? (
+                <MdRefresh className="w-5 h-5 animate-spin" style={{ color: colors.interactive.primary }} />
+              ) : progress.errorCount === 0 ? (
+                <MdCheckCircle className="w-5 h-5" style={{ color: colors.interactive.success }} />
+              ) : (
+                <MdWarning className="w-5 h-5 text-amber-500" />
+              )}
+              <span className="font-bold text-sm" style={{ color: colors.text.primary }}>
+                {isProcessing ? t('transactions.minimizedNotice') : t('transactions.importComplete', { success: progress.success })}
+              </span>
+            </div>
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => setIsMinimized(false)}
+                className="p-1.5 rounded-lg transition-colors hover:opacity-80"
+                style={{ color: colors.text.secondary }}
+                title="Expand modal"
+              >
+                <MdOpenInNew className="w-4 h-4" />
+              </button>
+              {!isProcessing && (
+                <button
+                  onClick={() => {
+                    setIsMinimized(false);
+                    onClose();
+                  }}
+                  className="p-1.5 rounded-lg transition-colors hover:opacity-80"
+                  style={{ color: colors.text.secondary }}
+                  title="Close"
+                >
+                  <MdClose className="w-4 h-4" />
+                </button>
+              )}
+            </div>
           </div>
 
-          {/* Modal Body */}
-          <div className="flex-1 overflow-y-auto p-6 space-y-4">
-            {importStatus === 'idle' && (
-              <>
-                {/* Guidelines */}
-                <div
-                  className="p-4 rounded-lg space-y-2 border text-sm"
-                  style={{ backgroundColor: colors.background.secondary, borderColor: colors.border.light }}
+          <div
+            className="w-full rounded-full h-2 overflow-hidden"
+            style={{ backgroundColor: isDark ? '#282B40' : '#E5E7EB' }}
+          >
+            <div
+              className="h-2 rounded-full transition-all duration-300"
+              style={{
+                width: `${progress.total > 0 ? (progress.current / progress.total) * 100 : 0}%`,
+                backgroundColor: colors.interactive.primary,
+              }}
+            />
+          </div>
+
+          <div className="flex justify-between text-xs font-semibold">
+            <span style={{ color: colors.text.secondary }}>
+              {progress.current} / {progress.total}
+            </span>
+            <div className="flex gap-3">
+              <span style={{ color: successValColor }} className="font-bold">
+                ✓ {progress.success}
+              </span>
+              <span style={{ color: failedValColor }} className="font-bold">
+                ✗ {progress.errorCount}
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Main Modal overlay */}
+      {isOpen && !isMinimized && (
+        <>
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 transition-opacity"
+            style={{
+              backgroundColor: 'rgba(0, 0, 0, 0.5)',
+              zIndex: 999,
+            }}
+            onClick={handleCloseModal}
+          />
+
+          {/* Modal Container */}
+          <div className="fixed inset-0 flex items-center justify-center p-4" style={{ zIndex: 1000 }}>
+            <div
+              className="rounded-2xl shadow-2xl max-w-lg w-full max-h-[85vh] flex flex-col overflow-hidden border"
+              style={{
+                backgroundColor: colors.background.primary,
+                borderColor: colors.border.light,
+              }}
+            >
+              {/* Header */}
+              <div
+                className="flex items-center justify-between p-6 border-b"
+                style={{ borderColor: colors.border.light }}
+              >
+                <Heading level={3} className="m-0" style={{ color: colors.text.primary }}>
+                  {t('transactions.excelModalTitle')}
+                </Heading>
+                <button
+                  onClick={handleCloseModal}
+                  className="p-1 rounded-lg transition-colors hover:opacity-75 hover:cursor-pointer"
+                  style={{ color: colors.text.secondary }}
+                  title={isProcessing ? t('transactions.runInBackground') : 'Close'}
                 >
-                  <p className="font-semibold" style={{ color: colors.text.primary }}>{t('transactions.excelGuidelineTitle')}</p>
-                  <ul className="list-disc pl-5 space-y-1" style={{ color: colors.text.secondary }}>
-                    <li><strong>{t('transactions.excelLabelColumns')}</strong>: {t('transactions.excelGuidelineColumnsDesc')}</li>
-                    <li><strong>Amount</strong>: {t('transactions.excelGuidelineAmountDesc')}</li>
-                    <li><strong>Type</strong>: {t('transactions.excelGuidelineTypeDesc')}</li>
-                    <li><strong>Category</strong>: {t('transactions.excelGuidelineCategoryDesc')}</li>
-                    <li><strong>Date</strong>: {t('transactions.excelGuidelineDateDesc')}</li>
-                    <li><strong>Description</strong>: {t('transactions.excelGuidelineDescDesc')}</li>
-                  </ul>
+                  <MdClose className="w-5 h-5" />
+                </button>
+              </div>
 
-                  {/* Excel Template Preview Table */}
-                  <div className="overflow-x-auto my-3 border rounded-lg shadow-sm" style={{ borderColor: '#9CA3AF' }}>
-                    <table className="min-w-full text-xs text-left border-collapse" style={{ border: `1px solid #9CA3AF` }}>
-                      <thead>
-                        {/* Excel-style Column Indicators A, B, C, D, E, F */}
-                        <tr style={{ backgroundColor: '#F9FAFB', borderBottom: `1px solid #9CA3AF` }}>
-                          <th className="p-1 text-center font-semibold text-[10px]" style={{ color: colors.text.tertiary, borderRight: `1px solid #9CA3AF`, width: '4%' }}></th>
-                          <th className="p-1 text-center font-semibold text-[10px]" style={{ color: colors.text.tertiary, borderRight: `1px solid #9CA3AF` }}>A</th>
-                          <th className="p-1 text-center font-semibold text-[10px]" style={{ color: colors.text.tertiary, borderRight: `1px solid #9CA3AF` }}>B</th>
-                          <th className="p-1 text-center font-semibold text-[10px]" style={{ color: colors.text.tertiary, borderRight: `1px solid #9CA3AF` }}>C</th>
-                          <th className="p-1 text-center font-semibold text-[10px]" style={{ color: colors.text.tertiary, borderRight: `1px solid #9CA3AF` }}>D</th>
-                          <th className="p-1 text-center font-semibold text-[10px]" style={{ color: colors.text.tertiary, borderRight: `1px solid #9CA3AF` }}>E</th>
-                          <th className="p-1 text-center font-semibold text-[10px]" style={{ color: colors.text.tertiary }}>F</th>
-                        </tr>
-                        {/* Styled Header Row */}
-                        <tr style={{ backgroundColor: '#E5E7EB', borderBottom: `2px solid #4B5563` }}>
-                          <td className="p-2 text-center font-bold text-[10px]" style={{ backgroundColor: '#F9FAFB', color: colors.text.tertiary, borderRight: `1px solid #9CA3AF` }}>1</td>
-                          <th className="p-2 px-2 font-bold text-center" style={{ color: '#111827', borderRight: `1px solid #9CA3AF` }}>No.</th>
-                          <th className="p-2 px-3 font-bold text-center" style={{ color: '#111827', borderRight: `1px solid #9CA3AF` }}>{t('transactions.excelHeaderAmount')}</th>
-                          <th className="p-2 px-3 font-bold text-center" style={{ color: '#111827', borderRight: `1px solid #9CA3AF` }}>{t('transactions.excelHeaderType')}</th>
-                          <th className="p-2 px-3 font-bold text-center" style={{ color: '#111827', borderRight: `1px solid #9CA3AF` }}>{t('transactions.excelHeaderCategory')}</th>
-                          <th className="p-2 px-3 font-bold text-center" style={{ color: '#111827', borderRight: `1px solid #9CA3AF` }}>{t('transactions.excelHeaderDate')}</th>
-                          <th className="p-2 px-3 font-bold text-center" style={{ color: '#111827' }}>{t('transactions.excelHeaderDescription')}</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {/* Row 2: Expense */}
-                        <tr style={{ backgroundColor: '#FFFFFF', borderBottom: `1px solid #9CA3AF` }}>
-                          <td className="p-2 text-center font-semibold text-[10px]" style={{ backgroundColor: '#F9FAFB', color: colors.text.tertiary, borderRight: `1px solid #9CA3AF` }}>2</td>
-                          <td className="p-2 text-center font-medium" style={{ color: '#374151', borderRight: `1px solid #9CA3AF` }}>1</td>
-                          <td className="p-2 pr-3 text-right font-bold" style={{ color: '#DC2626', borderRight: `1px solid #9CA3AF` }}>-50,000</td>
-                          <td className="p-2 text-center font-semibold" style={{ color: '#DC2626', borderRight: `1px solid #9CA3AF` }}>Expense</td>
-                          <td className="p-2 pl-3 text-left" style={{ color: '#374151', borderRight: `1px solid #9CA3AF` }}>Food</td>
-                          <td className="p-2 text-center font-mono" style={{ color: '#374151', borderRight: `1px solid #9CA3AF` }}>16/06/2026 12:30</td>
-                          <td className="p-2 pl-3 text-left" style={{ color: '#374151' }}>Lunch with coworkers</td>
-                        </tr>
-                        {/* Row 3: Income */}
-                        <tr style={{ backgroundColor: '#F9FAFB' }}>
-                          <td className="p-2 text-center font-semibold text-[10px]" style={{ backgroundColor: '#F9FAFB', color: colors.text.tertiary, borderRight: `1px solid #9CA3AF` }}>3</td>
-                          <td className="p-2 text-center font-medium" style={{ color: '#374151', borderRight: `1px solid #9CA3AF` }}>2</td>
-                          <td className="p-2 pr-3 text-right font-bold" style={{ color: '#16A34A', borderRight: `1px solid #9CA3AF` }}>+15,000,000</td>
-                          <td className="p-2 text-center font-semibold" style={{ color: '#16A34A', borderRight: `1px solid #9CA3AF` }}>Income</td>
-                          <td className="p-2 pl-3 text-left" style={{ color: '#374151', borderRight: `1px solid #9CA3AF` }}>Other</td>
-                          <td className="p-2 text-center font-mono" style={{ color: '#374151', borderRight: `1px solid #9CA3AF` }}>10/06/2026 09:00</td>
-                          <td className="p-2 pl-3 text-left" style={{ color: '#374151' }}>Monthly salary payment</td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-
-                  <div className="pt-2">
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      className="flex items-center gap-2"
-                      onClick={handleDownloadTemplate}
+              {/* Modal Body */}
+              <div className="flex-1 overflow-y-auto p-6 space-y-4">
+                {importStatus === 'idle' && (
+                  <>
+                    {/* Guidelines */}
+                    <div
+                      className="p-4 rounded-lg space-y-2 border text-sm"
+                      style={{ backgroundColor: colors.background.secondary, borderColor: colors.border.light }}
                     >
-                      <MdFileDownload className="w-4 h-4" />
-                      {t('transactions.downloadTemplate')}
-                    </Button>
-                  </div>
-                </div>
+                      <p className="font-semibold" style={{ color: colors.text.primary }}>{t('transactions.excelGuidelineTitle')}</p>
+                      <ul className="list-disc pl-5 space-y-1" style={{ color: colors.text.secondary }}>
+                        <li><strong>{t('transactions.excelLabelColumns')}</strong>: {t('transactions.excelGuidelineColumnsDesc')}</li>
+                        <li><strong>Amount</strong>: {t('transactions.excelGuidelineAmountDesc')}</li>
+                        <li><strong>Type</strong>: {t('transactions.excelGuidelineTypeDesc')}</li>
+                        <li><strong>Category</strong>: {t('transactions.excelGuidelineCategoryDesc')}</li>
+                        <li><strong>Date</strong>: {t('transactions.excelGuidelineDateDesc')}</li>
+                        <li><strong>Description</strong>: {t('transactions.excelGuidelineDescDesc')}</li>
+                      </ul>
 
-                {/* Drop Zone */}
-                <div
-                  onDragEnter={handleDrag}
-                  onDragOver={handleDrag}
-                  onDragLeave={handleDrag}
-                  onDrop={handleDrop}
-                  onClick={() => fileInputRef.current?.click()}
-                  className={`border-2 border-dashed rounded-xl p-8 flex flex-col items-center justify-center text-center cursor-pointer transition-all ${dragActive ? 'border-indigo-500 bg-indigo-50/10' : 'hover:bg-black/5'
-                    }`}
-                  style={{
-                    borderColor: dragActive ? colors.interactive.primary : colors.border.light,
-                  }}
-                >
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept=".xlsx,.xls"
-                    onChange={handleFileChange}
-                    className="hidden"
-                  />
-                  <MdCloudUpload className="w-12 h-12 mb-3" style={{ color: colors.interactive.primary }} />
-                  <Text className="font-medium mb-1" style={{ color: colors.text.primary }}>
-                    {t('transactions.dropExcelHere')}
-                  </Text>
-                  <Text className="text-xs" style={{ color: colors.text.tertiary }}>
-                    {t('transactions.excelOnlySupported')}
-                  </Text>
-                </div>
-
-                {generalError && (
-                  <div
-                    className="p-4 rounded-lg flex items-start gap-3"
-                    style={{ backgroundColor: `${colors.interactive.danger}15`, color: colors.interactive.danger }}
-                  >
-                    <MdError className="w-5 h-5 flex-shrink-0 mt-0.5" />
-                    <Text className="font-medium text-sm">{generalError}</Text>
-                  </div>
-                )}
-              </>
-            )}
-
-            {/* Preview & Validate state */}
-            {importStatus === 'parsed' && (
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <Text className="font-semibold" style={{ color: colors.text.primary }}>
-                    {t('transactions.parseSuccess', { count: parsedData.length })}
-                  </Text>
-                  <Button variant="secondary" size="sm" onClick={handleReset}>
-                    {t('common.cancel')}
-                  </Button>
-                </div>
-
-                {/* Parsed Rows Preview */}
-                <div className="border rounded-lg max-h-60 overflow-y-auto divide-y" style={{ borderColor: colors.border.light }}>
-                  {parsedData.map((row) => (
-                    <div key={row.rowNum} className="p-3 text-sm flex justify-between items-start gap-4">
-                      <div className="space-y-0.5">
-                        <div className="flex items-center gap-2">
-                          <span
-                            className="text-xs font-bold px-1.5 py-0.5 rounded"
-                            style={{
-                              backgroundColor: row.type === 'INCOME' ? '#D1FAE5' : '#FEE2E2',
-                              color: row.type === 'INCOME' ? '#065F46' : '#991B1B',
-                            }}
-                          >
-                            {row.type}
-                          </span>
-                          <span className="font-medium" style={{ color: colors.text.primary }}>
-                            {row.amount.toLocaleString()} VND
-                          </span>
-                          <span style={{ color: colors.text.tertiary }}>•</span>
-                          <span className="text-xs" style={{ color: colors.text.secondary }}>
-                            {row.category}
-                          </span>
-                        </div>
-                        {row.description && (
-                          <p className="text-xs italic" style={{ color: colors.text.secondary }}>
-                            "{row.description}"
-                          </p>
-                        )}
-                        <p className="text-xs font-mono" style={{ color: colors.text.tertiary }}>
-                          {row.date} (Row {row.rowNum})
-                        </p>
+                      {/* Excel Template Preview Table */}
+                      <div className="overflow-x-auto my-3 border rounded-lg shadow-sm" style={{ borderColor: '#9CA3AF' }}>
+                        <table className="min-w-full text-xs text-left border-collapse" style={{ border: `1px solid #9CA3AF` }}>
+                          <thead>
+                            <tr style={{ backgroundColor: isDark ? '#1E2235' : '#F9FAFB', borderBottom: `1px solid #9CA3AF` }}>
+                              <th className="p-1 text-center font-semibold text-[10px]" style={{ color: colors.text.tertiary, borderRight: `1px solid #9CA3AF`, width: '4%' }}></th>
+                              <th className="p-1 text-center font-semibold text-[10px]" style={{ color: colors.text.tertiary, borderRight: `1px solid #9CA3AF` }}>A</th>
+                              <th className="p-1 text-center font-semibold text-[10px]" style={{ color: colors.text.tertiary, borderRight: `1px solid #9CA3AF` }}>B</th>
+                              <th className="p-1 text-center font-semibold text-[10px]" style={{ color: colors.text.tertiary, borderRight: `1px solid #9CA3AF` }}>C</th>
+                              <th className="p-1 text-center font-semibold text-[10px]" style={{ color: colors.text.tertiary, borderRight: `1px solid #9CA3AF` }}>D</th>
+                              <th className="p-1 text-center font-semibold text-[10px]" style={{ color: colors.text.tertiary, borderRight: `1px solid #9CA3AF` }}>E</th>
+                              <th className="p-1 text-center font-semibold text-[10px]" style={{ color: colors.text.tertiary }}>F</th>
+                            </tr>
+                            <tr style={{ backgroundColor: isDark ? '#282B40' : '#E5E7EB', borderBottom: `2px solid #4B5563` }}>
+                              <td className="p-2 text-center font-bold text-[10px]" style={{ backgroundColor: isDark ? '#1E2235' : '#F9FAFB', color: colors.text.tertiary, borderRight: `1px solid #9CA3AF` }}>1</td>
+                              <th className="p-2 px-2 font-bold text-center" style={{ color: colors.text.primary, borderRight: `1px solid #9CA3AF` }}>No.</th>
+                              <th className="p-2 px-3 font-bold text-center" style={{ color: colors.text.primary, borderRight: `1px solid #9CA3AF` }}>{t('transactions.excelHeaderAmount')}</th>
+                              <th className="p-2 px-3 font-bold text-center" style={{ color: colors.text.primary, borderRight: `1px solid #9CA3AF` }}>{t('transactions.excelHeaderType')}</th>
+                              <th className="p-2 px-3 font-bold text-center" style={{ color: colors.text.primary, borderRight: `1px solid #9CA3AF` }}>{t('transactions.excelHeaderCategory')}</th>
+                              <th className="p-2 px-3 font-bold text-center" style={{ color: colors.text.primary, borderRight: `1px solid #9CA3AF` }}>{t('transactions.excelHeaderDate')}</th>
+                              <th className="p-2 px-3 font-bold text-center" style={{ color: colors.text.primary }}>{t('transactions.excelHeaderDescription')}</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr style={{ backgroundColor: isDark ? '#131520' : '#FFFFFF', borderBottom: `1px solid #9CA3AF` }}>
+                              <td className="p-2 text-center font-semibold text-[10px]" style={{ backgroundColor: isDark ? '#1E2235' : '#F9FAFB', color: colors.text.tertiary, borderRight: `1px solid #9CA3AF` }}>2</td>
+                              <td className="p-2 text-center font-medium" style={{ color: colors.text.primary, borderRight: `1px solid #9CA3AF` }}>1</td>
+                              <td className="p-2 pr-3 text-right font-bold" style={{ color: failedValColor, borderRight: `1px solid #9CA3AF` }}>-50,000</td>
+                              <td className="p-2 text-center font-semibold" style={{ color: failedValColor, borderRight: `1px solid #9CA3AF` }}>Expense</td>
+                              <td className="p-2 pl-3 text-left" style={{ color: colors.text.primary, borderRight: `1px solid #9CA3AF` }}>Food</td>
+                              <td className="p-2 text-center font-mono" style={{ color: colors.text.primary, borderRight: `1px solid #9CA3AF` }}>16/06/2026 12:30</td>
+                              <td className="p-2 pl-3 text-left" style={{ color: colors.text.primary }}>Lunch with coworkers</td>
+                            </tr>
+                            <tr style={{ backgroundColor: isDark ? '#1B1E2E' : '#F9FAFB' }}>
+                              <td className="p-2 text-center font-semibold text-[10px]" style={{ backgroundColor: isDark ? '#1E2235' : '#F9FAFB', color: colors.text.tertiary, borderRight: `1px solid #9CA3AF` }}>3</td>
+                              <td className="p-2 text-center font-medium" style={{ color: colors.text.primary, borderRight: `1px solid #9CA3AF` }}>2</td>
+                              <td className="p-2 pr-3 text-right font-bold" style={{ color: successValColor, borderRight: `1px solid #9CA3AF` }}>+15,000,000</td>
+                              <td className="p-2 text-center font-semibold" style={{ color: successValColor, borderRight: `1px solid #9CA3AF` }}>Income</td>
+                              <td className="p-2 pl-3 text-left" style={{ color: colors.text.primary, borderRight: `1px solid #9CA3AF` }}>Other</td>
+                              <td className="p-2 text-center font-mono" style={{ color: colors.text.primary, borderRight: `1px solid #9CA3AF` }}>10/06/2026 09:00</td>
+                              <td className="p-2 pl-3 text-left" style={{ color: colors.text.primary }}>Monthly salary payment</td>
+                            </tr>
+                          </tbody>
+                        </table>
                       </div>
 
-                      <div>
-                        {row.isValid ? (
-                          <MdCheckCircle className="w-5 h-5" style={{ color: colors.interactive.success }} />
-                        ) : (
-                          <div className="flex flex-col items-end">
-                            <MdError className="w-5 h-5" style={{ color: colors.interactive.danger }} />
-                            <span className="text-[10px] text-right mt-1 max-w-[200px]" style={{ color: colors.interactive.danger }}>
-                              {row.error}
-                            </span>
-                          </div>
-                        )}
+                      <div className="pt-2">
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          className="flex items-center gap-2"
+                          onClick={handleDownloadTemplate}
+                        >
+                          <MdFileDownload className="w-4 h-4" />
+                          {t('transactions.downloadTemplate')}
+                        </Button>
                       </div>
                     </div>
-                  ))}
-                </div>
 
-                {parsedData.some(r => !r.isValid) && (
-                  <div
-                    className="p-3 rounded-lg border text-xs"
-                    style={{ backgroundColor: `${colors.interactive.warning}10`, borderColor: colors.interactive.warning, color: colors.text.primary }}
-                  >
-                    {t('transactions.excelValidationWarning')}
-                  </div>
-                )}
-              </div>
-            )}
+                    {/* Drop Zone */}
+                    <div
+                      onDragEnter={handleDrag}
+                      onDragOver={handleDrag}
+                      onDragLeave={handleDrag}
+                      onDrop={handleDrop}
+                      onClick={() => fileInputRef.current?.click()}
+                      className={`border-2 border-dashed rounded-xl p-8 flex flex-col items-center justify-center text-center cursor-pointer transition-all ${
+                        dragActive ? 'border-indigo-500 bg-indigo-50/10' : 'hover:bg-black/5'
+                      }`}
+                      style={{
+                        borderColor: dragActive ? colors.interactive.primary : colors.border.light,
+                      }}
+                    >
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept=".xlsx,.xls"
+                        onChange={handleFileChange}
+                        className="hidden"
+                      />
+                      <MdCloudUpload className="w-12 h-12 mb-3" style={{ color: colors.interactive.primary }} />
+                      <Text className="font-medium mb-1" style={{ color: colors.text.primary }}>
+                        {t('transactions.dropExcelHere')}
+                      </Text>
+                      <Text className="text-xs" style={{ color: colors.text.tertiary }}>
+                        {t('transactions.excelOnlySupported')}
+                      </Text>
+                    </div>
 
-            {/* Importing processing state */}
-            {importStatus === 'importing' && (
-              <div className="py-8 space-y-4 text-center">
-                <div className="flex justify-center">
-                  <MdRefresh className="w-12 h-12 animate-spin" style={{ color: colors.interactive.primary }} />
-                </div>
-                <Heading level={4} className='pb-2'>
-                  {t('transactions.importProgress', { current: progress.current, total: progress.total })}
-                </Heading>
-                <div className="w-full bg-gray-200 rounded-full h-2 max-w-md mx-auto overflow-hidden">
-                  <div
-                    className="h-2 rounded-full transition-all duration-300"
-                    style={{
-                      width: `${(progress.current / progress.total) * 100}%`,
-                      backgroundColor: colors.interactive.primary,
-                    }}
-                  />
-                </div>
-                <div className="flex justify-center gap-6 text-sm">
-                  <span style={{ color: colors.interactive.success }}>Success: {progress.success}</span>
-                  <span style={{ color: colors.interactive.danger }}>Failed: {progress.errorCount}</span>
-                </div>
-              </div>
-            )}
-
-            {/* Completed status */}
-            {importStatus === 'completed' && (
-              <div className="space-y-4">
-                <div className="text-center py-6 space-y-2">
-                  <div className="flex justify-center">
-                    {progress.errorCount === 0 ? (
-                      <MdCheckCircle className="w-14 h-14" style={{ color: colors.interactive.success }} />
-                    ) : (
-                      <MdError className="w-14 h-14" style={{ color: colors.interactive.warning }} />
+                    {generalError && (
+                      <div
+                        className="p-4 rounded-lg flex items-start gap-3"
+                        style={{ backgroundColor: `${colors.interactive.danger}15`, color: colors.interactive.danger }}
+                      >
+                        <MdError className="w-5 h-5 flex-shrink-0 mt-0.5" />
+                        <Text className="font-medium text-sm">{generalError}</Text>
+                      </div>
                     )}
-                  </div>
-                  <Heading level={4} style={{ color: colors.text.primary }}>
-                    {t('transactions.importComplete', { success: progress.success })}
-                  </Heading>
-                </div>
+                  </>
+                )}
 
-                {importErrors.length > 0 && (
-                  <div className="space-y-2">
-                    <Text className="font-semibold text-sm" style={{ color: colors.text.primary }}>
-                      {t('transactions.partialErrors')}
-                    </Text>
-                    <div className="border rounded-lg max-h-48 overflow-y-auto divide-y text-xs" style={{ borderColor: colors.border.light }}>
-                      {importErrors.map((err, idx) => (
-                        <div key={idx} className="p-2.5 flex justify-between gap-4" style={{ color: colors.interactive.danger }}>
-                          <span className="font-medium">Row {err.rowNum}</span>
-                          <span>{err.error}</span>
+                {/* Preview & Validate state */}
+                {importStatus === 'parsed' && (
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <Text className="font-semibold" style={{ color: colors.text.primary }}>
+                        {t('transactions.parseSuccess', { count: parsedData.length })}
+                      </Text>
+                      <Button variant="secondary" size="sm" onClick={handleReset}>
+                        {t('common.cancel')}
+                      </Button>
+                    </div>
+
+                    {/* Parsed Rows Preview */}
+                    <div className="border rounded-lg max-h-60 overflow-y-auto divide-y" style={{ borderColor: colors.border.light }}>
+                      {parsedData.map((row) => (
+                        <div key={row.rowNum} className="p-3 text-sm flex justify-between items-start gap-4" style={{ borderColor: colors.border.light }}>
+                          <div className="space-y-0.5">
+                            <div className="flex items-center gap-2">
+                              <span
+                                className="text-xs font-bold px-1.5 py-0.5 rounded"
+                                style={{
+                                  backgroundColor: row.type === 'INCOME' ? (isDark ? '#064E3B' : '#D1FAE5') : (isDark ? '#7F1D1D' : '#FEE2E2'),
+                                  color: row.type === 'INCOME' ? (isDark ? '#34D399' : '#065F46') : (isDark ? '#FCA5A5' : '#991B1B'),
+                                }}
+                              >
+                                {row.type}
+                              </span>
+                              <span className="font-medium" style={{ color: colors.text.primary }}>
+                                {row.amount.toLocaleString()} VND
+                              </span>
+                              <span style={{ color: colors.text.tertiary }}>•</span>
+                              <span className="text-xs" style={{ color: colors.text.secondary }}>
+                                {row.category}
+                              </span>
+                            </div>
+                            {row.description && (
+                              <p className="text-xs italic" style={{ color: colors.text.secondary }}>
+                                "{row.description}"
+                              </p>
+                            )}
+                            <p className="text-xs font-mono" style={{ color: colors.text.tertiary }}>
+                              {row.date} ({t('transactions.excelRowHeader')} {row.rowNum})
+                            </p>
+                          </div>
+
+                          <div>
+                            {row.isValid ? (
+                              <MdCheckCircle className="w-5 h-5" style={{ color: colors.interactive.success }} />
+                            ) : (
+                              <div className="flex flex-col items-end">
+                                <MdError className="w-5 h-5" style={{ color: colors.interactive.danger }} />
+                                <span className="text-[10px] text-right mt-1 max-w-[200px]" style={{ color: failedValColor }}>
+                                  {row.error}
+                                </span>
+                              </div>
+                            )}
+                          </div>
                         </div>
                       ))}
                     </div>
+
+                    {parsedData.some(r => !r.isValid) && (
+                      <div
+                        className="p-3 rounded-lg border text-xs"
+                        style={{ backgroundColor: `${colors.interactive.warning}15`, borderColor: colors.interactive.warning, color: colors.text.primary }}
+                      >
+                        {t('transactions.excelValidationWarning')}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Importing processing state */}
+                {importStatus === 'importing' && (
+                  <div className="py-6 space-y-6 text-center">
+                    <div className="flex justify-center">
+                      <MdRefresh className="w-12 h-12 animate-spin" style={{ color: colors.interactive.primary }} />
+                    </div>
+                    <Heading level={4} className="pb-1" style={{ color: colors.text.primary }}>
+                      {t('transactions.importProgress', { current: progress.current, total: progress.total })}
+                    </Heading>
+
+                    {/* Progress Bar */}
+                    <div
+                      className="w-full rounded-full h-3 max-w-md mx-auto overflow-hidden"
+                      style={{ backgroundColor: isDark ? '#282B40' : '#E5E7EB' }}
+                    >
+                      <div
+                        className="h-3 rounded-full transition-all duration-300"
+                        style={{
+                          width: `${progress.total > 0 ? (progress.current / progress.total) * 100 : 0}%`,
+                          backgroundColor: colors.interactive.primary,
+                        }}
+                      />
+                    </div>
+
+                    {/* Stat Badges Grid */}
+                    <div className="grid grid-cols-3 gap-3 max-w-md mx-auto pt-2">
+                      {/* Total Card */}
+                      <div
+                        className="p-3.5 rounded-xl border text-center transition-colors"
+                        style={{ backgroundColor: totalCardBg, borderColor: totalCardBorder }}
+                      >
+                        <span className="text-xs font-semibold block mb-1" style={{ color: totalLabelColor }}>
+                          {t('transactions.excelTotalCount', { count: '' }).replace(': ', '').replace(':', '')}
+                        </span>
+                        <span className="text-2xl font-extrabold" style={{ color: totalValColor }}>
+                          {progress.total}
+                        </span>
+                      </div>
+
+                      {/* Success Card */}
+                      <div
+                        className="p-3.5 rounded-xl border text-center transition-colors"
+                        style={{ backgroundColor: successCardBg, borderColor: successCardBorder }}
+                      >
+                        <span className="text-xs font-semibold block mb-1" style={{ color: successLabelColor }}>
+                          {t('transactions.excelSuccessCount', { count: '' }).replace(': ', '').replace(':', '')}
+                        </span>
+                        <span className="text-2xl font-extrabold" style={{ color: successValColor }}>
+                          {progress.success}
+                        </span>
+                      </div>
+
+                      {/* Failed Card */}
+                      <div
+                        className="p-3.5 rounded-xl border text-center transition-colors"
+                        style={{ backgroundColor: failedCardBg, borderColor: failedCardBorder }}
+                      >
+                        <span className="text-xs font-semibold block mb-1" style={{ color: failedLabelColor }}>
+                          {t('transactions.excelFailedCount', { count: '' }).replace(': ', '').replace(':', '')}
+                        </span>
+                        <span className="text-2xl font-extrabold" style={{ color: failedValColor }}>
+                          {progress.errorCount}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Completed status */}
+                {importStatus === 'completed' && (
+                  <div className="space-y-5">
+                    <div className="text-center py-4 space-y-2">
+                      <div className="flex justify-center">
+                        {progress.errorCount === 0 ? (
+                          <MdCheckCircle className="w-14 h-14" style={{ color: colors.interactive.success }} />
+                        ) : (
+                          <MdWarning className="w-14 h-14 text-amber-500" />
+                        )}
+                      </div>
+                      <Heading level={4} style={{ color: colors.text.primary }}>
+                        {progress.errorCount === 0
+                          ? t('transactions.importComplete', { success: progress.success })
+                          : t('transactions.importCompleteWithErrors', { success: progress.success, failed: progress.errorCount })}
+                      </Heading>
+                    </div>
+
+                    {/* Stat Badges Grid */}
+                    <div className="grid grid-cols-3 gap-3 max-w-md mx-auto">
+                      {/* Total Card */}
+                      <div
+                        className="p-3.5 rounded-xl border text-center transition-colors"
+                        style={{ backgroundColor: totalCardBg, borderColor: totalCardBorder }}
+                      >
+                        <span className="text-xs font-semibold block mb-1" style={{ color: totalLabelColor }}>
+                          {t('transactions.excelTotalCount', { count: '' }).replace(': ', '').replace(':', '')}
+                        </span>
+                        <span className="text-2xl font-extrabold" style={{ color: totalValColor }}>
+                          {progress.total}
+                        </span>
+                      </div>
+
+                      {/* Success Card */}
+                      <div
+                        className="p-3.5 rounded-xl border text-center transition-colors"
+                        style={{ backgroundColor: successCardBg, borderColor: successCardBorder }}
+                      >
+                        <span className="text-xs font-semibold block mb-1" style={{ color: successLabelColor }}>
+                          {t('transactions.excelSuccessCount', { count: '' }).replace(': ', '').replace(':', '')}
+                        </span>
+                        <span className="text-2xl font-extrabold" style={{ color: successValColor }}>
+                          {progress.success}
+                        </span>
+                      </div>
+
+                      {/* Failed Card */}
+                      <div
+                        className="p-3.5 rounded-xl border text-center transition-colors"
+                        style={{ backgroundColor: failedCardBg, borderColor: failedCardBorder }}
+                      >
+                        <span className="text-xs font-semibold block mb-1" style={{ color: failedLabelColor }}>
+                          {t('transactions.excelFailedCount', { count: '' }).replace(': ', '').replace(':', '')}
+                        </span>
+                        <span className="text-2xl font-extrabold" style={{ color: failedValColor }}>
+                          {progress.errorCount}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Failure details section */}
+                    {importErrors.length > 0 && (
+                      <div className="space-y-2 pt-2">
+                        <Text className="font-semibold text-sm" style={{ color: colors.text.primary }}>
+                          {t('transactions.failedRowsDetails', { count: importErrors.length })}
+                        </Text>
+                        <div
+                          className="border rounded-xl max-h-52 overflow-y-auto divide-y text-xs shadow-inner"
+                          style={{
+                            borderColor: colors.border.light,
+                            backgroundColor: colors.background.secondary,
+                          }}
+                        >
+                          <div
+                            className="sticky top-0 p-2.5 font-bold flex justify-between gap-4 border-b"
+                            style={{
+                              backgroundColor: isDark ? '#282B40' : '#E5E7EB',
+                              borderColor: colors.border.light,
+                            }}
+                          >
+                            <span className="w-16 flex-shrink-0" style={{ color: isDark ? '#F3F4F6' : '#1F2937' }}>
+                              {t('transactions.excelRowHeader')}
+                            </span>
+                            <span className="flex-1" style={{ color: isDark ? '#F3F4F6' : '#1F2937' }}>
+                              {t('transactions.excelErrorHeader')}
+                            </span>
+                          </div>
+                          {importErrors.map((err, idx) => (
+                            <div
+                              key={idx}
+                              className="p-2.5 flex justify-between gap-4 items-start border-b transition-colors"
+                              style={{ borderColor: colors.border.light }}
+                            >
+                              <span
+                                className="font-mono font-bold px-2 py-0.5 rounded text-center w-16 flex-shrink-0"
+                                style={{
+                                  backgroundColor: isDark ? '#991B1B' : '#FEE2E2',
+                                  color: isDark ? '#FCA5A5' : '#991B1B',
+                                }}
+                              >
+                                #{err.rowNum}
+                              </span>
+                              <span
+                                className="flex-1 font-medium"
+                                style={{ color: isDark ? '#FCA5A5' : '#B91C1C' }}
+                              >
+                                {err.error}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
-            )}
+
+              {/* Footer */}
+              <div
+                className="p-6 border-t flex justify-end gap-3"
+                style={{ borderColor: colors.border.light }}
+              >
+                {importStatus === 'idle' && (
+                  <Button variant="secondary" onClick={onClose} disabled={isProcessing}>
+                    {t('common.cancel')}
+                  </Button>
+                )}
+
+                {importStatus === 'parsed' && (
+                  <>
+                    <Button variant="secondary" onClick={handleReset} disabled={isProcessing}>
+                      {t('common.cancel')}
+                    </Button>
+                    <Button
+                      variant="primary"
+                      onClick={handleStartImport}
+                      disabled={parsedData.length === 0 || isProcessing}
+                    >
+                      {t('transactions.excelImportRowsBtn', { count: parsedData.length })}
+                    </Button>
+                  </>
+                )}
+
+                {importStatus === 'importing' && (
+                  <Button variant="secondary" onClick={() => setIsMinimized(true)}>
+                    {t('transactions.runInBackground')}
+                  </Button>
+                )}
+
+                {importStatus === 'completed' && (
+                  <Button variant="primary" onClick={onClose}>
+                    {t('common.close')}
+                  </Button>
+                )}
+              </div>
+            </div>
           </div>
-
-          {/* Footer */}
-          <div
-            className="p-6 border-t flex justify-end gap-3"
-            style={{ borderColor: colors.border.light }}
-          >
-            {importStatus === 'idle' && (
-              <Button variant="secondary" onClick={onClose} disabled={isProcessing}>
-                {t('common.cancel')}
-              </Button>
-            )}
-
-            {importStatus === 'parsed' && (
-              <>
-                <Button variant="secondary" onClick={handleReset} disabled={isProcessing}>
-                  {t('common.cancel')}
-                </Button>
-                <Button
-                  variant="primary"
-                  onClick={handleStartImport}
-                  disabled={parsedData.filter(r => r.isValid).length === 0 || isProcessing}
-                >
-                  {t('transactions.excelImportRowsBtn', { count: parsedData.filter(r => r.isValid).length })}
-                </Button>
-              </>
-            )}
-
-            {importStatus === 'completed' && (
-              <Button variant="primary" onClick={onClose}>
-                {t('common.close')}
-              </Button>
-            )}
-          </div>
-        </div>
-      </div>
+        </>
+      )}
     </>
   );
 };

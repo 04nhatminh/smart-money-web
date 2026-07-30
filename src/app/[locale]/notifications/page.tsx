@@ -11,7 +11,7 @@ import { apiClient } from '@/lib/api-client';
 import { useGroups } from '@/hooks/useGroups';
 import { useRouter } from 'next/navigation';
 import { useLocale } from 'next-intl';
-import { MdCheck, MdClose, MdNotifications } from 'react-icons/md';
+import { MdCheck, MdClose, MdNotifications, MdChevronRight } from 'react-icons/md';
 import { parseNotificationPayload } from '@/lib/format';
 
 interface NotificationData {
@@ -133,7 +133,8 @@ export default function NotificationsPage() {
         const amount = args[1];
         const category = args[2];
 
-        const typeTranslated = typeKey === 'notification.expense'
+        const isExpense = typeKey === 'notification.expense' || typeKey === 'expense' || String(typeKey || '').toLowerCase().includes('expense');
+        const typeTranslated = isExpense
           ? (t('notifications.expense') || 'Expense')
           : (t('notifications.income') || 'Income');
 
@@ -193,6 +194,80 @@ export default function NotificationsPage() {
     }
 
     return content;
+  };
+
+  const resolveWebDeepLink = (deepLink: string | null | undefined, content: string): string | null => {
+    if (deepLink) {
+      if (deepLink.startsWith('smartmoney://group-invite')) {
+        const match = deepLink.match(/token=([a-zA-Z0-9]+)/);
+        if (match) return `/${locale}/invites/group?token=${match[1]}`;
+      }
+      if (deepLink.includes('token=')) {
+        const match = deepLink.match(/token=([a-zA-Z0-9]+)/);
+        if (match) return `/${locale}/invites/group?token=${match[1]}`;
+      }
+      if (deepLink.startsWith('/group-projects/')) {
+        return `/${locale}/projects`;
+      }
+      if (deepLink.startsWith('app://suggestions/')) {
+        const id = deepLink.replace('app://suggestions/', '');
+        return `/${locale}/suggestions?id=${id}`;
+      }
+      if (deepLink === 'app://suggestions') {
+        return `/${locale}/suggestions`;
+      }
+      if (deepLink === 'app://insights') {
+        return `/${locale}/insights`;
+      }
+      if (deepLink === 'app://transactions') {
+        return `/${locale}/transactions`;
+      }
+      if (deepLink === 'app://budgets') {
+        return `/${locale}/budgets`;
+      }
+      if (deepLink.startsWith('app://projects/')) {
+        return `/${locale}/projects`;
+      }
+      if (deepLink.startsWith('/projects')) {
+        return `/${locale}/projects`;
+      }
+      if (deepLink.startsWith('/')) {
+        return `/${locale}${deepLink}`;
+      }
+    }
+
+    if (content) {
+      if (
+        content.startsWith('notification.notification_done') ||
+        content.startsWith('notification.expense') ||
+        content.startsWith('notification.income') ||
+        content.startsWith('notification.insight.large_transaction') ||
+        content.startsWith('notification.insight.duplicate_charge')
+      ) {
+        return `/${locale}/transactions`;
+      }
+      if (content.startsWith('notification.suggestion.')) {
+        return `/${locale}/suggestions`;
+      }
+      if (content.startsWith('notification.insight.')) {
+        return `/${locale}/insights`;
+      }
+      if (content.startsWith('notification.digest.')) {
+        return `/${locale}/insights`;
+      }
+    }
+
+    return null;
+  };
+
+  const handleCardClick = async (notification: NotificationData) => {
+    if (!notification.read) {
+      handleToggleReadStatus(notification.id, false);
+    }
+    const targetUrl = resolveWebDeepLink(notification.deepLink, notification.content);
+    if (targetUrl) {
+      router.push(targetUrl);
+    }
   };
 
   const loadNotifications = async (pageNum = 0, isInitial = false) => {
@@ -538,6 +613,7 @@ export default function NotificationsPage() {
                 const isInvite = token !== null;
                 const isUnread = !notification.read;
                 const parsed = parseNotificationPayload(notification.content);
+                const targetUrl = resolveWebDeepLink(notification.deepLink, notification.content);
 
                 const sevStyle = parsed.severity === 'URGENT'
                   ? 'bg-red-500/20 text-red-400 border-red-500/30'
@@ -548,7 +624,10 @@ export default function NotificationsPage() {
                 return (
                   <div
                     key={notification.id}
-                    className="p-5 transition-all duration-200 border-l-4 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-4"
+                    onClick={() => handleCardClick(notification)}
+                    className={`p-5 transition-all duration-200 border-l-4 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-4 group ${
+                      targetUrl ? 'cursor-pointer hover:shadow-md hover:border-indigo-300 dark:hover:border-indigo-700' : ''
+                    }`}
                     style={{
                       backgroundColor: isUnread ? `${colors.interactive.primary}0c` : colors.background.primary,
                       borderLeftColor: isInvite ? '#F59E0B' : parsed.isBroadcast ? (parsed.severity === 'URGENT' ? '#EF4444' : parsed.severity === 'WARNING' ? '#F59E0B' : colors.interactive.primary) : colors.interactive.primary,
@@ -595,7 +674,7 @@ export default function NotificationsPage() {
                             color: colors.text.secondary
                           }}
                         >
-                          {parsed.isBroadcast ? parsed.message : notification.content}
+                          {parsed.isBroadcast ? parsed.message : parseNotificationContent(notification.content)}
                         </Text>
                       )}
 
@@ -609,13 +688,16 @@ export default function NotificationsPage() {
                     </div>
 
                     {/* Actions */}
-                    <div className="flex items-center gap-2 flex-shrink-0">
+                    <div className="flex items-center gap-2 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
                       {isInvite && (
                         <>
                           <Button
                             variant="primary"
                             size="sm"
-                            onClick={() => handleAcceptInvite(notification.id, token)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleAcceptInvite(notification.id, token);
+                            }}
                             disabled={actionLoading !== null}
                             className="flex items-center gap-1.5"
                           >
@@ -625,7 +707,10 @@ export default function NotificationsPage() {
                           <Button
                             variant="secondary"
                             size="sm"
-                            onClick={() => handleDeclineInvite(notification.id, token)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeclineInvite(notification.id, token);
+                            }}
                             disabled={actionLoading !== null}
                             className="flex items-center gap-1.5"
                           >
@@ -635,14 +720,31 @@ export default function NotificationsPage() {
                         </>
                       )}
                       {!notification.read && !isInvite && (
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          onClick={() => handleToggleReadStatus(notification.id, notification.read)}
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleToggleReadStatus(notification.id, notification.read);
+                          }}
                           disabled={actionLoading !== null}
+                          className="p-2 px-3 rounded-xl border flex items-center gap-1.5 text-xs font-semibold transition-all hover:scale-105 active:scale-95 flex-shrink-0 cursor-pointer shadow-sm"
+                          style={{
+                            color: colors.interactive.primary,
+                            borderColor: `${colors.interactive.primary}30`,
+                            backgroundColor: `${colors.interactive.primary}10`,
+                          }}
+                          title={t('notifications.markAsRead') || 'Mark as read'}
                         >
-                          {t('notifications.markAsRead') || 'Mark as read'}
-                        </Button>
+                          <MdCheck className="w-4 h-4" />
+                          <span className="hidden sm:inline">
+                            {t('notifications.markAsRead') || 'Mark as read'}
+                          </span>
+                        </button>
+                      )}
+                      {targetUrl && (
+                        <div className="p-1 text-gray-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors flex-shrink-0">
+                          <MdChevronRight className="w-5 h-5 group-hover:translate-x-0.5 transition-transform" />
+                        </div>
                       )}
                     </div>
                   </div>
