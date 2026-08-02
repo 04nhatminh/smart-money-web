@@ -11,9 +11,9 @@ import { CreateGroupModal } from './CreateGroupModal';
 import { GenerateBudgetModal } from './GenerateBudgetModal';
 import { CreateProjectRequest, ProjectAdvisorResponse } from '@/types/project.api';
 import { GroupSummaryResponse } from '@/types/group.api';
-import { formatAmountInput, parseFormattedNumber, formatPrice } from '@/lib/format';
+import { formatAmountInput, parseFormattedNumber, formatPrice, getDeadlineFromMonths, formatDateToInput } from '@/lib/format';
 import { MdClose, MdLightbulb, MdAutoAwesome, MdGroup, MdKeyboardArrowDown, MdCheckCircle, MdBlock } from 'react-icons/md';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { useAuth } from '@/context/AuthContext';
 
 interface CreateProjectModalProps {
@@ -58,6 +58,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
 }) => {
   const { colors } = useTheme();
   const t = useTranslations();
+  const locale = useLocale();
   const { user } = useAuth();
   const { isLoading: projectsLoading, createProject, projectAdvisor } = useProjects();
   const { listGroups, getGroupProjectSuggestions, createGroupProject, isLoading: groupsLoading } = useGroups();
@@ -95,7 +96,18 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
   const [totalMonths, setTotalMonths] = useState('1');
+  const [deadlineMonths, setDeadlineMonths] = useState('1');
   const [suggestType, setSuggestType] = useState<'amount' | 'months'>('amount');
+
+  const handleDeadlineMonthsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setDeadlineMonths(val);
+    const num = Math.max(1, Number(val) || 1);
+    setFormData((prev) => ({
+      ...prev,
+      deadline: getDeadlineFromMonths(num),
+    }));
+  };
   const [isCreateGroupModalOpen, setIsCreateGroupModalOpen] = useState(false);
 
   const [reactiveSuggestions, setReactiveSuggestions] = useState<{
@@ -384,7 +396,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
         });
         if (suggestionsRes.success && suggestionsRes.data) {
           const data = suggestionsRes.data;
-          
+
           if (data.totalDeficit && data.totalDeficit > 0) {
             if (data.isFeasible) {
               // Group can afford via sponsorship! Show simulation modal
@@ -575,7 +587,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
 
   if (!isOpen) return null;
 
-  const showFormModal = !isModeModalOpen && !isAdvisorResultModalOpen && !showDateGateOptions && !success;
+  const showFormModal = !isModeModalOpen && !isAdvisorResultModalOpen && !showDateGateOptions && !success && !isGenerateBudgetOpen;
 
   return (
     <>
@@ -764,9 +776,8 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
                           })()}
                           <MdKeyboardArrowDown
                             size={20}
-                            className={`text-gray-400 transition-transform duration-200 shrink-0 ${
-                              isGroupDropdownOpen ? 'rotate-180 text-indigo-600' : ''
-                            }`}
+                            className={`text-gray-400 transition-transform duration-200 shrink-0 ${isGroupDropdownOpen ? 'rotate-180 text-indigo-600' : ''
+                              }`}
                           />
                         </button>
 
@@ -789,23 +800,21 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
                                       setIsGroupDropdownOpen(false);
                                     }
                                   }}
-                                  className={`p-2.5 rounded-xl transition-all flex items-center justify-between gap-3 ${
-                                    isDisabled
-                                      ? 'opacity-55 bg-gray-50/80 cursor-not-allowed'
-                                      : isSelected
+                                  className={`p-2.5 rounded-xl transition-all flex items-center justify-between gap-3 ${isDisabled
+                                    ? 'opacity-55 bg-gray-50/80 cursor-not-allowed'
+                                    : isSelected
                                       ? 'bg-indigo-50/90 text-indigo-900 font-semibold border border-indigo-200/60 cursor-pointer'
                                       : 'hover:bg-gray-50 cursor-pointer text-gray-800'
-                                  }`}
+                                    }`}
                                 >
                                   <div className="flex items-center gap-2.5 min-w-0">
                                     <div
-                                      className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 text-xs font-bold ${
-                                        isDisabled
-                                          ? 'bg-gray-200 text-gray-500'
-                                          : isSelected
+                                      className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 text-xs font-bold ${isDisabled
+                                        ? 'bg-gray-200 text-gray-500'
+                                        : isSelected
                                           ? 'bg-indigo-600 text-white'
                                           : 'bg-indigo-50 text-indigo-600'
-                                      }`}
+                                        }`}
                                     >
                                       <MdGroup size={15} />
                                     </div>
@@ -971,21 +980,30 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
                   </div>
                 </div>
 
-                {/* Personal Project: Deadline, Group Project: Total Months */}
+                {/* Personal Project: Deadline Months (matching mobile UX) */}
                 {formData.type === 'PERSONAL' ? (
                   <div>
                     <label className="block text-sm font-medium mb-2" style={{ color: colors.text.primary }}>
-                      {t('projects.deadline')} <span style={{ color: colors.interactive.danger }}>*</span>
+                      {locale === 'vi' ? 'Số tháng tích lũy' : 'Duration (Months)'} <span style={{ color: colors.interactive.danger }}>*</span>
                     </label>
                     <Input
-                      type="date"
-                      name="deadline"
-                      value={formData.deadline}
-                      onChange={handleInputChange}
+                      type="number"
+                      name="deadlineMonths"
+                      value={deadlineMonths}
+                      onChange={handleDeadlineMonthsChange}
                       disabled={isLoading}
-                      min={minDeadlineStr}
+                      min={1}
+                      max={60}
+                      placeholder={locale === 'vi' ? 'Ví dụ: 2' : 'e.g. 2'}
                       required
                     />
+                    {formData.deadline && (
+                      <p className="text-xs mt-1 font-medium pt-1" style={{ color: colors.text.secondary }}>
+                        {locale === 'vi'
+                          ? `Hạn chót dự kiến: ${formatDateToInput(formData.deadline)} (${deadlineMonths || 1} tháng)`
+                          : `Estimated deadline: ${formatDateToInput(formData.deadline)} (${deadlineMonths || 1} month(s))`}
+                      </p>
+                    )}
                   </div>
                 ) : (
                   <div>
@@ -1311,7 +1329,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
           </div>
         </>
       )}
-      
+
       {/* Sponsorship Simulation Modal */}
       {showSimulationModal && simulationData && (
         <>

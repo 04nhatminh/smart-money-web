@@ -166,3 +166,43 @@ export const parseNotificationPayload = (content: string): ParsedNotification =>
     message: content,
   };
 };
+
+/**
+ * Add months to current date, adjusting for month-end overflows
+ */
+export const addMonthsFromDate = (months: number): Date => {
+  const now = new Date();
+  const result = new Date(now);
+  const originalDate = result.getDate();
+  result.setMonth(result.getMonth() + months);
+  if (result.getDate() !== originalDate) {
+    result.setDate(0);
+  }
+  return result;
+};
+
+/**
+ * Convert N months count to YYYY-MM-DD deadline (today + N months)
+ */
+export const getDeadlineFromMonths = (monthsCount: number): string => {
+  const count = Math.max(1, monthsCount || 1);
+  const targetDate = addMonthsFromDate(count);
+  const year = targetDate.getFullYear();
+  const month = String(targetDate.getMonth() + 1).padStart(2, '0');
+  const day = String(targetDate.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+/**
+ * Convert YYYY-MM-DD deadline string back to month count
+ */
+export const getMonthsFromDeadline = (deadlineStr: string): number => {
+  if (!deadlineStr) return 1;
+  const deadlineDate = new Date(deadlineStr);
+  if (isNaN(deadlineDate.getTime())) return 1;
+  const now = new Date();
+  const yearsDiff = deadlineDate.getFullYear() - now.getFullYear();
+  const monthsDiff = deadlineDate.getMonth() - now.getMonth();
+  const totalMonths = yearsDiff * 12 + monthsDiff;
+  return Math.max(1, totalMonths);
+};
