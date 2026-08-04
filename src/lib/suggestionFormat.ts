@@ -100,4 +100,5 @@ export const SUGGESTION_TYPE_ICONS: Record<SuggestionType, string> = {
   REVIEW_SUBSCRIPTION: 'MdSubscriptions',
   INCREASE_CONTRIBUTION: 'MdArrowUpward',
   CREATE_PROJECT: 'MdFolderSpecial',
+  REBALANCE_PROJECTS: 'MdSwapHoriz',
 };

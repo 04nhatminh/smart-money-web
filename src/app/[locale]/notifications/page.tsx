@@ -167,8 +167,32 @@ export default function NotificationsPage() {
       }
       case 'notification.suggestion.contribute_to_project':
       case 'notification.suggestion.increase_contribution':
-      case 'notification.insight.project_milestone': {
+      case 'notification.insight.project_milestone':
+      case 'notification.group.project_started':
+      case 'notification.group.project_completed':
+      case 'notification.group.project_expired':
+      case 'notification.group.sponsorship_failed':
+      case 'notification.settlement.project_completed':
+      case 'notification.settlement.project_frozen':
+      case 'notification.settlement.project_expired': {
         params = { projectName: args[0] || '' };
+        break;
+      }
+      case 'notification.group.invited': {
+        params = { groupName: args[0] || '' };
+        break;
+      }
+      case 'notification.group.member_dropped': {
+        params = { username: args[0] || '', projectName: args[1] || '' };
+        break;
+      }
+      case 'notification.group.sponsorship_survey':
+      case 'notification.group.sponsorship_new_round': {
+        const fmt = (raw: string) => {
+          const n = Number(raw);
+          return Number.isFinite(n) ? n.toLocaleString(locale === 'vi' ? 'vi-VN' : 'en-US') : raw;
+        };
+        params = { proposed: fmt(args[0] || ''), original: fmt(args[1] || '') };
         break;
       }
       case 'notification.suggestion.review_subscription': {

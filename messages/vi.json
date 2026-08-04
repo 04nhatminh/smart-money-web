@@ -278,7 +278,23 @@
       "reallocate_budget": "Ngân sách {category} có thể bị vượt — bù từ các ngân sách bạn chưa dùng?",
       "review_subscription": "\"{description}\" vừa tăng giá — bạn muốn xem lại không?",
       "increase_contribution": "\"{projectName}\" đang chậm tiến độ — góp thêm một chút để bắt kịp?",
-      "create_project": "Tháng này bạn có tiền dư — bắt đầu một mục tiêu tiết kiệm cho khoản đó nhé?"
+      "create_project": "Tháng này bạn có tiền dư — bắt đầu một mục tiêu tiết kiệm cho khoản đó nhé?",
+      "rebalance_projects": "Tổng dự án của bạn vượt quá thu nhập — bạn muốn cân đối lại không?"
+    },
+    "group": {
+      "invited": "Bạn đã được mời tham gia nhóm \"{groupName}\". Nhấp để chấp nhận.",
+      "project_started": "\"{projectName}\" đã sẵn sàng. Mở ứng dụng để đặt mục tiêu tiết kiệm của bạn.",
+      "project_completed": "\"{projectName}\" đã đạt mục tiêu. Chúc mừng!",
+      "member_dropped": "{username} không thể tiếp tục đóng góp cho \"{projectName}\". Mục tiêu nhóm đã được giảm theo các thành viên còn lại.",
+      "project_expired": "\"{projectName}\" đã hết hạn vì không còn thành viên nào tiếp tục đóng góp.",
+      "sponsorship_survey": "Một thành viên trong nhóm không đủ khả năng đóng góp cho \"{projectName}\" — bạn có muốn giúp đỡ không?",
+      "sponsorship_new_round": "Một số thành viên đã từ chối hỗ trợ. Mức đóng góp đề xuất mới là {proposed} VND/tháng thay vì {original} VND/tháng.",
+      "sponsorship_failed": "Dự án \"{projectName}\" của bạn thất bại vì các thành viên không thể bù đắp phần thiếu hụt."
+    },
+    "settlement": {
+      "project_completed": "Đạt mục tiêu: \"{projectName}\" đã hoàn tất.",
+      "project_frozen": "Lưu ý: \"{projectName}\" đã bị tạm dừng do chậm tiến độ tiết kiệm.",
+      "project_expired": "\"{projectName}\" đã hết hạn do bị tạm dừng quá lâu."
     },
     "insight": {
       "large_transaction": "Đây là một khoản chi {category} lớn — chúng tôi chỉ nhắc bạn lưu ý.",
@@ -1110,7 +1126,8 @@
       "shopping": "\"{description}\" đã tăng từ {previousAmount} lên {newAmount}.",
       "other": "\"{description}\" đã tăng từ {previousAmount} lên {newAmount}."
     },
-    "project_off_track": "\"{projectName}\" đang chậm tiến độ — cần khoảng {requiredMonthly} mỗi tháng để đạt được trước {deadline}."
+    "project_off_track": "\"{projectName}\" đang chậm tiến độ — cần khoảng {requiredMonthly} mỗi tháng để đạt được trước {deadline}.",
+    "over_committed": "Bạn đã phân bổ hết thu nhập tháng này — không còn gì để chi tiêu."
   },
   "suggestion": {
     "raise_budget": {
@@ -1152,6 +1169,10 @@
     "create_project": {
       "title": "Bắt đầu mục tiêu tiết kiệm",
       "ask": "Tháng này bạn có tiền dư — bắt đầu một mục tiêu tiết kiệm với {resolvedValue}?"
+    },
+    "rebalance_projects": {
+      "title": "Cân đối dự án",
+      "ask": "Tổng đóng góp dự án vượt quá thu nhập — giãn tiến độ để đưa về mức {resolvedValue}/tháng?"
     }
   },
   "admin": {
