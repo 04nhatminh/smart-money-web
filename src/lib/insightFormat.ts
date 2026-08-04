@@ -14,6 +14,8 @@ const MONEY_METRIC_KEYS = new Set([
   'committedBudgets',
   'disposable',
   'income',
+  'expenses',
+  'deficit',
   'overBy',
   'medianActual',
   'previousAmount',
@@ -22,6 +24,8 @@ const MONEY_METRIC_KEYS = new Set([
   'requiredMonthly',
   'observedMonthly',
   'shortfall',
+  'amount',
+  'typical',
 ]);
 
 const COUNT_METRIC_KEYS = new Set([
@@ -31,6 +35,8 @@ const COUNT_METRIC_KEYS = new Set([
   'daysInMonth',
   'monthsLeft',
   'observedWindowMonths',
+  'sampleSize',
+  'withinHours',
 ]);
 
 export function formatInsightParams(

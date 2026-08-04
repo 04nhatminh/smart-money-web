@@ -357,7 +357,11 @@ export const CreateBulkBudgetsModal: React.FC<CreateBulkBudgetsModalProps> = ({
                       >
                         {BUDGET_CATEGORIES.map(cat => (
                           <option key={cat} value={cat}>
-                            {cat}
+                            {t.has(`categories.${cat}`)
+                              ? t(`categories.${cat}`)
+                              : t.has(`categories.${cat.toLowerCase()}`)
+                              ? t(`categories.${cat.toLowerCase()}`)
+                              : cat}
                           </option>
                         ))}
                       </select>

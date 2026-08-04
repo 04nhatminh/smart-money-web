@@ -278,7 +278,23 @@
       "reallocate_budget": "Your {category} budget is about to overflow — cover it from budgets you're not using?",
       "review_subscription": "\"{description}\" just charged more than usual — worth a quick review?",
       "increase_contribution": "\"{projectName}\" is falling behind its deadline — put in a bit extra this month?",
-      "create_project": "You have spare money this month — start a saving project for it?"
+      "create_project": "You have spare money this month — start a saving project for it?",
+      "rebalance_projects": "Your projects add up to more than your income — want to rebalance them?"
+    },
+    "group": {
+      "invited": "You've been invited to join group \"{groupName}\". Tap to accept.",
+      "project_started": "\"{projectName}\" is ready. Open the app to set your personal savings target.",
+      "project_completed": "\"{projectName}\" reached its goal. Congratulations!",
+      "member_dropped": "{username} can no longer contribute to \"{projectName}\". The group goal was reduced to the remaining members.",
+      "project_expired": "\"{projectName}\" expired because no members are still contributing.",
+      "sponsorship_survey": "A member of your group can't afford their share for \"{projectName}\" — would you help?",
+      "sponsorship_new_round": "Some members declined to help. Your new proposed contribution is {proposed} VND/month instead of {original} VND/month.",
+      "sponsorship_failed": "Your project \"{projectName}\" failed because members couldn't cover the shortfall."
+    },
+    "settlement": {
+      "project_completed": "Goal reached: \"{projectName}\" is now complete.",
+      "project_frozen": "Heads up: \"{projectName}\" was frozen after falling behind on savings.",
+      "project_expired": "\"{projectName}\" expired after staying frozen too long."
     },
     "insight": {
       "large_transaction": "That {category} charge was much larger than your usual.",
@@ -1008,7 +1024,84 @@
       "critical": "Critical",
       "warn": "Warning",
       "info": "Info"
+    },
+    "metrics": {
+      "avgMonthlyIncome": "Avg Monthly Income",
+      "recurringCosts": "Recurring Costs",
+      "committedBudgets": "Committed Budgets",
+      "disposable": "Disposable Amount",
+      "baseline": "Baseline Spending",
+      "actual": "Actual Spent",
+      "spent": "Spent",
+      "limit": "Limit",
+      "projectedEndOfMonth": "Projected End of Month",
+      "meanMonthly": "Monthly Average",
+      "monthlyAmount": "Monthly Amount",
+      "income": "Income",
+      "overBy": "Over By",
+      "medianActual": "Median Actual",
+      "previousAmount": "Previous Amount",
+      "newAmount": "New Amount",
+      "remaining": "Remaining",
+      "requiredMonthly": "Required Monthly",
+      "observedMonthly": "Observed Monthly",
+      "shortfall": "Shortfall",
+      "sampleMonths": "Sample Months",
+      "monthsObserved": "Months Observed",
+      "dayOfMonth": "Day of Month",
+      "daysInMonth": "Days in Month",
+      "monthsLeft": "Months Left",
+      "observedWindowMonths": "Observed Window Months",
+      "stddev": "Std Dev",
+      "zScore": "Z-Score",
+      "overshootRatio": "Overshoot Ratio",
+      "forecastMethod": "Forecast Method",
+      "smoothedDailyRate": "Daily Rate",
+      "underspendRatio": "Underspend Ratio",
+      "amount": "Amount",
+      "typical": "Typical",
+      "sampleSize": "Sample Size",
+      "withinHours": "Within Hours",
+      "slope": "Slope",
+      "growthRatePerMonth": "Growth Rate/Month",
+      "increaseRatio": "Increase Ratio",
+      "description": "Description",
+      "dropRatio": "Drop Ratio",
+      "expenses": "Total Expenses",
+      "deficit": "Deficit"
     }
+  },
+  "categories": {
+    "FOOD": "Food & Dining",
+    "food": "Food & Dining",
+    "TRANSPORTATION": "Transportation",
+    "transportation": "Transportation",
+    "CLOTHING": "Clothing",
+    "clothing": "Clothing",
+    "UTILITIES": "Utilities",
+    "utilities": "Utilities",
+    "ENTERTAINMENT": "Entertainment",
+    "entertainment": "Entertainment",
+    "HEALTH": "Health",
+    "health": "Health",
+    "EDUCATION": "Education",
+    "education": "Education",
+    "SHOPPING": "Shopping",
+    "shopping": "Shopping",
+    "OTHER": "Other",
+    "other": "Other",
+    "SALARY": "Salary",
+    "salary": "Salary",
+    "BONUS": "Bonus",
+    "bonus": "Bonus",
+    "INVESTMENT": "Investment",
+    "investment": "Investment",
+    "GIFT": "Gift",
+    "gift": "Gift",
+    "PROJECT_REFUND": "Project Refund",
+    "project_refund": "Project Refund",
+    "PROJECT_CONTRIBUTION": "Project Contribution",
+    "project_contribution": "Project Contribution"
   },
   "suggestions": {
     "title": "AI Suggestions & Recommendations",
@@ -1113,7 +1206,14 @@
       "shopping": "\"{description}\" increased from {previousAmount} to {newAmount}.",
       "other": "\"{description}\" increased from {previousAmount} to {newAmount}."
     },
-    "project_off_track": "\"{projectName}\" is off track — requires about {requiredMonthly} per month to finish by {deadline}."
+    "project_off_track": "\"{projectName}\" is off track — requires about {requiredMonthly} per month to finish by {deadline}.",
+    "over_committed": "Your budgets add up to more than your income — consider adjusting them.",
+    "large_transaction": "Large transaction detected ({amount}): \"{description}\".",
+    "duplicate_charge": "Possible duplicate charge detected ({amount}): \"{description}\".",
+    "income_drop": "Income this month ({actual}) dropped significantly compared to baseline ({baseline}).",
+    "cashflow_negative": "Negative cash flow: Expenses this month ({expenses}) exceeded income ({income}).",
+    "project_milestone": "Congratulations! Goal \"{projectName}\" reached {progress}% progress.",
+    "good_month": "Great job! You controlled spending well and maintained positive savings this month."
   },
   "suggestion": {
     "raise_budget": {
@@ -1155,6 +1255,10 @@
     "create_project": {
       "title": "Start Savings Goal",
       "ask": "You have surplus funds this month — start a savings goal with {resolvedValue}?"
+    },
+    "rebalance_projects": {
+      "title": "Rebalance Projects",
+      "ask": "Your target project contributions exceed income — extend deadlines to adjust to {resolvedValue}/month?"
     }
   },
   "admin": {

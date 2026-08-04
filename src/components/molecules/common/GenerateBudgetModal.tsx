@@ -47,6 +47,8 @@ export const GenerateBudgetModal: React.FC<GenerateBudgetModalProps> = ({
   const [jobId, setJobId] = useState<string | null>(null);
   const [suggestions, setSuggestions] = useState<BudgetCategorySuggestion[]>([]);
   const [totalBudget, setTotalBudget] = useState<number>(0);
+  const [spendableEnvelope, setSpendableEnvelope] = useState<number>(0);
+  const [surplusToSavings, setSurplusToSavings] = useState<number>(0);
   const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth() + 1);
   const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
   const [currentBudgets, setCurrentBudgets] = useState<any[]>([]);
@@ -143,7 +145,11 @@ export const GenerateBudgetModal: React.FC<GenerateBudgetModalProps> = ({
   const handleGenerateClick = async () => {
     setStep('LOADING');
     setErrorMsg(null);
-    setLoadingStatus('Calculating budget allocation plan...');
+    setLoadingStatus(
+      locale === 'vi'
+        ? 'Đang tính toán kế hoạch phân bổ ngân sách...'
+        : 'Calculating budget allocation plan...'
+    );
 
     try {
       const response = await apiClient.post<any>(API_ENDPOINTS.budgets.computeAllocation, {});
@@ -152,8 +158,7 @@ export const GenerateBudgetModal: React.FC<GenerateBudgetModalProps> = ({
       const planData = payload.allocations ? payload : (payload.data || payload);
       if (planData && Array.isArray(planData.allocations)) {
         const allocations = planData.allocations || [];
-        const envelope = planData.envelope ?? planData.safeSpending ?? 0;
-
+        const envelope = Number(planData.envelope ?? planData.safeSpending) || 0;
         const totalAmt = allocations.reduce((acc: number, item: any) => acc + (Number(item.amount) || 0), 0);
 
         const categorySuggestions: BudgetCategorySuggestion[] = allocations.map((item: any) => {
@@ -161,25 +166,33 @@ export const GenerateBudgetModal: React.FC<GenerateBudgetModalProps> = ({
           return {
             category: item.category,
             amount: amt,
-            ratio: totalAmt > 0 ? (amt / totalAmt) * 100 : 0,
+            ratio: totalAmt > 0 ? amt / totalAmt : 0,
           };
         });
 
-        setTotalBudget(envelope || totalAmt);
+        setTotalBudget(totalAmt);
+        setSpendableEnvelope(envelope);
+        setSurplusToSavings(Number(planData.surplusToSavings) || 0);
         setSuggestions(categorySuggestions);
         setReason(
           planData.coldStart
-            ? 'Based on general budget template (cold start).'
+            ? locale === 'vi'
+              ? 'Dựa trên mẫu ngân sách chung (bắt đầu mới).'
+              : 'Based on general budget template (cold start).'
             : planData.overCommitted
-            ? 'Your commitments equal or exceed your target envelope.'
+            ? locale === 'vi'
+              ? 'Cam kết ngân sách của bạn đạt hoặc vượt hạn mức an toàn.'
+              : 'Your commitments equal or exceed your target envelope.'
+            : locale === 'vi'
+            ? 'Dựa trên lịch sử giao dịch và các cam kết tài chính của bạn.'
             : 'Based on your transaction history and financial commitments.'
         );
         setStep('SUGGESTION');
       } else {
-        throw new Error(payload?.message || 'Failed to compute budget allocation');
+        throw new Error(payload?.message || (locale === 'vi' ? 'Không thể tính toán phân bổ ngân sách' : 'Failed to compute budget allocation'));
       }
     } catch (err: any) {
-      const msg = err instanceof Error ? err.message : 'Failed to calculate budget allocation';
+      const msg = err instanceof Error ? err.message : (locale === 'vi' ? 'Không thể tính toán phân bổ ngân sách' : 'Failed to calculate budget allocation');
       setErrorMsg(msg);
       setStep('ERROR');
     }
@@ -187,7 +200,11 @@ export const GenerateBudgetModal: React.FC<GenerateBudgetModalProps> = ({
 
   const handleConfirmBudgets = async () => {
     setStep('LOADING');
-    setLoadingStatus('Saving generated budget categories...');
+    setLoadingStatus(
+      locale === 'vi'
+        ? 'Đang lưu danh mục ngân sách...'
+        : 'Saving generated budget categories...'
+    );
 
     try {
       // Map CATEGORY names (e.g. TRANSPORT to TRANSPORTATION)
@@ -364,7 +381,7 @@ export const GenerateBudgetModal: React.FC<GenerateBudgetModalProps> = ({
               <div className="space-y-5">
                 <div className="p-4 rounded-xl border text-center" style={{ backgroundColor: `${colors.interactive.primary}10`, borderColor: `${colors.interactive.primary}30` }}>
                   <Text className="text-xs font-bold uppercase tracking-wider" style={{ color: colors.text.secondary }}>
-                    {locale === 'vi' ? 'Tổng Ngân Sách Khuyến Nghị Từ AI' : 'AI Recommended Total Budget'}
+                    {locale === 'vi' ? 'Tổng Ngân Sách Đề Xuất (Theo Danh Mục)' : 'Total Recommended Category Budget'}
                   </Text>
                   <Heading level={2} className="mt-1" style={{ color: colors.interactive.primary }}>
                     {formatVietnamsePrice(totalBudget)}
@@ -411,6 +428,29 @@ export const GenerateBudgetModal: React.FC<GenerateBudgetModalProps> = ({
                     );
                   })}
                 </div>
+
+                {spendableEnvelope > 0 && (
+                  <div className="p-3.5 rounded-xl border space-y-2 text-xs" style={{ backgroundColor: colors.background.secondary, borderColor: colors.border.light }}>
+                    <div className="flex justify-between items-center">
+                      <Text style={{ color: colors.text.secondary }}>
+                        {locale === 'vi' ? 'Hạn mức chi tiêu tối đa (Income Envelope):' : 'Max Spendable Limit (Envelope):'}
+                      </Text>
+                      <Text className="font-bold" style={{ color: colors.text.primary }}>
+                        {formatVietnamsePrice(spendableEnvelope)}
+                      </Text>
+                    </div>
+                    {surplusToSavings > 0 && (
+                      <div className="flex justify-between items-center pt-2 border-t" style={{ borderColor: colors.border.light }}>
+                        <Text style={{ color: colors.interactive.primary }}>
+                          {locale === 'vi' ? 'Thặng dư dự kiến chuyển vào tiết kiệm:' : 'Projected Surplus to Savings:'}
+                        </Text>
+                        <Text className="font-bold" style={{ color: colors.interactive.primary }}>
+                          {formatVietnamsePrice(surplusToSavings)}
+                        </Text>
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 <div className="p-3 rounded-lg text-xs" style={{ backgroundColor: colors.background.secondary, color: colors.text.tertiary }}>
                   {locale === 'vi'

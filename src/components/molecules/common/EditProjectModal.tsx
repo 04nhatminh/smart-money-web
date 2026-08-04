@@ -5,7 +5,7 @@ import { Button, Heading, Text, Input, Alert } from '@/components/atoms';
 import { useTheme } from '@/context/ThemeContext';
 import { useProjects } from '@/hooks/useProjects';
 import { UpdateProjectRequest, ProjectDetail } from '@/types/project.api';
-import { formatAmountInput, parseFormattedNumber } from '@/lib/format';
+import { formatAmountInput, parseFormattedNumber, getDeadlineFromMonths, getMonthsFromDeadline, formatDateToInput } from '@/lib/format';
 import { MdClose } from 'react-icons/md';
 
 interface EditProjectModalProps {
@@ -42,6 +42,7 @@ export const EditProjectModal: React.FC<EditProjectModalProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const today = new Date().toISOString().split('T')[0];
+  const [deadlineMonths, setDeadlineMonths] = useState<string>('1');
 
   const [formData, setFormData] = useState<FormData>({
     name: '',
@@ -53,9 +54,21 @@ export const EditProjectModal: React.FC<EditProjectModalProps> = ({
     deadline: today,
   });
 
+  const handleDeadlineMonthsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setDeadlineMonths(val);
+    const num = Math.max(1, Number(val) || 1);
+    setFormData((prev) => ({
+      ...prev,
+      deadline: getDeadlineFromMonths(num),
+    }));
+  };
+
   // Initialize form with project data when it changes
   useEffect(() => {
     if (project && isOpen) {
+      const months = getMonthsFromDeadline(project.deadline);
+      setDeadlineMonths(String(months));
       setFormData({
         name: project.name,
         description: project.description || '',
@@ -353,19 +366,27 @@ export const EditProjectModal: React.FC<EditProjectModalProps> = ({
               </div>
             </div>
 
-            {/* Deadline */}
+            {/* Duration (Months) */}
             <div>
               <label className="block text-sm font-medium mb-2" style={{ color: colors.text.primary }}>
-                Deadline <span style={{ color: colors.interactive.danger }}>*</span>
+                Số tháng tích lũy (tháng) <span style={{ color: colors.interactive.danger }}>*</span>
               </label>
               <Input
-                type="date"
-                name="deadline"
-                value={formData.deadline}
-                onChange={handleInputChange}
+                type="number"
+                name="deadlineMonths"
+                value={deadlineMonths}
+                onChange={handleDeadlineMonthsChange}
                 disabled={isLoading}
+                min={1}
+                max={60}
+                placeholder="Ví dụ: 2"
                 required
               />
+              {formData.deadline && (
+                <p className="text-xs mt-1 font-medium" style={{ color: colors.text.secondary }}>
+                  📅 Hạn chót dự kiến: {formatDateToInput(formData.deadline)} ({deadlineMonths || 1} tháng)
+                </p>
+              )}
             </div>
 
             {/* Buttons */}
