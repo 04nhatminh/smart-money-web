@@ -70,6 +70,8 @@ export const InsightCard: React.FC<InsightCardProps> = ({ insight, locale = 'vi'
               >
                 {t.has(`categories.${insight.category}`)
                   ? t(`categories.${insight.category}`)
+                  : t.has(`categories.${insight.category.toLowerCase()}`)
+                  ? t(`categories.${insight.category.toLowerCase()}`)
                   : insight.category}
               </span>
             )}
@@ -106,29 +108,36 @@ export const InsightCard: React.FC<InsightCardProps> = ({ insight, locale = 'vi'
           className="mt-4 pt-3 border-t grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3"
           style={{ borderColor: colors.border.light }}
         >
-          {Object.entries(formattedParams).map(([key, val]) => (
-            <div
-              key={key}
-              className="p-2.5 rounded-xl border transition-colors"
-              style={{
-                backgroundColor: colors.surface.secondary,
-                borderColor: colors.border.light,
-              }}
-            >
+          {Object.entries(formattedParams).map(([key, val]) => {
+            const translatedKey = t.has(`insights.metrics.${key}`)
+              ? t(`insights.metrics.${key}`)
+              : key.replace(/([A-Z])/g, ' $1').trim();
+
+            return (
               <div
-                className="text-[11px] font-bold truncate uppercase tracking-wider"
-                style={{ color: colors.text.secondary }}
+                key={key}
+                className="p-2.5 rounded-xl border transition-colors"
+                style={{
+                  backgroundColor: colors.surface.secondary,
+                  borderColor: colors.border.light,
+                }}
               >
-                {key.replace(/([A-Z])/g, ' $1').trim()}
+                <div
+                  className="text-[11px] font-bold truncate uppercase tracking-wider"
+                  style={{ color: colors.text.secondary }}
+                  title={translatedKey}
+                >
+                  {translatedKey}
+                </div>
+                <div
+                  className="text-xs sm:text-sm font-bold truncate mt-1"
+                  style={{ color: colors.text.primary }}
+                >
+                  {String(val)}
+                </div>
               </div>
-              <div
-                className="text-xs sm:text-sm font-bold truncate mt-1"
-                style={{ color: colors.text.primary }}
-              >
-                {String(val)}
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

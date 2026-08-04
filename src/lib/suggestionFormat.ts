@@ -34,9 +34,15 @@ export function askSentence(
   }
 
   if (action?.category) {
-    params.category = t(`categories.${action.category}`, {
-      defaultValue: action.category,
-    });
+    const cat = action.category;
+    const hasFn = typeof (t as any).has === 'function' ? (t as any).has.bind(t) : null;
+    if (hasFn && hasFn(`categories.${cat}`)) {
+      params.category = t(`categories.${cat}`);
+    } else if (hasFn && hasFn(`categories.${cat.toLowerCase()}`)) {
+      params.category = t(`categories.${cat.toLowerCase()}`);
+    } else {
+      params.category = t(`categories.${cat}`, { defaultValue: cat });
+    }
   }
 
   if (suggestion.type === 'REVIEW_SUBSCRIPTION') {

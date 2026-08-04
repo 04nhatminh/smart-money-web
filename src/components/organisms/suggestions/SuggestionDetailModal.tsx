@@ -200,6 +200,8 @@ export const SuggestionDetailModal: React.FC<SuggestionDetailModalProps> = ({
                         <td className="px-4 py-3 font-semibold" style={{ color: colors.text.primary }}>
                           {t.has(`categories.${adj.category}`)
                             ? t(`categories.${adj.category}`)
+                            : t.has(`categories.${adj.category.toLowerCase()}`)
+                            ? t(`categories.${adj.category.toLowerCase()}`)
                             : adj.category}
                         </td>
                         <td className="px-4 py-3 text-gray-500">

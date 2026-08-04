@@ -145,7 +145,11 @@ export const GenerateBudgetModal: React.FC<GenerateBudgetModalProps> = ({
   const handleGenerateClick = async () => {
     setStep('LOADING');
     setErrorMsg(null);
-    setLoadingStatus('Calculating budget allocation plan...');
+    setLoadingStatus(
+      locale === 'vi'
+        ? 'Đang tính toán kế hoạch phân bổ ngân sách...'
+        : 'Calculating budget allocation plan...'
+    );
 
     try {
       const response = await apiClient.post<any>(API_ENDPOINTS.budgets.computeAllocation, {});
@@ -172,17 +176,23 @@ export const GenerateBudgetModal: React.FC<GenerateBudgetModalProps> = ({
         setSuggestions(categorySuggestions);
         setReason(
           planData.coldStart
-            ? 'Based on general budget template (cold start).'
+            ? locale === 'vi'
+              ? 'Dựa trên mẫu ngân sách chung (bắt đầu mới).'
+              : 'Based on general budget template (cold start).'
             : planData.overCommitted
-            ? 'Your commitments equal or exceed your target envelope.'
+            ? locale === 'vi'
+              ? 'Cam kết ngân sách của bạn đạt hoặc vượt hạn mức an toàn.'
+              : 'Your commitments equal or exceed your target envelope.'
+            : locale === 'vi'
+            ? 'Dựa trên lịch sử giao dịch và các cam kết tài chính của bạn.'
             : 'Based on your transaction history and financial commitments.'
         );
         setStep('SUGGESTION');
       } else {
-        throw new Error(payload?.message || 'Failed to compute budget allocation');
+        throw new Error(payload?.message || (locale === 'vi' ? 'Không thể tính toán phân bổ ngân sách' : 'Failed to compute budget allocation'));
       }
     } catch (err: any) {
-      const msg = err instanceof Error ? err.message : 'Failed to calculate budget allocation';
+      const msg = err instanceof Error ? err.message : (locale === 'vi' ? 'Không thể tính toán phân bổ ngân sách' : 'Failed to calculate budget allocation');
       setErrorMsg(msg);
       setStep('ERROR');
     }
@@ -190,7 +200,11 @@ export const GenerateBudgetModal: React.FC<GenerateBudgetModalProps> = ({
 
   const handleConfirmBudgets = async () => {
     setStep('LOADING');
-    setLoadingStatus('Saving generated budget categories...');
+    setLoadingStatus(
+      locale === 'vi'
+        ? 'Đang lưu danh mục ngân sách...'
+        : 'Saving generated budget categories...'
+    );
 
     try {
       // Map CATEGORY names (e.g. TRANSPORT to TRANSPORTATION)
