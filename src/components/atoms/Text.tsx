@@ -11,7 +11,7 @@ interface TextProps extends React.HTMLAttributes<HTMLParagraphElement> {
 
 export const Text: React.FC<TextProps> = ({
   variant = 'body',
-  weight = 'normal',
+  weight,
   className = '',
   ...props
 }) => {
@@ -54,7 +54,7 @@ export const Text: React.FC<TextProps> = ({
     <p
       style={{
         ...variantStyles[variant],
-        fontWeight: fontWeights[weight],
+        ...(weight ? { fontWeight: fontWeights[weight] } : {}),
         ...(style || {}),
       }}
       className={className}

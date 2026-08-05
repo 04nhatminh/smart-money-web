@@ -193,11 +193,15 @@ export default function DashboardPage() {
     return [...analyticsData.categoryProportions].sort((a, b) => b.percentage - a.percentage);
   }, [analyticsData]);
 
-  const usedPriorities = useMemo(() => {
-    return projects
-      .filter((p: any) => p.type === 'PERSONAL' && p.priority && p.status === 'ACTIVE')
-      .map((p: any) => p.priority);
+  const activeProjects = useMemo(() => {
+    return projects.filter((p: any) => p.status === 'ACTIVE');
   }, [projects]);
+
+  const usedPriorities = useMemo(() => {
+    return activeProjects
+      .filter((p: any) => p.type === 'PERSONAL' && p.priority)
+      .map((p: any) => p.priority);
+  }, [activeProjects]);
 
   if (isInitializing || (!isAuthenticated && isInitializing)) {
     return (
@@ -437,7 +441,7 @@ export default function DashboardPage() {
 
                       {/* Amount */}
                       <Text
-                        className="font-black text-sm sm:text-base whitespace-nowrap tracking-tight ml-2"
+                        className="font-bold text-base sm:text-lg whitespace-nowrap tracking-tight ml-2"
                         style={{ color: tx.type === 'INCOME' ? '#10B981' : '#EF4444' }}
                       >
                         {tx.type === 'INCOME' ? '+' : '-'}{formatVietnamsePrice(tx.amount)}
@@ -567,11 +571,13 @@ export default function DashboardPage() {
                     </div>
                   ))}
                 </div>
-              ) : projects.length > 0 ? (
-                projects.slice(0, 3).map((project: any) => {
-                  const currentSaved = project.currentAmount || 0;
+              ) : activeProjects.length > 0 ? (
+                activeProjects.slice(0, 3).map((project: any) => {
+                  const currentSaved = project.totalContributed ?? 0;
                   const target = project.targetAmount || 1;
-                  const percent = Math.min((currentSaved / target) * 100, 100);
+                  const percent = typeof project.progressPercent === 'number'
+                    ? Math.min(project.progressPercent, 100)
+                    : Math.min((currentSaved / target) * 100, 100);
 
                   return (
                     <div key={project.projectId} className="space-y-1">
