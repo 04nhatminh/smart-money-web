@@ -342,7 +342,7 @@ export const DashboardPreview: React.FC = () => {
 
                           {/* Amount */}
                           <Text
-                            className="font-black text-sm sm:text-base whitespace-nowrap tracking-tight ml-2"
+                            className="font-bold text-base sm:text-lg whitespace-nowrap tracking-tight ml-2"
                             style={{ color: tx.type === 'INCOME' ? '#10B981' : '#EF4444' }}
                           >
                             {tx.type === 'INCOME' ? '+' : '-'}{formatVietnamsePrice(tx.amount)}
