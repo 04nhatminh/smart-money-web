@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
+import { useRouter } from 'next/navigation';
 import { useTheme } from '@/context/ThemeContext';
 import { Suggestion } from '@/types/suggestion.types';
 import {
@@ -36,6 +37,8 @@ export const SuggestionDetailModal: React.FC<SuggestionDetailModalProps> = ({
   projectName,
 }) => {
   const t = useTranslations();
+  const locale = useLocale();
+  const router = useRouter();
   const { colors } = useTheme();
 
   const [loadingAction, setLoadingAction] = useState<'accept' | 'dismiss' | null>(null);
@@ -61,6 +64,10 @@ export const SuggestionDetailModal: React.FC<SuggestionDetailModalProps> = ({
       const res = await onRespond(suggestion.id, accept);
       if (res.success) {
         onClose();
+        if (accept && suggestion.type === 'CREATE_PROJECT') {
+          const targetVal = suggestion.payload?.proposedAction?.resolvedValue;
+          router.push(`/${locale}/projects?create=true${targetVal ? `&targetAmount=${targetVal}` : ''}`);
+        }
       } else {
         setErrorMsg(res.error || (accept ? 'Không thể chấp nhận gợi ý' : 'Không thể bỏ qua gợi ý'));
       }

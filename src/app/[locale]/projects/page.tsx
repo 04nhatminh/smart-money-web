@@ -40,7 +40,11 @@ export default function ProjectsPage() {
     tabParam === 'groups' ? 'groups' : 'projects'
   );
 
-  // Sync tab param if it changes
+  const createParam = searchParams.get('create');
+  const targetAmountParam = searchParams.get('targetAmount');
+  const [initialTargetAmount, setInitialTargetAmount] = useState<string | undefined>(undefined);
+
+  // Sync tab & create params if they change
   useEffect(() => {
     const tab = searchParams.get('tab');
     if (tab === 'groups') {
@@ -48,7 +52,14 @@ export default function ProjectsPage() {
     } else if (tab === 'projects') {
       setActiveTab('projects');
     }
-  }, [searchParams]);
+
+    if (createParam === 'true') {
+      if (targetAmountParam) {
+        setInitialTargetAmount(targetAmountParam);
+      }
+      setIsCreateModalOpen(true);
+    }
+  }, [searchParams, createParam, targetAmountParam]);
 
   // Projects State
   const [projects, setProjects] = useState<ProjectListItem[]>([]);
@@ -630,6 +641,7 @@ export default function ProjectsPage() {
           defaultType={defaultCreateType}
           defaultGroupId={defaultCreateGroupId}
           initialGroups={groups}
+          initialTargetAmount={initialTargetAmount}
         />
 
         <CreateGroupModal
