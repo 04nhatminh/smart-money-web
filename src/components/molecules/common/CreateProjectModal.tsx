@@ -27,6 +27,7 @@ interface CreateProjectModalProps {
   defaultType?: 'PERSONAL' | 'GROUP';
   defaultGroupId?: string;
   initialGroups?: GroupSummaryResponse[];
+  initialTargetAmount?: number | string;
 }
 
 type ProjectType = 'PERSONAL' | 'GROUP';
@@ -55,6 +56,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
   defaultType,
   defaultGroupId,
   initialGroups,
+  initialTargetAmount,
 }) => {
   const { colors } = useTheme();
   const t = useTranslations();
@@ -190,7 +192,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
         description: '',
         type: defaultType || 'PERSONAL',
         priority: 'MEDIUM',
-        targetAmount: '',
+        targetAmount: initialTargetAmount ? formatAmountInput(initialTargetAmount.toString()) : '',
         currency: 'VND',
         deadline: minDeadlineStr,
       });
@@ -199,7 +201,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
       setError(null);
       setSuccess(false);
     }
-  }, [isOpen, defaultType, defaultGroupId, minDeadlineStr]);
+  }, [isOpen, defaultType, defaultGroupId, minDeadlineStr, initialTargetAmount]);
 
 
 
